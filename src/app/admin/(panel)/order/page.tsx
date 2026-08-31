@@ -6,7 +6,7 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { dummyOrders, type Order } from "@/models";
 import { formatDate, formatRupiah } from "@/utils/format";
 
-export default function ManageOrderPage() {
+export default function OrderPage() {
   const { t, locale } = useT();
   const mounted = useMounted();
   if (!mounted) return null;

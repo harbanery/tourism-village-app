@@ -20,8 +20,12 @@ export default function AdminLoginPage() {
         <ThemeToggle />
       </div>
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center">{t("admin.login.title")}</h1>
-        <p className="mt-1 text-center text-foreground/60">{t("admin.title")}</p>
+        <h1 className="text-2xl font-bold text-center">
+          {t("admin.login.title")}
+        </h1>
+        <p className="mt-1 text-center text-foreground/60">
+          {t("admin.title")}
+        </p>
         <Form layout="vertical" className="mt-6">
           <Form.Item name="username" label={t("admin.accounts.username")}>
             <Input prefix={<UserOutlined />} placeholder="adminku" />
@@ -30,7 +34,7 @@ export default function AdminLoginPage() {
             <Input.Password prefix={<LockOutlined />} />
           </Form.Item>
           <Form.Item>
-            <Link href="/admin/manage-account">
+            <Link href="/admin">
               <Button type="primary" htmlType="submit" block>
                 {t("auth.login.button")}
               </Button>
@@ -39,7 +43,10 @@ export default function AdminLoginPage() {
         </Form>
         <p className="text-center text-sm text-foreground/60">
           {t("auth.login.noAccount")}{" "}
-          <Link href="/admin/register" className="text-[#0d7a5f] hover:underline">
+          <Link
+            href="/admin/register"
+            className="text-[#0d7a5f] hover:underline"
+          >
             {t("nav.register")}
           </Link>
         </p>

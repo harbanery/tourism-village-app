@@ -7,7 +7,7 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { dummyPackages, dummyPlaces, type Package, type Place } from "@/models";
 import { formatRupiah } from "@/utils/format";
 
-export default function ManageTourismPage() {
+export default function TourismPage() {
   const { t } = useT();
   const mounted = useMounted();
   if (!mounted) return null;

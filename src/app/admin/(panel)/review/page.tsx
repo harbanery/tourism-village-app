@@ -6,7 +6,7 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { dummyTestimonials, type Testimonial } from "@/models";
 import { formatDate } from "@/utils/format";
 
-export default function ManageReviewPage() {
+export default function ReviewPage() {
   const { t, locale } = useT();
   const mounted = useMounted();
   if (!mounted) return null;

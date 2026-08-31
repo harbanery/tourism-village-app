@@ -7,7 +7,7 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { dummyBlogs, type BlogPost } from "@/models";
 import { formatDate } from "@/utils/format";
 
-export default function ManageBlogPage() {
+export default function BlogPage() {
   const { t, locale } = useT();
   const mounted = useMounted();
   if (!mounted) return null;

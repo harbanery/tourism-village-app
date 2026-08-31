@@ -7,7 +7,7 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { dummyAdmins, dummyUsers, type Admin, type User } from "@/models";
 import { formatDate } from "@/utils/format";
 
-export default function ManageAccountPage() {
+export default function AccountPage() {
   const { t, locale } = useT();
   const mounted = useMounted();
   if (!mounted) return null;

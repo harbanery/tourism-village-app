@@ -6,7 +6,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyGalleries, type GalleryItem } from "@/models";
 
-export default function ManageGalleryPage() {
+export default function GalleryPage() {
   const { t } = useT();
   const mounted = useMounted();
   if (!mounted) return null;

@@ -1,26 +1,28 @@
 "use client";
 
 import { useMounted } from "@/hooks/useMounted";
-import { Button, Card, Table } from "antd";
+import { Button, Card, Image, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { dummyVideos } from "@/models";
+import { dummySponsors, type Sponsor } from "@/models";
 
-export default function ManageVlogPage() {
+export default function SponsorPage() {
   const { t } = useT();
   const mounted = useMounted();
   if (!mounted) return null;
 
   const columns = [
     { title: "Id", dataIndex: "id", key: "id", width: 60 },
-    { title: t("common.name"), dataIndex: "name", key: "name" },
-    { title: t("admin.tourism.place"), dataIndex: "placeName", key: "placeName" },
+    { title: t("admin.sponsors.name"), dataIndex: "name", key: "name" },
     {
-      title: t("admin.vlog.videoCode"),
-      dataIndex: "linkCode",
-      key: "linkCode",
-      render: (code: string) => <code className="text-xs bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded">{code}</code>,
+      title: t("admin.gallery.photo"),
+      dataIndex: "filename",
+      key: "filename",
+      render: (_: unknown, record: Sponsor) => (
+        <Image src={record.filename} alt={record.name} width={80} height={40} className="rounded object-contain bg-black/5 dark:bg-white/10" />
+      ),
     },
+    { title: t("admin.sponsors.desc"), dataIndex: "description", key: "description", render: (v: string | null) => v ?? "-" },
     {
       title: t("common.actions"),
       key: "actions",
@@ -35,9 +37,9 @@ export default function ManageVlogPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t("admin.vlog.title")}</h1>
+      <h1 className="text-2xl font-bold">{t("admin.sponsors.title")}</h1>
       <Card extra={<Button type="primary" icon={<PlusOutlined />}>{t("common.add")}</Button>}>
-        <Table dataSource={dummyVideos} columns={columns} rowKey="id" pagination={false} />
+        <Table dataSource={dummySponsors} columns={columns} rowKey="id" pagination={false} />
       </Card>
     </div>
   );

@@ -11,7 +11,8 @@ export function Footer() {
         <div>
           <h3 className="font-semibold mb-2">{t("footer.location")}</h3>
           <p className="text-sm text-foreground/70">
-            Desa Tempellemahbang, Pasir Eurih, Tamansari, Kabupaten Bogor, Jawa Barat
+            Desa Tempellemahbang, Pasir Eurih, Tamansari, Kabupaten Bogor, Jawa
+            Barat
           </p>
         </div>
         <div>
@@ -29,7 +30,7 @@ export function Footer() {
       </div>
       <div className="border-t border-black/5 dark:border-white/10 py-4 text-center text-xs text-foreground/60">
         {t("footer.copyright")} ·{" "}
-        <Link href="/admin/login" className="hover:underline">
+        <Link href="/admin" className="hover:underline">
           {t("admin.login.title")}
         </Link>
       </div>

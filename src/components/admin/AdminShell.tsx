@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Avatar, Button, Layout, Menu, theme } from "antd";
 import {
   BankOutlined,
+  DashboardOutlined,
   FileTextOutlined,
   FundViewOutlined,
   LogoutOutlined,
@@ -25,14 +26,47 @@ import { LanguageToggle } from "@/components/locale/LanguageToggle";
 const { Header, Sider, Content } = Layout;
 
 const menuItems = [
-  { key: "/admin/manage-account", icon: <TeamOutlined />, localeKey: "admin.accounts.title" },
-  { key: "/admin/manage-tourism", icon: <BankOutlined />, localeKey: "admin.tourism.title" },
-  { key: "/admin/manage-gallery", icon: <PictureOutlined />, localeKey: "admin.gallery.title" },
-  { key: "/admin/manage-vlog", icon: <VideoCameraOutlined />, localeKey: "admin.vlog.title" },
-  { key: "/admin/manage-blog", icon: <FileTextOutlined />, localeKey: "admin.blog.title" },
-  { key: "/admin/manage-order", icon: <ShoppingOutlined />, localeKey: "admin.orders.title" },
-  { key: "/admin/manage-sponsor", icon: <TrophyOutlined />, localeKey: "admin.sponsors.title" },
-  { key: "/admin/manage-review", icon: <FundViewOutlined />, localeKey: "admin.reviews.title" },
+  { key: "/admin", icon: <DashboardOutlined />, localeKey: "admin.dashboard" },
+  {
+    key: "/admin/account",
+    icon: <TeamOutlined />,
+    localeKey: "admin.accounts.title",
+  },
+  {
+    key: "/admin/tourism",
+    icon: <BankOutlined />,
+    localeKey: "admin.tourism.title",
+  },
+  {
+    key: "/admin/gallery",
+    icon: <PictureOutlined />,
+    localeKey: "admin.gallery.title",
+  },
+  {
+    key: "/admin/vlog",
+    icon: <VideoCameraOutlined />,
+    localeKey: "admin.vlog.title",
+  },
+  {
+    key: "/admin/blog",
+    icon: <FileTextOutlined />,
+    localeKey: "admin.blog.title",
+  },
+  {
+    key: "/admin/order",
+    icon: <ShoppingOutlined />,
+    localeKey: "admin.orders.title",
+  },
+  {
+    key: "/admin/sponsor",
+    icon: <TrophyOutlined />,
+    localeKey: "admin.sponsors.title",
+  },
+  {
+    key: "/admin/review",
+    icon: <FundViewOutlined />,
+    localeKey: "admin.reviews.title",
+  },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -42,7 +76,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const { token } = theme.useToken();
 
   const selectedKey =
-    menuItems.find((item) => pathname.startsWith(item.key))?.key ?? "/admin/manage-account";
+    menuItems.find((item) => pathname.startsWith(item.key))?.key ?? "/admin";
 
   return (
     <Layout style={{ minHeight: "100dvh" }}>
@@ -64,7 +98,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <span className="w-8 h-8 shrink-0 rounded-lg bg-[#0d7a5f] text-white grid place-items-center text-sm font-bold">
             DV
           </span>
-          {!collapsed && <span className="font-bold truncate">Panel Admin</span>}
+          {!collapsed && (
+            <span className="font-bold truncate">Panel Admin</span>
+          )}
         </div>
         <Menu
           mode="inline"
@@ -90,14 +126,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <ThemeToggle />
-            <Link href="/admin/adminku">
+            <Link href="/admin/profile">
               <Avatar
                 style={{ backgroundColor: token.colorPrimary }}
                 icon={<UserOutlined />}
               />
             </Link>
             <Link href="/">
-              <Button type="text" icon={<LogoutOutlined />} aria-label="Back to site" />
+              <Button
+                type="text"
+                icon={<LogoutOutlined />}
+                aria-label="Back to site"
+              />
             </Link>
           </div>
         </Header>
