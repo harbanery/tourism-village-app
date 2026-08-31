@@ -1,8 +1,8 @@
 "use client";
 
 import { useMounted } from "@/hooks/useMounted";
-import Link from "next/link";
-import { Card, Col, Row, Statistic, Table, Tag } from "antd";
+import { useRouter } from "next/navigation";
+import { Button, Card, Col, Row, Statistic, Table, Tag } from "antd";
 import {
   BankOutlined,
   FileTextOutlined,
@@ -15,6 +15,7 @@ import { formatDate, formatRupiah } from "@/utils/format";
 
 export default function DashboardPage() {
   const { t, locale } = useT();
+  const router = useRouter();
   const mounted = useMounted();
   if (!mounted) return null;
 
@@ -89,9 +90,13 @@ export default function DashboardPage() {
       <Card
         title={t("admin.orders.title")}
         extra={
-          <Link href="/admin/order" className="text-primary! hover:underline!">
+          <Button
+            type="link"
+            className="text-primary! hover:underline!"
+            onClick={() => router.push("/admin/order")}
+          >
             {t("common.viewAll")}
-          </Link>
+          </Button>
         }
       >
         <Table

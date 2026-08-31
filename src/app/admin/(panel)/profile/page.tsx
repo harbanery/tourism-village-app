@@ -1,7 +1,7 @@
 "use client";
 
 import { useMounted } from "@/hooks/useMounted";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Avatar, Button, Card } from "antd";
 import { ArrowLeftOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -12,14 +12,19 @@ const currentAdmin = dummyAdmins[0];
 
 export default function AdminProfilePage() {
   const { t } = useT();
+  const router = useRouter();
   const mounted = useMounted();
   if (!mounted) return null;
 
   return (
     <div className="max-w-2xl">
-      <Link href="/admin" className="inline-block! mb-4!">
-        <Button icon={<ArrowLeftOutlined />}>{t("admin.dashboard")}</Button>
-      </Link>
+      <Button
+        icon={<ArrowLeftOutlined />}
+        className="mb-4!"
+        onClick={() => router.push("/admin")}
+      >
+        {t("admin.dashboard")}
+      </Button>
       <Card>
         <div className="flex flex-col items-center text-center">
           <Avatar

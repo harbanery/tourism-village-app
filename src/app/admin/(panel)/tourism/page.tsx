@@ -101,6 +101,7 @@ export default function TourismPage() {
       title: t("common.actions"),
       key: "actions",
       fixed: "right" as const,
+      width: 140,
       render: (_: unknown, record: Place) => (
         <div className="flex gap-2">
           <Button size="small" onClick={() => showPlaceForm(record)}>
@@ -136,6 +137,7 @@ export default function TourismPage() {
       title: t("common.actions"),
       key: "actions",
       fixed: "right" as const,
+      width: 140,
       render: (_: unknown, record: Package) => (
         <div className="flex gap-2">
           <Button size="small" onClick={() => showPackageForm(record)}>

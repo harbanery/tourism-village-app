@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, Breadcrumb, Button, Grid, Layout, Space, theme } from "antd";
 import { LogoutOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -16,6 +15,7 @@ const HeaderLayout: React.FC<{
 }> = ({ onMobileMenuClick }) => {
   const { t } = useT();
   const pathname = usePathname();
+  const router = useRouter();
   const { token } = theme.useToken();
 
   const screens = Grid.useBreakpoint();
@@ -59,19 +59,17 @@ const HeaderLayout: React.FC<{
       <Space size="middle">
         <LanguageToggle />
         <ThemeToggle />
-        <Link href="/admin/profile">
-          <Avatar
-            style={{ backgroundColor: token.colorPrimary }}
-            icon={<UserOutlined />}
-          />
-        </Link>
-        <Link href="/">
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            aria-label="Back to site"
-          />
-        </Link>
+        <Avatar
+          style={{ backgroundColor: token.colorPrimary, cursor: "pointer" }}
+          icon={<UserOutlined />}
+          onClick={() => router.push("/admin/profile")}
+        />
+        <Button
+          type="text"
+          icon={<LogoutOutlined />}
+          onClick={() => router.push("/")}
+          aria-label="Back to site"
+        />
       </Space>
     </Header>
   );

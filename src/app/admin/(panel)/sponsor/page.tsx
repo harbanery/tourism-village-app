@@ -62,6 +62,7 @@ export default function SponsorPage() {
       title: t("common.actions"),
       key: "actions",
       fixed: "right" as const,
+      width: 140,
       render: (_: unknown, record: Sponsor) => (
         <div className="flex gap-2">
           <Button size="small" onClick={() => showForm(record)}>

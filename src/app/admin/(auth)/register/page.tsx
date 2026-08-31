@@ -1,7 +1,7 @@
 "use client";
 
 import { useMounted } from "@/hooks/useMounted";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, Card, Form, Input } from "antd";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -10,6 +10,7 @@ import { LanguageToggle } from "@/components/locale/LanguageToggle";
 
 export default function AdminRegisterPage() {
   const { t } = useT();
+  const router = useRouter();
   const mounted = useMounted();
   if (!mounted) return null;
 
@@ -46,9 +47,13 @@ export default function AdminRegisterPage() {
         </Form>
         <p className="text-center text-sm text-foreground/60">
           {t("auth.register.haveAccount")}{" "}
-          <Link href="/admin/login" className="text-primary! hover:underline!">
+          <Button
+            type="link"
+            className="text-primary! hover:underline!"
+            onClick={() => router.push("/admin/login")}
+          >
             {t("nav.login")}
-          </Link>
+          </Button>
         </p>
       </Card>
     </div>

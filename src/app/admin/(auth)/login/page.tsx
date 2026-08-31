@@ -1,7 +1,7 @@
 "use client";
 
 import { useMounted } from "@/hooks/useMounted";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, Card, Form, Input } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -10,6 +10,7 @@ import { LanguageToggle } from "@/components/locale/LanguageToggle";
 
 export default function AdminLoginPage() {
   const { t } = useT();
+  const router = useRouter();
   const mounted = useMounted();
   if (!mounted) return null;
 
@@ -26,7 +27,11 @@ export default function AdminLoginPage() {
         <p className="mt-1 text-center text-foreground/60">
           {t("admin.title")}
         </p>
-        <Form layout="vertical" className="mt-6!">
+        <Form
+          layout="vertical"
+          className="mt-6!"
+          onFinish={() => router.push("/admin")}
+        >
           <Form.Item name="username" label={t("admin.accounts.username")}>
             <Input prefix={<UserOutlined />} placeholder="adminku" />
           </Form.Item>
@@ -34,21 +39,20 @@ export default function AdminLoginPage() {
             <Input.Password prefix={<LockOutlined />} />
           </Form.Item>
           <Form.Item>
-            <Link href="/admin">
-              <Button type="primary" htmlType="submit" block>
-                {t("auth.login.button")}
-              </Button>
-            </Link>
+            <Button type="primary" htmlType="submit" block>
+              {t("auth.login.button")}
+            </Button>
           </Form.Item>
         </Form>
         <p className="text-center text-sm text-foreground/60">
           {t("auth.login.noAccount")}{" "}
-          <Link
-            href="/admin/register"
+          <Button
+            type="link"
             className="text-primary! hover:underline!"
+            onClick={() => router.push("/admin/register")}
           >
             {t("nav.register")}
-          </Link>
+          </Button>
         </p>
       </Card>
     </div>
