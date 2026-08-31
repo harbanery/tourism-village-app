@@ -33,7 +33,7 @@ export function PackagesSection() {
                   </li>
                 ))}
               </ul>
-              <Link href="/package-detail">
+              <Link href="/package">
                 <Button type="primary" block className="mt-6">
                   {t("home.packages.cta")}
                 </Button>

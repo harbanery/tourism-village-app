@@ -20,7 +20,7 @@ export function HeroSection() {
           {t("home.hero.title")}
         </h1>
         <p className="mt-4 max-w-xl text-white/85 md:text-lg">{t("home.hero.subtitle")}</p>
-        <Link href="/package-detail">
+        <Link href="/package">
           <Button type="primary" size="large" icon={<ArrowRightOutlined />} className="mt-8">
             {t("home.hero.cta")}
           </Button>

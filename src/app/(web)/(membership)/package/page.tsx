@@ -8,7 +8,7 @@ import { dummyPackages } from "@/models";
 import { PackageListSection, type CartItem } from "./section/PackageListSection";
 import { CartSection } from "./section/CartSection";
 
-export default function PackageDetailPage() {
+export default function PackagePage() {
   const { t } = useT();
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [cart, setCart] = useState<CartItem[]>([]);

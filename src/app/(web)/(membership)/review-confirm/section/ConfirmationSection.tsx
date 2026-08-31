@@ -5,7 +5,7 @@ import { Button } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 
-export function SuccessConfirmationSection() {
+export function ConfirmationSection() {
   const { t } = useT();
 
   return (

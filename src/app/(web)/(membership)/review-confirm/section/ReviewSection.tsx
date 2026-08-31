@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button, Input, Rate } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 
-export function SuccessReviewSection() {
+export function ReviewSection() {
   const { t } = useT();
   const [rating, setRating] = useState(5);
 
