@@ -52,7 +52,7 @@ export default function OrderPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">{t("admin.orders.title")}</h1>
       <Card>
-        <Table dataSource={dummyOrders} columns={columns} rowKey="id" pagination={false} scroll={{ x: 900 }} />
+        <Table dataSource={dummyOrders} columns={columns} rowKey="id" pagination={false} scroll={{ x: "max-content" }} />
       </Card>
     </div>
   );

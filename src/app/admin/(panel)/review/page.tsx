@@ -51,6 +51,7 @@ export default function ReviewPage() {
     {
       title: t("common.actions"),
       key: "actions",
+      fixed: "right" as const,
       render: () => (
         <div className="flex gap-2">
           <Button size="small">{t("common.edit")}</Button>
@@ -64,7 +65,7 @@ export default function ReviewPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">{t("admin.reviews.title")}</h1>
       <Card>
-        <Table dataSource={dummyTestimonials} columns={columns} rowKey="id" pagination={false} scroll={{ x: 1000 }} />
+        <Table dataSource={dummyTestimonials} columns={columns} rowKey="id" pagination={false} scroll={{ x: "max-content" }} />
       </Card>
     </div>
   );

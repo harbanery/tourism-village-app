@@ -31,16 +31,33 @@ export default function AccountPage() {
       dataIndex: "gender",
       key: "gender",
       render: (gender: User["gender"]) =>
-        gender ? <Tag>{gender === "male" ? t("profile.male") : t("profile.female")}</Tag> : "-",
+        gender ? (
+          <Tag>
+            {gender === "male" ? t("profile.male") : t("profile.female")}
+          </Tag>
+        ) : (
+          "-"
+        ),
     },
     {
       title: t("admin.accounts.birthDate"),
       dataIndex: "birthDate",
       key: "birthDate",
-      render: (value: User["birthDate"]) => (value ? formatDate(value, locale) : "-"),
+      render: (value: User["birthDate"]) =>
+        value ? formatDate(value, locale) : "-",
     },
-    { title: t("admin.accounts.address"), dataIndex: "address", key: "address", render: (v: string | null) => v ?? "-" },
-    { title: t("common.phone"), dataIndex: "phone", key: "phone", render: (v: string | null) => v ?? "-" },
+    {
+      title: t("admin.accounts.address"),
+      dataIndex: "address",
+      key: "address",
+      render: (v: string | null) => v ?? "-",
+    },
+    {
+      title: t("common.phone"),
+      dataIndex: "phone",
+      key: "phone",
+      render: (v: string | null) => v ?? "-",
+    },
   ];
 
   const adminColumns = [
@@ -56,18 +73,34 @@ export default function AccountPage() {
         </div>
       ),
     },
-    { title: t("common.name"), dataIndex: "name", key: "name", render: (v: string | null) => v ?? "-" },
+    {
+      title: t("common.name"),
+      dataIndex: "name",
+      key: "name",
+      render: (v: string | null) => v ?? "-",
+    },
     { title: t("common.email"), dataIndex: "email", key: "email" },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold">{t("admin.accounts.title")}</h1>
       <Card title={t("admin.accounts.users")}>
-        <Table dataSource={dummyUsers} columns={userColumns} rowKey="id" pagination={false} scroll={{ x: 900 }} />
+        <Table
+          dataSource={dummyUsers}
+          columns={userColumns}
+          rowKey="id"
+          pagination={false}
+          scroll={{ x: "max-content" }}
+        />
       </Card>
       <Card title={t("admin.accounts.admins")}>
-        <Table dataSource={dummyAdmins} columns={adminColumns} rowKey="id" pagination={false} />
+        <Table
+          dataSource={dummyAdmins}
+          columns={adminColumns}
+          rowKey="id"
+          pagination={false}
+        />
       </Card>
     </div>
   );

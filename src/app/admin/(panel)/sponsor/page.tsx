@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useMounted } from "@/hooks/useMounted";
-import { Button, Card, Image, Table } from "antd";
+import { App, Button, Card, Form, Image, Input, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
+import { FormDrawer } from "@/components/admin/FormDrawer";
 import { dummySponsors, type Sponsor } from "@/models";
 
 export default function SponsorPage() {
   const { t } = useT();
   const mounted = useMounted();
+  const { message } = App.useApp();
+  const [open, setOpen] = useState(false);
   if (!mounted) return null;
 
   const columns = [
@@ -26,6 +30,7 @@ export default function SponsorPage() {
     {
       title: t("common.actions"),
       key: "actions",
+      fixed: "right" as const,
       render: () => (
         <div className="flex gap-2">
           <Button size="small">{t("common.edit")}</Button>
@@ -38,9 +43,36 @@ export default function SponsorPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">{t("admin.sponsors.title")}</h1>
-      <Card extra={<Button type="primary" icon={<PlusOutlined />}>{t("common.add")}</Button>}>
-        <Table dataSource={dummySponsors} columns={columns} rowKey="id" pagination={false} />
+      <Card
+        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>{t("common.add")}</Button>}
+      >
+        <Table dataSource={dummySponsors} columns={columns} rowKey="id" pagination={false} scroll={{ x: "max-content" }} />
       </Card>
+
+      <FormDrawer
+        open={open}
+        title={`${t("common.add")} ${t("admin.sponsors.title")}`}
+        onClose={() => setOpen(false)}
+        onFinish={() => message.success(t("common.saved"))}
+      >
+        <Form.Item
+          name="name"
+          label={t("admin.sponsors.name")}
+          rules={[{ required: true }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="filename"
+          label={t("admin.gallery.photo")}
+          rules={[{ required: true }]}
+        >
+          <Input placeholder="/images/sponsor/contoh.png" />
+        </Form.Item>
+        <Form.Item name="description" label={t("admin.sponsors.desc")}>
+          <Input.TextArea autoSize={{ minRows: 3, maxRows: 6 }} />
+        </Form.Item>
+      </FormDrawer>
     </div>
   );
 }
