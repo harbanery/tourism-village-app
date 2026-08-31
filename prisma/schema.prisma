@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// Auth
+// ============================================================
+
+model AuthAdmin {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  username String  @unique
+  password String
+  name     String?
+  avatar   String?
+  blog     Blog[]
+
+  @@map("auth_admin")
+}
+
+model AuthUser {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  phone        String?    @map("no_tlp")
+  password     String
+  name         String
+  gender       String?    @map("jenis_kelamin") // male | female
+  birthDate    DateTime?  @map("tgl_lahir") @db.Date
+  address      String?    @map("alamat")
+  avatar       String?
+  orders       Order[]
+  testimonials Testimonial[]
+
+  @@map("auth_user")
+}
+
+// ============================================================
+// Content
+// ============================================================
+
+model Place {
+  id        Int          @id @default(autoincrement())
+  name      String       @map("tempat_name")
+  active    String // yes | no
+  photo     String?      @map("photo_tempat")
+  packages  Package[]
+  galleries Gallery[]
+  videos    Video[]
+
+  @@map("wisata_tempat")
+}
+
+model Package {
+  id          Int      @id @default(autoincrement())
+  name        String   @map("paket_name")
+  placeId     Int?     @map("tempat_id")
+  facility1   String?  @map("fasilitas1")
+  facility2   String?  @map("fasilitas2")
+  facility3   String?  @map("fasilitas3")
+  facility4   String?  @map("fasilitas4")
+  price       Int      @map("harga")
+  place       Place?   @relation(fields: [placeId], references: [id], onDelete: SetNull)
+  orderItems  OrderItem[]
+
+  @@map("wisata_paket")
+}
+
+model Gallery {
+  id          Int     @id @default(autoincrement())
+  title       String  @map("gambar_name")
+  placeId     Int     @map("tempat_id")
+  filename    String
+  locked      String // yes | no (yes = dipakai sebagai cover tempat)
+  place       Place   @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@map("galeri")
+}
+
+model Video {
+  id        Int    @id @default(autoincrement())
+  name      String @map("video_name")
+  placeId   Int    @map("tempat_id")
+  linkCode  String @map("link_code") // YouTube video id
+  place     Place  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@map("video")
+}
+
+model Blog {
+  id             Int       @id @default(autoincrement())
+  adminId        Int       @map("admin_id")
+  datetime       DateTime  @default(now())
+  datetimeAfter  DateTime? @map("datetime_after")
+  title          String
+  filename       String // cover image
+  paraHeader     String    @map("para_header")
+  paraBody       String    @map("para_body")
+  admin          AuthAdmin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("blog")
+}
+
+model Sponsor {
+  id          Int     @id @default(autoincrement())
+  name        String  @map("sponsor_name")
+  description String? @map("deskripsi")
+  filename    String // logo image
+
+  @@map("sponsor")
+}
+
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  date        DateTime @default(now()) @map("date_kom")
+  comment     String   @map("komentar")
+  rating      Int // 1..5
+  active      String // yes | no (moderasi)
+  note        String? @map("keterangan")
+  user        AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("komentar")
+}
+
+// ============================================================
+// Orders
+// ============================================================
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  userId        Int         @map("user_id")
+  dateOrder     DateTime    @default(now()) @map("date_order")
+  dateSchedule  DateTime    @map("date_schedule") @db.Date
+  homestay      String // yes | no
+  homestayTime  Int?        @map("homestay_time")
+  totalPrice    Int         @map("total_harga")
+  user          AuthUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         OrderItem[]
+
+  @@map("wisata_pesan")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int     @map("pesan_id")
+  packageId Int     @map("paket_id")
+  quantity  Int
+  price     Int // subtotal
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@map("wisata_pesan_detail")
+}
