@@ -11,9 +11,9 @@ import { LanguageToggle } from "@/components/locale/LanguageToggle";
 
 const links = [
   { href: "/", key: "nav.home" },
-  { href: "/artikel", key: "nav.articles" },
-  { href: "/pemesanan", key: "nav.booking" },
-  { href: "/galeri-foto", key: "nav.gallery" },
+  { href: "/article", key: "nav.articles" },
+  { href: "/booking", key: "nav.booking" },
+  { href: "/gallery", key: "nav.gallery" },
   { href: "/vlog", key: "nav.vlog" },
 ];
 

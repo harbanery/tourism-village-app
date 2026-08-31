@@ -31,7 +31,7 @@ export default function HomePage() {
             {t("home.hero.title")}
           </h1>
           <p className="mt-4 max-w-xl text-white/85 md:text-lg">{t("home.hero.subtitle")}</p>
-          <Link href="/paket-detail">
+          <Link href="/package-detail">
             <Button type="primary" size="large" icon={<ArrowRightOutlined />} className="mt-8">
               {t("home.hero.cta")}
             </Button>
@@ -113,7 +113,7 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/paket-detail">
+                <Link href="/package-detail">
                   <Button type="primary" block className="mt-6">
                     {t("home.packages.cta")}
                   </Button>

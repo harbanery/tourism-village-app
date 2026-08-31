@@ -37,7 +37,7 @@ export default function LoginPage() {
           </p>
           <p className="text-foreground/60">
             {t("auth.login.noAccount")}{" "}
-            <Link href="/registrasi" className="text-[#0d7a5f] hover:underline">
+            <Link href="/register" className="text-[#0d7a5f] hover:underline">
               {t("nav.register")}
             </Link>
           </p>

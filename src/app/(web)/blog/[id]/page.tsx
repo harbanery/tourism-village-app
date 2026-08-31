@@ -19,7 +19,7 @@ export default function BlogDetailPage({ params }: PageProps<"/blog/[id]">) {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
-      <Link href="/artikel" className="inline-block mb-4">
+      <Link href="/article" className="inline-block mb-4">
         <Button icon={<ArrowLeftOutlined />}>{t("articles.title")}</Button>
       </Link>
       {post ? (

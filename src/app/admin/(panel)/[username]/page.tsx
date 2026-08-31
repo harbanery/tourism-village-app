@@ -8,7 +8,7 @@ import { ArrowLeftOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyAdmins } from "@/models";
 
-export default function AdminProfilPage({ params }: PageProps<"/admin/[username]">) {
+export default function AdminProfilePage({ params }: PageProps<"/admin/[username]">) {
   const { username } = use(params);
   const { t } = useT();
   const mounted = useMounted();
@@ -18,7 +18,7 @@ export default function AdminProfilPage({ params }: PageProps<"/admin/[username]
 
   return (
     <div className="max-w-2xl">
-      <Link href="/admin/kelola-akun" className="inline-block mb-4">
+      <Link href="/admin/manage-account" className="inline-block mb-4">
         <Button icon={<ArrowLeftOutlined />}>{t("admin.title")}</Button>
       </Link>
       <Card>

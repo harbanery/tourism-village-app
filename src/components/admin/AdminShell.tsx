@@ -25,14 +25,14 @@ import { LanguageToggle } from "@/components/locale/LanguageToggle";
 const { Header, Sider, Content } = Layout;
 
 const menuItems = [
-  { key: "/admin/kelola-akun", icon: <TeamOutlined />, localeKey: "admin.accounts.title" },
-  { key: "/admin/kelola-wisata", icon: <BankOutlined />, localeKey: "admin.tourism.title" },
-  { key: "/admin/kelola-galeri", icon: <PictureOutlined />, localeKey: "admin.gallery.title" },
-  { key: "/admin/kelola-vlog", icon: <VideoCameraOutlined />, localeKey: "admin.vlog.title" },
-  { key: "/admin/kelola-blog", icon: <FileTextOutlined />, localeKey: "admin.blog.title" },
-  { key: "/admin/kelola-pemesanan", icon: <ShoppingOutlined />, localeKey: "admin.orders.title" },
-  { key: "/admin/kelola-sponsor", icon: <TrophyOutlined />, localeKey: "admin.sponsors.title" },
-  { key: "/admin/kelola-ulasan", icon: <FundViewOutlined />, localeKey: "admin.reviews.title" },
+  { key: "/admin/manage-account", icon: <TeamOutlined />, localeKey: "admin.accounts.title" },
+  { key: "/admin/manage-tourism", icon: <BankOutlined />, localeKey: "admin.tourism.title" },
+  { key: "/admin/manage-gallery", icon: <PictureOutlined />, localeKey: "admin.gallery.title" },
+  { key: "/admin/manage-vlog", icon: <VideoCameraOutlined />, localeKey: "admin.vlog.title" },
+  { key: "/admin/manage-blog", icon: <FileTextOutlined />, localeKey: "admin.blog.title" },
+  { key: "/admin/manage-order", icon: <ShoppingOutlined />, localeKey: "admin.orders.title" },
+  { key: "/admin/manage-sponsor", icon: <TrophyOutlined />, localeKey: "admin.sponsors.title" },
+  { key: "/admin/manage-review", icon: <FundViewOutlined />, localeKey: "admin.reviews.title" },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -42,7 +42,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const { token } = theme.useToken();
 
   const selectedKey =
-    menuItems.find((item) => pathname.startsWith(item.key))?.key ?? "/admin/kelola-akun";
+    menuItems.find((item) => pathname.startsWith(item.key))?.key ?? "/admin/manage-account";
 
   return (
     <Layout style={{ minHeight: "100dvh" }}>
