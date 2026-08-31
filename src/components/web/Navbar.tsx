@@ -10,7 +10,6 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
 
 const links = [
-  { href: "/", key: "nav.home" },
   { href: "/article", key: "nav.articles" },
   { href: "/booking", key: "nav.booking" },
   { href: "/gallery", key: "nav.gallery" },
@@ -32,6 +31,7 @@ export function Navbar() {
           <span className="hidden sm:inline">Tempellemahbang</span>
         </Link>
 
+        {/* Menu desktop */}
         <div className="hidden md:flex items-center gap-1">
           {links.map((link) => {
             const active = pathname === link.href;
@@ -69,12 +69,13 @@ export function Navbar() {
         </div>
       </nav>
 
+      {/* Menu Mobile */}
       <Drawer
         title={t("nav.menu")}
         placement="right"
         onClose={() => setOpen(false)}
         open={open}
-        width={280}
+        size="large"
       >
         <div className="flex flex-col gap-1">
           {links.map((link) => (
