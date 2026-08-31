@@ -16,6 +16,22 @@ const links = [
   { href: "/vlog", key: "nav.vlog" },
 ];
 
+/**
+ * Underline animasi: muncul saat hover dan tetap tampil di route aktif.
+ */
+function navLinkClass(active: boolean, stacked = false) {
+  return [
+    "group relative text-sm font-medium transition-colors",
+    "after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-0 after:rounded-full",
+    "after:bg-[#0d7a5f] after:transition-all after:duration-300",
+    "hover:after:w-full",
+    stacked ? "px-1 py-2.5" : "px-1 py-2",
+    active
+      ? "text-[#0d7a5f] after:w-full"
+      : "text-foreground/80 hover:text-foreground",
+  ].join(" ");
+}
+
 export function Navbar() {
   const { t } = useT();
   const pathname = usePathname();
@@ -24,31 +40,20 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#141416]/80 border-b border-black/5 dark:border-white/10">
       <nav className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-          <span className="w-8 h-8 rounded-lg bg-[#0d7a5f] text-white grid place-items-center text-sm">
-            DV
-          </span>
-          <span className="hidden sm:inline">Tempellemahbang</span>
+        <Link href="/" className="text-lg font-bold tracking-tight">
+          Desaku<span className="text-[#0d7a5f]">Wisataku</span>
         </Link>
 
-        {/* Menu desktop */}
-        <div className="hidden md:flex items-center gap-1">
-          {links.map((link) => {
-            const active = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  active
-                    ? "text-[#0d7a5f] bg-[#0d7a5f]/10"
-                    : "text-foreground/80 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10"
-                }`}
-              >
-                {t(link.key)}
-              </Link>
-            );
-          })}
+        <div className="hidden md:flex items-center gap-5">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={navLinkClass(pathname.startsWith(link.href))}
+            >
+              {t(link.key)}
+            </Link>
+          ))}
         </div>
 
         <div className="flex items-center gap-1">
@@ -69,7 +74,6 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Menu Mobile */}
       <Drawer
         title={t("nav.menu")}
         placement="right"
@@ -77,13 +81,13 @@ export function Navbar() {
         open={open}
         size="large"
       >
-        <div className="flex flex-col gap-1">
+        <nav className="flex flex-col gap-1">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="px-3 py-2 rounded-md text-sm font-medium hover:bg-black/5 dark:hover:bg-white/10"
+              className={navLinkClass(pathname.startsWith(link.href), true)}
             >
               {t(link.key)}
             </Link>
@@ -91,11 +95,11 @@ export function Navbar() {
           <Link
             href="/login"
             onClick={() => setOpen(false)}
-            className="px-3 py-2 rounded-md text-sm font-medium hover:bg-black/5 dark:hover:bg-white/10"
+            className={navLinkClass(pathname === "/login", true)}
           >
             {t("nav.login")}
           </Link>
-        </div>
+        </nav>
       </Drawer>
     </header>
   );

@@ -76,7 +76,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const { token } = theme.useToken();
 
   const selectedKey =
-    menuItems.find((item) => pathname.startsWith(item.key))?.key ?? "/admin";
+    menuItems.find(
+      (item) => pathname === item.key || pathname.startsWith(`${item.key}/`),
+    )?.key ?? "/admin";
 
   return (
     <Layout style={{ minHeight: "100dvh" }}>
@@ -95,12 +97,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         }}
       >
         <div className="flex items-center gap-2 px-4 h-16">
-          <span className="w-8 h-8 shrink-0 rounded-lg bg-[#0d7a5f] text-white grid place-items-center text-sm font-bold">
-            DV
-          </span>
-          {!collapsed && (
-            <span className="font-bold truncate">Panel Admin</span>
-          )}
+          <span className="font-bold truncate">Desaku Wisataku</span>
         </div>
         <Menu
           mode="inline"

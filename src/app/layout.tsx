@@ -7,11 +7,11 @@ import "@/assets/global/index.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Desa Wisata Tempellemahbang",
-    template: "%s | Desa Wisata Tempellemahbang",
+    default: "Desaku Wisataku",
+    template: "%s | Desaku Wisataku",
   },
   description:
-    "Website desa wisata (tourism village) Tempellemahbang — paket wisata, galeri, vlog, dan artikel.",
+    "Website desa wisata Desaku Wisataku — paket wisata, galeri, vlog, dan artikel.",
 };
 
 export const viewport: Viewport = {

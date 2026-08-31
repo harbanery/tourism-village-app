@@ -11,8 +11,10 @@ export function PackagesSection() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-14">
-      <h2 className="text-2xl md:text-3xl font-bold">{t("home.packages.title")}</h2>
-      <p className="mt-1 text-foreground/60">{t("home.packages.subtitle")}</p>
+      <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
+        {t("home.packages.title")}
+      </h2>
+      <p className="mt-1 text-white/80 drop-shadow">{t("home.packages.subtitle")}</p>
       <Row gutter={[16, 16]} className="mt-6">
         {dummyPackages.map((pkg) => (
           <Col xs={24} sm={12} md={8} key={pkg.id}>

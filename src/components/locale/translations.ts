@@ -50,13 +50,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.theme.toggle": "Ganti tema",
     "nav.language.toggle": "Ganti bahasa",
 
-    "home.hero.title": "Sugeng Rawuh Ing Desa Tempellemahbang",
+    "home.hero.title": "Selamat Datang di Desaku Wisataku",
     "home.hero.subtitle":
       "Destinasi desa wisata dengan keindahan alam dan budaya yang memukau",
     "home.hero.cta": "Lihat Paket Wisata",
     "home.popular.title": "Wisata Populer",
     "home.popular.subtitle": "Tempat wisata favorit di desa kami",
-    "home.why.title": "Mengapa Desa Tempellemahbang?",
+    "home.why.title": "Mengapa Desaku Wisataku?",
     "home.why.facility.title": "Fasilitas No. 1",
     "home.why.facility.desc":
       "Kami menyediakan fasilitas terbaik dan lengkap untuk kenyamanan wisatawan.",
@@ -73,7 +73,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.video.subtitle": "Lihat keseruan wisata di desa kami",
 
     "articles.title": "Artikel",
-    "articles.subtitle": "Kabar terbaru dari Desa Tempellemahbang",
+    "articles.subtitle": "Kabar terbaru dari Desa Sukamaju",
     "articles.postedBy": "Diposting pada {date} oleh {author}",
     "articles.archives": "Arsip",
     "articles.searchPlaceholder": "Cari artikel...",
@@ -81,7 +81,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "articles.searchResults": "Hasil pencarian: {keyword}",
 
     "gallery.title": "Galeri Foto",
-    "gallery.subtitle": "Momen indah di Desa Tempellemahbang",
+    "gallery.subtitle": "Momen indah di Desa Sukamaju",
     "gallery.followInstagram": "FOLLOW OUR INSTAGRAM",
 
     "vlog.title": "Vlog",
@@ -154,7 +154,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.hours": "Jam Buka",
     "footer.hoursValue": "Setiap Hari, 08.00 - 17.00 WIB",
     "footer.contact": "Narahubung",
-    "footer.copyright": "© 2026 Desa Tempellemahbang. All rights reserved.",
+    "footer.copyright": "© 2026 Desaku Wisataku. All rights reserved.",
 
     "admin.title": "Panel Admin",
     "admin.dashboard": "Dashboard",
@@ -238,13 +238,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.theme.toggle": "Toggle theme",
     "nav.language.toggle": "Toggle language",
 
-    "home.hero.title": "Welcome to Tempellemahbang Village",
+    "home.hero.title": "Welcome to Desaku Wisataku",
     "home.hero.subtitle":
       "A tourism village destination with stunning nature and culture",
     "home.hero.cta": "View Tour Packages",
     "home.popular.title": "Popular Tourism",
     "home.popular.subtitle": "Favorite destinations in our village",
-    "home.why.title": "Why Tempellemahbang Village?",
+    "home.why.title": "Why Desaku Wisataku?",
     "home.why.facility.title": "Top Facilities",
     "home.why.facility.desc":
       "We provide the best and most complete facilities for visitor comfort.",
@@ -261,7 +261,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.video.subtitle": "See the fun of tourism in our village",
 
     "articles.title": "Articles",
-    "articles.subtitle": "Latest news from Tempellemahbang Village",
+    "articles.subtitle": "Latest news from Sukamaju Village",
     "articles.postedBy": "Posted on {date} by {author}",
     "articles.archives": "Archives",
     "articles.searchPlaceholder": "Search articles...",
@@ -269,7 +269,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "articles.searchResults": "Search results: {keyword}",
 
     "gallery.title": "Photo Gallery",
-    "gallery.subtitle": "Beautiful moments in Tempellemahbang Village",
+    "gallery.subtitle": "Beautiful moments in Sukamaju Village",
     "gallery.followInstagram": "FOLLOW OUR INSTAGRAM",
 
     "vlog.title": "Vlog",
@@ -342,7 +342,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.hours": "Opening Hours",
     "footer.hoursValue": "Every Day, 08.00 - 17.00 WIB (UTC+7)",
     "footer.contact": "Contact",
-    "footer.copyright": "© 2026 Tempellemahbang Village. All rights reserved.",
+    "footer.copyright": "© 2026 Desaku Wisataku. All rights reserved.",
 
     "admin.title": "Admin Panel",
     "admin.dashboard": "Dashboard",
