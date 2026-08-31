@@ -23,11 +23,11 @@ function navLinkClass(active: boolean, stacked = false) {
   return [
     "group relative text-sm font-medium transition-colors",
     "after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-0 after:rounded-full",
-    "after:bg-[#0d7a5f] after:transition-all after:duration-300",
+    "after:bg-primary after:transition-all after:duration-300",
     "hover:after:w-full",
     stacked ? "px-1 py-2.5" : "px-1 py-2",
     active
-      ? "text-[#0d7a5f] after:w-full"
+      ? "text-primary after:w-full"
       : "text-foreground/80 hover:text-foreground",
   ].join(" ");
 }
@@ -41,7 +41,10 @@ export function Navbar() {
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#141416]/80 border-b border-black/5 dark:border-white/10">
       <nav className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between gap-4">
         <Link href="/" className="text-lg font-bold tracking-tight">
-          Desaku<span className="text-[#0d7a5f]">Wisataku</span>
+          <span className="text-foreground transition-colors hover:text-foreground/70">
+            Desaku
+          </span>
+          <span className="text-primary">Wisataku</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-5">

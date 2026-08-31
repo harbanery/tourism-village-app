@@ -39,7 +39,7 @@ export function PackageListSection({
               title={pkg.name}
               extra={<span className="text-xs text-foreground/50">{pkg.placeName}</span>}
             >
-              <div className="text-2xl font-bold text-[#0d7a5f]">
+              <div className="text-2xl font-bold text-primary">
                 {formatRupiah(pkg.price)}
                 <span className="text-sm font-normal text-foreground/60">
                   {t("common.perPerson")}

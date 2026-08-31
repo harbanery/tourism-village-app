@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button, Card } from "antd";
+import { Button, Card, Empty } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import type { BlogPost } from "@/models";
 import { formatDate } from "@/utils/format";
@@ -32,8 +32,12 @@ export function SearchResultsSection({
         ) : (
           results.map((post) => (
             <Card key={post.id} hoverable cover={
-              // eslint-disable-next-line @next/next/no-img-element
-              <img alt={post.title} src={post.filename} className="h-56 w-full object-cover" />
+              post.filename ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img alt={post.title} src={post.filename} className="h-56 w-full object-cover" />
+              ) : (
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} className="grid h-56 place-items-center" />
+              )
             }>
               <h2 className="text-xl font-semibold">{post.title}</h2>
               <p className="mt-1 text-xs text-foreground/50">

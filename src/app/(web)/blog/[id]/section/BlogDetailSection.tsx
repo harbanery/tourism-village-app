@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button, Card } from "antd";
+import { Button, Card, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import type { BlogPost } from "@/models";
@@ -18,8 +18,12 @@ export function BlogDetailSection({ post }: { post: BlogPost | null }) {
       {post ? (
         <Card
           cover={
-            // eslint-disable-next-line @next/next/no-img-element
-            <img alt={post.title} src={post.filename} className="max-h-96 w-full object-cover" />
+            post.filename ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img alt={post.title} src={post.filename} className="max-h-96 w-full object-cover" />
+            ) : (
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} className="grid max-h-96 min-h-48 place-items-center" />
+            )
           }
         >
           <h1 className="text-2xl md:text-3xl font-bold">{post.title}</h1>

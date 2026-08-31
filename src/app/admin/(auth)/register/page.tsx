@@ -46,7 +46,7 @@ export default function AdminRegisterPage() {
         </Form>
         <p className="text-center text-sm text-foreground/60">
           {t("auth.register.haveAccount")}{" "}
-          <Link href="/admin/login" className="text-[#0d7a5f] hover:underline">
+          <Link href="/admin/login" className="text-primary hover:underline">
             {t("nav.login")}
           </Link>
         </p>

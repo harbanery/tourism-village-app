@@ -20,7 +20,7 @@ export function ArchiveSection() {
           <Link
             key={month}
             href={`/search?date=${month}`}
-            className="text-sm text-[#0d7a5f] hover:underline"
+            className="text-sm text-primary hover:underline"
           >
             {formatDate(`${month}-01`, locale)}
           </Link>

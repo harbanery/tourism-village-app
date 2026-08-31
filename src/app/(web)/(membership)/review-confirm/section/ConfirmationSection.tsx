@@ -10,7 +10,7 @@ export function ConfirmationSection() {
 
   return (
     <div className="text-center">
-      <CheckCircleFilled className="text-5xl text-[#0d7a5f]" />
+      <CheckCircleFilled className="text-5xl text-primary" />
       <h1 className="mt-4 text-2xl font-bold">{t("success.title")}</h1>
       <p className="mt-2 text-foreground/70">{t("success.message")}</p>
       <div className="mt-6 flex justify-center gap-3">

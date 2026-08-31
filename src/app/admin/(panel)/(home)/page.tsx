@@ -52,7 +52,7 @@ export default function DashboardPage() {
             <Statistic
               title={t("admin.tourism.places")}
               value={activePlaces}
-              prefix={<BankOutlined className="text-[#0d7a5f]" />}
+              prefix={<BankOutlined className="text-primary" />}
               suffix={`/ ${dummyPlaces.length}`}
             />
           </Card>
@@ -62,7 +62,7 @@ export default function DashboardPage() {
             <Statistic
               title={t("admin.tourism.packages")}
               value={dummyPackages.length}
-              prefix={<FileTextOutlined className="text-[#0d7a5f]" />}
+              prefix={<FileTextOutlined className="text-primary" />}
             />
           </Card>
         </Col>
@@ -71,7 +71,7 @@ export default function DashboardPage() {
             <Statistic
               title={t("admin.orders.title")}
               value={dummyOrders.length}
-              prefix={<ShoppingOutlined className="text-[#0d7a5f]" />}
+              prefix={<ShoppingOutlined className="text-primary" />}
             />
           </Card>
         </Col>
@@ -80,7 +80,7 @@ export default function DashboardPage() {
             <Statistic
               title={t("admin.reviews.title")}
               value={dummyTestimonials.filter((r) => r.active === "yes").length}
-              prefix={<StarOutlined className="text-[#0d7a5f]" />}
+              prefix={<StarOutlined className="text-primary" />}
             />
           </Card>
         </Col>
@@ -89,7 +89,7 @@ export default function DashboardPage() {
       <Card
         title={t("admin.orders.title")}
         extra={
-          <Link href="/admin/order" className="text-[#0d7a5f] hover:underline">
+          <Link href="/admin/order" className="text-primary hover:underline">
             {t("common.viewAll")}
           </Link>
         }

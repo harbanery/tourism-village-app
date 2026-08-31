@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
           {t("auth.login.noAccount")}{" "}
           <Link
             href="/admin/register"
-            className="text-[#0d7a5f] hover:underline"
+            className="text-primary hover:underline"
           >
             {t("nav.register")}
           </Link>

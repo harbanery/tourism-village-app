@@ -1,35 +1,28 @@
+import { HeroBackground } from "./section/HeroBackground";
 import { HeroSection } from "./section/HeroSection";
 import { PopularSection } from "./section/PopularSection";
-import { WhySection } from "./section/WhySection";
+import { FeatureSection } from "./section/FeatureSection";
 import { PackagesSection } from "./section/PackagesSection";
 import { TestimonialsSection } from "./section/TestimonialsSection";
 import { SponsorsSection } from "./section/SponsorsSection";
-import { VideoSection } from "./section/VideoSection";
+import { DocumentationSection } from "./section/DocumentationSection";
 
 export default function HomePage() {
   return (
     <div className="relative">
       {/*
-        Parallax background: fixed di viewport sehingga "bergerak" mengikuti
-        scroll dan tetap terlihat di belakang section transparan. Section dengan
-        latar solid (bg-white dark:bg-[#141416]) menutupinya.
+        Background parallax + crossfade hero-a/hero-b: fixed di viewport
+        sehingga "bergerak" mengikuti scroll dan tetap terlihat di belakang
+        section transparan. Section berlatar solid menutupinya.
       */}
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: "url(/images/hero.png)" }}
-      />
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10 bg-black/45 dark:bg-black/60"
-      />
+      <HeroBackground />
       <HeroSection />
       <PopularSection />
-      <WhySection />
+      <FeatureSection />
       <PackagesSection />
       <TestimonialsSection />
       <SponsorsSection />
-      <VideoSection />
+      <DocumentationSection />
     </div>
   );
 }

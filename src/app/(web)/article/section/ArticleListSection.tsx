@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, Card, Input } from "antd";
+import { Button, Card, Empty, Input } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyBlogs } from "@/models";
 import { formatDate } from "@/utils/format";
@@ -19,8 +19,12 @@ export function ArticleListSection({ children }: { children?: React.ReactNode })
         <div className="mt-6 space-y-6">
           {dummyBlogs.map((post) => (
             <Card key={post.id} hoverable cover={
-              // eslint-disable-next-line @next/next/no-img-element
-              <img alt={post.title} src={post.filename} className="h-56 w-full object-cover" />
+              post.filename ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img alt={post.title} src={post.filename} className="h-56 w-full object-cover" />
+              ) : (
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} className="grid h-56 place-items-center" />
+              )
             }>
               <h2 className="text-xl font-semibold">{post.title}</h2>
               <p className="mt-1 text-xs text-foreground/50">

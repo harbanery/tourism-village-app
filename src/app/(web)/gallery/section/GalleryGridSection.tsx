@@ -1,7 +1,7 @@
 "use client";
 
 import { useMounted } from "@/hooks/useMounted";
-import { Image } from "antd";
+import { Empty, Image } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyGalleries, dummyPlaces } from "@/models";
 
@@ -23,15 +23,24 @@ export function GalleryGridSection() {
           <section key={place.id} className="mt-10">
             <h2 className="text-xl font-semibold">{place.name}</h2>
             <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3">
-              {photos.map((photo) => (
-                <Image
-                  key={photo.id}
-                  src={photo.filename}
-                  alt={photo.title}
-                  className="h-48 w-full rounded-xl object-cover"
-                  loading="lazy"
-                />
-              ))}
+              {photos.map((photo) =>
+                photo.filename ? (
+                  <Image
+                    key={photo.id}
+                    src={photo.filename}
+                    alt={photo.title}
+                    className="h-48 w-full rounded-xl object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <Empty
+                    key={photo.id}
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={false}
+                    className="grid h-48 w-full place-items-center rounded-xl border border-black/5 dark:border-white/10"
+                  />
+                ),
+              )}
             </div>
           </section>
         );

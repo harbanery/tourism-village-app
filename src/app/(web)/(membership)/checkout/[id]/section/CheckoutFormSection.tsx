@@ -72,7 +72,7 @@ export function CheckoutFormSection({
             ))}
             <div className="py-2 flex justify-between font-semibold">
               <span>{t("cart.totalPrice")}</span>
-              <span className="text-[#0d7a5f]">{formatRupiah(total)}</span>
+              <span className="text-primary">{formatRupiah(total)}</span>
             </div>
           </div>
 

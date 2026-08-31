@@ -22,7 +22,7 @@ export function BookingPackageSection() {
                 <li key={f}>{f}</li>
               ))}
             </ol>
-            <p className="mt-4 font-semibold text-[#0d7a5f]">
+            <p className="mt-4 font-semibold text-primary">
               {t("booking.pricePerPerson", { price: pkg.price.toLocaleString("id-ID") })}
             </p>
           </Card>

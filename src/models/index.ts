@@ -105,15 +105,17 @@ export interface Order {
 // ------------------------------------------------------------
 
 export const dummyPlaces: Place[] = [
-  { id: 1, name: "Curug Leuwi Lieuk", active: "yes", photo: "https://picsum.photos/seed/curug/750/500" },
-  { id: 2, name: "Kampung Budaya Sindang Barang", active: "yes", photo: "https://picsum.photos/seed/sindang/750/500" },
-  { id: 3, name: "Goa Tanding", active: "no", photo: "https://picsum.photos/seed/goa/750/500" },
+  { id: 1, name: "Telaga Saat, Puncak", active: "yes", photo: "/images/villages/telaga-saat-puncak-by-ishaq-robin.png" },
+  { id: 2, name: "Camp Situ Patenggang", active: "yes", photo: "/images/villages/camp-situ-patenggang-by-fadhila-nurhakim.png" },
+  { id: 3, name: "Waduk Jatiluhur", active: "yes", photo: "/images/villages/waduk-jatiluhur-by-inna-safa.png" },
+  { id: 4, name: "Kuningan", active: "yes", photo: "/images/villages/kuningan-by-raiyan-zakaria.png" },
+  { id: 5, name: "Pacitan", active: "yes", photo: "/images/villages/pacitan-by-galih-setyo-putro.png" },
 ];
 
 export const dummyPackages: Package[] = [
-  { id: 1, name: "Paket A", placeId: 1, placeName: "Curug Leuwi Lieuk", facilities: ["Jasa Pemandu", "Peralatan", "Asuransi", "Transportasi"], price: 75000 },
-  { id: 2, name: "Paket B", placeId: 2, placeName: "Kampung Budaya Sindang Barang", facilities: ["Jasa Pemandu", "Peralatan", "Asuransi", "Transportasi"], price: 75000 },
-  { id: 3, name: "Paket C", placeId: 1, placeName: "Curug Leuwi Lieuk", facilities: ["Jasa Pemandu", "Peralatan", "Transportasi", null], price: 65000 },
+  { id: 1, name: "Paket A", placeId: 1, placeName: "Telaga Saat, Puncak", facilities: ["Jasa Pemandu", "Peralatan", "Asuransi", "Transportasi"], price: 75000 },
+  { id: 2, name: "Paket B", placeId: 2, placeName: "Camp Situ Patenggang", facilities: ["Jasa Pemandu", "Peralatan", "Asuransi", "Transportasi"], price: 75000 },
+  { id: 3, name: "Paket C", placeId: 1, placeName: "Telaga Saat, Puncak", facilities: ["Jasa Pemandu", "Peralatan", "Transportasi", null], price: 65000 },
 ];
 
 export const dummyGalleries: GalleryItem[] = [
@@ -188,6 +190,8 @@ export const dummyTestimonials: Testimonial[] = [
   { id: 1, userId: 1, userName: "Raihan Yusuf", userEmail: "raihany@gmail.com", userPhone: "089605567347", date: "2021-11-08 10:00:00", comment: "Pemandangannya bagus banget, pemandunya juga ramah!", rating: 5, active: "yes", note: null },
   { id: 2, userId: 4, userName: "Alatas Ali", userEmail: "111201912121@mhs.dinus.ac.id", userPhone: null, date: "2021-11-20 09:30:00", comment: "Pengalaman homestay yang nyaman, kuliner lokalnya juara.", rating: 4, active: "yes", note: null },
   { id: 3, userId: 1, userName: "Raihan Yusuf", userEmail: "raihany@gmail.com", userPhone: "089605567347", date: "2021-12-01 14:20:00", comment: "Parkirnya perlu diperluas saat weekend.", rating: 3, active: "no", note: "Menunggu perbaikan area parkir" },
+  { id: 4, userId: 5, userName: "Dewi Lestari", userEmail: "dewi.lestari@gmail.com", userPhone: null, date: "2022-01-15 16:45:00", comment: "Sunrise di bukit desa luar biasa, bakal balik lagi bareng keluarga.", rating: 5, active: "yes", note: null },
+  { id: 5, userId: 6, userName: "Bima Saputra", userEmail: "bima.saputra@gmail.com", userPhone: null, date: "2022-02-03 11:10:00", comment: "Paket wisatanya lengkap dan harganya masuk akal untuk rombongan.", rating: 4, active: "yes", note: null },
 ];
 
 export const dummyUsers: User[] = [

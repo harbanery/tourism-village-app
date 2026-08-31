@@ -50,19 +50,26 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.theme.toggle": "Ganti tema",
     "nav.language.toggle": "Ganti bahasa",
 
-    "home.hero.title": "Selamat Datang di Desaku Wisataku",
-    "home.hero.subtitle":
-      "Destinasi desa wisata dengan keindahan alam dan budaya yang memukau",
+    "home.hero.title1": "Selamat Datang di",
+    "home.hero.subtitle1": "Destinasi desa wisata dengan keindahan alam",
+    "home.hero.subtitle2": "dan budaya yang memukau",
     "home.hero.cta": "Lihat Paket Wisata",
     "home.popular.title": "Wisata Populer",
     "home.popular.subtitle": "Tempat wisata favorit di desa kami",
     "home.why.title": "Mengapa Desaku Wisataku?",
+    "home.why.subtitle": "Keunggulan yang kami tawarkan untuk wisatawan",
     "home.why.facility.title": "Fasilitas No. 1",
     "home.why.facility.desc":
       "Kami menyediakan fasilitas terbaik dan lengkap untuk kenyamanan wisatawan.",
     "home.why.service.title": "Layanan Prima",
     "home.why.service.desc":
       "Pelayanan ramah dan profesional dari warga desa untuk pengalaman tak terlupakan.",
+    "home.why.cheap.title": "Harga Terjangkau",
+    "home.why.cheap.desc":
+      "Paket wisata dengan harga bersahabat untuk semua kalangan.",
+    "home.why.local.title": "Kearifan Lokal",
+    "home.why.local.desc":
+      "Budaya dan tradisi asli desa yang tetap terjaga keasliannya.",
     "home.packages.title": "Paket Wisata",
     "home.packages.subtitle": "Pilihan paket wisata dengan harga terjangkau",
     "home.packages.cta": "Pesan Sekarang",
@@ -238,19 +245,26 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.theme.toggle": "Toggle theme",
     "nav.language.toggle": "Toggle language",
 
-    "home.hero.title": "Welcome to Desaku Wisataku",
-    "home.hero.subtitle":
-      "A tourism village destination with stunning nature and culture",
+    "home.hero.title1": "Welcome to",
+    "home.hero.subtitle1": "A tourism village destination with stunning nature",
+    "home.hero.subtitle2": "and captivating culture",
     "home.hero.cta": "View Tour Packages",
     "home.popular.title": "Popular Tourism",
     "home.popular.subtitle": "Favorite destinations in our village",
     "home.why.title": "Why Desaku Wisataku?",
+    "home.why.subtitle": "The advantages we offer to visitors",
     "home.why.facility.title": "Top Facilities",
     "home.why.facility.desc":
       "We provide the best and most complete facilities for visitor comfort.",
     "home.why.service.title": "Excellent Service",
     "home.why.service.desc":
       "Friendly and professional service from villagers for an unforgettable experience.",
+    "home.why.cheap.title": "Affordable Prices",
+    "home.why.cheap.desc":
+      "Tour packages at friendly prices for everyone.",
+    "home.why.local.title": "Local Wisdom",
+    "home.why.local.desc":
+      "Authentic village culture and traditions, well preserved.",
     "home.packages.title": "Tour Packages",
     "home.packages.subtitle": "Affordable tour package options",
     "home.packages.cta": "Book Now",

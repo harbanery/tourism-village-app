@@ -15,8 +15,21 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* Primary brand (hijau) — selaras dengan token colorPrimary AntD. */
+  --color-primary: #0d7a5f;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Marquee sponsor (pola skills-marquee portfolio). */
+  --animate-scroll: scroll 45s linear infinite;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 body {
