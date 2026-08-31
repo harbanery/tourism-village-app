@@ -59,24 +59,21 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.why.title": "Mengapa Desaku Wisataku?",
     "home.why.subtitle": "Keunggulan yang kami tawarkan untuk wisatawan",
     "home.why.facility.title": "Fasilitas No. 1",
-    "home.why.facility.desc":
-      "Kami menyediakan fasilitas terbaik dan lengkap untuk kenyamanan wisatawan.",
+    "home.why.facility.desc": "Fasilitas lengkap dan terbaik untuk kenyamanan Anda.",
     "home.why.service.title": "Layanan Prima",
-    "home.why.service.desc":
-      "Pelayanan ramah dan profesional dari warga desa untuk pengalaman tak terlupakan.",
+    "home.why.service.desc": "Pelayanan ramah dan profesional dari warga desa.",
     "home.why.cheap.title": "Harga Terjangkau",
-    "home.why.cheap.desc":
-      "Paket wisata dengan harga bersahabat untuk semua kalangan.",
+    "home.why.cheap.desc": "Harga paket bersahabat untuk semua kalangan.",
     "home.why.local.title": "Kearifan Lokal",
-    "home.why.local.desc":
-      "Budaya dan tradisi asli desa yang tetap terjaga keasliannya.",
+    "home.why.local.desc": "Budaya dan tradisi asli desa yang terjaga.",
     "home.packages.title": "Paket Wisata",
     "home.packages.subtitle": "Pilihan paket wisata dengan harga terjangkau",
     "home.packages.cta": "Pesan Sekarang",
     "home.testimonials.title": "Komentar Pengunjung",
     "home.testimonials.subtitle": "Apa kata mereka tentang desa kami",
     "home.sponsors.title": "Klien & Sponsor",
-    "home.video.title": "Video Dokumentasi",
+    "home.sponsors.label": "Disponsori oleh",
+    "home.video.title": "Perjalanan Kami",
     "home.video.subtitle": "Lihat keseruan wisata di desa kami",
 
     "articles.title": "Artikel",
@@ -254,24 +251,21 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.why.title": "Why Desaku Wisataku?",
     "home.why.subtitle": "The advantages we offer to visitors",
     "home.why.facility.title": "Top Facilities",
-    "home.why.facility.desc":
-      "We provide the best and most complete facilities for visitor comfort.",
+    "home.why.facility.desc": "Complete, top facilities for your comfort.",
     "home.why.service.title": "Excellent Service",
-    "home.why.service.desc":
-      "Friendly and professional service from villagers for an unforgettable experience.",
+    "home.why.service.desc": "Friendly, professional service from villagers.",
     "home.why.cheap.title": "Affordable Prices",
-    "home.why.cheap.desc":
-      "Tour packages at friendly prices for everyone.",
+    "home.why.cheap.desc": "Friendly prices for every traveler.",
     "home.why.local.title": "Local Wisdom",
-    "home.why.local.desc":
-      "Authentic village culture and traditions, well preserved.",
+    "home.why.local.desc": "Authentic, well-preserved village traditions.",
     "home.packages.title": "Tour Packages",
     "home.packages.subtitle": "Affordable tour package options",
     "home.packages.cta": "Book Now",
     "home.testimonials.title": "Visitor Comments",
     "home.testimonials.subtitle": "What they say about our village",
     "home.sponsors.title": "Clients & Sponsors",
-    "home.video.title": "Documentation Video",
+    "home.sponsors.label": "Sponsored by",
+    "home.video.title": "Our Journey",
     "home.video.subtitle": "See the fun of tourism in our village",
 
     "articles.title": "Articles",

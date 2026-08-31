@@ -47,7 +47,8 @@ export function Navbar() {
           <span className="text-primary">Wisataku</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-5">
+        {/* Laptop/desktop: menu biasa. Tablet/mobile: drawer (tombol di bawah). */}
+        <div className="hidden lg:flex items-center gap-5">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -68,7 +69,7 @@ export function Navbar() {
             </Button>
           </Link>
           <Button
-            className="md:hidden"
+            className="lg:hidden"
             type="text"
             aria-label="Menu"
             icon={<MenuOutlined />}

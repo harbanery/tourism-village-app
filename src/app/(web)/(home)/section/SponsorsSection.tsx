@@ -27,29 +27,32 @@ const sponsorIcons = [
 /**
  * Marquee sponsor — pola skills-marquee portfolio: track diduplikasi lalu
  * discroll linear terus-menerus (animate-scroll), berhenti saat hover.
+ * Gradient tepi memudar ke background section (putih / gelap saat dark).
  */
 export function SponsorsSection() {
   const { t } = useT();
 
   return (
-    <section
-      aria-label={t("home.sponsors.title")}
-      className="relative overflow-hidden py-10"
-    >
-      <div className="group relative overflow-hidden">
-        {/* Fade tepi agar track terasa "masuk/keluar" halus */}
-        <div className="pointer-events-none absolute left-0 z-10 h-full w-4/12 bg-linear-to-r from-black/70 from-0% to-transparent to-100%" />
-        <div className="pointer-events-none absolute right-0 z-10 h-full w-4/12 bg-linear-to-l from-black/70 from-0% to-transparent to-100%" />
-        <div className="flex w-max animate-scroll items-center gap-16 pr-16 group-hover:[animation-play-state:paused] md:gap-24 md:pr-24">
-          {[...sponsorIcons, ...sponsorIcons].map((Icon, index) => (
-            <span
-              key={`sponsor-icon-${index + 1}`}
-              className="flex cursor-pointer items-center gap-16 whitespace-nowrap text-white/50 transition-colors duration-500 hover:text-white md:gap-24"
-            >
-              <Icon aria-hidden className="shrink-0 text-4xl" />
-              <span className="h-1 w-1 rounded-full bg-white/30" />
-            </span>
-          ))}
+    <section className="flex min-h-screen flex-col items-center justify-center bg-white dark:bg-[#141416]">
+      <div className="w-full">
+        <p className="text-center text-sm font-medium uppercase tracking-widest text-foreground/50">
+          {t("home.sponsors.label")}
+        </p>
+
+        <div className="group relative mt-6 overflow-hidden">
+          <div className="pointer-events-none absolute left-0 z-10 h-full w-3/12 bg-linear-to-r from-white to-transparent dark:from-[#141416]" />
+          <div className="pointer-events-none absolute right-0 z-10 h-full w-3/12 bg-linear-to-l from-white to-transparent dark:from-[#141416]" />
+          <div className="flex w-max animate-scroll items-center gap-16 pr-16 group-hover:[animation-play-state:paused] md:gap-24 md:pr-24">
+            {[...sponsorIcons, ...sponsorIcons].map((Icon, index) => (
+              <span
+                key={`sponsor-icon-${index + 1}`}
+                className="flex cursor-pointer items-center gap-16 whitespace-nowrap text-foreground/40 transition-colors duration-500 hover:text-foreground md:gap-24"
+              >
+                <Icon aria-hidden className="shrink-0 text-4xl" />
+                <span className="h-1 w-1 rounded-full bg-foreground/20" />
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </section>

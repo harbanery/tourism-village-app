@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Carousel, Col, Rate, Row } from "antd";
+import { Card, Carousel, Rate } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyTestimonials, type Testimonial } from "@/models";
 
@@ -8,13 +8,11 @@ const REVIEWS_PER_SLIDE = 3;
 
 function ReviewCard({ review }: { review: Testimonial }) {
   return (
-    <Col xs={24} md={8} className="h-full">
-      <Card className="h-full">
-        <Rate disabled defaultValue={review.rating} />
-        <p className="mt-3 text-foreground/80">&ldquo;{review.comment}&rdquo;</p>
-        <p className="mt-4 font-medium">— {review.userName}</p>
-      </Card>
-    </Col>
+    <Card className="h-full">
+      <Rate disabled defaultValue={review.rating} />
+      <p className="mt-3 text-foreground/80">&ldquo;{review.comment}&rdquo;</p>
+      <p className="mt-4 font-medium">— {review.userName}</p>
+    </Card>
   );
 }
 
@@ -47,23 +45,25 @@ export function TestimonialsSection() {
         </div>
 
         {activeTestimonials.length > REVIEWS_PER_SLIDE ? (
+          /* CSS grid di dalam slide (bukan Row/Col) agar tidak ada margin
+             negatif gutter yang bocor keluar container slick. */
           <Carousel autoplay dots className="mt-8">
             {slides.map((slide, slideIndex) => (
-              <div key={slideIndex} className="pb-2">
-                <Row gutter={[16, 16]}>
+              <div key={slideIndex} className="pb-8">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   {slide.map((review) => (
                     <ReviewCard key={review.id} review={review} />
                   ))}
-                </Row>
+                </div>
               </div>
             ))}
           </Carousel>
         ) : (
-          <Row gutter={[16, 16]} className="mt-8">
+          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
             {activeTestimonials.map((review) => (
               <ReviewCard key={review.id} review={review} />
             ))}
-          </Row>
+          </div>
         )}
       </div>
     </section>

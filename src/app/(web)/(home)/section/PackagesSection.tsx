@@ -11,13 +11,13 @@ export function PackagesSection() {
   const { t } = useT();
 
   return (
-    <section className="flex min-h-screen items-center">
+    <section className="flex min-h-screen items-center bg-white dark:bg-[#141416]">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
         <div className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
+          <h2 className="text-2xl md:text-3xl font-bold">
             {t("home.packages.title")}
           </h2>
-          <p className="mt-1 text-white/80 drop-shadow">
+          <p className="mt-1 text-foreground/60">
             {t("home.packages.subtitle")}
           </p>
         </div>
