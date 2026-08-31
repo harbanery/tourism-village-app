@@ -33,7 +33,7 @@ export default function BlogPage() {
       dataIndex: "filename",
       key: "filename",
       render: (_: unknown, record: BlogPost) => (
-        <Image src={record.filename} alt={record.title} width={80} height={52} className="rounded object-cover" />
+        <Image src={record.filename} alt={record.title} width={80} height={52} className="rounded! object-cover!" />
       ),
     },
     {

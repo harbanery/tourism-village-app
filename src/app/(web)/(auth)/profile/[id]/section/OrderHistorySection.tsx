@@ -16,7 +16,7 @@ export function OrderHistorySection({ orders }: { orders: Order[] }) {
     <div>
       <h2 className="text-xl font-bold">{t("profile.orderHistory")}</h2>
       {orders.length === 0 ? (
-        <Card className="mt-4">
+        <Card className="mt-4!">
           <p className="text-foreground/60">{t("profile.noOrders")}</p>
         </Card>
       ) : (
@@ -46,7 +46,7 @@ export function OrderHistorySection({ orders }: { orders: Order[] }) {
                     </li>
                   ))}
                 </ul>
-                <Button className="mt-4">{t("profile.downloadReceipt")}</Button>
+                <Button className="mt-4!">{t("profile.downloadReceipt")}</Button>
               </Card>
             </List.Item>
           )}

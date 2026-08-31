@@ -36,7 +36,7 @@ export function SearchResultsSection({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img alt={post.title} src={post.filename} className="h-56 w-full object-cover" />
               ) : (
-                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} className="grid h-56 place-items-center" />
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} className="grid! h-56! place-items-center!" />
               )
             }>
               <h2 className="text-xl font-semibold">{post.title}</h2>
@@ -51,7 +51,7 @@ export function SearchResultsSection({
                 dangerouslySetInnerHTML={{ __html: post.paraHeader }}
               />
               <Link href={`/blog/${post.id}`} className="inline-block mt-4">
-                <Button type="link" className="!px-0">
+                <Button type="link" className="px-0!">
                   {t("common.readMore")}
                 </Button>
               </Link>

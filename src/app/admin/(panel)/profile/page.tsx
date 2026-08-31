@@ -47,10 +47,10 @@ export default function AdminProfilePage() {
             </div>
           ))}
         </div>
-        <Button className="mt-4" block>
+        <Button className="mt-4!" block>
           {t("profile.editProfile")}
         </Button>
-        <Button className="mt-2" block danger>
+        <Button className="mt-2!" block danger>
           {t("nav.logout")}
         </Button>
       </Card>

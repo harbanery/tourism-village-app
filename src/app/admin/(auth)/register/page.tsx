@@ -19,10 +19,10 @@ export default function AdminRegisterPage() {
         <LanguageToggle />
         <ThemeToggle />
       </div>
-      <Card className="w-full max-w-md">
+      <Card className="w-full! max-w-md!">
         <h1 className="text-2xl font-bold text-center">{t("auth.register.title")}</h1>
         <p className="mt-1 text-center text-foreground/60">{t("admin.title")}</p>
-        <Form layout="vertical" className="mt-6">
+        <Form layout="vertical" className="mt-6!">
           <Form.Item name="name" label={t("auth.register.name")}>
             <Input prefix={<UserOutlined />} />
           </Form.Item>

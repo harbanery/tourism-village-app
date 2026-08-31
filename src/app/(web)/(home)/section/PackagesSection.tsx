@@ -34,7 +34,7 @@ export function PackagesSection() {
                     {pkg.placeName}
                   </span>
                 }
-                className="flex h-full flex-col"
+                className="flex! h-full! flex-col!"
                 styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
               >
                 <div className="text-3xl font-bold text-primary">

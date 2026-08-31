@@ -16,7 +16,7 @@ export function LoginFormSection() {
       <Card>
         <h1 className="text-2xl font-bold text-center">{t("auth.login.title")}</h1>
         <p className="mt-1 text-center text-foreground/60">{t("auth.login.subtitle")}</p>
-        <Form layout="vertical" className="mt-6">
+        <Form layout="vertical" className="mt-6!">
           <Form.Item name="email" label={t("common.email")}>
             <Input prefix={<MailOutlined />} placeholder="email@example.com" />
           </Form.Item>

@@ -20,7 +20,7 @@ export default function GalleryPage() {
       dataIndex: "filename",
       key: "filename",
       render: (_: unknown, record: GalleryItem) => (
-        <Image src={record.filename} alt={record.title} width={80} height={52} className="rounded object-cover" />
+        <Image src={record.filename} alt={record.title} width={80} height={52} className="rounded! object-cover!" />
       ),
     },
     {

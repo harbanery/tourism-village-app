@@ -16,7 +16,7 @@ export function RegisterFormSection() {
       <Card>
         <h1 className="text-2xl font-bold text-center">{t("auth.register.title")}</h1>
         <p className="mt-1 text-center text-foreground/60">{t("auth.register.subtitle")}</p>
-        <Form layout="vertical" className="mt-6">
+        <Form layout="vertical" className="mt-6!">
           <Form.Item name="name" label={t("auth.register.name")}>
             <Input prefix={<UserOutlined />} />
           </Form.Item>

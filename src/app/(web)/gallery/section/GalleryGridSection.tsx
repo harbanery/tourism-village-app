@@ -37,7 +37,7 @@ export function GalleryGridSection() {
                     key={photo.id}
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                     description={false}
-                    className="grid h-48 w-full place-items-center rounded-xl border border-black/5 dark:border-white/10"
+                    className="grid! h-48! w-full! place-items-center! rounded-xl! border! border-black/5! dark:border-white/10!"
                   />
                 ),
               )}

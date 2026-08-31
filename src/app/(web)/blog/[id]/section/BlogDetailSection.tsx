@@ -22,7 +22,7 @@ export function BlogDetailSection({ post }: { post: BlogPost | null }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img alt={post.title} src={post.filename} className="max-h-96 w-full object-cover" />
             ) : (
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} className="grid max-h-96 min-h-48 place-items-center" />
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} className="grid! max-h-96! min-h-48! place-items-center!" />
             )
           }
         >

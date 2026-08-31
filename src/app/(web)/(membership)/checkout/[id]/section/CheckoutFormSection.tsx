@@ -29,10 +29,10 @@ export function CheckoutFormSection({
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl md:text-3xl font-bold">{t("checkout.title")}</h1>
-      <Card className="mt-6">
+      <Card className="mt-6!">
         <Form layout="vertical">
           <Form.Item label={t("checkout.scheduleDate")} name="dateSchedule" required>
-            <DatePicker className="w-full" />
+            <DatePicker className="w-full!" />
           </Form.Item>
           <Form.Item label={t("checkout.homestay")} name="homestay">
             <Radio.Group defaultValue="no">
@@ -41,7 +41,7 @@ export function CheckoutFormSection({
             </Radio.Group>
           </Form.Item>
           <Form.Item label={t("checkout.homestayDays")} name="homestayTime">
-            <InputNumber min={1} className="w-full" />
+            <InputNumber min={1} className="w-full!" />
           </Form.Item>
 
           <h2 className="font-semibold mt-4">{t("checkout.orderer")}</h2>
@@ -76,7 +76,7 @@ export function CheckoutFormSection({
             </div>
           </div>
 
-          <Button type="primary" size="large" block htmlType="submit" className="mt-6">
+          <Button type="primary" size="large" block htmlType="submit" className="mt-6!">
             {t("checkout.process")}
           </Button>
         </Form>

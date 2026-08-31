@@ -33,13 +33,13 @@ export function SponsorsSection() {
   const { t } = useT();
 
   return (
-    <section className="flex min-h-screen flex-col items-center justify-center bg-white dark:bg-[#141416]">
+    <section className="flex max-h-screen flex-col items-center justify-center bg-white dark:bg-[#141416] py-14">
       <div className="w-full">
         <p className="text-center text-sm font-medium uppercase tracking-widest text-foreground/50">
           {t("home.sponsors.label")}
         </p>
 
-        <div className="group relative mt-6 overflow-hidden">
+        <div className="group relative mt-12 overflow-hidden">
           <div className="pointer-events-none absolute left-0 z-10 h-full w-3/12 bg-linear-to-r from-white to-transparent dark:from-[#141416]" />
           <div className="pointer-events-none absolute right-0 z-10 h-full w-3/12 bg-linear-to-l from-white to-transparent dark:from-[#141416]" />
           <div className="flex w-max animate-scroll items-center gap-16 pr-16 group-hover:[animation-play-state:paused] md:gap-24 md:pr-24">

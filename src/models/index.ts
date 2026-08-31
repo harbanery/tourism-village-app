@@ -105,35 +105,128 @@ export interface Order {
 // ------------------------------------------------------------
 
 export const dummyPlaces: Place[] = [
-  { id: 1, name: "Telaga Saat, Puncak", active: "yes", photo: "/images/villages/telaga-saat-puncak-by-ishaq-robin.png" },
-  { id: 2, name: "Camp Situ Patenggang", active: "yes", photo: "/images/villages/camp-situ-patenggang-by-fadhila-nurhakim.png" },
-  { id: 3, name: "Waduk Jatiluhur", active: "yes", photo: "/images/villages/waduk-jatiluhur-by-inna-safa.png" },
-  { id: 4, name: "Kuningan", active: "yes", photo: "/images/villages/kuningan-by-raiyan-zakaria.png" },
-  { id: 5, name: "Pacitan", active: "yes", photo: "/images/villages/pacitan-by-galih-setyo-putro.png" },
+  { id: 1, name: "Telaga Saat, Puncak", active: "yes", photo: null },
+  { id: 2, name: "Camp Situ Patenggang", active: "yes", photo: null },
+  { id: 3, name: "Waduk Jatiluhur", active: "yes", photo: null },
+  { id: 4, name: "Kuningan", active: "yes", photo: null },
+  { id: 5, name: "Pacitan", active: "yes", photo: null },
 ];
 
 export const dummyPackages: Package[] = [
-  { id: 1, name: "Paket A", placeId: 1, placeName: "Telaga Saat, Puncak", facilities: ["Jasa Pemandu", "Peralatan", "Asuransi", "Transportasi"], price: 75000 },
-  { id: 2, name: "Paket B", placeId: 2, placeName: "Camp Situ Patenggang", facilities: ["Jasa Pemandu", "Peralatan", "Asuransi", "Transportasi"], price: 75000 },
-  { id: 3, name: "Paket C", placeId: 1, placeName: "Telaga Saat, Puncak", facilities: ["Jasa Pemandu", "Peralatan", "Transportasi", null], price: 65000 },
+  {
+    id: 1,
+    name: "Paket A",
+    placeId: 1,
+    placeName: "Telaga Saat, Puncak",
+    facilities: ["Jasa Pemandu", "Peralatan", "Asuransi", "Transportasi"],
+    price: 75000,
+  },
+  {
+    id: 2,
+    name: "Paket B",
+    placeId: 2,
+    placeName: "Camp Situ Patenggang",
+    facilities: ["Jasa Pemandu", "Peralatan", "Asuransi", "Transportasi"],
+    price: 75000,
+  },
+  {
+    id: 3,
+    name: "Paket C",
+    placeId: 1,
+    placeName: "Telaga Saat, Puncak",
+    facilities: ["Jasa Pemandu", "Peralatan", "Transportasi", null],
+    price: 65000,
+  },
 ];
 
 export const dummyGalleries: GalleryItem[] = [
-  { id: 101, title: "Sejuknya Curug Leuwi Lieuk", placeId: 1, placeName: "Curug Leuwi Lieuk", filename: "https://picsum.photos/seed/curug1/750/500", locked: "no" },
-  { id: 102, title: "Lingkungan Kampung Budaya Sindang Barang", placeId: 2, placeName: "Kampung Budaya Sindang Barang", filename: "https://picsum.photos/seed/sindang1/750/500", locked: "no" },
-  { id: 103, title: "Tarian di Kampung Budaya Sindang Barang", placeId: 2, placeName: "Kampung Budaya Sindang Barang", filename: "https://picsum.photos/seed/sindang2/750/500", locked: "yes" },
-  { id: 104, title: "Bertandang ke Leuwi Lieuk", placeId: 1, placeName: "Curug Leuwi Lieuk", filename: "https://picsum.photos/seed/curug2/750/500", locked: "no" },
-  { id: 105, title: "Pengalaman dan Harga Tiket di Curug Leuwi", placeId: 1, placeName: "Curug Leuwi Lieuk", filename: "https://picsum.photos/seed/curug3/750/500", locked: "yes" },
-  { id: 106, title: "Bersama-sama ke Curug Leuwi Lieuk", placeId: 1, placeName: "Curug Leuwi Lieuk", filename: "https://picsum.photos/seed/curug4/750/500", locked: "no" },
+  {
+    id: 101,
+    title: "Sejuknya Curug Leuwi Lieuk",
+    placeId: 1,
+    placeName: "Curug Leuwi Lieuk",
+    filename: "https://picsum.photos/seed/curug1/750/500",
+    locked: "no",
+  },
+  {
+    id: 102,
+    title: "Lingkungan Kampung Budaya Sindang Barang",
+    placeId: 2,
+    placeName: "Kampung Budaya Sindang Barang",
+    filename: "https://picsum.photos/seed/sindang1/750/500",
+    locked: "no",
+  },
+  {
+    id: 103,
+    title: "Tarian di Kampung Budaya Sindang Barang",
+    placeId: 2,
+    placeName: "Kampung Budaya Sindang Barang",
+    filename: "https://picsum.photos/seed/sindang2/750/500",
+    locked: "yes",
+  },
+  {
+    id: 104,
+    title: "Bertandang ke Leuwi Lieuk",
+    placeId: 1,
+    placeName: "Curug Leuwi Lieuk",
+    filename: "https://picsum.photos/seed/curug2/750/500",
+    locked: "no",
+  },
+  {
+    id: 105,
+    title: "Pengalaman dan Harga Tiket di Curug Leuwi",
+    placeId: 1,
+    placeName: "Curug Leuwi Lieuk",
+    filename: "https://picsum.photos/seed/curug3/750/500",
+    locked: "yes",
+  },
+  {
+    id: 106,
+    title: "Bersama-sama ke Curug Leuwi Lieuk",
+    placeId: 1,
+    placeName: "Curug Leuwi Lieuk",
+    filename: "https://picsum.photos/seed/curug4/750/500",
+    locked: "no",
+  },
 ];
 
 export const dummyVideos: VideoItem[] = [
-  { id: 401, name: "Wisata Curug Air Terjun Leuwi Lieuk & Leuwi Cepet Sentul | Bogor", placeId: 1, placeName: "Curug Leuwi Lieuk", linkCode: "goiL7aOMsjg" },
-  { id: 402, name: "Curug Leuwi Lieuk Bogor Jawa Barat", placeId: 1, placeName: "Curug Leuwi Lieuk", linkCode: "2eQEuMV1YEA" },
-  { id: 403, name: "Curug Leuwi Lieuk, Bogor", placeId: 1, placeName: "Curug Leuwi Lieuk", linkCode: "0U3sCG0FqqA" },
-  { id: 404, name: "Kampung Budaya Sindangbarang - Sejarah dan Tradisi", placeId: 2, placeName: "Kampung Budaya Sindang Barang", linkCode: "UTX0WClNGY0" },
-  { id: 405, name: "Kampung Budaya Sindangbarang", placeId: 2, placeName: "Kampung Budaya Sindang Barang", linkCode: "WaPKZj4LXk8" },
-]
+  {
+    id: 401,
+    name: "Wisata Curug Air Terjun Leuwi Lieuk & Leuwi Cepet Sentul | Bogor",
+    placeId: 1,
+    placeName: "Curug Leuwi Lieuk",
+    linkCode: "goiL7aOMsjg",
+  },
+  {
+    id: 402,
+    name: "Curug Leuwi Lieuk Bogor Jawa Barat",
+    placeId: 1,
+    placeName: "Curug Leuwi Lieuk",
+    linkCode: "2eQEuMV1YEA",
+  },
+  {
+    id: 403,
+    name: "Curug Leuwi Lieuk, Bogor",
+    placeId: 1,
+    placeName: "Curug Leuwi Lieuk",
+    linkCode: "0U3sCG0FqqA",
+  },
+  {
+    id: 404,
+    name: "Kampung Budaya Sindangbarang - Sejarah dan Tradisi",
+    placeId: 2,
+    placeName: "Kampung Budaya Sindang Barang",
+    linkCode: "UTX0WClNGY0",
+  },
+  {
+    id: 405,
+    name: "Kampung Budaya Sindangbarang",
+    placeId: 2,
+    placeName: "Kampung Budaya Sindang Barang",
+    linkCode: "WaPKZj4LXk8",
+  },
+];
 
 export const dummyBlogs: BlogPost[] = [
   {
@@ -178,31 +271,153 @@ export const dummyBlogs: BlogPost[] = [
 ];
 
 export const dummySponsors: Sponsor[] = [
-  { id: 1, name: "Dinas Pariwisata", description: "Pendukung utama desa wisata", filename: "https://picsum.photos/seed/sponsor1/200/100" },
-  { id: 2, name: "Bank BJB", description: "Mitra pembayaran", filename: "https://picsum.photos/seed/sponsor2/200/100" },
-  { id: 3, name: "Travel Bogor", description: "Mitra perjalanan", filename: "https://picsum.photos/seed/sponsor3/200/100" },
-  { id: 4, name: "Kopi Salak", description: "Byproduct desa", filename: "https://picsum.photos/seed/sponsor4/200/100" },
-  { id: 5, name: "UMKM Pasir Eurih", description: "Produk lokal warga", filename: "https://picsum.photos/seed/sponsor5/200/100" },
-  { id: 6, name: "Outdoor Bogor", description: "Sewa peralatan outdoor", filename: "https://picsum.photos/seed/sponsor6/200/100" },
+  {
+    id: 1,
+    name: "Dinas Pariwisata",
+    description: "Pendukung utama desa wisata",
+    filename: "https://picsum.photos/seed/sponsor1/200/100",
+  },
+  {
+    id: 2,
+    name: "Bank BJB",
+    description: "Mitra pembayaran",
+    filename: "https://picsum.photos/seed/sponsor2/200/100",
+  },
+  {
+    id: 3,
+    name: "Travel Bogor",
+    description: "Mitra perjalanan",
+    filename: "https://picsum.photos/seed/sponsor3/200/100",
+  },
+  {
+    id: 4,
+    name: "Kopi Salak",
+    description: "Byproduct desa",
+    filename: "https://picsum.photos/seed/sponsor4/200/100",
+  },
+  {
+    id: 5,
+    name: "UMKM Pasir Eurih",
+    description: "Produk lokal warga",
+    filename: "https://picsum.photos/seed/sponsor5/200/100",
+  },
+  {
+    id: 6,
+    name: "Outdoor Bogor",
+    description: "Sewa peralatan outdoor",
+    filename: "https://picsum.photos/seed/sponsor6/200/100",
+  },
 ];
 
 export const dummyTestimonials: Testimonial[] = [
-  { id: 1, userId: 1, userName: "Raihan Yusuf", userEmail: "raihany@gmail.com", userPhone: "089605567347", date: "2021-11-08 10:00:00", comment: "Pemandangannya bagus banget, pemandunya juga ramah!", rating: 5, active: "yes", note: null },
-  { id: 2, userId: 4, userName: "Alatas Ali", userEmail: "111201912121@mhs.dinus.ac.id", userPhone: null, date: "2021-11-20 09:30:00", comment: "Pengalaman homestay yang nyaman, kuliner lokalnya juara.", rating: 4, active: "yes", note: null },
-  { id: 3, userId: 1, userName: "Raihan Yusuf", userEmail: "raihany@gmail.com", userPhone: "089605567347", date: "2021-12-01 14:20:00", comment: "Parkirnya perlu diperluas saat weekend.", rating: 3, active: "no", note: "Menunggu perbaikan area parkir" },
-  { id: 4, userId: 5, userName: "Dewi Lestari", userEmail: "dewi.lestari@gmail.com", userPhone: null, date: "2022-01-15 16:45:00", comment: "Sunrise di bukit desa luar biasa, bakal balik lagi bareng keluarga.", rating: 5, active: "yes", note: null },
-  { id: 5, userId: 6, userName: "Bima Saputra", userEmail: "bima.saputra@gmail.com", userPhone: null, date: "2022-02-03 11:10:00", comment: "Paket wisatanya lengkap dan harganya masuk akal untuk rombongan.", rating: 4, active: "yes", note: null },
+  {
+    id: 1,
+    userId: 1,
+    userName: "Raihan Yusuf",
+    userEmail: "raihany@gmail.com",
+    userPhone: "089605567347",
+    date: "2021-11-08 10:00:00",
+    comment: "Pemandangannya bagus banget, pemandunya juga ramah!",
+    rating: 5,
+    active: "yes",
+    note: null,
+  },
+  {
+    id: 2,
+    userId: 4,
+    userName: "Alatas Ali",
+    userEmail: "111201912121@mhs.dinus.ac.id",
+    userPhone: null,
+    date: "2021-11-20 09:30:00",
+    comment: "Pengalaman homestay yang nyaman, kuliner lokalnya juara.",
+    rating: 4,
+    active: "yes",
+    note: null,
+  },
+  {
+    id: 3,
+    userId: 1,
+    userName: "Raihan Yusuf",
+    userEmail: "raihany@gmail.com",
+    userPhone: "089605567347",
+    date: "2021-12-01 14:20:00",
+    comment: "Parkirnya perlu diperluas saat weekend.",
+    rating: 3,
+    active: "no",
+    note: "Menunggu perbaikan area parkir",
+  },
+  {
+    id: 4,
+    userId: 5,
+    userName: "Dewi Lestari",
+    userEmail: "dewi.lestari@gmail.com",
+    userPhone: null,
+    date: "2022-01-15 16:45:00",
+    comment:
+      "Sunrise di bukit desa luar biasa, bakal balik lagi bareng keluarga.",
+    rating: 5,
+    active: "yes",
+    note: null,
+  },
+  {
+    id: 5,
+    userId: 6,
+    userName: "Bima Saputra",
+    userEmail: "bima.saputra@gmail.com",
+    userPhone: null,
+    date: "2022-02-03 11:10:00",
+    comment: "Paket wisatanya lengkap dan harganya masuk akal untuk rombongan.",
+    rating: 4,
+    active: "yes",
+    note: null,
+  },
 ];
 
 export const dummyUsers: User[] = [
-  { id: 1, email: "raihany@gmail.com", phone: "0896-0556-7347", name: "Raihan Yusuf", gender: "male", birthDate: "2001-07-07", address: "Jl. Bukit Kelapa Hijau XI No.29 Semarang", avatar: "https://picsum.photos/seed/user1/200/200" },
-  { id: 4, email: "111201912121@mhs.dinus.ac.id", phone: null, name: "Alatas Ali", gender: null, birthDate: null, address: null, avatar: "https://picsum.photos/seed/user2/200/200" },
+  {
+    id: 1,
+    email: "raihany@gmail.com",
+    phone: "0896-0556-7347",
+    name: "Raihan Yusuf",
+    gender: "male",
+    birthDate: "2001-07-07",
+    address: "Jl. Bukit Kelapa Hijau XI No.29 Semarang",
+    avatar: "https://picsum.photos/seed/user1/200/200",
+  },
+  {
+    id: 4,
+    email: "111201912121@mhs.dinus.ac.id",
+    phone: null,
+    name: "Alatas Ali",
+    gender: null,
+    birthDate: null,
+    address: null,
+    avatar: "https://picsum.photos/seed/user2/200/200",
+  },
 ];
 
 export const dummyAdmins: Admin[] = [
-  { id: 1, email: "adminsementara@gmail.com", username: "adminku", name: "Admin Sementara", avatar: "https://picsum.photos/seed/admin1/200/200" },
-  { id: 2, email: "fabianski@gmail.com", username: "fabfab", name: "Fabianski", avatar: "https://picsum.photos/seed/admin2/200/200" },
-  { id: 3, email: "taniatan@gmail.com", username: "taniaaaa", name: "Tania Anggra", avatar: "https://picsum.photos/seed/admin3/200/200" },
+  {
+    id: 1,
+    email: "adminsementara@gmail.com",
+    username: "adminku",
+    name: "Admin Sementara",
+    avatar: "https://picsum.photos/seed/admin1/200/200",
+  },
+  {
+    id: 2,
+    email: "fabianski@gmail.com",
+    username: "fabfab",
+    name: "Fabianski",
+    avatar: "https://picsum.photos/seed/admin2/200/200",
+  },
+  {
+    id: 3,
+    email: "taniatan@gmail.com",
+    username: "taniaaaa",
+    name: "Tania Anggra",
+    avatar: "https://picsum.photos/seed/admin3/200/200",
+  },
 ];
 
 export const dummyOrders: Order[] = [

@@ -61,14 +61,14 @@ export function CartSection({
             okText={t("common.yes")}
             cancelText={t("common.no")}
           >
-            <Button danger block className="mt-4">
+            <Button danger block className="mt-4!">
               {t("cart.clearAll")}
             </Button>
           </Popconfirm>
           <Button
             type="primary"
             block
-            className="mt-2"
+            className="mt-2!"
             disabled={cart.length === 0}
             onClick={() => router.push("/checkout/1")}
           >

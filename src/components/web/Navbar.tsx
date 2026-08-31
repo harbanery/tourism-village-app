@@ -69,7 +69,7 @@ export function Navbar() {
             </Button>
           </Link>
           <Button
-            className="lg:hidden"
+            className="lg:hidden!"
             type="text"
             aria-label="Menu"
             icon={<MenuOutlined />}

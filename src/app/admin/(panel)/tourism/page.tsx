@@ -20,7 +20,7 @@ export default function TourismPage() {
       key: "name",
       render: (_: unknown, record: Place) => (
         <div className="flex items-center gap-3">
-          <Image src={record.photo ?? undefined} alt={record.name} width={64} height={40} className="rounded object-cover" />
+          <Image src={record.photo ?? undefined} alt={record.name} width={64} height={40} className="rounded! object-cover!" />
           <span className="font-medium">{record.name}</span>
         </div>
       ),

@@ -26,7 +26,7 @@ export function HeroSection() {
             type="primary"
             size="large"
             icon={<ArrowRightOutlined />}
-            className="mt-8"
+            className="mt-8!"
           >
             {t("home.hero.cta")}
           </Button>

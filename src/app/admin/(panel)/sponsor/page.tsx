@@ -19,7 +19,7 @@ export default function SponsorPage() {
       dataIndex: "filename",
       key: "filename",
       render: (_: unknown, record: Sponsor) => (
-        <Image src={record.filename} alt={record.name} width={80} height={40} className="rounded object-contain bg-black/5 dark:bg-white/10" />
+        <Image src={record.filename} alt={record.name} width={80} height={40} className="rounded! object-contain! bg-black/5! dark:bg-white/10!" />
       ),
     },
     { title: t("admin.sponsors.desc"), dataIndex: "description", key: "description", render: (v: string | null) => v ?? "-" },
