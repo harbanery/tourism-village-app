@@ -43,7 +43,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold">{t("admin.dashboard")}</h1>
 
       <Row gutter={[16, 16]}>
@@ -98,8 +98,8 @@ export default function DashboardPage() {
           dataSource={dummyOrders}
           columns={columns}
           rowKey="id"
-          pagination={false}
-          scroll={{ x: 700 }}
+          pagination={{ pageSize: 5, showSizeChanger: false }}
+          scroll={{ x: "max-content" }}
         />
       </Card>
 

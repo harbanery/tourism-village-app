@@ -8,6 +8,8 @@ interface FormDrawerProps {
   title: string;
   onClose: () => void;
   onFinish?: (values: Record<string, unknown>) => void;
+  /** Nilai awal untuk mode edit; ganti `key` komponen per record. */
+  initialValues?: Record<string, unknown>;
   children: React.ReactNode;
 }
 
@@ -20,6 +22,7 @@ export function FormDrawer({
   title,
   onClose,
   onFinish,
+  initialValues,
   children,
 }: FormDrawerProps) {
   const { t } = useT();
@@ -32,13 +35,11 @@ export function FormDrawer({
       open={open}
       onClose={onClose}
       width={480}
+      destroyOnHidden
       extra={
         <Space>
           <Button onClick={onClose}>{t("common.cancel")}</Button>
-          <Button
-            type="primary"
-            onClick={() => form.submit()}
-          >
+          <Button type="primary" onClick={() => form.submit()}>
             {t("common.save")}
           </Button>
         </Space>
@@ -47,9 +48,9 @@ export function FormDrawer({
       <Form
         form={form}
         layout="vertical"
+        initialValues={initialValues}
         onFinish={(values) => {
           onFinish?.(values);
-          form.resetFields();
           onClose();
         }}
       >
