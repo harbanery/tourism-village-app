@@ -52,7 +52,7 @@ export function OrderHistorySection({ orders }: { orders: Order[] }) {
           )}
         />
       )}
-      <Link href="/" className="inline-block mt-6">
+      <Link href="/" className="inline-block! mt-6!">
         <Button>{t("common.backToHome")}</Button>
       </Link>
     </div>

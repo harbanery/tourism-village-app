@@ -17,7 +17,7 @@ export default function AdminProfilePage() {
 
   return (
     <div className="max-w-2xl">
-      <Link href="/admin" className="inline-block mb-4">
+      <Link href="/admin" className="inline-block! mb-4!">
         <Button icon={<ArrowLeftOutlined />}>{t("admin.dashboard")}</Button>
       </Link>
       <Card>

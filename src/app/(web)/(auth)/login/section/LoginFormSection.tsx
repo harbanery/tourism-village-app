@@ -31,13 +31,13 @@ export function LoginFormSection() {
         </Form>
         <div className="text-center space-y-2 text-sm">
           <p>
-            <Link href="#" className="text-primary hover:underline">
+            <Link href="#" className="text-primary! hover:underline!">
               {t("auth.login.forgot")}
             </Link>
           </p>
           <p className="text-foreground/60">
             {t("auth.login.noAccount")}{" "}
-            <Link href="/register" className="text-primary hover:underline">
+            <Link href="/register" className="text-primary! hover:underline!">
               {t("nav.register")}
             </Link>
           </p>

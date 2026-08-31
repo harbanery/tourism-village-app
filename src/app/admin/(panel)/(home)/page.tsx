@@ -89,7 +89,7 @@ export default function DashboardPage() {
       <Card
         title={t("admin.orders.title")}
         extra={
-          <Link href="/admin/order" className="text-primary hover:underline">
+          <Link href="/admin/order" className="text-primary! hover:underline!">
             {t("common.viewAll")}
           </Link>
         }

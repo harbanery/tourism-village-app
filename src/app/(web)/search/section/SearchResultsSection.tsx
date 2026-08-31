@@ -50,7 +50,7 @@ export function SearchResultsSection({
                 className="mt-3 text-foreground/75 line-clamp-2"
                 dangerouslySetInnerHTML={{ __html: post.paraHeader }}
               />
-              <Link href={`/blog/${post.id}`} className="inline-block mt-4">
+              <Link href={`/blog/${post.id}`} className="inline-block! mt-4!">
                 <Button type="link" className="px-0!">
                   {t("common.readMore")}
                 </Button>

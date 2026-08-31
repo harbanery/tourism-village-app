@@ -43,18 +43,20 @@ export function PackagesSection() {
                     {t("common.perPerson")}
                   </span>
                 </div>
+                {/* Maksimal 4 fasilitas: tiap item min-height satu baris
+                    sehingga tinggi daftar seragam antar card. */}
                 <ul className="mt-4 flex-1 space-y-2">
                   {pkg.facilities.filter(Boolean).map((f) => (
                     <li
                       key={f}
-                      className="flex items-start gap-2 text-sm text-foreground/80"
+                      className="flex min-h-6 items-start gap-2 text-sm text-foreground/80"
                     >
                       <CheckCircleFilled className="mt-0.5 text-primary" />
                       {f}
                     </li>
                   ))}
                 </ul>
-                <Link href="/package" className="mt-6 block">
+                <Link href="/package" className="mt-6! block!">
                   <Button type="primary" block>
                     {t("home.packages.cta")}
                   </Button>

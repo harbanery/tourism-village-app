@@ -37,7 +37,7 @@ export function RegisterFormSection() {
         </Form>
         <p className="text-center text-sm text-foreground/60">
           {t("auth.register.haveAccount")}{" "}
-          <Link href="/login" className="text-primary hover:underline">
+          <Link href="/login" className="text-primary! hover:underline!">
             {t("nav.login")}
           </Link>
         </p>

@@ -21,7 +21,7 @@ export function Footer() {
         <div>
           <h3 className="font-semibold mb-2">{t("footer.contact")}</h3>
           <p className="text-sm text-foreground/70">
-            WhatsApp: +62 896-0556-7347
+            WhatsApp: +62 812-3456-7890
             <br />
             Email: halo@desakuwisataku.id
           </p>
@@ -29,7 +29,7 @@ export function Footer() {
       </div>
       <div className="border-t border-black/5 dark:border-white/10 py-4 text-center text-xs text-foreground/60">
         {t("footer.copyright")} ·{" "}
-        <Link href="/admin" className="hover:underline">
+        <Link href="/admin" className="hover:underline!">
           {t("admin.login.title")}
         </Link>
       </div>
