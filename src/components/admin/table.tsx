@@ -63,6 +63,7 @@ export function useAdminColumns<T extends AdminRow>() {
     dataIndex: "status",
     key: "status",
     width: FIXED_COLUMN_WIDTH.status,
+    align: "center",
     fixed: "right",
     render: (status: StatusValue) => (
       <Tag color={STATUS_TAG_COLORS[status] ?? "default"}>
@@ -76,6 +77,7 @@ export function useAdminColumns<T extends AdminRow>() {
     title: t("common.actions"),
     key: "actions",
     width: FIXED_COLUMN_WIDTH.actions,
+    align: "center",
     fixed: "right",
     render: (_: unknown, record: T) => render(record),
   });

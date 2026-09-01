@@ -45,6 +45,8 @@ export async function PATCH(request: Request, { params }: Params) {
       data: {
         ...(body.status !== undefined && { status: body.status }),
         ...(body.featured !== undefined && { featured: body.featured }),
+        // Nonaktifkan ulasan otomatis menghapus status utama.
+        ...(body.status === "NONACTIVE" && { featured: false }),
       },
     });
     return NextResponse.json({ success: true, data: testimonial });

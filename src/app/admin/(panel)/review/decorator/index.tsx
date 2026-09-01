@@ -1,16 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { App, Card, Input, Rate, Space, Tooltip } from "antd";
 import {
-  App,
-  Card,
-  Input,
-  Rate,
-  Space,
-  Tag,
-  Tooltip,
-} from "antd";
-import { CheckOutlined, SearchOutlined, StarFilled, StopOutlined } from "@ant-design/icons";
+  CheckOutlined,
+  CloseOutlined,
+  SearchOutlined,
+  StarFilled,
+  StopOutlined,
+} from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import { useAdminSession } from "@/components/admin/session";
@@ -143,11 +141,6 @@ const ReviewDecorator = () => {
       key: "userName",
     },
     {
-      title: t("common.email"),
-      dataIndex: ["user", "email"],
-      key: "userEmail",
-    },
-    {
       title: t("admin.reviews.comment"),
       dataIndex: "comment",
       key: "comment",
@@ -160,23 +153,25 @@ const ReviewDecorator = () => {
       render: (rating: number) => <Rate disabled defaultValue={rating} />,
     },
     {
+      // Kolom utama: ceklis (bg hijau) bila utama, X (bg merah) bila tidak.
       title: t("admin.reviews.featured"),
       dataIndex: "featured",
       key: "featured",
-      render: (featured: boolean) =>
-        featured ? (
-          <Tag color="gold" icon={<StarFilled />}>
-            {t("admin.reviews.main")}
-          </Tag>
-        ) : (
-          "-"
-        ),
-    },
-    {
-      title: t("admin.reviews.note"),
-      dataIndex: "note",
-      key: "note",
-      render: (v: string | null) => v ?? "-",
+      render: (featured: boolean) => (
+        <Tooltip
+          title={featured ? t("admin.reviews.main") : t("admin.reviews.nomain")}
+        >
+          <span
+            className={
+              featured
+                ? "flex h-6 w-6 items-center justify-center rounded-full bg-green-400 text-white"
+                : "flex h-6 w-6 items-center justify-center rounded-full bg-red-400 text-white"
+            }
+          >
+            {featured ? <CheckOutlined /> : <CloseOutlined />}
+          </span>
+        </Tooltip>
+      ),
     },
     // Kolom status & opsi: fixed kanan, width statis (global).
     cols.status,
@@ -219,14 +214,20 @@ const ReviewDecorator = () => {
                           onOk: () => handleToggleStatus(record),
                         }),
                     },
-                    {
-                      key: "featured",
-                      icon: <StarFilled />,
-                      label: record.featured
-                        ? t("admin.reviews.unmain")
-                        : t("admin.reviews.main"),
-                      onClick: () => handleToggleFeatured(record),
-                    },
+                    // Opsi utama hanya untuk ulasan berstatus aktif;
+                    // nonaktifkan otomatis menghapus status utama (API).
+                    ...(record.status === "ACTIVE"
+                      ? [
+                          {
+                            key: "featured",
+                            icon: <StarFilled />,
+                            label: record.featured
+                              ? t("admin.reviews.unmain")
+                              : t("admin.reviews.main"),
+                            onClick: () => handleToggleFeatured(record),
+                          },
+                        ]
+                      : []),
                   ]}
                 />
               </div>

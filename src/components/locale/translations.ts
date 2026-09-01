@@ -28,7 +28,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notif.fetchFailed": "Gagal mengambil data",
     "notif.saveSuccess": "{entity} berhasil disimpan",
     "notif.saveFailed": "Gagal menyimpan {entity}",
-    "notif.createSuccess": "{entity} berhasil ditambahkan (status awal: nonaktif)",
+    "notif.createSuccess":
+      "{entity} berhasil ditambahkan (status awal: nonaktif)",
     "notif.createFailed": "Gagal menambahkan {entity}",
     "notif.roleUpdated": "Role {entity} berhasil diubah",
     "notif.deleteSuccess": "{entity} berhasil dihapus",
@@ -46,13 +47,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "validation.maxLength": "{field} maksimal {max} karakter",
 
     "upload.hint": "Klik atau seret file ke area ini",
-    "upload.subHint": "Mendukung gambar (maks 2MB). Foto disimpan di Cloudinary.",
+    "upload.subHint":
+      "Mendukung gambar (maks 2MB). Foto disimpan di Cloudinary.",
 
     "auth.login.success": "Berhasil masuk",
     "auth.login.invalid": "Username/email atau password salah",
-    "auth.login.blocked": "Terlalu banyak percobaan gagal. Coba lagi dalam {minutes} menit.",
+    "auth.login.blocked":
+      "Terlalu banyak percobaan gagal. Coba lagi dalam {minutes} menit.",
     "auth.login.requiredTitle": "Belum masuk",
-    "auth.login.requiredDesc": "Silakan masuk terlebih dahulu untuk melihat profil Anda.",
+    "auth.login.requiredDesc":
+      "Silakan masuk terlebih dahulu untuk melihat profil Anda.",
     "auth.register.success": "Registrasi berhasil, selamat datang!",
     "auth.register.failed": "Registrasi gagal",
     "auth.register.passwordMismatch": "Password tidak sama",
@@ -111,7 +115,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.why.title": "Mengapa Desaku Wisataku?",
     "home.why.subtitle": "Keunggulan yang kami tawarkan untuk wisatawan",
     "home.why.facility.title": "Fasilitas No. 1",
-    "home.why.facility.desc": "Fasilitas lengkap dan terbaik untuk kenyamanan Anda.",
+    "home.why.facility.desc":
+      "Fasilitas lengkap dan terbaik untuk kenyamanan Anda.",
     "home.why.service.title": "Layanan Prima",
     "home.why.service.desc": "Pelayanan ramah dan profesional dari warga desa.",
     "home.why.cheap.title": "Harga Terjangkau",
@@ -273,10 +278,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.reviews.note": "Keterangan",
     "admin.reviews.featured": "Utama",
     "admin.reviews.main": "Utama",
+    "admin.reviews.nomain": "Tidak Utama",
     "admin.reviews.unmain": "Batal Utama",
-    "admin.reviews.featuredHint": "Tandai sebagai ulasan utama (maksimal {max})",
-    "admin.deleteConfirm": "Data yang dihapus tidak dapat dikembalikan. Lanjutkan?",
-    "admin.footer.text": "© {year} Desaku Wisataku — Dibangun dengan Next.js, Ant Design & Tailwind CSS",
+    "admin.reviews.featuredHint":
+      "Tandai sebagai ulasan utama (maksimal {max})",
+    "admin.deleteConfirm":
+      "Data yang dihapus tidak dapat dikembalikan. Lanjutkan?",
+    "admin.footer.text":
+      "© {year} Desaku Wisataku — Dibangun dengan Next.js, Ant Design & Tailwind CSS",
     "admin.login.title": "Masuk Admin",
     "admin.login.credentials.title": "Kredensial default (seed):",
     "admin.login.backToSite": "Kembali ke situs web",
@@ -308,7 +317,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notif.fetchFailed": "Failed to fetch data",
     "notif.saveSuccess": "{entity} saved successfully",
     "notif.saveFailed": "Failed to save {entity}",
-    "notif.createSuccess": "{entity} added successfully (initial status: inactive)",
+    "notif.createSuccess":
+      "{entity} added successfully (initial status: inactive)",
     "notif.createFailed": "Failed to add {entity}",
     "notif.roleUpdated": "Role of {entity} updated successfully",
     "notif.deleteSuccess": "{entity} deleted successfully",
@@ -326,11 +336,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     "validation.maxLength": "{field} must be at most {max} characters",
 
     "upload.hint": "Click or drag file to this area to upload",
-    "upload.subHint": "Supports images (max 2MB). Photos are stored in Cloudinary.",
+    "upload.subHint":
+      "Supports images (max 2MB). Photos are stored in Cloudinary.",
 
     "auth.login.success": "Logged in successfully",
     "auth.login.invalid": "Invalid username/email or password",
-    "auth.login.blocked": "Too many failed attempts. Try again in {minutes} minutes.",
+    "auth.login.blocked":
+      "Too many failed attempts. Try again in {minutes} minutes.",
     "auth.login.requiredTitle": "Not logged in",
     "auth.login.requiredDesc": "Please log in first to view your profile.",
     "auth.register.success": "Registration successful, welcome!",
@@ -553,10 +565,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.reviews.note": "Note",
     "admin.reviews.featured": "Featured",
     "admin.reviews.main": "Featured",
+    "admin.reviews.nomain": "Not Featured",
     "admin.reviews.unmain": "Unfeature",
     "admin.reviews.featuredHint": "Mark as featured review (max {max})",
     "admin.deleteConfirm": "Deleted data cannot be restored. Continue?",
-    "admin.footer.text": "© {year} Desaku Wisataku — Built with Next.js, Ant Design & Tailwind CSS",
+    "admin.footer.text":
+      "© {year} Desaku Wisataku — Built with Next.js, Ant Design & Tailwind CSS",
     "admin.login.title": "Admin Login",
     "admin.login.credentials.title": "Default credentials (seed):",
     "admin.login.backToSite": "Back to website",

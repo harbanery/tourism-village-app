@@ -441,7 +441,7 @@ const BlogDecorator = () => {
           setEditing(null);
           setIsModalOpen(false);
         }}
-        width={680}
+        width={900}
         footer={
           <div className="flex justify-end gap-2">
             <Button
