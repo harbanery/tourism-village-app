@@ -8,35 +8,99 @@ datasource db {
 }
 
 // ============================================================
+// Enums
+// ============================================================
+
+/** Status data (dipakai semua konten + akun). */
+enum Status {
+  ACTIVE
+  NONACTIVE
+}
+
+/** Role admin: master (semua), viewer (lihat saja), author (blog saja). */
+enum AdminRole {
+  MASTER
+  VIEWER
+  AUTHOR
+}
+
+/** Jenis kelamin pengguna. */
+enum Gender {
+  MALE
+  FEMALE
+}
+
+// ============================================================
 // Auth
 // ============================================================
 
 model AuthAdmin {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  username String  @unique
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  username String    @unique
   password String
   name     String?
   avatar   String?
-  blog     Blog[]
+  role     AdminRole @default(VIEWER)
+  status   Status    @default(ACTIVE)
+  blogs    Blog[]
+  sessions AdminSession[]
 
   @@map("auth_admin")
 }
 
 model AuthUser {
-  id           Int        @id @default(autoincrement())
-  email        String     @unique
-  phone        String?    @map("no_tlp")
-  password     String
-  name         String
-  gender       String?    @map("jenis_kelamin") // male | female
-  birthDate    DateTime?  @map("tgl_lahir") @db.Date
-  address      String?    @map("alamat")
-  avatar       String?
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  phone     String?  @map("no_tlp")
+  password  String
+  name      String
+  gender    Gender?  @map("jenis_kelamin")
+  birthDate DateTime? @map("tgl_lahir") @db.Date
+  address   String?  @map("alamat")
+  avatar    String?
+  status    Status   @default(ACTIVE)
   orders       Order[]
   testimonials Testimonial[]
+  sessions  UserSession[]
 
   @@map("auth_user")
+}
+
+model AdminSession {
+  id        String   @id
+  adminId   Int      @map("admin_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  admin AuthAdmin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@map("admin_session")
+}
+
+model UserSession {
+  id        String   @id
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_session")
+}
+
+/** Rate-limit login per IP (admin & web). */
+model LoginAttempt {
+  id            Int       @id @default(autoincrement())
+  ipAddress     String    @unique @map("ip_address")
+  scope         String    @default("admin") // admin | web
+  attemptCount  Int       @default(0) @map("attempt_count")
+  blockedUntil  DateTime? @map("blocked_until")
+  lastAttemptAt DateTime  @default(now()) @map("last_attempt_at")
+
+  @@map("login_attempt")
 }
 
 // ============================================================
@@ -44,11 +108,11 @@ model AuthUser {
 // ============================================================
 
 model Place {
-  id        Int          @id @default(autoincrement())
-  name      String       @map("tempat_name")
-  active    String // yes | no
-  photo     String?      @map("photo_tempat")
-  packages  Package[]
+  id       Int      @id @default(autoincrement())
+  name     String   @map("tempat_name")
+  status   Status   @default(ACTIVE)
+  photo    String?  @map("photo_tempat")
+  packages Package[]
   galleries Gallery[]
   videos    Video[]
 
@@ -56,16 +120,14 @@ model Place {
 }
 
 model Package {
-  id          Int      @id @default(autoincrement())
-  name        String   @map("paket_name")
-  placeId     Int?     @map("tempat_id")
-  facility1   String?  @map("fasilitas1")
-  facility2   String?  @map("fasilitas2")
-  facility3   String?  @map("fasilitas3")
-  facility4   String?  @map("fasilitas4")
-  price       Int      @map("harga")
-  place       Place?   @relation(fields: [placeId], references: [id], onDelete: SetNull)
-  orderItems  OrderItem[]
+  id         Int      @id @default(autoincrement())
+  name       String   @map("paket_name")
+  placeId    Int?     @map("tempat_id")
+  facilities String[] @default([])
+  price      Int      @map("harga")
+  status     Status   @default(ACTIVE)
+  place      Place?   @relation(fields: [placeId], references: [id], onDelete: SetNull)
+  orderItems OrderItem[]
 
   @@map("wisata_paket")
 }
@@ -75,54 +137,58 @@ model Gallery {
   title       String  @map("gambar_name")
   placeId     Int     @map("tempat_id")
   filename    String
-  locked      String // yes | no (yes = dipakai sebagai cover tempat)
+  status      Status @default(ACTIVE)
+  locked      String  @default("no") // yes | no (yes = dipakai sebagai cover tempat)
   place       Place   @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@map("galeri")
 }
 
 model Video {
-  id        Int    @id @default(autoincrement())
-  name      String @map("video_name")
-  placeId   Int    @map("tempat_id")
-  linkCode  String @map("link_code") // YouTube video id
-  place     Place  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  id        Int     @id @default(autoincrement())
+  name      String  @map("video_name")
+  placeId   Int     @map("tempat_id")
+  linkCode  String  @map("link_code") // YouTube video id
+  status    Status @default(ACTIVE)
+  place     Place   @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@map("video")
 }
 
 model Blog {
-  id             Int       @id @default(autoincrement())
-  adminId        Int       @map("admin_id")
-  datetime       DateTime  @default(now())
-  datetimeAfter  DateTime? @map("datetime_after")
-  title          String
-  filename       String // cover image
-  paraHeader     String    @map("para_header")
-  paraBody       String    @map("para_body")
-  admin          AuthAdmin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  id            Int        @id @default(autoincrement())
+  adminId       Int        @map("admin_id")
+  datetime      DateTime   @default(now())
+  datetimeAfter DateTime?  @map("datetime_after")
+  title         String
+  filename      String // cover image (Cloudinary URL)
+  para          String // gabungan paragraf pembuka + isi (rich text)
+  status        Status     @default(ACTIVE)
+  admin         AuthAdmin  @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@map("blog")
 }
 
 model Sponsor {
-  id          Int     @id @default(autoincrement())
-  name        String  @map("sponsor_name")
+  id          Int    @id @default(autoincrement())
+  name        String @map("sponsor_name")
   description String? @map("deskripsi")
-  filename    String // logo image
+  filename    String // logo image (Cloudinary URL)
+  status      Status @default(ACTIVE)
 
   @@map("sponsor")
 }
 
 model Testimonial {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  date        DateTime @default(now()) @map("date_kom")
-  comment     String   @map("komentar")
-  rating      Int // 1..5
-  active      String // yes | no (moderasi)
-  note        String? @map("keterangan")
-  user        AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       Int      @id @default(autoincrement())
+  userId   Int      @map("user_id")
+  date     DateTime @default(now()) @map("date_kom")
+  comment  String   @map("komentar")
+  rating   Int // 1..5
+  status   Status   @default(NONACTIVE) // moderasi
+  featured Boolean  @default(false) // utama (maksimal 3)
+  note     String?  @map("keterangan")
+  user     AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("komentar")
 }
@@ -132,15 +198,16 @@ model Testimonial {
 // ============================================================
 
 model Order {
-  id            Int         @id @default(autoincrement())
-  userId        Int         @map("user_id")
-  dateOrder     DateTime    @default(now()) @map("date_order")
-  dateSchedule  DateTime    @map("date_schedule") @db.Date
-  homestay      String // yes | no
-  homestayTime  Int?        @map("homestay_time")
-  totalPrice    Int         @map("total_harga")
-  user          AuthUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items         OrderItem[]
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  dateOrder    DateTime @default(now()) @map("date_order")
+  dateSchedule DateTime @map("date_schedule") @db.Date
+  homestay     Boolean  @default(false)
+  homestayTime Int?     @map("homestay_time")
+  totalPrice   Int      @map("total_harga")
+  status       Status   @default(ACTIVE)
+  user         AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
 
   @@map("wisata_pesan")
 }

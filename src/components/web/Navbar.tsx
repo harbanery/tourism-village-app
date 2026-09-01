@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button, Drawer } from "antd";
-import { LoginOutlined, MenuOutlined } from "@ant-design/icons";
+import { usePathname, useRouter } from "next/navigation";
+import { Avatar, Button, Drawer, Dropdown } from "antd";
+import { LoginOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
@@ -33,10 +33,39 @@ function navLinkClass(active: boolean, stacked = false) {
   ].join(" ");
 }
 
+interface SessionUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
 export function Navbar() {
   const { t } = useT();
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<SessionUser | null>(null);
+
+  const fetchSession = useCallback(async () => {
+    try {
+      const res = await fetch("/api/web/auth/session");
+      const result = await res.json();
+      setUser(result.success ? result.data : null);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    void Promise.resolve().then(fetchSession);
+  }, [fetchSession]);
+
+  const handleLogout = async () => {
+    await fetch("/api/web/auth/logout", { method: "POST" });
+    setUser(null);
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#141416]/80 border-b border-black/5 dark:border-white/10">
@@ -64,11 +93,39 @@ export function Navbar() {
         <div className="flex items-center gap-1">
           <LanguageToggle />
           <ThemeToggle />
-          <Link href="/login" className="hidden! sm:block! ml-1!">
-            <Button type="primary" icon={<LoginOutlined />}>
-              {t("nav.login")}
-            </Button>
-          </Link>
+          {user ? (
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "profile",
+                    icon: <UserOutlined />,
+                    label: t("nav.profile"),
+                    onClick: () => router.push(`/profile/${user.id}`),
+                  },
+                  {
+                    key: "logout",
+                    icon: <LogoutOutlined />,
+                    danger: true,
+                    label: t("nav.logout"),
+                    onClick: handleLogout,
+                  },
+                ],
+              }}
+              trigger={["click"]}
+            >
+              <Avatar
+                className="ml-1 cursor-pointer"
+                icon={<UserOutlined />}
+              />
+            </Dropdown>
+          ) : (
+            <Link href="/login" className="hidden! sm:block! ml-1!">
+              <Button type="primary" icon={<LoginOutlined />}>
+                {t("nav.login")}
+              </Button>
+            </Link>
+          )}
           <Button
             className="lg:hidden!"
             type="text"
@@ -97,13 +154,37 @@ export function Navbar() {
               {t(link.key)}
             </Link>
           ))}
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
-            className={navLinkClass(pathname === "/login", true)}
-          >
-            {t("nav.login")}
-          </Link>
+          {user ? (
+            <>
+              <Link
+                href={`/profile/${user.id}`}
+                onClick={() => setOpen(false)}
+                className={navLinkClass(
+                  pathname.startsWith("/profile"),
+                  true,
+                )}
+              >
+                {t("nav.profile")}
+              </Link>
+              <Button
+                className="mt-2 justify-start! px-1!"
+                type="text"
+                danger
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+              >
+                {t("nav.logout")}
+              </Button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className={navLinkClass(pathname === "/login", true)}
+            >
+              {t("nav.login")}
+            </Link>
+          )}
         </nav>
       </Drawer>
     </header>

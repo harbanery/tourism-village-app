@@ -1,25 +1,56 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
-import { useRouter } from "next/navigation";
-import { Button, Card, Col, Row, Statistic, Table, Tag } from "antd";
+import { useCallback, useEffect, useState } from "react";
+import { Card, Col, Row, Statistic, Table } from "antd";
 import {
   BankOutlined,
+  CommentOutlined,
   FileTextOutlined,
   ShoppingOutlined,
-  StarOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { dummyBlogs, dummyOrders, dummyPackages, dummyPlaces, dummyTestimonials } from "@/models";
+import { useMounted } from "@/hooks/useMounted";
+import LoaderPage from "@/components/admin/loader";
 import { formatDate, formatRupiah } from "@/utils/format";
+
+interface DashboardData {
+  activePlaces: number;
+  totalPlaces: number;
+  totalPackages: number;
+  totalOrders: number;
+  totalTestimonials: number;
+  recentOrders: {
+    id: number;
+    userName: string;
+    dateOrder: string;
+    dateSchedule: string;
+    totalPrice: number;
+  }[];
+}
 
 export default function DashboardPage() {
   const { t, locale } = useT();
-  const router = useRouter();
   const mounted = useMounted();
-  if (!mounted) return null;
+  const [fetching, setFetching] = useState(true);
+  const [data, setData] = useState<DashboardData | null>(null);
 
-  const activePlaces = dummyPlaces.filter((p) => p.active === "yes").length;
+  const fetchDashboard = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/dashboard");
+      const result = await res.json();
+      if (result.success) setData(result.data);
+    } catch (error) {
+      console.error("Error fetching dashboard:", error);
+    } finally {
+      setFetching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void Promise.resolve().then(fetchDashboard);
+  }, [fetchDashboard]);
+
+  if (!mounted || fetching) return <LoaderPage />;
 
   const columns = [
     {
@@ -39,7 +70,9 @@ export default function DashboardPage() {
       title: t("admin.orders.totalPrice"),
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (v: number) => <span className="font-medium">{formatRupiah(v)}</span>,
+      render: (v: number) => (
+        <span className="font-medium">{formatRupiah(v)}</span>
+      ),
     },
   ];
 
@@ -52,9 +85,9 @@ export default function DashboardPage() {
           <Card>
             <Statistic
               title={t("admin.tourism.places")}
-              value={activePlaces}
+              value={data?.activePlaces ?? 0}
               prefix={<BankOutlined className="text-primary" />}
-              suffix={`/ ${dummyPlaces.length}`}
+              suffix={`/ ${data?.totalPlaces ?? 0}`}
             />
           </Card>
         </Col>
@@ -62,7 +95,7 @@ export default function DashboardPage() {
           <Card>
             <Statistic
               title={t("admin.tourism.packages")}
-              value={dummyPackages.length}
+              value={data?.totalPackages ?? 0}
               prefix={<FileTextOutlined className="text-primary" />}
             />
           </Card>
@@ -71,7 +104,7 @@ export default function DashboardPage() {
           <Card>
             <Statistic
               title={t("admin.orders.title")}
-              value={dummyOrders.length}
+              value={data?.totalOrders ?? 0}
               prefix={<ShoppingOutlined className="text-primary" />}
             />
           </Card>
@@ -80,40 +113,20 @@ export default function DashboardPage() {
           <Card>
             <Statistic
               title={t("admin.reviews.title")}
-              value={dummyTestimonials.filter((r) => r.active === "yes").length}
-              prefix={<StarOutlined className="text-primary" />}
+              value={data?.totalTestimonials ?? 0}
+              prefix={<CommentOutlined className="text-primary" />}
             />
           </Card>
         </Col>
       </Row>
 
-      <Card
-        title={t("admin.orders.title")}
-        extra={
-          <Button
-            type="link"
-            className="text-primary! hover:underline!"
-            onClick={() => router.push("/admin/order")}
-          >
-            {t("common.viewAll")}
-          </Button>
-        }
-      >
+      <Card title={t("admin.dashboard.recentOrders")}>
         <Table
-          dataSource={dummyOrders}
+          dataSource={data?.recentOrders ?? []}
           columns={columns}
           rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
+          pagination={false}
         />
-      </Card>
-
-      <Card>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-foreground/70">
-          <Tag color="green">{t("common.dummyDataNote")}</Tag>
-          {dummyBlogs.length} {t("admin.blog.title").toLowerCase()} ·{" "}
-          {t("footer.hoursValue")}
-        </div>
       </Card>
     </div>
   );

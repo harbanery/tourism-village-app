@@ -5,18 +5,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button, Drawer, Grid, Layout, Menu, theme } from "antd";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { adminMenu, matchMenu } from "./menu";
+import { menuAdminConfig } from "@/helpers/menu";
+import { loadAntdIcon } from "@/components/custom/icon";
+import type { AdminRole } from "@prisma/client";
 
 const { Sider } = Layout;
 
 interface SiderLayoutProps {
   mobileOpen: boolean;
   onMobileClose: () => void;
+  /** Role admin aktif untuk filter menu. */
+  role: AdminRole | null;
 }
 
 const SiderLayout: React.FC<SiderLayoutProps> = ({
   mobileOpen,
   onMobileClose,
+  role,
 }) => {
   const { t } = useT();
   const pathname = usePathname();
@@ -28,18 +33,31 @@ const SiderLayout: React.FC<SiderLayoutProps> = ({
 
   const [collapsed, setCollapsed] = useState(false);
 
-  // Match terpanjang agar "/admin" (dashboard) tidak menang atas
-  // rute turunan seperti "/admin/account".
-  const selectedKey = useMemo(
-    () => matchMenu(pathname)?.key ?? "/admin",
-    [pathname],
+  // Filter menu sesuai role (AUTHOR hanya dashboard + blog).
+  const filteredMenu = useMemo(
+    () => menuAdminConfig.filter((item) => role === null || item.roles.includes(role)),
+    [role],
   );
 
-  const menuItems = adminMenu.map((item) => ({
-    key: item.key,
-    icon: item.icon,
-    label: t(item.localeKey),
-  }));
+  const selectedKey = useMemo(() => {
+    const match =
+      [...filteredMenu]
+        .sort((a, b) => b.link.length - a.link.length)
+        .find(
+          (item) =>
+            pathname === item.link || pathname.startsWith(`${item.link}/`),
+        ) ?? filteredMenu[0];
+    return match?.link ?? "/admin";
+  }, [pathname, filteredMenu]);
+
+  const menuItems = filteredMenu.map((item) => {
+    const Icon = loadAntdIcon(item.icon);
+    return {
+      key: item.link,
+      icon: <Icon />,
+      label: t(`menu.${item.key}`),
+    };
+  });
 
   const toggleMenu = ({ key }: { key: string }) => {
     router.push(key);
