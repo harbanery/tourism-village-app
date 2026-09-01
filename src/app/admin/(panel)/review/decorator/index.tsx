@@ -3,12 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   App,
-  Button,
   Card,
   Input,
   Rate,
   Space,
-  Table,
   Tag,
   Tooltip,
 } from "antd";
@@ -17,6 +15,11 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
+import {
+  AdminTable,
+  RowActions,
+  useAdminColumns,
+} from "@/components/admin/table";
 import { asAppError } from "@/helpers/error";
 import { formatDate } from "@/utils/format";
 
@@ -39,6 +42,9 @@ const ReviewDecorator = () => {
 
   // Aturan role: MASTER bisa akses opsi; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
+
+  // Kolom global (id, status, opsi) untuk tabel ulasan.
+  const cols = useAdminColumns<TestimonialRow>();
 
   const [fetching, setFetching] = useState(true);
   const [testimonials, setTestimonials] = useState<TestimonialRow[]>([]);
@@ -154,16 +160,6 @@ const ReviewDecorator = () => {
       render: (rating: number) => <Rate disabled defaultValue={rating} />,
     },
     {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: TestimonialRow["status"]) => (
-        <Tag color={status === "ACTIVE" ? "green" : "default"}>
-          {status === "ACTIVE" ? t("common.active") : t("common.inactive")}
-        </Tag>
-      ),
-    },
-    {
       title: t("admin.reviews.featured"),
       dataIndex: "featured",
       key: "featured",
@@ -182,64 +178,60 @@ const ReviewDecorator = () => {
       key: "note",
       render: (v: string | null) => v ?? "-",
     },
-    // Opsi hanya untuk MASTER — viewer hidden, bukan disabled.
+    // Kolom status & opsi: fixed kanan, width statis (global).
+    cols.status,
+    // Opsi digabung dropdown three-dots; hanya untuk MASTER —
+    // viewer hidden, bukan disabled.
     ...(isMaster
       ? [
-          {
-            title: t("common.actions"),
-            key: "actions",
-            fixed: "right" as const,
-            width: 240,
-            render: (_: unknown, record: TestimonialRow) => (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="small"
-                  icon={
-                    record.status === "ACTIVE" ? (
-                      <StopOutlined />
-                    ) : (
-                      <CheckOutlined />
-                    )
-                  }
-                  onClick={() =>
-                    modal.confirm({
-                      title: t("notif.confirmToggle", {
-                        action:
-                          record.status === "ACTIVE"
-                            ? t("common.deactivate")
-                            : t("common.activate"),
-                        entity: t("admin.reviews.title"),
-                      }),
-                      okText: t("common.yes"),
-                      cancelText: t("common.no"),
-                      onOk: () => handleToggleStatus(record),
-                    })
-                  }
-                >
-                  {record.status === "ACTIVE"
-                    ? t("common.deactivate")
-                    : t("common.activate")}
-                </Button>
-                <Tooltip
-                  title={t("admin.reviews.featuredHint", {
-                    max: 3,
-                  })}
-                >
-                  <Button
-                    size="small"
-                    type={record.featured ? "default" : "primary"}
-                    ghost={!record.featured}
-                    icon={<StarFilled />}
-                    onClick={() => handleToggleFeatured(record)}
-                  >
-                    {record.featured
-                      ? t("admin.reviews.unmain")
-                      : t("admin.reviews.main")}
-                  </Button>
-                </Tooltip>
+          cols.actions((record) => (
+            <Tooltip
+              title={t("admin.reviews.featuredHint", {
+                max: 3,
+              })}
+            >
+              <div>
+                <RowActions
+                  items={[
+                    {
+                      key: "toggle",
+                      icon:
+                        record.status === "ACTIVE" ? (
+                          <StopOutlined />
+                        ) : (
+                          <CheckOutlined />
+                        ),
+                      label:
+                        record.status === "ACTIVE"
+                          ? t("common.deactivate")
+                          : t("common.activate"),
+                      onClick: () =>
+                        modal.confirm({
+                          title: t("notif.confirmToggle", {
+                            action:
+                              record.status === "ACTIVE"
+                                ? t("common.deactivate")
+                                : t("common.activate"),
+                            entity: t("admin.reviews.title"),
+                          }),
+                          okText: t("common.yes"),
+                          cancelText: t("common.no"),
+                          onOk: () => handleToggleStatus(record),
+                        }),
+                    },
+                    {
+                      key: "featured",
+                      icon: <StarFilled />,
+                      label: record.featured
+                        ? t("admin.reviews.unmain")
+                        : t("admin.reviews.main"),
+                      onClick: () => handleToggleFeatured(record),
+                    },
+                  ]}
+                />
               </div>
-            ),
-          },
+            </Tooltip>
+          )),
         ]
       : []),
   ];
@@ -270,13 +262,7 @@ const ReviewDecorator = () => {
           </Space>
         }
       >
-        <Table
-          dataSource={filtered}
-          columns={columns}
-          rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
-        />
+        <AdminTable dataSource={filtered} columns={columns} />
       </Card>
     </div>
   );

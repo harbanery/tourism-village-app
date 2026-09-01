@@ -17,6 +17,7 @@ import { ArrowLeftOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
+import { ROLE_TAG_COLORS } from "@/components/admin/table";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
 import { asAppError } from "@/helpers/error";
@@ -198,13 +199,7 @@ const ProfileDecorator = () => {
             {session && (
               <Tag
                 className="w-fit!"
-                color={
-                  session.role === "MASTER"
-                    ? "green"
-                    : session.role === "AUTHOR"
-                      ? "blue"
-                      : "default"
-                }
+                color={ROLE_TAG_COLORS[session.role] ?? "default"}
               >
                 {t(`admin.role.${session.role}`)}
               </Tag>

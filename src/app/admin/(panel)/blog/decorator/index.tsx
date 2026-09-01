@@ -11,8 +11,6 @@ import {
   Input,
   Modal,
   Space,
-  Table,
-  Tag,
 } from "antd";
 import {
   CheckOutlined,
@@ -28,7 +26,12 @@ import { useMounted } from "@/hooks/useMounted";
 import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
-import { modalBodyProps } from "@/helpers/modal";
+import {
+  AdminTable,
+  RowActions,
+  useAdminColumns,
+} from "@/components/admin/table";
+import { drawerBodyProps } from "@/helpers/drawer";
 import { asAppError } from "@/helpers/error";
 import { getImageString } from "@/helpers/image";
 import { formatDate } from "@/utils/format";
@@ -72,6 +75,9 @@ const BlogDecorator = () => {
   // VIEWER tanpa opsi dan tombol tambah (hidden, bukan disabled).
   const isMaster = session?.role === "MASTER";
   const canWriteBlog = isMaster || session?.role === "AUTHOR";
+
+  // Kolom global (id, status, opsi) untuk tabel blog.
+  const cols = useAdminColumns<BlogRow>();
 
   const [fetching, setFetching] = useState(true);
   const [blogs, setBlogs] = useState<BlogRow[]>([]);
@@ -246,32 +252,12 @@ const BlogDecorator = () => {
   };
 
   const columns = [
-    { title: "Id", dataIndex: "id", key: "id", width: 60 },
+    cols.id,
     {
-      // Kolom judul diperlebar (width 320).
       title: t("admin.blog.judul"),
       dataIndex: "title",
       key: "title",
       width: 320,
-    },
-    {
-      // Tempat wisata yang terkait (optional).
-      title: t("admin.blog.relatedPlace"),
-      dataIndex: ["place", "name"],
-      key: "placeName",
-      render: (v: string | null) => v ?? "-",
-    },
-    {
-      title: t("common.date"),
-      dataIndex: "datetime",
-      key: "datetime",
-      render: (v: string) => formatDate(v, locale, true),
-    },
-    {
-      title: t("admin.blog.dateChanged"),
-      dataIndex: "datetimeAfter",
-      key: "datetimeAfter",
-      render: (v: string | null) => (v ? formatDate(v, locale, true) : "-"),
     },
     {
       title: t("admin.blog.author"),
@@ -280,95 +266,99 @@ const BlogDecorator = () => {
       render: (v: string | null, record: BlogRow) => v ?? record.admin.username,
     },
     {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: BlogRow["status"]) => (
-        <Tag color={status === "ACTIVE" ? "green" : "default"}>
-          {status === "ACTIVE" ? t("common.active") : t("common.inactive")}
-        </Tag>
-      ),
+      // Tanggal gabungan: tampilkan tanggal setelah diubah,
+      // jika tidak ada maka tanggal awalnya.
+      title: t("common.date"),
+      key: "date",
+      render: (_: unknown, record: BlogRow) =>
+        formatDate(record.datetimeAfter ?? record.datetime, locale, true),
     },
-    // Opsi hanya untuk yang berhak (MASTER semua; AUTHOR edit saja);
-    // VIEWER tanpa kolom opsi sama sekali (hidden, bukan disabled).
+    {
+      // Tempat wisata yang terkait (optional).
+      title: t("admin.blog.relatedPlace"),
+      dataIndex: ["place", "name"],
+      key: "placeName",
+      render: (v: string | null) => v ?? "-",
+    },
+    // Kolom status & opsi: fixed kanan, width statis (global).
+    cols.status,
+    // Opsi digabung dropdown three-dots; hanya untuk yang berhak
+    // (MASTER semua; AUTHOR edit miliknya saja); VIEWER tanpa kolom opsi.
     ...(canWriteBlog
       ? [
-          {
-            title: t("common.actions"),
-            key: "actions",
-            fixed: "right" as const,
-            width: 280,
-            render: (_: unknown, record: BlogRow) => (
-              <div className="flex flex-wrap gap-2">
-                {/* AUTHOR hanya bisa edit blog miliknya sendiri. */}
-                {(isMaster || record.adminId === session?.id) && (
-                  <Button
-                    size="small"
-                    icon={<EditOutlined />}
-                    onClick={() => showForm(record)}
-                  >
-                    {t("common.edit")}
-                  </Button>
-                )}
-                {/* Toggle status hanya MASTER. */}
-                {isMaster && (
-                  <Button
-                    size="small"
-                    icon={
-                      record.status === "ACTIVE" ? (
-                        <StopOutlined />
-                      ) : (
-                        <CheckOutlined />
-                      )
-                    }
-                    onClick={() =>
-                      modal.confirm({
-                        title: t("notif.confirmToggle", {
-                          action:
-                            record.status === "ACTIVE"
-                              ? t("common.deactivate")
-                              : t("common.activate"),
-                          entity: t("admin.blog.title"),
+          cols.actions((record) => {
+            const items = [
+              // AUTHOR hanya bisa edit blog miliknya sendiri.
+              ...(isMaster || record.adminId === session?.id
+                ? [
+                    {
+                      key: "edit",
+                      icon: <EditOutlined />,
+                      label: t("common.edit"),
+                      onClick: () => showForm(record),
+                    },
+                  ]
+                : []),
+              // Toggle status hanya MASTER.
+              ...(isMaster
+                ? [
+                    {
+                      key: "toggle",
+                      icon:
+                        record.status === "ACTIVE" ? (
+                          <StopOutlined />
+                        ) : (
+                          <CheckOutlined />
+                        ),
+                      label:
+                        record.status === "ACTIVE"
+                          ? t("common.deactivate")
+                          : t("common.activate"),
+                      onClick: () =>
+                        modal.confirm({
+                          title: t("notif.confirmToggle", {
+                            action:
+                              record.status === "ACTIVE"
+                                ? t("common.deactivate")
+                                : t("common.activate"),
+                            entity: t("admin.blog.title"),
+                          }),
+                          okText: t("common.yes"),
+                          cancelText: t("common.no"),
+                          onOk: () => handleToggleStatus(record),
                         }),
-                        okText: t("common.yes"),
-                        cancelText: t("common.no"),
-                        onOk: () => handleToggleStatus(record),
-                      })
-                    }
-                  >
-                    {record.status === "ACTIVE"
-                      ? t("common.deactivate")
-                      : t("common.activate")}
-                  </Button>
-                )}
-                <Button
-                  size="small"
-                  icon={<EyeOutlined />}
-                  onClick={() => setViewBlog(record)}
-                >
-                  {t("common.viewPhoto")}
-                </Button>
-                {/* Hapus hanya MASTER dan hanya untuk data nonaktif. */}
-                {isMaster && record.status !== "ACTIVE" && (
-                  <Button
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() =>
-                      modal.confirm({
-                        title: `${t("common.delete")} "${record.title}"?`,
-                        content: t("admin.deleteConfirm"),
-                        okText: t("common.delete"),
-                        okButtonProps: { danger: true },
-                        cancelText: t("common.cancel"),
-                        onOk: () => handleDelete(record.id),
-                      })
-                    }
-                  />
-                )}
-              </div>
-            ),
-          },
+                    },
+                  ]
+                : []),
+              {
+                key: "view",
+                icon: <EyeOutlined />,
+                label: t("common.viewPhoto"),
+                onClick: () => setViewBlog(record),
+              },
+              // Hapus hanya MASTER dan hanya untuk data nonaktif.
+              ...(isMaster && record.status !== "ACTIVE"
+                ? [
+                    {
+                      key: "delete",
+                      icon: <DeleteOutlined />,
+                      danger: true,
+                      label: t("common.delete"),
+                      onClick: () =>
+                        modal.confirm({
+                          title: `${t("common.delete")} "${record.title}"?`,
+                          content: t("admin.deleteConfirm"),
+                          okText: t("common.delete"),
+                          okButtonProps: { danger: true },
+                          cancelText: t("common.cancel"),
+                          onOk: () => handleDelete(record.id),
+                        }),
+                    },
+                  ]
+                : []),
+            ];
+            return <RowActions items={items} />;
+          }),
         ]
       : []),
   ];
@@ -409,13 +399,7 @@ const BlogDecorator = () => {
           </Space>
         }
       >
-        <Table
-          dataSource={filtered}
-          columns={columns}
-          rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
-        />
+        <AdminTable dataSource={filtered} columns={columns} />
       </Card>
 
       {/* Modal lihat foto blog */}
@@ -469,7 +453,7 @@ const BlogDecorator = () => {
             </Button>
           </div>
         }
-        {...modalBodyProps()}
+        {...drawerBodyProps()}
       >
         <FormAdmin
           formProps={{ form }}

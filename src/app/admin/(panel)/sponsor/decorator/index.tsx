@@ -11,8 +11,6 @@ import {
   Input,
   Modal,
   Space,
-  Table,
-  Tag,
 } from "antd";
 import {
   CheckOutlined,
@@ -28,7 +26,12 @@ import { useMounted } from "@/hooks/useMounted";
 import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
-import { modalBodyProps } from "@/helpers/modal";
+import {
+  AdminTable,
+  RowActions,
+  useAdminColumns,
+} from "@/components/admin/table";
+import { drawerBodyProps } from "@/helpers/drawer";
 import { asAppError } from "@/helpers/error";
 import { getImageString } from "@/helpers/image";
 import { sponsorFormLayout } from "../config";
@@ -55,6 +58,9 @@ const SponsorDecorator = () => {
 
   // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
+
+  // Kolom global (id, status, opsi) untuk tabel sponsor.
+  const cols = useAdminColumns<SponsorRow>();
 
   const [form] = Form.useForm<SponsorFormValues>();
 
@@ -215,7 +221,7 @@ const SponsorDecorator = () => {
   };
 
   const columns = [
-    { title: "Id", dataIndex: "id", key: "id", width: 60 },
+    cols.id,
     {
       title: t("admin.sponsors.name"),
       dataIndex: "name",
@@ -228,43 +234,34 @@ const SponsorDecorator = () => {
       key: "description",
       render: (v: string | null) => v ?? "-",
     },
-    {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: SponsorRow["status"]) => (
-        <Tag color={status === "ACTIVE" ? "green" : "default"}>
-          {status === "ACTIVE" ? t("common.active") : t("common.inactive")}
-        </Tag>
-      ),
-    },
-    // Opsi hanya untuk MASTER — viewer hidden, bukan disabled.
+    // Kolom status & opsi: fixed kanan, width statis (global).
+    cols.status,
+    // Opsi digabung dropdown three-dots; hanya untuk MASTER —
+    // viewer hidden, bukan disabled.
     ...(isMaster
       ? [
-          {
-            title: t("common.actions"),
-            key: "actions",
-            fixed: "right" as const,
-            width: 280,
-            render: (_: unknown, record: SponsorRow) => (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => showForm(record)}
-                >
-                  {t("common.edit")}
-                </Button>
-                <Button
-                  size="small"
-                  icon={
+          cols.actions((record) => (
+            <RowActions
+              items={[
+                {
+                  key: "edit",
+                  icon: <EditOutlined />,
+                  label: t("common.edit"),
+                  onClick: () => showForm(record),
+                },
+                {
+                  key: "toggle",
+                  icon:
                     record.status === "ACTIVE" ? (
                       <StopOutlined />
                     ) : (
                       <CheckOutlined />
-                    )
-                  }
-                  onClick={() =>
+                    ),
+                  label:
+                    record.status === "ACTIVE"
+                      ? t("common.deactivate")
+                      : t("common.activate"),
+                  onClick: () =>
                     modal.confirm({
                       title: t("notif.confirmToggle", {
                         action:
@@ -276,40 +273,36 @@ const SponsorDecorator = () => {
                       okText: t("common.yes"),
                       cancelText: t("common.no"),
                       onOk: () => handleToggleStatus(record),
-                    })
-                  }
-                >
-                  {record.status === "ACTIVE"
-                    ? t("common.deactivate")
-                    : t("common.activate")}
-                </Button>
-                <Button
-                  size="small"
-                  icon={<EyeOutlined />}
-                  onClick={() => setViewSponsor(record)}
-                >
-                  {t("common.viewPhoto")}
-                </Button>
-                {record.status !== "ACTIVE" && (
-                  <Button
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() =>
-                      modal.confirm({
-                        title: `${t("common.delete")} "${record.name}"?`,
-                        content: t("admin.deleteConfirm"),
-                        okText: t("common.delete"),
-                        okButtonProps: { danger: true },
-                        cancelText: t("common.cancel"),
-                        onOk: () => handleDelete(record.id),
-                      })
-                    }
-                  />
-                )}
-              </div>
-            ),
-          },
+                    }),
+                },
+                {
+                  key: "view",
+                  icon: <EyeOutlined />,
+                  label: t("common.viewPhoto"),
+                  onClick: () => setViewSponsor(record),
+                },
+                ...(record.status !== "ACTIVE"
+                  ? [
+                      {
+                        key: "delete",
+                        icon: <DeleteOutlined />,
+                        danger: true,
+                        label: t("common.delete"),
+                        onClick: () =>
+                          modal.confirm({
+                            title: `${t("common.delete")} "${record.name}"?`,
+                            content: t("admin.deleteConfirm"),
+                            okText: t("common.delete"),
+                            okButtonProps: { danger: true },
+                            cancelText: t("common.cancel"),
+                            onOk: () => handleDelete(record.id),
+                          }),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          )),
         ]
       : []),
   ];
@@ -350,13 +343,7 @@ const SponsorDecorator = () => {
           </Space>
         }
       >
-        <Table
-          dataSource={filtered}
-          columns={columns}
-          rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
-        />
+        <AdminTable dataSource={filtered} columns={columns} />
       </Card>
 
       {/* Modal lihat foto sponsor */}
@@ -410,7 +397,7 @@ const SponsorDecorator = () => {
             </Button>
           </div>
         }
-        {...modalBodyProps()}
+        {...drawerBodyProps()}
       >
         <FormAdmin
           formProps={{ form }}

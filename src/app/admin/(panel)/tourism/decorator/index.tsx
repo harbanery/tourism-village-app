@@ -11,8 +11,6 @@ import {
   Input,
   Modal,
   Space,
-  Table,
-  Tag,
 } from "antd";
 import {
   CheckOutlined,
@@ -28,7 +26,12 @@ import { useMounted } from "@/hooks/useMounted";
 import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
-import { modalBodyProps } from "@/helpers/modal";
+import {
+  AdminTable,
+  RowActions,
+  useAdminColumns,
+} from "@/components/admin/table";
+import { drawerBodyProps } from "@/helpers/drawer";
 import { asAppError } from "@/helpers/error";
 import { facilityOptions } from "@/helpers/menu";
 import { getImageString } from "@/helpers/image";
@@ -72,6 +75,10 @@ const TourismDecorator = () => {
 
   // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
+
+  // Kolom global (id, status, opsi) untuk kedua tabel.
+  const placeCols = useAdminColumns<PlaceRow>();
+  const packageCols = useAdminColumns<PackageRow>();
 
   const [placeForm] = Form.useForm<PlaceFormValues>();
   const [packageForm] = Form.useForm<PackageFormValues>();
@@ -376,50 +383,41 @@ const TourismDecorator = () => {
   // ------------------------------------------------------------------
 
   const placeColumns = [
-    { title: "Id", dataIndex: "id", key: "id", width: 60 },
+    placeCols.id,
     {
       title: t("admin.tourism.places"),
       dataIndex: "name",
       key: "name",
       render: (name: string) => <span className="font-medium">{name}</span>,
     },
-    {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: PlaceRow["status"]) => (
-        <Tag color={status === "ACTIVE" ? "green" : "default"}>
-          {status === "ACTIVE" ? t("common.active") : t("common.inactive")}
-        </Tag>
-      ),
-    },
-    // Opsi hanya untuk MASTER — viewer hidden, bukan disabled.
+    // Kolom status & opsi: fixed kanan, width statis (global).
+    placeCols.status,
+    // Opsi digabung dropdown three-dots; hanya untuk MASTER —
+    // viewer hidden, bukan disabled.
     ...(isMaster
       ? [
-          {
-            title: t("common.actions"),
-            key: "actions",
-            fixed: "right" as const,
-            width: 260,
-            render: (_: unknown, record: PlaceRow) => (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => showPlaceForm(record)}
-                >
-                  {t("common.edit")}
-                </Button>
-                <Button
-                  size="small"
-                  icon={
+          placeCols.actions((record) => (
+            <RowActions
+              items={[
+                {
+                  key: "edit",
+                  icon: <EditOutlined />,
+                  label: t("common.edit"),
+                  onClick: () => showPlaceForm(record),
+                },
+                {
+                  key: "toggle",
+                  icon:
                     record.status === "ACTIVE" ? (
                       <StopOutlined />
                     ) : (
                       <CheckOutlined />
-                    )
-                  }
-                  onClick={() =>
+                    ),
+                  label:
+                    record.status === "ACTIVE"
+                      ? t("common.deactivate")
+                      : t("common.activate"),
+                  onClick: () =>
                     modal.confirm({
                       title: t("notif.confirmToggle", {
                         action:
@@ -431,46 +429,42 @@ const TourismDecorator = () => {
                       okText: t("common.yes"),
                       cancelText: t("common.no"),
                       onOk: () => handleTogglePlaceStatus(record),
-                    })
-                  }
-                >
-                  {record.status === "ACTIVE"
-                    ? t("common.deactivate")
-                    : t("common.activate")}
-                </Button>
-                <Button
-                  size="small"
-                  icon={<EyeOutlined />}
-                  onClick={() => setViewPlace(record)}
-                >
-                  {t("common.viewPhoto")}
-                </Button>
-                {record.status !== "ACTIVE" && (
-                  <Button
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() =>
-                      modal.confirm({
-                        title: `${t("common.delete")} "${record.name}"?`,
-                        content: t("admin.deleteConfirm"),
-                        okText: t("common.delete"),
-                        okButtonProps: { danger: true },
-                        cancelText: t("common.cancel"),
-                        onOk: () => handleDeletePlace(record.id),
-                      })
-                    }
-                  />
-                )}
-              </div>
-            ),
-          },
+                    }),
+                },
+                {
+                  key: "view",
+                  icon: <EyeOutlined />,
+                  label: t("common.viewPhoto"),
+                  onClick: () => setViewPlace(record),
+                },
+                ...(record.status !== "ACTIVE"
+                  ? [
+                      {
+                        key: "delete",
+                        icon: <DeleteOutlined />,
+                        danger: true,
+                        label: t("common.delete"),
+                        onClick: () =>
+                          modal.confirm({
+                            title: `${t("common.delete")} "${record.name}"?`,
+                            content: t("admin.deleteConfirm"),
+                            okText: t("common.delete"),
+                            okButtonProps: { danger: true },
+                            cancelText: t("common.cancel"),
+                            onOk: () => handleDeletePlace(record.id),
+                          }),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          )),
         ]
       : []),
   ];
 
   const packageColumns = [
-    { title: "Id", dataIndex: "id", key: "id", width: 60 },
+    packageCols.id,
     { title: t("admin.tourism.packages"), dataIndex: "name", key: "name" },
     {
       title: t("admin.tourism.place"),
@@ -494,43 +488,34 @@ const TourismDecorator = () => {
         <span className="font-medium">{formatRupiah(price)}</span>
       ),
     },
-    {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: PackageRow["status"]) => (
-        <Tag color={status === "ACTIVE" ? "green" : "default"}>
-          {status === "ACTIVE" ? t("common.active") : t("common.inactive")}
-        </Tag>
-      ),
-    },
-    // Opsi hanya untuk MASTER — viewer hidden, bukan disabled.
+    // Kolom status & opsi: fixed kanan, width statis (global).
+    packageCols.status,
+    // Opsi digabung dropdown three-dots; hanya untuk MASTER —
+    // viewer hidden, bukan disabled.
     ...(isMaster
       ? [
-          {
-            title: t("common.actions"),
-            key: "actions",
-            fixed: "right" as const,
-            width: 220,
-            render: (_: unknown, record: PackageRow) => (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => showPackageForm(record)}
-                >
-                  {t("common.edit")}
-                </Button>
-                <Button
-                  size="small"
-                  icon={
+          packageCols.actions((record) => (
+            <RowActions
+              items={[
+                {
+                  key: "edit",
+                  icon: <EditOutlined />,
+                  label: t("common.edit"),
+                  onClick: () => showPackageForm(record),
+                },
+                {
+                  key: "toggle",
+                  icon:
                     record.status === "ACTIVE" ? (
                       <StopOutlined />
                     ) : (
                       <CheckOutlined />
-                    )
-                  }
-                  onClick={() =>
+                    ),
+                  label:
+                    record.status === "ACTIVE"
+                      ? t("common.deactivate")
+                      : t("common.activate"),
+                  onClick: () =>
                     modal.confirm({
                       title: t("notif.confirmToggle", {
                         action:
@@ -542,33 +527,30 @@ const TourismDecorator = () => {
                       okText: t("common.yes"),
                       cancelText: t("common.no"),
                       onOk: () => handleTogglePackageStatus(record),
-                    })
-                  }
-                >
-                  {record.status === "ACTIVE"
-                    ? t("common.deactivate")
-                    : t("common.activate")}
-                </Button>
-                {record.status !== "ACTIVE" && (
-                  <Button
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() =>
-                      modal.confirm({
-                        title: `${t("common.delete")} "${record.name}"?`,
-                        content: t("admin.deleteConfirm"),
-                        okText: t("common.delete"),
-                        okButtonProps: { danger: true },
-                        cancelText: t("common.cancel"),
-                        onOk: () => handleDeletePackage(record.id),
-                      })
-                    }
-                  />
-                )}
-              </div>
-            ),
-          },
+                    }),
+                },
+                ...(record.status !== "ACTIVE"
+                  ? [
+                      {
+                        key: "delete",
+                        icon: <DeleteOutlined />,
+                        danger: true,
+                        label: t("common.delete"),
+                        onClick: () =>
+                          modal.confirm({
+                            title: `${t("common.delete")} "${record.name}"?`,
+                            content: t("admin.deleteConfirm"),
+                            okText: t("common.delete"),
+                            okButtonProps: { danger: true },
+                            cancelText: t("common.cancel"),
+                            onOk: () => handleDeletePackage(record.id),
+                          }),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          )),
         ]
       : []),
   ];
@@ -613,13 +595,7 @@ const TourismDecorator = () => {
           </Space>
         }
       >
-        <Table
-          dataSource={filteredPlaces}
-          columns={placeColumns}
-          rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
-        />
+        <AdminTable dataSource={filteredPlaces} columns={placeColumns} />
       </Card>
       <Card
         title={t("admin.tourism.packages")}
@@ -645,13 +621,7 @@ const TourismDecorator = () => {
           </Space>
         }
       >
-        <Table
-          dataSource={filteredPackages}
-          columns={packageColumns}
-          rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
-        />
+        <AdminTable dataSource={filteredPackages} columns={packageColumns} />
       </Card>
 
       {/* Modal lihat foto tempat wisata */}
@@ -705,7 +675,7 @@ const TourismDecorator = () => {
             </Button>
           </div>
         }
-        {...modalBodyProps()}
+        {...drawerBodyProps()}
       >
         <FormAdmin
           formProps={{ form: placeForm }}
@@ -748,7 +718,7 @@ const TourismDecorator = () => {
             </Button>
           </div>
         }
-        {...modalBodyProps()}
+        {...drawerBodyProps()}
       >
         <FormAdmin
           formProps={{ form: packageForm }}

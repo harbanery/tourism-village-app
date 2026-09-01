@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Table } from "antd";
+import { Card, Col, Row, Statistic } from "antd";
 import {
   BankOutlined,
   CommentOutlined,
@@ -11,6 +11,7 @@ import {
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import LoaderPage from "@/components/admin/loader";
+import { AdminTable } from "@/components/admin/table";
 import { formatDate, formatRupiah } from "@/utils/format";
 
 interface DashboardData {
@@ -121,10 +122,9 @@ export default function DashboardPage() {
       </Row>
 
       <Card title={t("admin.dashboard.recentOrders")}>
-        <Table
+        <AdminTable
           dataSource={data?.recentOrders ?? []}
           columns={columns}
-          rowKey="id"
           pagination={false}
         />
       </Card>

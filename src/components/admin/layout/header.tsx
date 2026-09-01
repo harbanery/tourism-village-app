@@ -18,6 +18,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
 import { menuAdminConfig } from "@/helpers/menu";
 import { useAdminSession } from "@/components/admin/session";
+import { ROLE_TAG_COLORS } from "@/components/admin/table";
 
 const { Header } = Layout;
 
@@ -93,13 +94,7 @@ const HeaderLayout: React.FC<{
                 label: session ? (
                   <Tag
                     className="m-0!"
-                    color={
-                      session.role === "MASTER"
-                        ? "green"
-                        : session.role === "AUTHOR"
-                          ? "blue"
-                          : "default"
-                    }
+                    color={ROLE_TAG_COLORS[session.role] ?? "default"}
                   >
                     {t(`admin.role.${session.role}`)}
                   </Tag>

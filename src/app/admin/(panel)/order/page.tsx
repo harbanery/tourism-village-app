@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { App, Card, Input, Space, Table, Tag, Typography } from "antd";
+import { App, Card, Input, Space, Tag, Typography } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+import { AdminTable } from "@/components/admin/table";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import LoaderPage from "@/components/admin/loader";
@@ -156,13 +157,7 @@ export default function OrderPage() {
           </Space>
         }
       >
-        <Table
-          dataSource={filtered}
-          columns={columns}
-          rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
-        />
+        <AdminTable dataSource={filtered} columns={columns} />
       </Card>
     </div>
   );

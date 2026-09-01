@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   App,
   Avatar,
@@ -10,9 +9,9 @@ import {
   Drawer,
   Input,
   Space,
-  Table,
   Tag,
   Typography,
+  Form,
 } from "antd";
 import {
   CheckOutlined,
@@ -27,11 +26,16 @@ import { useMounted } from "@/hooks/useMounted";
 import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
-import { modalBodyProps } from "@/helpers/modal";
+import {
+  AdminTable,
+  ROLE_TAG_COLORS,
+  RowActions,
+  useAdminColumns,
+} from "@/components/admin/table";
+import { drawerBodyProps } from "@/helpers/drawer";
 import { asAppError } from "@/helpers/error";
 import { adminRoleOptions } from "@/helpers/menu";
 import { adminFormLayout, adminRoleFormLayout } from "../config";
-import { Form } from "antd";
 import { formatDate } from "@/utils/format";
 
 interface AdminRow {
@@ -57,7 +61,6 @@ interface UserRow {
 
 const AccountDecorator = () => {
   const { t } = useT();
-  const router = useRouter();
   const mounted = useMounted();
   const { session, loading: sessionLoading } = useAdminSession();
   const { notification, modal } = App.useApp();
@@ -66,6 +69,10 @@ const AccountDecorator = () => {
 
   // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
+
+  // Kolom global (id, status, opsi) untuk kedua tabel.
+  const userCols = useAdminColumns<UserRow>();
+  const adminCols = useAdminColumns<AdminRow>();
 
   const [fetching, setFetching] = useState(true);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -186,7 +193,9 @@ const AccountDecorator = () => {
               {t("admin.accounts.credentialsNote")}
             </Typography.Paragraph>
             <Typography.Paragraph
-              copyable={{ text: `${result.data.username} / ${result.data.password}` }}
+              copyable={{
+                text: `${result.data.username} / ${result.data.password}`,
+              }}
             >
               <strong>{t("admin.accounts.username")}:</strong>{" "}
               {result.data.username}
@@ -206,8 +215,7 @@ const AccountDecorator = () => {
         ...(err.errorFields
           ? {}
           : {
-              description:
-                err.message || t("notif.saveFailed"),
+              description: err.message || t("notif.saveFailed"),
               placement: "bottomRight" as const,
             }),
         placement: "bottomRight",
@@ -251,8 +259,7 @@ const AccountDecorator = () => {
         ...(err.errorFields
           ? {}
           : {
-              description:
-                err.message || t("notif.saveFailed"),
+              description: err.message || t("notif.saveFailed"),
               placement: "bottomRight" as const,
             }),
         placement: "bottomRight",
@@ -279,7 +286,7 @@ const AccountDecorator = () => {
   );
 
   const userColumns = [
-    { title: "Id", dataIndex: "id", key: "id", width: 60 },
+    userCols.id,
     {
       title: t("common.name"),
       dataIndex: "name",
@@ -318,36 +325,27 @@ const AccountDecorator = () => {
       key: "phone",
       render: (v: string | null) => v ?? "-",
     },
-    {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: UserRow["status"]) => (
-        <Tag color={status === "ACTIVE" ? "green" : "default"}>
-          {status === "ACTIVE" ? t("common.active") : t("common.inactive")}
-        </Tag>
-      ),
-    },
+    // Kolom status & opsi: fixed kanan, width statis (global).
+    userCols.status,
     // Opsi (toggle) hanya untuk MASTER — viewer hidden, bukan disabled.
     ...(isMaster
       ? [
-          {
-            title: t("common.actions"),
-            key: "actions",
-            fixed: "right" as const,
-            width: 140,
-            render: (_: unknown, record: UserRow) => (
-              <div className="flex gap-2">
-                <Button
-                  size="small"
-                  icon={
+          userCols.actions((record) => (
+            <RowActions
+              items={[
+                {
+                  key: "toggle",
+                  icon:
                     record.status === "ACTIVE" ? (
                       <StopOutlined />
                     ) : (
                       <CheckOutlined />
-                    )
-                  }
-                  onClick={() =>
+                    ),
+                  label:
+                    record.status === "ACTIVE"
+                      ? t("common.deactivate")
+                      : t("common.activate"),
+                  onClick: () =>
                     modal.confirm({
                       title: t("notif.confirmToggle", {
                         action:
@@ -359,22 +357,17 @@ const AccountDecorator = () => {
                       okText: t("common.yes"),
                       cancelText: t("common.no"),
                       onOk: () => handleToggleUserStatus(record),
-                    })
-                  }
-                >
-                  {record.status === "ACTIVE"
-                    ? t("common.deactivate")
-                    : t("common.activate")}
-                </Button>
-              </div>
-            ),
-          },
+                    }),
+                },
+              ]}
+            />
+          )),
         ]
       : []),
   ];
 
   const adminColumns = [
-    { title: "Id", dataIndex: "id", key: "id", width: 60 },
+    adminCols.id,
     {
       title: t("admin.accounts.username"),
       dataIndex: "username",
@@ -394,66 +387,45 @@ const AccountDecorator = () => {
     },
     { title: t("common.email"), dataIndex: "email", key: "email" },
     {
+      // Tag role dibedakan dari tag status (MASTER tidak hijau).
       title: t("admin.accounts.role"),
       dataIndex: "role",
       key: "role",
       render: (role: AdminRow["role"]) => (
-        <Tag
-          color={
-            role === "MASTER" ? "green" : role === "AUTHOR" ? "blue" : "default"
-          }
-        >
+        <Tag color={ROLE_TAG_COLORS[role] ?? "default"}>
           {t(`admin.role.${role}`)}
         </Tag>
       ),
     },
-    {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: AdminRow["status"]) => (
-        <Tag color={status === "ACTIVE" ? "green" : "default"}>
-          {status === "ACTIVE" ? t("common.active") : t("common.inactive")}
-        </Tag>
-      ),
-    },
-    // Opsi (ubah role + toggle) hanya untuk MASTER — akun sendiri dikecualikan.
+    adminCols.status,
+    // Opsi digabung dropdown three-dots; hanya untuk MASTER.
+    // Akun sendiri: opsi profil; akun lain: ubah + toggle.
     ...(isMaster
       ? [
-          {
-            title: t("common.actions"),
-            key: "actions",
-            fixed: "right" as const,
-            width: 240,
-            render: (_: unknown, record: AdminRow) =>
-              session?.id === record.id ? (
-                // Akun sendiri: button langsung ke halaman profile admin.
-                <Button
-                  size="small"
-                  icon={<UserOutlined />}
-                  onClick={() => router.push("/admin/profile")}
-                >
-                  {t("nav.profile")}
-                </Button>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="small"
-                    icon={<EditOutlined />}
-                    onClick={() => showRoleForm(record)}
-                  >
-                    {t("common.edit")}
-                  </Button>
-                  <Button
-                    size="small"
-                    icon={
+          adminCols.actions((record) => {
+            const isSelf = session?.id === record.id;
+            const items = isSelf
+              ? []
+              : [
+                  {
+                    key: "edit",
+                    icon: <EditOutlined />,
+                    label: t("common.edit"),
+                    onClick: () => showRoleForm(record),
+                  },
+                  {
+                    key: "toggle",
+                    icon:
                       record.status === "ACTIVE" ? (
                         <StopOutlined />
                       ) : (
                         <CheckOutlined />
-                      )
-                    }
-                    onClick={() =>
+                      ),
+                    label:
+                      record.status === "ACTIVE"
+                        ? t("common.deactivate")
+                        : t("common.activate"),
+                    onClick: () =>
                       modal.confirm({
                         title: t("notif.confirmToggle", {
                           action:
@@ -465,16 +437,11 @@ const AccountDecorator = () => {
                         okText: t("common.yes"),
                         cancelText: t("common.no"),
                         onOk: () => handleToggleAdminStatus(record),
-                      })
-                    }
-                  >
-                    {record.status === "ACTIVE"
-                      ? t("common.deactivate")
-                      : t("common.activate")}
-                  </Button>
-                </div>
-              ),
-          },
+                      }),
+                  },
+                ];
+            return <RowActions items={items} />;
+          }),
         ]
       : []),
   ];
@@ -496,13 +463,7 @@ const AccountDecorator = () => {
           />
         }
       >
-        <Table
-          dataSource={filteredUsers}
-          columns={userColumns}
-          rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
-        />
+        <AdminTable dataSource={filteredUsers} columns={userColumns} />
       </Card>
       <Card
         title={t("admin.accounts.admins")}
@@ -528,13 +489,7 @@ const AccountDecorator = () => {
           </Space>
         }
       >
-        <Table
-          dataSource={filteredAdmins}
-          columns={adminColumns}
-          rowKey="id"
-          pagination={{ pageSize: 5, showSizeChanger: false }}
-          scroll={{ x: "max-content" }}
-        />
+        <AdminTable dataSource={filteredAdmins} columns={adminColumns} />
       </Card>
 
       {/* Drawer tambah admin */}
@@ -561,7 +516,7 @@ const AccountDecorator = () => {
             </Button>
           </div>
         }
-        {...modalBodyProps()}
+        {...drawerBodyProps()}
       >
         <FormAdmin
           formProps={{ form, initialValues: { role: "VIEWER" } }}
@@ -599,7 +554,7 @@ const AccountDecorator = () => {
             </Button>
           </div>
         }
-        {...modalBodyProps()}
+        {...drawerBodyProps()}
       >
         <Typography.Paragraph type="secondary" className="mb-4!">
           {t("admin.accounts.changeRoleNote")}
