@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   App,
   Avatar,
@@ -56,6 +57,7 @@ interface UserRow {
 
 const AccountDecorator = () => {
   const { t } = useT();
+  const router = useRouter();
   const mounted = useMounted();
   const { session, loading: sessionLoading } = useAdminSession();
   const { notification, modal } = App.useApp();
@@ -425,7 +427,14 @@ const AccountDecorator = () => {
             width: 240,
             render: (_: unknown, record: AdminRow) =>
               session?.id === record.id ? (
-                <Tag>{t("admin.accounts.self")}</Tag>
+                // Akun sendiri: button langsung ke halaman profile admin.
+                <Button
+                  size="small"
+                  icon={<UserOutlined />}
+                  onClick={() => router.push("/admin/profile")}
+                >
+                  {t("nav.profile")}
+                </Button>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   <Button
@@ -433,7 +442,7 @@ const AccountDecorator = () => {
                     icon={<EditOutlined />}
                     onClick={() => showRoleForm(record)}
                   >
-                    {t("admin.accounts.changeRole")}
+                    {t("common.edit")}
                   </Button>
                   <Button
                     size="small"
@@ -568,7 +577,7 @@ const AccountDecorator = () => {
 
       {/* Drawer ubah role admin — hanya role yang bisa diubah. */}
       <Drawer
-        title={`${t("admin.accounts.changeRole")} — ${editingRole?.username ?? ""}`}
+        title={`${t("common.edit")} — ${editingRole?.username ?? ""}`}
         open={editingRole !== null}
         onClose={() => {
           roleForm.resetFields();

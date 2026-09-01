@@ -84,6 +84,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.viewAll": "Lihat Semua",
     "common.readMore": "Baca Selengkapnya",
     "common.backToHome": "Kembali ke Beranda",
+    "common.back": "Kembali",
     "common.dummyDataNote": "Data yang ditampilkan masih dummy (slicing)",
 
     "nav.home": "Beranda",
@@ -228,9 +229,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.accounts.credentialsTitle": "Kredensial Admin Baru",
     "admin.accounts.credentialsNote":
       "Simpan kredensial berikut — password hanya ditampilkan sekali dan telah dikirim via email bila SMTP aktif.",
-    "admin.accounts.changeRole": "Ubah Role",
     "admin.accounts.changeRoleNote": "Hanya role yang dapat diubah.",
-    "admin.accounts.self": "Profil",
     "admin.tourism.title": "Wisata",
     "admin.tourism.places": "Tempat Wisata",
     "admin.tourism.packages": "Paket",
@@ -284,6 +283,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.login.backToSite": "Kembali ke situs web",
     "admin.profile.title": "Profil Admin",
     "admin.profile.editHint": "Hanya avatar dan nama yang dapat diubah.",
+    "admin.profile.avatarHint": "Klik avatar untuk mengunggah foto (maks 2MB)",
   },
   en: {
     "common.today": "Today",
@@ -365,6 +365,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.viewAll": "View All",
     "common.readMore": "Read More",
     "common.backToHome": "Back to Home",
+    "common.back": "Back",
     "common.dummyDataNote": "Displayed data is still dummy (slicing)",
 
     "nav.home": "Home",
@@ -509,9 +510,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.accounts.credentialsTitle": "New Admin Credentials",
     "admin.accounts.credentialsNote":
       "Save the credentials below — the password is shown only once and has been sent via email if SMTP is active.",
-    "admin.accounts.changeRole": "Change Role",
     "admin.accounts.changeRoleNote": "Only the role can be changed.",
-    "admin.accounts.self": "Profile",
     "admin.tourism.title": "Tourism",
     "admin.tourism.places": "Tourism Places",
     "admin.tourism.packages": "Packages",
@@ -565,6 +564,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.login.backToSite": "Back to website",
     "admin.profile.title": "Admin Profile",
     "admin.profile.editHint": "Only the avatar and name can be edited.",
+    "admin.profile.avatarHint": "Click the avatar to upload a photo (max 2MB)",
   },
 };
 
