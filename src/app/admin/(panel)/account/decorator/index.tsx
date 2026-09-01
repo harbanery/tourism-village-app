@@ -22,7 +22,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";

@@ -22,9 +22,9 @@ export function PackagesSection() {
           </p>
         </div>
 
-        <Row gutter={[16, 16]} className="mt-8">
+        <Row gutter={[16, 16]} className="mt-8!">
           {dummyPackages.map((pkg) => (
-            <Col xs={24} sm={12} md={8} key={pkg.id} className="h-full">
+            <Col xs={24} sm={12} md={8} key={pkg.id} className="h-full!">
               {/* Kartu flex-col: daftar fasilitas yang beda jumlah tetap
                   menghasilkan tinggi kartu sama, dengan CTA terpacu di dasar. */}
               <Card

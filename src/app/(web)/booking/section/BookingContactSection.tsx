@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { Card } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 

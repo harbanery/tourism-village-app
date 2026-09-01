@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { Avatar, Card } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";

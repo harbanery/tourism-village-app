@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { App, Button, Card, Form, Input } from "antd";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 
 interface RegisterFormValues {
   name: string;

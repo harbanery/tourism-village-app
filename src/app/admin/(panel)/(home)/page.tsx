@@ -9,7 +9,7 @@ import {
   ShoppingOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import LoaderPage from "@/components/admin/loader";
 import { AdminTable } from "@/components/admin/table";
 import { formatDate, formatRupiah } from "@/utils/format";

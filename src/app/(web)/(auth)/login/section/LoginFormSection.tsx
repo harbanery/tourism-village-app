@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Alert, App, Button, Card, Form, Input, Typography } from "antd";
 import { InfoCircleOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 
 interface LoginFormValues {
   email: string;

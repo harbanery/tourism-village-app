@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { Button, Card, DatePicker, Form, InputNumber, Radio } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import type { User } from "@/models";

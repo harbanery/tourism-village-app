@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { Empty, Image } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyGalleries, dummyPlaces } from "@/models";

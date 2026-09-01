@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, Button } from "antd";
 import { LoginOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 
 export function LoginRequired() {
   const { t } = useT();

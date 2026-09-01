@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { Button, Card, Col, InputNumber, Row } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";

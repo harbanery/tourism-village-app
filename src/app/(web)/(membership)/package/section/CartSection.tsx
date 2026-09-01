@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { useRouter } from "next/navigation";
 import { Button, Card, Popconfirm } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";

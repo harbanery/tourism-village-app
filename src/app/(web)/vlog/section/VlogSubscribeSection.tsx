@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { Button } from "antd";
 import { YoutubeOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";

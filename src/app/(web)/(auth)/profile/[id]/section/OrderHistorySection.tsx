@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import Link from "next/link";
 import { Button, Card, List } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";

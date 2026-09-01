@@ -15,6 +15,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.addField": "Tambah {field}",
     "common.present": "Sekarang",
 
+    "error.title": "Terjadi kesalahan",
+    "error.subtitle": "Terjadi kesalahan yang tidak terduga.",
+    "error.retry": "Coba Lagi",
+    "notFound.subtitle": "Halaman yang Anda cari tidak ditemukan.",
+    "notFound.back": "Kembali ke Beranda",
+
     "menu.dashboard": "Dashboard",
     "menu.account": "Akun",
     "menu.tourism": "Wisata",
@@ -252,6 +258,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.blog.paraHeader": "Paragraf Pembuka",
     "admin.blog.paraBody": "Paragraf Isi",
     "admin.blog.para": "Paragraf",
+    "admin.blog.dateChanged": "Diubah",
     "form.title": "Judul",
     "form.filename": "Foto",
     "form.para": "Paragraf",
@@ -303,6 +310,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.noPhoto": "No photo yet",
     "common.addField": "Add {field}",
     "common.present": "Present",
+
+    "error.title": "Something went wrong",
+    "error.subtitle": "An unexpected error occurred.",
+    "error.retry": "Try Again",
+    "notFound.subtitle": "The page you are looking for does not exist.",
+    "notFound.back": "Back Home",
 
     "menu.dashboard": "Dashboard",
     "menu.account": "Accounts",
@@ -539,6 +552,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.blog.paraHeader": "Opening Paragraph",
     "admin.blog.paraBody": "Body Paragraph",
     "admin.blog.para": "Paragraph",
+    "admin.blog.dateChanged": "Changed",
     "form.title": "Title",
     "form.filename": "Photo",
     "form.para": "Paragraph",

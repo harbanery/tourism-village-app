@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { Col, Row } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyPackages } from "@/models";
@@ -34,7 +34,7 @@ export default function PackagePage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="text-2xl md:text-3xl font-bold">{t("home.packages.title")}</h1>
-      <Row gutter={[24, 24]} className="mt-6">
+      <Row gutter={[24, 24]} className="mt-6!">
         <Col xs={24} lg={16}>
           <PackageListSection
             quantities={quantities}

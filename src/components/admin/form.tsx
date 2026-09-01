@@ -404,7 +404,7 @@ const FormAdmin = ({
                               {...restField}
                               name={name}
                               rules={buildRules(item, item.required)}
-                              className="!mb-0 flex-1"
+                              className="flex-1! mb-0!"
                             >
                               {renderField({
                                 type: item.type,

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Alert, App, Button, Card, Form, Input, Typography } from "antd";
 import { InfoCircleOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/hooks/useMounted";
+import { useMounted } from "@/helpers/useMounted";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
 
@@ -105,13 +105,13 @@ export default function AdminLoginPage() {
           description={
             <div className="flex flex-col gap-0.5">
               <Typography.Text className="text-xs!">
-                {t("admin.accounts.role.MASTER")}: masteradmin / Admin#1234
+                {t("admin.role.MASTER")}: masteradmin / Admin#1234
               </Typography.Text>
               <Typography.Text className="text-xs!">
-                {t("admin.accounts.role.VIEWER")}: vieweradmin / Viewer#1234
+                {t("admin.role.VIEWER")}: vieweradmin / Viewer#1234
               </Typography.Text>
               <Typography.Text className="text-xs!">
-                {t("admin.accounts.role.AUTHOR")}: authoradmin / Author#1234
+                {t("admin.role.AUTHOR")}: authoradmin / Author#1234
               </Typography.Text>
             </div>
           }
