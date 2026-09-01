@@ -3,23 +3,22 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   App,
+  Avatar,
   Button,
   Card,
   Drawer,
   Form,
-  Image,
   Input,
-  Modal,
   Space,
 } from "antd";
 import {
   CheckOutlined,
   DeleteOutlined,
   EditOutlined,
-  EyeOutlined,
   PlusOutlined,
   SearchOutlined,
   StopOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
@@ -69,7 +68,6 @@ const SponsorDecorator = () => {
   const [query, setQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<SponsorRow | null>(null);
-  const [viewSponsor, setViewSponsor] = useState<SponsorRow | null>(null);
   const [saving, setSaving] = useState(false);
 
   const fetchSponsors = useCallback(async () => {
@@ -223,10 +221,16 @@ const SponsorDecorator = () => {
   const columns = [
     cols.id,
     {
+      // Foto logo sponsor berada di kolom nama (seperti akun admin/user).
       title: t("admin.sponsors.name"),
       dataIndex: "name",
       key: "name",
-      render: (name: string) => <span className="font-medium">{name}</span>,
+      render: (_: unknown, record: SponsorRow) => (
+        <div className="flex items-center gap-2">
+          <Avatar src={record.filename} icon={<TrophyOutlined />} />
+          <span className="font-medium">{record.name}</span>
+        </div>
+      ),
     },
     {
       title: t("admin.sponsors.desc"),
@@ -274,12 +278,6 @@ const SponsorDecorator = () => {
                       cancelText: t("common.no"),
                       onOk: () => handleToggleStatus(record),
                     }),
-                },
-                {
-                  key: "view",
-                  icon: <EyeOutlined />,
-                  label: t("common.viewPhoto"),
-                  onClick: () => setViewSponsor(record),
                 },
                 ...(record.status !== "ACTIVE"
                   ? [
@@ -345,27 +343,6 @@ const SponsorDecorator = () => {
       >
         <AdminTable dataSource={filtered} columns={columns} />
       </Card>
-
-      {/* Modal lihat foto sponsor */}
-      <Modal
-        title={`${t("common.viewPhoto")} — ${viewSponsor?.name ?? ""}`}
-        open={viewSponsor !== null}
-        footer={null}
-        onCancel={() => setViewSponsor(null)}
-        width={640}
-      >
-        {viewSponsor?.filename ? (
-          <Image
-            src={viewSponsor.filename}
-            alt={viewSponsor.name}
-            className="w-full! rounded! bg-black/5! object-contain!"
-          />
-        ) : (
-          <p className="text-center py-8 text-foreground/60">
-            {t("common.noPhoto")}
-          </p>
-        )}
-      </Modal>
 
       {/* Drawer tambah/edit sponsor */}
       <Drawer

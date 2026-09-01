@@ -89,6 +89,22 @@ const HeaderLayout: React.FC<{
           menu={{
             items: [
               {
+                key: "identity",
+                disabled: true,
+                label: session ? (
+                  <div className="flex flex-col py-1">
+                    <span className="font-semibold">
+                      {session.name ?? session.username}
+                    </span>
+                    <span className="text-xs! text-foreground/60!">
+                      {session.email}
+                    </span>
+                  </div>
+                ) : (
+                  "-"
+                ),
+              },
+              {
                 key: "role",
                 disabled: true,
                 label: session ? (

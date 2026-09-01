@@ -78,10 +78,10 @@ export default function OrderPage() {
       width: 60,
     },
     {
-      title: t("common.date"),
-      dataIndex: "dateOrder",
-      key: "dateOrder",
-      render: (v: string) => formatDate(v, locale, true),
+      title: t("admin.orders.departureDate"),
+      dataIndex: "dateSchedule",
+      key: "dateSchedule",
+      render: (v: string) => formatDate(v, locale),
     },
     {
       title: t("common.name"),
@@ -98,12 +98,6 @@ export default function OrderPage() {
       dataIndex: ["user", "phone"],
       key: "userPhone",
       render: (v: string | null) => v ?? "-",
-    },
-    {
-      title: t("admin.orders.departureDate"),
-      dataIndex: "dateSchedule",
-      key: "dateSchedule",
-      render: (v: string) => formatDate(v, locale),
     },
     {
       title: t("admin.orders.stay"),

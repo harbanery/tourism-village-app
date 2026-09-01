@@ -9,7 +9,6 @@ import {
   Form,
   Image,
   Input,
-  Modal,
   Space,
 } from "antd";
 import {
@@ -71,7 +70,7 @@ const TourismDecorator = () => {
   const { t } = useT();
   const mounted = useMounted();
   const { session, loading: sessionLoading } = useAdminSession();
-  const { notification, modal } = App.useApp();
+  const { notification, modal, message } = App.useApp();
 
   // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
@@ -91,12 +90,25 @@ const TourismDecorator = () => {
 
   const [isPlaceModalOpen, setIsPlaceModalOpen] = useState(false);
   const [editingPlace, setEditingPlace] = useState<PlaceRow | null>(null);
-  const [viewPlace, setViewPlace] = useState<PlaceRow | null>(null);
+  /** Foto yang sedang dipreview langsung (lightbox, bukan modal). */
+  const [preview, setPreview] = useState<{
+    src: string;
+    name: string;
+  } | null>(null);
 
   const [isPackageModalOpen, setIsPackageModalOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<PackageRow | null>(null);
 
   const [saving, setSaving] = useState(false);
+
+  /** Buka foto langsung di image preview. */
+  const openPhoto = (src: string | null, name: string) => {
+    if (!src) {
+      message.info(t("common.noPhoto"));
+      return;
+    }
+    setPreview({ src, name });
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -435,7 +447,7 @@ const TourismDecorator = () => {
                   key: "view",
                   icon: <EyeOutlined />,
                   label: t("common.viewPhoto"),
-                  onClick: () => setViewPlace(record),
+                  onClick: () => openPhoto(record.photo, record.name),
                 },
                 ...(record.status !== "ACTIVE"
                   ? [
@@ -624,26 +636,19 @@ const TourismDecorator = () => {
         <AdminTable dataSource={filteredPackages} columns={packageColumns} />
       </Card>
 
-      {/* Modal lihat foto tempat wisata */}
-      <Modal
-        title={`${t("common.viewPhoto")} — ${viewPlace?.name ?? ""}`}
-        open={viewPlace !== null}
-        footer={null}
-        onCancel={() => setViewPlace(null)}
-        width={640}
-      >
-        {viewPlace?.photo ? (
-          <Image
-            src={viewPlace.photo}
-            alt={viewPlace.name}
-            className="w-full! rounded!"
-          />
-        ) : (
-          <p className="text-center py-8 text-foreground/60">
-            {t("common.noPhoto")}
-          </p>
-        )}
-      </Modal>
+      {/* Preview foto tempat wisata langsung (lightbox, tanpa modal) */}
+      <Image
+        src={preview?.src}
+        alt={preview?.name}
+        style={{ display: "none" }}
+        preview={{
+          open: preview !== null,
+          src: preview?.src,
+          onOpenChange: (open) => {
+            if (!open) setPreview(null);
+          },
+        }}
+      />
 
       {/* Drawer tambah/edit tempat wisata */}
       <Drawer

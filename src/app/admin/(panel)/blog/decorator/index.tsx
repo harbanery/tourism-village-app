@@ -9,7 +9,6 @@ import {
   Form,
   Image,
   Input,
-  Modal,
   Space,
 } from "antd";
 import {
@@ -67,7 +66,7 @@ const BlogDecorator = () => {
   const { t, locale } = useT();
   const mounted = useMounted();
   const { session, loading: sessionLoading } = useAdminSession();
-  const { notification, modal } = App.useApp();
+  const { notification, modal, message } = App.useApp();
 
   const [form] = Form.useForm<BlogFormValues>();
 
@@ -85,8 +84,21 @@ const BlogDecorator = () => {
   const [query, setQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<BlogRow | null>(null);
-  const [viewBlog, setViewBlog] = useState<BlogRow | null>(null);
+  /** Foto yang sedang dipreview langsung (lightbox, bukan modal). */
+  const [preview, setPreview] = useState<{
+    src: string;
+    name: string;
+  } | null>(null);
   const [saving, setSaving] = useState(false);
+
+  /** Buka foto langsung di image preview. */
+  const openPhoto = (src: string | null, name: string) => {
+    if (!src) {
+      message.info(t("common.noPhoto"));
+      return;
+    }
+    setPreview({ src, name });
+  };
 
   const fetchBlogs = useCallback(async () => {
     try {
@@ -334,7 +346,7 @@ const BlogDecorator = () => {
                 key: "view",
                 icon: <EyeOutlined />,
                 label: t("common.viewPhoto"),
-                onClick: () => setViewBlog(record),
+                onClick: () => openPhoto(record.filename, record.title),
               },
               // Hapus hanya MASTER dan hanya untuk data nonaktif.
               ...(isMaster && record.status !== "ACTIVE"
@@ -402,26 +414,19 @@ const BlogDecorator = () => {
         <AdminTable dataSource={filtered} columns={columns} />
       </Card>
 
-      {/* Modal lihat foto blog */}
-      <Modal
-        title={`${t("common.viewPhoto")} — ${viewBlog?.title ?? ""}`}
-        open={viewBlog !== null}
-        footer={null}
-        onCancel={() => setViewBlog(null)}
-        width={720}
-      >
-        {viewBlog?.filename ? (
-          <Image
-            src={viewBlog.filename}
-            alt={viewBlog.title}
-            className="w-full! rounded!"
-          />
-        ) : (
-          <p className="text-center py-8 text-foreground/60">
-            {t("common.noPhoto")}
-          </p>
-        )}
-      </Modal>
+      {/* Preview foto blog langsung (lightbox, tanpa modal) */}
+      <Image
+        src={preview?.src}
+        alt={preview?.name}
+        style={{ display: "none" }}
+        preview={{
+          open: preview !== null,
+          src: preview?.src,
+          onOpenChange: (open) => {
+            if (!open) setPreview(null);
+          },
+        }}
+      />
 
       {/* Drawer tambah/edit blog */}
       <Drawer
