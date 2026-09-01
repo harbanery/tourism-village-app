@@ -387,10 +387,11 @@ const AccountDecorator = () => {
     },
     { title: t("common.email"), dataIndex: "email", key: "email" },
     {
-      // Tag role dibedakan dari tag status (MASTER tidak hijau).
+      // Tag role (align tengah) dibedakan dari tag status (MASTER tidak hijau).
       title: t("admin.accounts.role"),
       dataIndex: "role",
       key: "role",
+      align: "center" as const,
       render: (role: AdminRow["role"]) => (
         <Tag color={ROLE_TAG_COLORS[role] ?? "default"}>
           {t(`admin.role.${role}`)}

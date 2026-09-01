@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { App, Card, Input, Rate, Space, Tooltip } from "antd";
 import {
+  CheckCircleFilled,
   CheckOutlined,
+  CloseCircleFilled,
   CloseOutlined,
   SearchOutlined,
   StarFilled,
@@ -150,13 +152,17 @@ const ReviewDecorator = () => {
       title: t("admin.reviews.rating"),
       dataIndex: "rating",
       key: "rating",
-      render: (rating: number) => <Rate disabled defaultValue={rating} />,
+      render: (rating: number) => (
+        <Rate disabled allowHalf defaultValue={rating} />
+      ),
     },
     {
-      // Kolom utama: ceklis (bg hijau) bila utama, X (bg merah) bila tidak.
+      // Kolom utama (align tengah): ceklis (bg hijau) bila utama,
+      // X (bg merah) bila tidak.
       title: t("admin.reviews.featured"),
       dataIndex: "featured",
       key: "featured",
+      align: "center" as const,
       render: (featured: boolean) => (
         <Tooltip
           title={featured ? t("admin.reviews.main") : t("admin.reviews.nomain")}
@@ -164,11 +170,11 @@ const ReviewDecorator = () => {
           <span
             className={
               featured
-                ? "flex h-6 w-6 items-center justify-center rounded-full bg-green-400 text-white"
-                : "flex h-6 w-6 items-center justify-center rounded-full bg-red-400 text-white"
+                ? "flex items-center justify-center text-base text-green-400"
+                : "flex items-center justify-center text-base text-red-400"
             }
           >
-            {featured ? <CheckOutlined /> : <CloseOutlined />}
+            {featured ? <CheckCircleFilled /> : <CloseCircleFilled />}
           </span>
         </Tooltip>
       ),
@@ -180,58 +186,50 @@ const ReviewDecorator = () => {
     ...(isMaster
       ? [
           cols.actions((record) => (
-            <Tooltip
-              title={t("admin.reviews.featuredHint", {
-                max: 3,
-              })}
-            >
-              <div>
-                <RowActions
-                  items={[
-                    {
-                      key: "toggle",
-                      icon:
-                        record.status === "ACTIVE" ? (
-                          <StopOutlined />
-                        ) : (
-                          <CheckOutlined />
-                        ),
-                      label:
-                        record.status === "ACTIVE"
-                          ? t("common.deactivate")
-                          : t("common.activate"),
-                      onClick: () =>
-                        modal.confirm({
-                          title: t("notif.confirmToggle", {
-                            action:
-                              record.status === "ACTIVE"
-                                ? t("common.deactivate")
-                                : t("common.activate"),
-                            entity: t("admin.reviews.title"),
-                          }),
-                          okText: t("common.yes"),
-                          cancelText: t("common.no"),
-                          onOk: () => handleToggleStatus(record),
-                        }),
-                    },
-                    // Opsi utama hanya untuk ulasan berstatus aktif;
-                    // nonaktifkan otomatis menghapus status utama (API).
-                    ...(record.status === "ACTIVE"
-                      ? [
-                          {
-                            key: "featured",
-                            icon: <StarFilled />,
-                            label: record.featured
-                              ? t("admin.reviews.unmain")
-                              : t("admin.reviews.main"),
-                            onClick: () => handleToggleFeatured(record),
-                          },
-                        ]
-                      : []),
-                  ]}
-                />
-              </div>
-            </Tooltip>
+            <RowActions
+              items={[
+                {
+                  key: "toggle",
+                  icon:
+                    record.status === "ACTIVE" ? (
+                      <StopOutlined />
+                    ) : (
+                      <CheckOutlined />
+                    ),
+                  label:
+                    record.status === "ACTIVE"
+                      ? t("common.deactivate")
+                      : t("common.activate"),
+                  onClick: () =>
+                    modal.confirm({
+                      title: t("notif.confirmToggle", {
+                        action:
+                          record.status === "ACTIVE"
+                            ? t("common.deactivate")
+                            : t("common.activate"),
+                        entity: t("admin.reviews.title"),
+                      }),
+                      okText: t("common.yes"),
+                      cancelText: t("common.no"),
+                      onOk: () => handleToggleStatus(record),
+                    }),
+                },
+                // Opsi utama hanya untuk ulasan berstatus aktif;
+                // nonaktifkan otomatis menghapus status utama (API).
+                ...(record.status === "ACTIVE"
+                  ? [
+                      {
+                        key: "featured",
+                        icon: <StarFilled />,
+                        label: record.featured
+                          ? t("admin.reviews.unmain")
+                          : t("admin.reviews.main"),
+                        onClick: () => handleToggleFeatured(record),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
           )),
         ]
       : []),
