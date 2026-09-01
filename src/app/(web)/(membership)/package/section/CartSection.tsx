@@ -1,7 +1,6 @@
 "use client";
 
 import { useMounted } from "@/helpers/useMounted";
-import { useRouter } from "next/navigation";
 import { Button, Card, Popconfirm } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -13,14 +12,15 @@ export function CartSection({
   total,
   onRemove,
   onClear,
+  onCheckout,
 }: {
   cart: CartItem[];
   total: number;
   onRemove: (packageId: number) => void;
   onClear: () => void;
+  onCheckout: () => void;
 }) {
   const { t } = useT();
-  const router = useRouter();
   const mounted = useMounted();
   if (!mounted) return null;
 
@@ -70,7 +70,7 @@ export function CartSection({
             block
             className="mt-2!"
             disabled={cart.length === 0}
-            onClick={() => router.push("/checkout/1")}
+            onClick={onCheckout}
           >
             {t("cart.checkout")}
           </Button>

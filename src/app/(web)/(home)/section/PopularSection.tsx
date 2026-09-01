@@ -1,13 +1,20 @@
 "use client";
 
-import { Card, Empty } from "antd";
+import { useCallback, useEffect, useState } from "react";
+import { Card, Empty, Skeleton } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { dummyPlaces, type Place } from "@/models";
 
 const MAX_PLACES = 3;
 
-function PlaceCard({ place }: { place: Place }) {
+/** Tempat wisata live dari /api/web/places (kelola admin). */
+interface WebPlace {
+  id: number;
+  name: string;
+  photo: string | null;
+}
+
+function PlaceCard({ place }: { place: WebPlace }) {
   return (
     <Card
       hoverable
@@ -40,7 +47,24 @@ function PlaceCard({ place }: { place: Place }) {
 
 export function PopularSection() {
   const { t } = useT();
-  const places = dummyPlaces.filter((p) => p.active === "yes").slice(0, MAX_PLACES);
+  const [places, setPlaces] = useState<WebPlace[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPlaces = useCallback(async () => {
+    try {
+      const res = await fetch("/api/web/places");
+      const json = await res.json();
+      if (json.success) setPlaces(json.data);
+    } catch (error) {
+      console.error("Error fetching places:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void Promise.resolve().then(fetchPlaces);
+  }, [fetchPlaces]);
 
   return (
     <section className="flex min-h-screen items-center bg-white dark:bg-[#141416]">
@@ -55,9 +79,15 @@ export function PopularSection() {
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {places.map((place) => (
-            <PlaceCard key={place.id} place={place} />
-          ))}
+          {loading
+            ? [1, 2, 3].map((key) => (
+                <Card key={key} loading className="h-full!">
+                  <Skeleton.Image active className="w-full!" />
+                </Card>
+              ))
+            : places.slice(0, MAX_PLACES).map((place) => (
+                <PlaceCard key={place.id} place={place} />
+              ))}
         </div>
       </div>
     </section>

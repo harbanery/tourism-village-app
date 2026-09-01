@@ -182,6 +182,27 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.orderer": "Data Pemesan",
     "checkout.process": "Proses Order",
     "checkout.orders": "Pesanan",
+    "checkout.emptyCart":
+      "Keranjang kosong — silakan pilih paket wisata terlebih dahulu.",
+
+    "payment.title": "Pembayaran",
+    "payment.simulatorNote":
+      "Mode simulator Midtrans (sandbox) — transaksi tidak menggunakan uang nyata.",
+    "payment.simulatorHint":
+      "Isi MIDTRANS_SERVER_KEY di .env untuk beralih ke Snap sandbox Midtrans asli.",
+    "payment.method": "Metode Pembayaran",
+    "payment.pay": "Bayar Sekarang",
+    "payment.success": "Pembayaran berhasil",
+    "payment.canceled": "Pembayaran dibatalkan",
+    "payment.failed": "Pembayaran gagal, coba lagi",
+    "payment.status.PENDING": "Menunggu Pembayaran",
+    "payment.status.PAID": "Lunas",
+    "payment.status.FAILED": "Gagal",
+    "payment.status.CANCELED": "Dibatalkan",
+
+    "notif.orderCreated": "Pesanan dibuat — selesaikan pembayaran",
+    "notif.orderFailed": "Gagal membuat pesanan",
+    "notif.reviewSubmitted": "Ulasan terkirim — menunggu moderasi admin",
 
     "success.title": "Pesanan Berhasil!",
     "success.message":
@@ -276,6 +297,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.orders.departureDate": "Tanggal Berangkat",
     "admin.orders.stay": "Inap",
     "admin.orders.totalPrice": "Harga Total",
+    "admin.orders.payment": "Pembayaran",
     "admin.sponsors.title": "Sponsor",
     "admin.sponsors.name": "Nama Sponsor",
     "admin.sponsors.desc": "Deskripsi",
@@ -476,6 +498,27 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.orderer": "Orderer Data",
     "checkout.process": "Process Order",
     "checkout.orders": "Orders",
+    "checkout.emptyCart":
+      "Your cart is empty — please pick a tour package first.",
+
+    "payment.title": "Payment",
+    "payment.simulatorNote":
+      "Midtrans simulator mode (sandbox) — no real money is transferred.",
+    "payment.simulatorHint":
+      "Set MIDTRANS_SERVER_KEY in .env to switch to the real Midtrans sandbox Snap.",
+    "payment.method": "Payment Method",
+    "payment.pay": "Pay Now",
+    "payment.success": "Payment successful",
+    "payment.canceled": "Payment canceled",
+    "payment.failed": "Payment failed, please try again",
+    "payment.status.PENDING": "Pending Payment",
+    "payment.status.PAID": "Paid",
+    "payment.status.FAILED": "Failed",
+    "payment.status.CANCELED": "Canceled",
+
+    "notif.orderCreated": "Order created — complete the payment",
+    "notif.orderFailed": "Failed to create order",
+    "notif.reviewSubmitted": "Review submitted — awaiting admin moderation",
 
     "success.title": "Order Successful!",
     "success.message":
@@ -570,6 +613,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.orders.departureDate": "Departure Date",
     "admin.orders.stay": "Stay",
     "admin.orders.totalPrice": "Total Price",
+    "admin.orders.payment": "Payment",
     "admin.sponsors.title": "Sponsors",
     "admin.sponsors.name": "Sponsor Name",
     "admin.sponsors.desc": "Description",

@@ -17,6 +17,14 @@ enum Status {
   NONACTIVE
 }
 
+/** Status pembayaran pesanan (Midtrans/simulator). */
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+}
+
 /** Role admin: master (semua), viewer (lihat saja), author (blog saja). */
 enum AdminRole {
   MASTER
@@ -201,16 +209,20 @@ model Testimonial {
 // ============================================================
 
 model Order {
-  id           Int      @id @default(autoincrement())
-  userId       Int      @map("user_id")
-  dateOrder    DateTime @default(now()) @map("date_order")
-  dateSchedule DateTime @map("date_schedule") @db.Date
-  homestay     Boolean  @default(false)
-  homestayTime Int?     @map("homestay_time")
-  totalPrice   Int      @map("total_harga")
-  status       Status   @default(ACTIVE)
-  user         AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items        OrderItem[]
+  id            Int           @id @default(autoincrement())
+  userId        Int           @map("user_id")
+  dateOrder     DateTime      @default(now()) @map("date_order")
+  dateSchedule  DateTime      @map("date_schedule") @db.Date
+  homestay      Boolean       @default(false)
+  homestayTime  Int?          @map("homestay_time")
+  totalPrice    Int           @map("total_harga")
+  status        Status        @default(ACTIVE)
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
+  paymentMethod String?       @map("payment_method")
+  snapToken     String?       @map("snap_token")
+  paidAt        DateTime?     @map("paid_at")
+  user          AuthUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         OrderItem[]
 
   @@map("wisata_pesan")
 }

@@ -32,6 +32,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
     homestay: order.homestay ? ("yes" as const) : ("no" as const),
     homestayTime: order.homestayTime,
     totalPrice: order.totalPrice,
+    paymentStatus: order.paymentStatus,
     items: order.items.map((item) => ({
       id: item.id,
       packageName: item.package.name,

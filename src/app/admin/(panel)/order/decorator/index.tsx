@@ -9,6 +9,16 @@ import { useMounted } from "@/helpers/useMounted";
 import LoaderPage from "@/components/admin/loader";
 import { formatDate, formatRupiah } from "@/utils/format";
 
+type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
+
+/** Warna tag status pembayaran. */
+const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
+  PAID: "green",
+  PENDING: "orange",
+  FAILED: "red",
+  CANCELED: "default",
+};
+
 interface OrderRow {
   id: number;
   dateOrder: string;
@@ -16,6 +26,7 @@ interface OrderRow {
   homestay: boolean;
   homestayTime: number | null;
   totalPrice: number;
+  paymentStatus: PaymentStatus;
   status: "ACTIVE" | "NONACTIVE";
   user: { id: number; name: string; email: string; phone: string | null };
   items: {
@@ -130,6 +141,16 @@ const OrderDecorator = () => {
       key: "totalPrice",
       render: (v: number) => (
         <span className="font-medium">{formatRupiah(v)}</span>
+      ),
+    },
+    {
+      title: t("admin.orders.payment"),
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
+      render: (v: PaymentStatus) => (
+        <Tag color={PAYMENT_TAG_COLORS[v] ?? "default"}>
+          {t(`payment.status.${v}`)}
+        </Tag>
       ),
     },
   ];

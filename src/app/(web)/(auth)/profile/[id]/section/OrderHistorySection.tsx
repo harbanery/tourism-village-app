@@ -2,12 +2,36 @@
 
 import { useMounted } from "@/helpers/useMounted";
 import Link from "next/link";
-import { Button, Card, List } from "antd";
+import { Button, Card, List, Tag } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
-import type { Order } from "@/models";
 import { formatDate, formatRupiah } from "@/utils/format";
 
-export function OrderHistorySection({ orders }: { orders: Order[] }) {
+type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
+
+export interface HistoryOrder {
+  id: number;
+  userId: number;
+  userName?: string;
+  userEmail?: string;
+  userPhone?: string | null;
+  dateOrder: string;
+  dateSchedule: string;
+  homestay: "yes" | "no";
+  homestayTime: number | null;
+  totalPrice: number;
+  paymentStatus: PaymentStatus;
+  items: { id: number; packageName: string; quantity: number; price: number }[];
+}
+
+/** Warna tag status pembayaran. */
+const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
+  PAID: "green",
+  PENDING: "orange",
+  FAILED: "red",
+  CANCELED: "default",
+};
+
+export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
   const { t, locale } = useT();
   const mounted = useMounted();
   if (!mounted) return null;
@@ -26,7 +50,14 @@ export function OrderHistorySection({ orders }: { orders: Order[] }) {
           dataSource={orders}
           renderItem={(order) => (
             <List.Item>
-              <Card title={`${t("common.total")}: ${formatRupiah(order.totalPrice)}`}>
+              <Card
+                title={`${t("common.total")}: ${formatRupiah(order.totalPrice)}`}
+                extra={
+                  <Tag color={PAYMENT_TAG_COLORS[order.paymentStatus]}>
+                    {t(`payment.status.${order.paymentStatus}`)}
+                  </Tag>
+                }
+              >
                 <p className="text-sm text-foreground/70">
                   {t("common.date")}: {formatDate(order.dateOrder, locale, true)}
                 </p>

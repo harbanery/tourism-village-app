@@ -1,24 +1,59 @@
 "use client";
 
-import { useState } from "react";
-import { useMounted } from "@/helpers/useMounted";
-import { Col, Row } from "antd";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Col, Row, App } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
-import { dummyPackages } from "@/models";
-import { PackageListSection, type CartItem } from "./section/PackageListSection";
+import { useMounted } from "@/helpers/useMounted";
+import { writeCart } from "@/helpers/cart";
+import { PackageListSection, type CartItem, type WebPackage } from "./section/PackageListSection";
 import { CartSection } from "./section/CartSection";
 
+/** Halaman paket wisata — data live dari DB (sesuai kelola admin). */
 export default function PackagePage() {
   const { t } = useT();
+  const router = useRouter();
+  const mounted = useMounted();
+  const { notification } = App.useApp();
+
+  const [fetching, setFetching] = useState(true);
+  const [packages, setPackages] = useState<WebPackage[]>([]);
+  const [session, setSession] = useState<{ id: number } | null>(null);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  const mounted = useMounted();
-  if (!mounted) return null;
+  const load = useCallback(async () => {
+    try {
+      const [packagesRes, sessionRes] = await Promise.all([
+        fetch("/api/web/packages"),
+        fetch("/api/web/auth/session"),
+      ]);
+      const packagesJson = await packagesRes.json();
+      const sessionJson = await sessionRes.json();
+      if (packagesJson.success) setPackages(packagesJson.data);
+      setSession(sessionJson.success ? sessionJson.data : null);
+    } catch (error) {
+      console.error("Error fetching packages:", error);
+      notification.error({
+        title: t("notif.error"),
+        description: t("notif.fetchFailed"),
+        placement: "bottomRight",
+      });
+    } finally {
+      setFetching(false);
+    }
+  }, [notification, t]);
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
 
-  const addToCart = (pkg: (typeof dummyPackages)[number]) => {
+  const total = useMemo(
+    () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [cart],
+  );
+
+  const addToCart = (pkg: WebPackage) => {
     const quantity = quantities[pkg.id] ?? 1;
     setCart((prev) => {
       const existing = prev.find((c) => c.packageId === pkg.id);
@@ -27,32 +62,49 @@ export default function PackagePage() {
           c.packageId === pkg.id ? { ...c, quantity: c.quantity + quantity } : c,
         );
       }
-      return [...prev, { packageId: pkg.id, name: pkg.name, price: pkg.price, quantity }];
+      return [
+        ...prev,
+        { packageId: pkg.id, name: pkg.name, price: pkg.price, quantity },
+      ];
     });
   };
+
+  const goCheckout = () => {
+    // Simpan keranjang untuk halaman checkout (sessionStorage).
+    writeCart(cart.map((item) => ({ packageId: item.packageId, quantity: item.quantity })));
+    router.push(session ? `/checkout/${session.id}` : "/login");
+  };
+
+  if (!mounted) return null;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="text-2xl md:text-3xl font-bold">{t("home.packages.title")}</h1>
-      <Row gutter={[24, 24]} className="mt-6!">
-        <Col xs={24} lg={16}>
-          <PackageListSection
-            quantities={quantities}
-            setQuantities={setQuantities}
-            onAdd={addToCart}
-          />
-        </Col>
-        <Col xs={24} lg={8}>
-          <CartSection
-            cart={cart}
-            total={total}
-            onRemove={(packageId) =>
-              setCart((prev) => prev.filter((c) => c.packageId !== packageId))
-            }
-            onClear={() => setCart([])}
-          />
-        </Col>
-      </Row>
+      {fetching ? (
+        <p className="mt-6 text-foreground/60">{t("common.loading")}</p>
+      ) : (
+        <Row gutter={[24, 24]} className="mt-6!">
+          <Col xs={24} lg={16}>
+            <PackageListSection
+              packages={packages}
+              quantities={quantities}
+              setQuantities={setQuantities}
+              onAdd={addToCart}
+            />
+          </Col>
+          <Col xs={24} lg={8}>
+            <CartSection
+              cart={cart}
+              total={total}
+              onRemove={(packageId) =>
+                setCart((prev) => prev.filter((c) => c.packageId !== packageId))
+              }
+              onClear={() => setCart([])}
+              onCheckout={goCheckout}
+            />
+          </Col>
+        </Row>
+      )}
     </div>
   );
 }
