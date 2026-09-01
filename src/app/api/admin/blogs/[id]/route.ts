@@ -41,9 +41,14 @@ export async function PUT(request: Request, { params }: Params) {
       where: { id: Number(id) },
       data: {
         title: body.title,
+        ...(body.placeId !== undefined && { placeId: body.placeId ?? null }),
         ...(body.filename !== undefined && { filename: body.filename || "" }),
         para: body.para,
         datetimeAfter: new Date(),
+      },
+      include: {
+        admin: { select: { id: true, username: true, name: true } },
+        place: { select: { id: true, name: true } },
       },
     });
 

@@ -7,18 +7,18 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
 import { menuAdminConfig } from "@/helpers/menu";
-import type { AdminSessionInfo } from "./index";
+import { useAdminSession } from "@/components/admin/session";
 
 const { Header } = Layout;
 
 const HeaderLayout: React.FC<{
-  session: AdminSessionInfo | null;
   onMobileMenuClick?: () => void;
-}> = ({ session, onMobileMenuClick }) => {
+}> = ({ onMobileMenuClick }) => {
   const { t } = useT();
   const pathname = usePathname();
   const router = useRouter();
   const { token } = theme.useToken();
+  const { session } = useAdminSession();
 
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;

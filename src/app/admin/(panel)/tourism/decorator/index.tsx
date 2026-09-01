@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
 import { modalBodyProps } from "@/helpers/modal";
@@ -64,7 +65,11 @@ interface PackageFormValues {
 const TourismDecorator = () => {
   const { t } = useT();
   const mounted = useMounted();
+  const { session, loading: sessionLoading } = useAdminSession();
   const { notification, modal } = App.useApp();
+
+  // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
+  const isMaster = session?.role === "MASTER";
 
   const [placeForm] = Form.useForm<PlaceFormValues>();
   const [packageForm] = Form.useForm<PackageFormValues>();
@@ -151,9 +156,10 @@ const TourismDecorator = () => {
 
       notification.success({
         title: t("notif.success"),
-        description: t("notif.saveSuccess", {
-          entity: t("admin.tourism.places"),
-        }),
+        // Data baru dibuat nonaktif dulu; aktifkan lewat opsi.
+        description: editingPlace
+          ? t("notif.saveSuccess", { entity: t("admin.tourism.places") })
+          : t("notif.createSuccess", { entity: t("admin.tourism.places") }),
         placement: "bottomRight",
       });
       setIsPlaceModalOpen(false);
@@ -278,9 +284,10 @@ const TourismDecorator = () => {
 
       notification.success({
         title: t("notif.success"),
-        description: t("notif.saveSuccess", {
-          entity: t("admin.tourism.packages"),
-        }),
+        // Data baru dibuat nonaktif dulu; aktifkan lewat opsi.
+        description: editingPackage
+          ? t("notif.saveSuccess", { entity: t("admin.tourism.packages") })
+          : t("notif.createSuccess", { entity: t("admin.tourism.packages") }),
         placement: "bottomRight",
       });
       setIsPackageModalOpen(false);
@@ -384,69 +391,80 @@ const TourismDecorator = () => {
         </Tag>
       ),
     },
-    {
-      title: t("common.actions"),
-      key: "actions",
-      fixed: "right" as const,
-      width: 260,
-      render: (_: unknown, record: PlaceRow) => (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => showPlaceForm(record)}
-          >
-            {t("common.edit")}
-          </Button>
-          <Button
-            size="small"
-            icon={record.status === "ACTIVE" ? <StopOutlined /> : <CheckOutlined />}
-            onClick={() =>
-              modal.confirm({
-                title: t("notif.confirmToggle", {
-                  action:
-                    record.status === "ACTIVE"
-                      ? t("common.deactivate")
-                      : t("common.activate"),
-                  entity: t("admin.tourism.places"),
-                }),
-                okText: t("common.yes"),
-                cancelText: t("common.no"),
-                onOk: () => handleTogglePlaceStatus(record),
-              })
-            }
-          >
-            {record.status === "ACTIVE"
-              ? t("common.deactivate")
-              : t("common.activate")}
-          </Button>
-          <Button
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => setViewPlace(record)}
-          >
-            {t("common.viewPhoto")}
-          </Button>
-          {record.status !== "ACTIVE" && (
-            <Button
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() =>
-                modal.confirm({
-                  title: `${t("common.delete")} "${record.name}"?`,
-                  content: t("admin.deleteConfirm"),
-                  okText: t("common.delete"),
-                  okButtonProps: { danger: true },
-                  cancelText: t("common.cancel"),
-                  onOk: () => handleDeletePlace(record.id),
-                })
-              }
-            />
-          )}
-        </div>
-      ),
-    },
+    // Opsi hanya untuk MASTER — viewer hidden, bukan disabled.
+    ...(isMaster
+      ? [
+          {
+            title: t("common.actions"),
+            key: "actions",
+            fixed: "right" as const,
+            width: 260,
+            render: (_: unknown, record: PlaceRow) => (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => showPlaceForm(record)}
+                >
+                  {t("common.edit")}
+                </Button>
+                <Button
+                  size="small"
+                  icon={
+                    record.status === "ACTIVE" ? (
+                      <StopOutlined />
+                    ) : (
+                      <CheckOutlined />
+                    )
+                  }
+                  onClick={() =>
+                    modal.confirm({
+                      title: t("notif.confirmToggle", {
+                        action:
+                          record.status === "ACTIVE"
+                            ? t("common.deactivate")
+                            : t("common.activate"),
+                        entity: t("admin.tourism.places"),
+                      }),
+                      okText: t("common.yes"),
+                      cancelText: t("common.no"),
+                      onOk: () => handleTogglePlaceStatus(record),
+                    })
+                  }
+                >
+                  {record.status === "ACTIVE"
+                    ? t("common.deactivate")
+                    : t("common.activate")}
+                </Button>
+                <Button
+                  size="small"
+                  icon={<EyeOutlined />}
+                  onClick={() => setViewPlace(record)}
+                >
+                  {t("common.viewPhoto")}
+                </Button>
+                {record.status !== "ACTIVE" && (
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() =>
+                      modal.confirm({
+                        title: `${t("common.delete")} "${record.name}"?`,
+                        content: t("admin.deleteConfirm"),
+                        okText: t("common.delete"),
+                        okButtonProps: { danger: true },
+                        cancelText: t("common.cancel"),
+                        onOk: () => handleDeletePlace(record.id),
+                      })
+                    }
+                  />
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const packageColumns = [
@@ -484,62 +502,73 @@ const TourismDecorator = () => {
         </Tag>
       ),
     },
-    {
-      title: t("common.actions"),
-      key: "actions",
-      fixed: "right" as const,
-      width: 220,
-      render: (_: unknown, record: PackageRow) => (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => showPackageForm(record)}
-          >
-            {t("common.edit")}
-          </Button>
-          <Button
-            size="small"
-            icon={record.status === "ACTIVE" ? <StopOutlined /> : <CheckOutlined />}
-            onClick={() =>
-              modal.confirm({
-                title: t("notif.confirmToggle", {
-                  action:
-                    record.status === "ACTIVE"
-                      ? t("common.deactivate")
-                      : t("common.activate"),
-                  entity: t("admin.tourism.packages"),
-                }),
-                okText: t("common.yes"),
-                cancelText: t("common.no"),
-                onOk: () => handleTogglePackageStatus(record),
-              })
-            }
-          >
-            {record.status === "ACTIVE"
-              ? t("common.deactivate")
-              : t("common.activate")}
-          </Button>
-          {record.status !== "ACTIVE" && (
-            <Button
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() =>
-                modal.confirm({
-                  title: `${t("common.delete")} "${record.name}"?`,
-                  content: t("admin.deleteConfirm"),
-                  okText: t("common.delete"),
-                  okButtonProps: { danger: true },
-                  cancelText: t("common.cancel"),
-                  onOk: () => handleDeletePackage(record.id),
-                })
-              }
-            />
-          )}
-        </div>
-      ),
-    },
+    // Opsi hanya untuk MASTER — viewer hidden, bukan disabled.
+    ...(isMaster
+      ? [
+          {
+            title: t("common.actions"),
+            key: "actions",
+            fixed: "right" as const,
+            width: 220,
+            render: (_: unknown, record: PackageRow) => (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => showPackageForm(record)}
+                >
+                  {t("common.edit")}
+                </Button>
+                <Button
+                  size="small"
+                  icon={
+                    record.status === "ACTIVE" ? (
+                      <StopOutlined />
+                    ) : (
+                      <CheckOutlined />
+                    )
+                  }
+                  onClick={() =>
+                    modal.confirm({
+                      title: t("notif.confirmToggle", {
+                        action:
+                          record.status === "ACTIVE"
+                            ? t("common.deactivate")
+                            : t("common.activate"),
+                        entity: t("admin.tourism.packages"),
+                      }),
+                      okText: t("common.yes"),
+                      cancelText: t("common.no"),
+                      onOk: () => handleTogglePackageStatus(record),
+                    })
+                  }
+                >
+                  {record.status === "ACTIVE"
+                    ? t("common.deactivate")
+                    : t("common.activate")}
+                </Button>
+                {record.status !== "ACTIVE" && (
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() =>
+                      modal.confirm({
+                        title: `${t("common.delete")} "${record.name}"?`,
+                        content: t("admin.deleteConfirm"),
+                        okText: t("common.delete"),
+                        okButtonProps: { danger: true },
+                        cancelText: t("common.cancel"),
+                        onOk: () => handleDeletePackage(record.id),
+                      })
+                    }
+                  />
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const filteredPlaces = places.filter((p) =>
@@ -553,7 +582,7 @@ const TourismDecorator = () => {
       .includes(packageQuery.toLowerCase()),
   );
 
-  if (!mounted || fetching) return <LoaderPage />;
+  if (!mounted || fetching || sessionLoading) return <LoaderPage />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -568,13 +597,16 @@ const TourismDecorator = () => {
               placeholder={t("common.search")}
               onChange={(e) => setPlaceQuery(e.target.value)}
             />
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => showPlaceForm()}
-            >
-              {t("common.add")}
-            </Button>
+            {/* Tombol tambah hanya untuk MASTER — viewer hidden. */}
+            {isMaster && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => showPlaceForm()}
+              >
+                {t("common.add")}
+              </Button>
+            )}
           </Space>
         }
       >
@@ -596,13 +628,16 @@ const TourismDecorator = () => {
               placeholder={t("common.search")}
               onChange={(e) => setPackageQuery(e.target.value)}
             />
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => showPackageForm()}
-            >
-              {t("common.add")}
-            </Button>
+            {/* Tombol tambah hanya untuk MASTER — viewer hidden. */}
+            {isMaster && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => showPackageForm()}
+              >
+                {t("common.add")}
+              </Button>
+            )}
           </Space>
         }
       >

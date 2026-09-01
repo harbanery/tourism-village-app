@@ -1,6 +1,7 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
 import { NextResponse } from "next/server";
+import type { AdminRole, Status } from "@prisma/client";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -28,12 +29,31 @@ export async function PATCH(request: Request, { params }: Params) {
       );
     }
 
+    // Ubah bersifat parsial: hanya role (fitur ubah) dan/atau status
+    // (fitur aktifkan/nonaktifkan) yang diizinkan, dengan validasi nilai.
+    const data: { role?: AdminRole; status?: Status } = {};
+    if (body.role !== undefined) {
+      if (!["MASTER", "VIEWER", "AUTHOR"].includes(body.role)) {
+        return NextResponse.json(
+          { success: false, error: "Role tidak valid." },
+          { status: 400 },
+        );
+      }
+      data.role = body.role as AdminRole;
+    }
+    if (body.status !== undefined) {
+      if (!["ACTIVE", "NONACTIVE"].includes(body.status)) {
+        return NextResponse.json(
+          { success: false, error: "Status tidak valid." },
+          { status: 400 },
+        );
+      }
+      data.status = body.status as Status;
+    }
+
     const updated = await prisma.authAdmin.update({
       where: { id: targetId },
-      data: {
-        ...(body.status !== undefined && { status: body.status }),
-        ...(body.role !== undefined && { role: body.role }),
-      },
+      data,
       select: {
         id: true,
         email: true,

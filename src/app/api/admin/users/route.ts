@@ -21,7 +21,6 @@ export async function GET() {
         name: true,
         gender: true,
         birthDate: true,
-        address: true,
         avatar: true,
         status: true,
       },

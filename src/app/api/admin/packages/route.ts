@@ -26,7 +26,7 @@ export async function GET() {
   }
 }
 
-/** POST /api/admin/packages — tambah paket (MASTER). */
+/** POST /api/admin/packages — tambah paket (MASTER, status awal NONACTIVE). */
 export async function POST(request: Request) {
   const admin = await requireAdmin();
   if (!admin || !adminCanWrite(admin)) {
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         placeId: body.placeId ?? null,
         facilities: body.facilities || [],
         price: Number(body.price) || 0,
-        status: "ACTIVE",
+        status: "NONACTIVE",
       },
     });
     return NextResponse.json({ success: true, data: pkg }, { status: 201 });

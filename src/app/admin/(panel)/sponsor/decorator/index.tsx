@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
 import { modalBodyProps } from "@/helpers/modal";
@@ -47,7 +48,11 @@ interface SponsorFormValues {
 const SponsorDecorator = () => {
   const { t } = useT();
   const mounted = useMounted();
+  const { session, loading: sessionLoading } = useAdminSession();
   const { notification, modal } = App.useApp();
+
+  // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
+  const isMaster = session?.role === "MASTER";
 
   const [form] = Form.useForm<SponsorFormValues>();
 
@@ -122,9 +127,10 @@ const SponsorDecorator = () => {
 
       notification.success({
         title: t("notif.success"),
-        description: t("notif.saveSuccess", {
-          entity: t("admin.sponsors.title"),
-        }),
+        // Data baru dibuat nonaktif dulu; aktifkan lewat opsi.
+        description: editing
+          ? t("notif.saveSuccess", { entity: t("admin.sponsors.title") })
+          : t("notif.createSuccess", { entity: t("admin.sponsors.title") }),
         placement: "bottomRight",
       });
       setIsModalOpen(false);
@@ -230,69 +236,80 @@ const SponsorDecorator = () => {
         </Tag>
       ),
     },
-    {
-      title: t("common.actions"),
-      key: "actions",
-      fixed: "right" as const,
-      width: 280,
-      render: (_: unknown, record: SponsorRow) => (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => showForm(record)}
-          >
-            {t("common.edit")}
-          </Button>
-          <Button
-            size="small"
-            icon={record.status === "ACTIVE" ? <StopOutlined /> : <CheckOutlined />}
-            onClick={() =>
-              modal.confirm({
-                title: t("notif.confirmToggle", {
-                  action:
-                    record.status === "ACTIVE"
-                      ? t("common.deactivate")
-                      : t("common.activate"),
-                  entity: t("admin.sponsors.title"),
-                }),
-                okText: t("common.yes"),
-                cancelText: t("common.no"),
-                onOk: () => handleToggleStatus(record),
-              })
-            }
-          >
-            {record.status === "ACTIVE"
-              ? t("common.deactivate")
-              : t("common.activate")}
-          </Button>
-          <Button
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => setViewSponsor(record)}
-          >
-            {t("common.viewPhoto")}
-          </Button>
-          {record.status !== "ACTIVE" && (
-            <Button
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() =>
-                modal.confirm({
-                  title: `${t("common.delete")} "${record.name}"?`,
-                  content: t("admin.deleteConfirm"),
-                  okText: t("common.delete"),
-                  okButtonProps: { danger: true },
-                  cancelText: t("common.cancel"),
-                  onOk: () => handleDelete(record.id),
-                })
-              }
-            />
-          )}
-        </div>
-      ),
-    },
+    // Opsi hanya untuk MASTER — viewer hidden, bukan disabled.
+    ...(isMaster
+      ? [
+          {
+            title: t("common.actions"),
+            key: "actions",
+            fixed: "right" as const,
+            width: 280,
+            render: (_: unknown, record: SponsorRow) => (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => showForm(record)}
+                >
+                  {t("common.edit")}
+                </Button>
+                <Button
+                  size="small"
+                  icon={
+                    record.status === "ACTIVE" ? (
+                      <StopOutlined />
+                    ) : (
+                      <CheckOutlined />
+                    )
+                  }
+                  onClick={() =>
+                    modal.confirm({
+                      title: t("notif.confirmToggle", {
+                        action:
+                          record.status === "ACTIVE"
+                            ? t("common.deactivate")
+                            : t("common.activate"),
+                        entity: t("admin.sponsors.title"),
+                      }),
+                      okText: t("common.yes"),
+                      cancelText: t("common.no"),
+                      onOk: () => handleToggleStatus(record),
+                    })
+                  }
+                >
+                  {record.status === "ACTIVE"
+                    ? t("common.deactivate")
+                    : t("common.activate")}
+                </Button>
+                <Button
+                  size="small"
+                  icon={<EyeOutlined />}
+                  onClick={() => setViewSponsor(record)}
+                >
+                  {t("common.viewPhoto")}
+                </Button>
+                {record.status !== "ACTIVE" && (
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() =>
+                      modal.confirm({
+                        title: `${t("common.delete")} "${record.name}"?`,
+                        content: t("admin.deleteConfirm"),
+                        okText: t("common.delete"),
+                        okButtonProps: { danger: true },
+                        cancelText: t("common.cancel"),
+                        onOk: () => handleDelete(record.id),
+                      })
+                    }
+                  />
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const filtered = sponsors.filter((s) =>
@@ -303,7 +320,7 @@ const SponsorDecorator = () => {
       .includes(query.toLowerCase()),
   );
 
-  if (!mounted || fetching) return <LoaderPage />;
+  if (!mounted || fetching || sessionLoading) return <LoaderPage />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -317,13 +334,16 @@ const SponsorDecorator = () => {
               placeholder={t("common.search")}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => showForm()}
-            >
-              {t("common.add")}
-            </Button>
+            {/* Tombol tambah hanya untuk MASTER — viewer hidden. */}
+            {isMaster && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => showForm()}
+              >
+                {t("common.add")}
+              </Button>
+            )}
           </Space>
         }
       >

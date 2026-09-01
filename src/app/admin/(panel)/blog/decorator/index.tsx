@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
 import { modalBodyProps } from "@/helpers/modal";
@@ -34,6 +35,7 @@ import { blogFormLayout } from "../config";
 interface BlogRow {
   id: number;
   adminId: number;
+  placeId: number | null;
   datetime: string;
   datetimeAfter: string | null;
   title: string;
@@ -41,10 +43,17 @@ interface BlogRow {
   para: string;
   status: "ACTIVE" | "NONACTIVE";
   admin: { id: number; username: string; name: string | null };
+  place: { id: number; name: string } | null;
+}
+
+interface PlaceOption {
+  id: number;
+  name: string;
 }
 
 interface BlogFormValues {
   title: string;
+  placeId?: number | null;
   filename?: unknown;
   para?: string;
 }
@@ -52,12 +61,19 @@ interface BlogFormValues {
 const BlogDecorator = () => {
   const { t, locale } = useT();
   const mounted = useMounted();
+  const { session, loading: sessionLoading } = useAdminSession();
   const { notification, modal } = App.useApp();
 
   const [form] = Form.useForm<BlogFormValues>();
 
+  // Aturan role blog: MASTER semua opsi; AUTHOR hanya edit + tambah;
+  // VIEWER tanpa opsi dan tombol tambah (hidden, bukan disabled).
+  const isMaster = session?.role === "MASTER";
+  const canWriteBlog = isMaster || session?.role === "AUTHOR";
+
   const [fetching, setFetching] = useState(true);
   const [blogs, setBlogs] = useState<BlogRow[]>([]);
+  const [places, setPlaces] = useState<PlaceOption[]>([]);
   const [query, setQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<BlogRow | null>(null);
@@ -66,9 +82,20 @@ const BlogDecorator = () => {
 
   const fetchBlogs = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/blogs");
-      const result = await res.json();
-      if (result.success) setBlogs(result.data);
+      const [blogsRes, placesRes] = await Promise.all([
+        fetch("/api/admin/blogs"),
+        fetch("/api/admin/places"),
+      ]);
+      const blogsJson = await blogsRes.json();
+      const placesJson = await placesRes.json();
+      if (blogsJson.success) setBlogs(blogsJson.data);
+      if (placesJson.success)
+        setPlaces(
+          (placesJson.data as PlaceOption[]).map((p) => ({
+            id: p.id,
+            name: p.name,
+          })),
+        );
     } catch (error) {
       console.error("Error fetching blogs:", error);
       notification.error({
@@ -89,6 +116,7 @@ const BlogDecorator = () => {
     const filename = await getImageString(values.filename);
     return {
       title: values.title,
+      placeId: values.placeId ?? null,
       filename,
       para: values.para ?? "",
     };
@@ -99,6 +127,7 @@ const BlogDecorator = () => {
     if (record) {
       form.setFieldsValue({
         title: record.title,
+        placeId: record.placeId ?? undefined,
         filename: record.filename
           ? [{ url: record.filename, thumbUrl: record.filename, status: "done" }]
           : undefined,
@@ -131,9 +160,10 @@ const BlogDecorator = () => {
 
       notification.success({
         title: t("notif.success"),
-        description: t("notif.saveSuccess", {
-          entity: t("admin.blog.title"),
-        }),
+        // Data baru dibuat nonaktif dulu; aktifkan lewat opsi.
+        description: editing
+          ? t("notif.saveSuccess", { entity: t("admin.blog.title") })
+          : t("notif.createSuccess", { entity: t("admin.blog.title") }),
         placement: "bottomRight",
       });
       setIsModalOpen(false);
@@ -223,6 +253,13 @@ const BlogDecorator = () => {
       width: 320,
     },
     {
+      // Tempat wisata yang terkait (optional).
+      title: t("admin.blog.relatedPlace"),
+      dataIndex: ["place", "name"],
+      key: "placeName",
+      render: (v: string | null) => v ?? "-",
+    },
+    {
       title: t("common.date"),
       dataIndex: "datetime",
       key: "datetime",
@@ -250,80 +287,96 @@ const BlogDecorator = () => {
         </Tag>
       ),
     },
-    {
-      title: t("common.actions"),
-      key: "actions",
-      fixed: "right" as const,
-      width: 280,
-      render: (_: unknown, record: BlogRow) => (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => showForm(record)}
-          >
-            {t("common.edit")}
-          </Button>
-          <Button
-            size="small"
-            icon={record.status === "ACTIVE" ? <StopOutlined /> : <CheckOutlined />}
-            onClick={() =>
-              modal.confirm({
-                title: t("notif.confirmToggle", {
-                  action:
-                    record.status === "ACTIVE"
+    // Opsi hanya untuk yang berhak (MASTER semua; AUTHOR edit saja);
+    // VIEWER tanpa kolom opsi sama sekali (hidden, bukan disabled).
+    ...(canWriteBlog
+      ? [
+          {
+            title: t("common.actions"),
+            key: "actions",
+            fixed: "right" as const,
+            width: 280,
+            render: (_: unknown, record: BlogRow) => (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => showForm(record)}
+                >
+                  {t("common.edit")}
+                </Button>
+                {/* Toggle status hanya MASTER. */}
+                {isMaster && (
+                  <Button
+                    size="small"
+                    icon={
+                      record.status === "ACTIVE" ? (
+                        <StopOutlined />
+                      ) : (
+                        <CheckOutlined />
+                      )
+                    }
+                    onClick={() =>
+                      modal.confirm({
+                        title: t("notif.confirmToggle", {
+                          action:
+                            record.status === "ACTIVE"
+                              ? t("common.deactivate")
+                              : t("common.activate"),
+                          entity: t("admin.blog.title"),
+                        }),
+                        okText: t("common.yes"),
+                        cancelText: t("common.no"),
+                        onOk: () => handleToggleStatus(record),
+                      })
+                    }
+                  >
+                    {record.status === "ACTIVE"
                       ? t("common.deactivate")
-                      : t("common.activate"),
-                  entity: t("admin.blog.title"),
-                }),
-                okText: t("common.yes"),
-                cancelText: t("common.no"),
-                onOk: () => handleToggleStatus(record),
-              })
-            }
-          >
-            {record.status === "ACTIVE"
-              ? t("common.deactivate")
-              : t("common.activate")}
-          </Button>
-          <Button
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => setViewBlog(record)}
-          >
-            {t("common.viewPhoto")}
-          </Button>
-          {record.status !== "ACTIVE" && (
-            <Button
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() =>
-                modal.confirm({
-                  title: `${t("common.delete")} "${record.title}"?`,
-                  content: t("admin.deleteConfirm"),
-                  okText: t("common.delete"),
-                  okButtonProps: { danger: true },
-                  cancelText: t("common.cancel"),
-                  onOk: () => handleDelete(record.id),
-                })
-              }
-            />
-          )}
-        </div>
-      ),
-    },
+                      : t("common.activate")}
+                  </Button>
+                )}
+                <Button
+                  size="small"
+                  icon={<EyeOutlined />}
+                  onClick={() => setViewBlog(record)}
+                >
+                  {t("common.viewPhoto")}
+                </Button>
+                {/* Hapus hanya MASTER dan hanya untuk data nonaktif. */}
+                {isMaster && record.status !== "ACTIVE" && (
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() =>
+                      modal.confirm({
+                        title: `${t("common.delete")} "${record.title}"?`,
+                        content: t("admin.deleteConfirm"),
+                        okText: t("common.delete"),
+                        okButtonProps: { danger: true },
+                        cancelText: t("common.cancel"),
+                        onOk: () => handleDelete(record.id),
+                      })
+                    }
+                  />
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const filtered = blogs.filter((post) =>
-    [post.title, post.admin?.name]
+    [post.title, post.admin?.name, post.place?.name]
       .filter(Boolean)
       .join(" ")
       .toLowerCase()
       .includes(query.toLowerCase()),
   );
 
-  if (!mounted || fetching) return <LoaderPage />;
+  if (!mounted || fetching || sessionLoading) return <LoaderPage />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -337,13 +390,16 @@ const BlogDecorator = () => {
               placeholder={t("common.search")}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => showForm()}
-            >
-              {t("common.add")}
-            </Button>
+            {/* Tombol tambah untuk MASTER & AUTHOR; VIEWER hidden. */}
+            {canWriteBlog && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => showForm()}
+              >
+                {t("common.add")}
+              </Button>
+            )}
           </Space>
         }
       >
@@ -400,6 +456,9 @@ const BlogDecorator = () => {
         <FormAdmin
           formProps={{ form }}
           layout={blogFormLayout}
+          optionList={{
+            placeId: places.map((p) => ({ label: p.name, value: p.id })),
+          }}
           uploadFolder="blogs"
         />
       </Modal>

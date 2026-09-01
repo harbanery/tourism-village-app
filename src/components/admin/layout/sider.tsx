@@ -7,6 +7,7 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { menuAdminConfig } from "@/helpers/menu";
 import { loadAntdIcon } from "@/components/custom/icon";
+import { useAdminSession } from "@/components/admin/session";
 import type { AdminRole } from "@prisma/client";
 
 const { Sider } = Layout;
@@ -14,19 +15,18 @@ const { Sider } = Layout;
 interface SiderLayoutProps {
   mobileOpen: boolean;
   onMobileClose: () => void;
-  /** Role admin aktif untuk filter menu. */
-  role: AdminRole | null;
 }
 
 const SiderLayout: React.FC<SiderLayoutProps> = ({
   mobileOpen,
   onMobileClose,
-  role,
 }) => {
   const { t } = useT();
   const pathname = usePathname();
   const router = useRouter();
   const { token } = theme.useToken();
+  const { session } = useAdminSession();
+  const role: AdminRole | null = session?.role ?? null;
 
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;

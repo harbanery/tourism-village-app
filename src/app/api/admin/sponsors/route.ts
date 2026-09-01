@@ -25,7 +25,7 @@ export async function GET() {
   }
 }
 
-/** POST /api/admin/sponsors — tambah sponsor (MASTER). */
+/** POST /api/admin/sponsors — tambah sponsor (MASTER, status awal NONACTIVE). */
 export async function POST(request: Request) {
   const admin = await requireAdmin();
   if (!admin || !adminCanWrite(admin)) {
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         name: body.name,
         description: body.description || null,
         filename: body.filename || "",
-        status: "ACTIVE",
+        status: "NONACTIVE",
       },
     });
     return NextResponse.json(

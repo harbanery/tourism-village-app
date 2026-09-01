@@ -30,3 +30,17 @@ export const adminFormLayout: FormLayout[] = [
     ],
   },
 ];
+
+/** Form ubah admin — hanya role yang bisa diubah. */
+export const adminRoleFormLayout: FormLayout[] = [
+  {
+    key: "role",
+    items: [
+      {
+        name: "role",
+        type: "select",
+        required: true,
+      },
+    ],
+  },
+];

@@ -25,7 +25,7 @@ export async function GET() {
   }
 }
 
-/** POST /api/admin/places — tambah tempat wisata (MASTER). */
+/** POST /api/admin/places — tambah tempat wisata (MASTER, status awal NONACTIVE). */
 export async function POST(request: Request) {
   const admin = await requireAdmin();
   if (!admin || !adminCanWrite(admin)) {
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       data: {
         name: body.name,
         photo: body.photo || null,
-        status: "ACTIVE",
+        status: "NONACTIVE",
       },
     });
     return NextResponse.json({ success: true, data: place }, { status: 201 });

@@ -16,6 +16,7 @@ export async function GET() {
       orderBy: { datetime: "desc" },
       include: {
         admin: { select: { id: true, username: true, name: true } },
+        place: { select: { id: true, name: true } },
       },
     });
     return NextResponse.json({ success: true, data: blogs });
@@ -28,7 +29,10 @@ export async function GET() {
   }
 }
 
-/** POST /api/admin/blogs — tambah blog (MASTER | AUTHOR). */
+/**
+ * POST /api/admin/blogs — tambah blog (MASTER | AUTHOR).
+ * Data baru dibuat NONACTIVE dulu; aktifkan lewat opsi (MASTER).
+ */
 export async function POST(request: Request) {
   const admin = await requireAdmin();
   if (!admin || !adminCanWriteBlog(admin)) {
@@ -42,10 +46,15 @@ export async function POST(request: Request) {
     const blog = await prisma.blog.create({
       data: {
         adminId: admin.id,
+        placeId: body.placeId ?? null,
         title: body.title,
         filename: body.filename || "",
         para: body.para || "",
-        status: "ACTIVE",
+        status: "NONACTIVE",
+      },
+      include: {
+        admin: { select: { id: true, username: true, name: true } },
+        place: { select: { id: true, name: true } },
       },
     });
     return NextResponse.json({ success: true, data: blog }, { status: 201 });

@@ -13,15 +13,22 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { CheckOutlined, PlusOutlined, StopOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  EditOutlined,
+  PlusOutlined,
+  StopOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
 import { modalBodyProps } from "@/helpers/modal";
 import { asAppError } from "@/helpers/error";
 import { adminRoleOptions } from "@/helpers/menu";
-import { adminFormLayout } from "../config";
+import { adminFormLayout, adminRoleFormLayout } from "../config";
 import { Form } from "antd";
 import { formatDate } from "@/utils/format";
 
@@ -42,7 +49,6 @@ interface UserRow {
   name: string;
   gender: "MALE" | "FEMALE" | null;
   birthDate: string | null;
-  address: string | null;
   avatar: string | null;
   status: "ACTIVE" | "NONACTIVE";
 }
@@ -50,8 +56,13 @@ interface UserRow {
 const AccountDecorator = () => {
   const { t } = useT();
   const mounted = useMounted();
+  const { session, loading: sessionLoading } = useAdminSession();
   const { notification, modal } = App.useApp();
   const [form] = Form.useForm();
+  const [roleForm] = Form.useForm<{ role: AdminRow["role"] }>();
+
+  // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
+  const isMaster = session?.role === "MASTER";
 
   const [fetching, setFetching] = useState(true);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -59,6 +70,7 @@ const AccountDecorator = () => {
   const [userQuery, setUserQuery] = useState("");
   const [adminQuery, setAdminQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState<AdminRow | null>(null);
   const [saving, setSaving] = useState(false);
 
   const fetchAccounts = useCallback(async () => {
@@ -170,11 +182,15 @@ const AccountDecorator = () => {
             <Typography.Paragraph>
               {t("admin.accounts.credentialsNote")}
             </Typography.Paragraph>
-            <Typography.Paragraph copyable={{ text: `${result.data.username} / ${result.data.password}` }}>
-              <strong>{t("admin.accounts.username")}:</strong> {result.data.username}
+            <Typography.Paragraph
+              copyable={{ text: `${result.data.username} / ${result.data.password}` }}
+            >
+              <strong>{t("admin.accounts.username")}:</strong>{" "}
+              {result.data.username}
             </Typography.Paragraph>
             <Typography.Paragraph copyable={{ text: result.data.password }}>
-              <strong>{t("auth.register.password")}:</strong> {result.data.password}
+              <strong>{t("auth.register.password")}:</strong>{" "}
+              {result.data.password}
             </Typography.Paragraph>
           </div>
         ),
@@ -186,7 +202,56 @@ const AccountDecorator = () => {
         title: err.errorFields ? t("notif.validationError") : t("notif.error"),
         ...(err.errorFields
           ? {}
-          : { description: err.message || t("notif.saveFailed"), placement: "bottomRight" as const }),
+          : {
+              description:
+                err.message || t("notif.saveFailed"),
+              placement: "bottomRight" as const,
+            }),
+        placement: "bottomRight",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /** Buka modal ubah role — hanya role yang bisa diubah. */
+  const showRoleForm = (record: AdminRow) => {
+    setEditingRole(record);
+    roleForm.setFieldsValue({ role: record.role });
+  };
+
+  const handleSaveRole = async () => {
+    if (!editingRole) return;
+    setSaving(true);
+    try {
+      const values = await roleForm.validateFields();
+      const res = await fetch(`/api/admin/admins/${editingRole.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: values.role }),
+      });
+      const result = await res.json();
+      if (!result.success) throw new Error(result.error);
+
+      notification.success({
+        title: t("notif.success"),
+        description: t("notif.roleUpdated", { entity: editingRole.username }),
+        placement: "bottomRight",
+      });
+      setEditingRole(null);
+      roleForm.resetFields();
+      fetchAccounts();
+    } catch (error) {
+      const err = asAppError(error);
+      notification.error({
+        title: err.errorFields ? t("notif.validationError") : t("notif.error"),
+        ...(err.errorFields
+          ? {}
+          : {
+              description:
+                err.message || t("notif.saveFailed"),
+              placement: "bottomRight" as const,
+            }),
         placement: "bottomRight",
       });
     } finally {
@@ -230,7 +295,9 @@ const AccountDecorator = () => {
       key: "gender",
       render: (gender: UserRow["gender"]) =>
         gender ? (
-          <Tag>{gender === "MALE" ? t("profile.male") : t("profile.female")}</Tag>
+          <Tag>
+            {gender === "MALE" ? t("profile.male") : t("profile.female")}
+          </Tag>
         ) : (
           "-"
         ),
@@ -241,12 +308,6 @@ const AccountDecorator = () => {
       key: "birthDate",
       render: (value: UserRow["birthDate"]) =>
         value ? formatDate(value) : "-",
-    },
-    {
-      title: t("admin.accounts.address"),
-      dataIndex: "address",
-      key: "address",
-      render: (v: string | null) => v ?? "-",
     },
     {
       title: t("common.phone"),
@@ -264,25 +325,49 @@ const AccountDecorator = () => {
         </Tag>
       ),
     },
-    {
-      title: t("common.actions"),
-      key: "actions",
-      fixed: "right" as const,
-      width: 140,
-      render: (_: unknown, record: UserRow) => (
-        <div className="flex gap-2">
-          <Button
-            size="small"
-            icon={record.status === "ACTIVE" ? <StopOutlined /> : <CheckOutlined />}
-            onClick={() => handleToggleUserStatus(record)}
-          >
-            {record.status === "ACTIVE"
-              ? t("common.deactivate")
-              : t("common.activate")}
-          </Button>
-        </div>
-      ),
-    },
+    // Opsi (toggle) hanya untuk MASTER — viewer hidden, bukan disabled.
+    ...(isMaster
+      ? [
+          {
+            title: t("common.actions"),
+            key: "actions",
+            fixed: "right" as const,
+            width: 140,
+            render: (_: unknown, record: UserRow) => (
+              <div className="flex gap-2">
+                <Button
+                  size="small"
+                  icon={
+                    record.status === "ACTIVE" ? (
+                      <StopOutlined />
+                    ) : (
+                      <CheckOutlined />
+                    )
+                  }
+                  onClick={() =>
+                    modal.confirm({
+                      title: t("notif.confirmToggle", {
+                        action:
+                          record.status === "ACTIVE"
+                            ? t("common.deactivate")
+                            : t("common.activate"),
+                        entity: record.name,
+                      }),
+                      okText: t("common.yes"),
+                      cancelText: t("common.no"),
+                      onOk: () => handleToggleUserStatus(record),
+                    })
+                  }
+                >
+                  {record.status === "ACTIVE"
+                    ? t("common.deactivate")
+                    : t("common.activate")}
+                </Button>
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const adminColumns = [
@@ -310,7 +395,11 @@ const AccountDecorator = () => {
       dataIndex: "role",
       key: "role",
       render: (role: AdminRow["role"]) => (
-        <Tag color={role === "MASTER" ? "green" : role === "AUTHOR" ? "blue" : "default"}>
+        <Tag
+          color={
+            role === "MASTER" ? "green" : role === "AUTHOR" ? "blue" : "default"
+          }
+        >
           {t(`admin.role.${role}`)}
         </Tag>
       ),
@@ -325,28 +414,62 @@ const AccountDecorator = () => {
         </Tag>
       ),
     },
-    {
-      title: t("common.actions"),
-      key: "actions",
-      fixed: "right" as const,
-      width: 140,
-      render: (_: unknown, record: AdminRow) => (
-        <div className="flex gap-2">
-          <Button
-            size="small"
-            icon={record.status === "ACTIVE" ? <StopOutlined /> : <CheckOutlined />}
-            onClick={() => handleToggleAdminStatus(record)}
-          >
-            {record.status === "ACTIVE"
-              ? t("common.deactivate")
-              : t("common.activate")}
-          </Button>
-        </div>
-      ),
-    },
+    // Opsi (ubah role + toggle) hanya untuk MASTER — akun sendiri dikecualikan.
+    ...(isMaster
+      ? [
+          {
+            title: t("common.actions"),
+            key: "actions",
+            fixed: "right" as const,
+            width: 240,
+            render: (_: unknown, record: AdminRow) =>
+              session?.id === record.id ? (
+                <Tag>{t("admin.accounts.self")}</Tag>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={() => showRoleForm(record)}
+                  >
+                    {t("admin.accounts.changeRole")}
+                  </Button>
+                  <Button
+                    size="small"
+                    icon={
+                      record.status === "ACTIVE" ? (
+                        <StopOutlined />
+                      ) : (
+                        <CheckOutlined />
+                      )
+                    }
+                    onClick={() =>
+                      modal.confirm({
+                        title: t("notif.confirmToggle", {
+                          action:
+                            record.status === "ACTIVE"
+                              ? t("common.deactivate")
+                              : t("common.activate"),
+                          entity: record.username,
+                        }),
+                        okText: t("common.yes"),
+                        cancelText: t("common.no"),
+                        onOk: () => handleToggleAdminStatus(record),
+                      })
+                    }
+                  >
+                    {record.status === "ACTIVE"
+                      ? t("common.deactivate")
+                      : t("common.activate")}
+                  </Button>
+                </div>
+              ),
+          },
+        ]
+      : []),
   ];
 
-  if (!mounted || fetching) return <LoaderPage />;
+  if (!mounted || fetching || sessionLoading) return <LoaderPage />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -380,13 +503,16 @@ const AccountDecorator = () => {
               placeholder={t("common.search")}
               onChange={(e) => setAdminQuery(e.target.value)}
             />
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsAddOpen(true)}
-            >
-              {t("common.add")}
-            </Button>
+            {/* Tombol tambah hanya untuk MASTER — viewer hidden. */}
+            {isMaster && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setIsAddOpen(true)}
+              >
+                {t("common.add")}
+              </Button>
+            )}
           </Space>
         }
       >
@@ -416,6 +542,36 @@ const AccountDecorator = () => {
         <FormAdmin
           formProps={{ form, initialValues: { role: "VIEWER" } }}
           layout={adminFormLayout}
+          optionList={{
+            role: adminRoleOptions.map((r) => ({
+              label: t(`admin.role.${r.value}`),
+              value: r.value,
+            })),
+          }}
+        />
+      </Modal>
+
+      {/* Modal ubah role admin — hanya role yang bisa diubah. */}
+      <Modal
+        title={`${t("admin.accounts.changeRole")} — ${editingRole?.username ?? ""}`}
+        open={editingRole !== null}
+        onOk={handleSaveRole}
+        onCancel={() => {
+          roleForm.resetFields();
+          setEditingRole(null);
+        }}
+        okText={t("common.save")}
+        cancelText={t("common.cancel")}
+        confirmLoading={saving}
+        width={480}
+        {...modalBodyProps()}
+      >
+        <Typography.Paragraph type="secondary" className="mb-4!">
+          {t("admin.accounts.changeRoleNote")}
+        </Typography.Paragraph>
+        <FormAdmin
+          formProps={{ form: roleForm }}
+          layout={adminRoleFormLayout}
           optionList={{
             role: adminRoleOptions.map((r) => ({
               label: t(`admin.role.${r.value}`),

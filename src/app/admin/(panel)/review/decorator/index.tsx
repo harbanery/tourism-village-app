@@ -15,6 +15,7 @@ import {
 import { CheckOutlined, StarFilled, StopOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { useAdminSession } from "@/components/admin/session";
 import LoaderPage from "@/components/admin/loader";
 import { asAppError } from "@/helpers/error";
 import { formatDate } from "@/utils/format";
@@ -33,7 +34,11 @@ interface TestimonialRow {
 const ReviewDecorator = () => {
   const { t, locale } = useT();
   const mounted = useMounted();
+  const { session, loading: sessionLoading } = useAdminSession();
   const { notification, modal } = App.useApp();
+
+  // Aturan role: MASTER bisa akses opsi; VIEWER hidden.
+  const isMaster = session?.role === "MASTER";
 
   const [fetching, setFetching] = useState(true);
   const [testimonials, setTestimonials] = useState<TestimonialRow[]>([]);
@@ -177,53 +182,66 @@ const ReviewDecorator = () => {
       key: "note",
       render: (v: string | null) => v ?? "-",
     },
-    {
-      title: t("common.actions"),
-      key: "actions",
-      fixed: "right" as const,
-      width: 240,
-      render: (_: unknown, record: TestimonialRow) => (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="small"
-            icon={record.status === "ACTIVE" ? <StopOutlined /> : <CheckOutlined />}
-            onClick={() =>
-              modal.confirm({
-                title: t("notif.confirmToggle", {
-                  action:
-                    record.status === "ACTIVE"
-                      ? t("common.deactivate")
-                      : t("common.activate"),
-                  entity: t("admin.reviews.title"),
-                }),
-                okText: t("common.yes"),
-                cancelText: t("common.no"),
-                onOk: () => handleToggleStatus(record),
-              })
-            }
-          >
-            {record.status === "ACTIVE"
-              ? t("common.deactivate")
-              : t("common.activate")}
-          </Button>
-          <Tooltip
-            title={t("admin.reviews.featuredHint", {
-              max: 3,
-            })}
-          >
-            <Button
-              size="small"
-              type={record.featured ? "default" : "primary"}
-              ghost={!record.featured}
-              icon={<StarFilled />}
-              onClick={() => handleToggleFeatured(record)}
-            >
-              {record.featured ? t("admin.reviews.unmain") : t("admin.reviews.main")}
-            </Button>
-          </Tooltip>
-        </div>
-      ),
-    },
+    // Opsi hanya untuk MASTER — viewer hidden, bukan disabled.
+    ...(isMaster
+      ? [
+          {
+            title: t("common.actions"),
+            key: "actions",
+            fixed: "right" as const,
+            width: 240,
+            render: (_: unknown, record: TestimonialRow) => (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="small"
+                  icon={
+                    record.status === "ACTIVE" ? (
+                      <StopOutlined />
+                    ) : (
+                      <CheckOutlined />
+                    )
+                  }
+                  onClick={() =>
+                    modal.confirm({
+                      title: t("notif.confirmToggle", {
+                        action:
+                          record.status === "ACTIVE"
+                            ? t("common.deactivate")
+                            : t("common.activate"),
+                        entity: t("admin.reviews.title"),
+                      }),
+                      okText: t("common.yes"),
+                      cancelText: t("common.no"),
+                      onOk: () => handleToggleStatus(record),
+                    })
+                  }
+                >
+                  {record.status === "ACTIVE"
+                    ? t("common.deactivate")
+                    : t("common.activate")}
+                </Button>
+                <Tooltip
+                  title={t("admin.reviews.featuredHint", {
+                    max: 3,
+                  })}
+                >
+                  <Button
+                    size="small"
+                    type={record.featured ? "default" : "primary"}
+                    ghost={!record.featured}
+                    icon={<StarFilled />}
+                    onClick={() => handleToggleFeatured(record)}
+                  >
+                    {record.featured
+                      ? t("admin.reviews.unmain")
+                      : t("admin.reviews.main")}
+                  </Button>
+                </Tooltip>
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const filtered = testimonials.filter((r) =>
@@ -234,7 +252,7 @@ const ReviewDecorator = () => {
       .includes(query.toLowerCase()),
   );
 
-  if (!mounted || fetching) return <LoaderPage />;
+  if (!mounted || fetching || sessionLoading) return <LoaderPage />;
 
   return (
     <div className="flex flex-col gap-6">

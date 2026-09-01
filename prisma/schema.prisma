@@ -115,6 +115,7 @@ model Place {
   packages Package[]
   galleries Gallery[]
   videos    Video[]
+  blogs    Blog[]
 
   @@map("wisata_tempat")
 }
@@ -158,6 +159,7 @@ model Video {
 model Blog {
   id            Int        @id @default(autoincrement())
   adminId       Int        @map("admin_id")
+  placeId       Int?       @map("tempat_id")
   datetime      DateTime   @default(now())
   datetimeAfter DateTime?  @map("datetime_after")
   title         String
@@ -165,6 +167,7 @@ model Blog {
   para          String // gabungan paragraf pembuka + isi (rich text)
   status        Status     @default(ACTIVE)
   admin         AuthAdmin  @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  place         Place?     @relation(fields: [placeId], references: [id], onDelete: SetNull)
 
   @@map("blog")
 }
