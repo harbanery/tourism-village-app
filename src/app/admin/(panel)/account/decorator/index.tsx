@@ -6,8 +6,8 @@ import {
   Avatar,
   Button,
   Card,
+  Drawer,
   Input,
-  Modal,
   Space,
   Table,
   Tag,
@@ -17,6 +17,7 @@ import {
   CheckOutlined,
   EditOutlined,
   PlusOutlined,
+  SearchOutlined,
   StopOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -477,8 +478,9 @@ const AccountDecorator = () => {
       <Card
         title={t("admin.accounts.users")}
         extra={
-          <Input.Search
+          <Input
             allowClear
+            prefix={<SearchOutlined />}
             className="w-full! sm:w-44!"
             placeholder={t("common.search")}
             onChange={(e) => setUserQuery(e.target.value)}
@@ -497,8 +499,9 @@ const AccountDecorator = () => {
         title={t("admin.accounts.admins")}
         extra={
           <Space wrap>
-            <Input.Search
+            <Input
               allowClear
+              prefix={<SearchOutlined />}
               className="w-full! sm:w-44!"
               placeholder={t("common.search")}
               onChange={(e) => setAdminQuery(e.target.value)}
@@ -525,18 +528,30 @@ const AccountDecorator = () => {
         />
       </Card>
 
-      <Modal
+      {/* Drawer tambah admin */}
+      <Drawer
         title={`${t("common.add")} ${t("admin.accounts.admins")}`}
         open={isAddOpen}
-        onOk={handleAddAdmin}
-        onCancel={() => {
+        onClose={() => {
           form.resetFields();
           setIsAddOpen(false);
         }}
-        okText={t("common.save")}
-        cancelText={t("common.cancel")}
-        confirmLoading={saving}
         width={560}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => {
+                form.resetFields();
+                setIsAddOpen(false);
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button type="primary" loading={saving} onClick={handleAddAdmin}>
+              {t("common.save")}
+            </Button>
+          </div>
+        }
         {...modalBodyProps()}
       >
         <FormAdmin
@@ -549,21 +564,32 @@ const AccountDecorator = () => {
             })),
           }}
         />
-      </Modal>
+      </Drawer>
 
-      {/* Modal ubah role admin — hanya role yang bisa diubah. */}
-      <Modal
+      {/* Drawer ubah role admin — hanya role yang bisa diubah. */}
+      <Drawer
         title={`${t("admin.accounts.changeRole")} — ${editingRole?.username ?? ""}`}
         open={editingRole !== null}
-        onOk={handleSaveRole}
-        onCancel={() => {
+        onClose={() => {
           roleForm.resetFields();
           setEditingRole(null);
         }}
-        okText={t("common.save")}
-        cancelText={t("common.cancel")}
-        confirmLoading={saving}
         width={480}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => {
+                roleForm.resetFields();
+                setEditingRole(null);
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button type="primary" loading={saving} onClick={handleSaveRole}>
+              {t("common.save")}
+            </Button>
+          </div>
+        }
         {...modalBodyProps()}
       >
         <Typography.Paragraph type="secondary" className="mb-4!">
@@ -579,7 +605,7 @@ const AccountDecorator = () => {
             })),
           }}
         />
-      </Modal>
+      </Drawer>
     </div>
   );
 };

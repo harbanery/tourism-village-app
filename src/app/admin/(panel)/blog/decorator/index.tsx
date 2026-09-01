@@ -5,6 +5,7 @@ import {
   App,
   Button,
   Card,
+  Drawer,
   Form,
   Image,
   Input,
@@ -19,6 +20,7 @@ import {
   EditOutlined,
   EyeOutlined,
   PlusOutlined,
+  SearchOutlined,
   StopOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -298,13 +300,16 @@ const BlogDecorator = () => {
             width: 280,
             render: (_: unknown, record: BlogRow) => (
               <div className="flex flex-wrap gap-2">
-                <Button
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => showForm(record)}
-                >
-                  {t("common.edit")}
-                </Button>
+                {/* AUTHOR hanya bisa edit blog miliknya sendiri. */}
+                {(isMaster || record.adminId === session?.id) && (
+                  <Button
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={() => showForm(record)}
+                  >
+                    {t("common.edit")}
+                  </Button>
+                )}
                 {/* Toggle status hanya MASTER. */}
                 {isMaster && (
                   <Button
@@ -384,8 +389,9 @@ const BlogDecorator = () => {
       <Card
         extra={
           <Space wrap>
-            <Input.Search
+            <Input
               allowClear
+              prefix={<SearchOutlined />}
               className="w-full! sm:w-44!"
               placeholder={t("common.search")}
               onChange={(e) => setQuery(e.target.value)}
@@ -433,24 +439,36 @@ const BlogDecorator = () => {
         )}
       </Modal>
 
-      {/* Modal tambah/edit blog */}
-      <Modal
+      {/* Drawer tambah/edit blog */}
+      <Drawer
         title={
           editing
             ? `${t("common.edit")} ${t("admin.blog.title")}`
             : `${t("common.add")} ${t("admin.blog.title")}`
         }
         open={isModalOpen}
-        onOk={handleSave}
-        onCancel={() => {
+        onClose={() => {
           form.resetFields();
           setEditing(null);
           setIsModalOpen(false);
         }}
-        okText={t("common.save")}
-        cancelText={t("common.cancel")}
-        confirmLoading={saving}
         width={680}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => {
+                form.resetFields();
+                setEditing(null);
+                setIsModalOpen(false);
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button type="primary" loading={saving} onClick={handleSave}>
+              {t("common.save")}
+            </Button>
+          </div>
+        }
         {...modalBodyProps()}
       >
         <FormAdmin
@@ -461,7 +479,7 @@ const BlogDecorator = () => {
           }}
           uploadFolder="blogs"
         />
-      </Modal>
+      </Drawer>
     </div>
   );
 };

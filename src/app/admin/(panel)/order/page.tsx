@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { App, Card, Input, Space, Table, Tag, Typography } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import LoaderPage from "@/components/admin/loader";
@@ -145,8 +146,9 @@ export default function OrderPage() {
       <Card
         extra={
           <Space wrap>
-            <Input.Search
+            <Input
               allowClear
+              prefix={<SearchOutlined />}
               className="w-full! sm:w-44!"
               placeholder={t("common.search")}
               onChange={(e) => setQuery(e.target.value)}

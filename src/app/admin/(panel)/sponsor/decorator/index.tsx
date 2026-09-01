@@ -5,6 +5,7 @@ import {
   App,
   Button,
   Card,
+  Drawer,
   Form,
   Image,
   Input,
@@ -19,6 +20,7 @@ import {
   EditOutlined,
   EyeOutlined,
   PlusOutlined,
+  SearchOutlined,
   StopOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -328,8 +330,9 @@ const SponsorDecorator = () => {
       <Card
         extra={
           <Space wrap>
-            <Input.Search
+            <Input
               allowClear
+              prefix={<SearchOutlined />}
               className="w-full! sm:w-44!"
               placeholder={t("common.search")}
               onChange={(e) => setQuery(e.target.value)}
@@ -377,24 +380,36 @@ const SponsorDecorator = () => {
         )}
       </Modal>
 
-      {/* Modal tambah/edit sponsor */}
-      <Modal
+      {/* Drawer tambah/edit sponsor */}
+      <Drawer
         title={
           editing
             ? `${t("common.edit")} ${t("admin.sponsors.title")}`
             : `${t("common.add")} ${t("admin.sponsors.title")}`
         }
         open={isModalOpen}
-        onOk={handleSave}
-        onCancel={() => {
+        onClose={() => {
           form.resetFields();
           setEditing(null);
           setIsModalOpen(false);
         }}
-        okText={t("common.save")}
-        cancelText={t("common.cancel")}
-        confirmLoading={saving}
         width={560}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => {
+                form.resetFields();
+                setEditing(null);
+                setIsModalOpen(false);
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button type="primary" loading={saving} onClick={handleSave}>
+              {t("common.save")}
+            </Button>
+          </div>
+        }
         {...modalBodyProps()}
       >
         <FormAdmin
@@ -402,7 +417,7 @@ const SponsorDecorator = () => {
           layout={sponsorFormLayout}
           uploadFolder="sponsors"
         />
-      </Modal>
+      </Drawer>
     </div>
   );
 };

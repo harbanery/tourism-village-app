@@ -23,11 +23,14 @@ interface AdminSessionContextValue {
   session: AdminSessionInfo | null;
   /** True selama sesi masih diambil dari server. */
   loading: boolean;
+  /** Ambil ulang sesi (dipakai setelah profil diperbarui). */
+  refresh: () => Promise<void>;
 }
 
 const AdminSessionContext = createContext<AdminSessionContextValue>({
   session: null,
   loading: true,
+  refresh: async () => {},
 });
 
 /** Ambil sesi admin (role, dll) dari layout shell admin. */
@@ -66,7 +69,7 @@ export function AdminSessionProvider({
   }, [fetchSession]);
 
   return (
-    <AdminSessionContext.Provider value={{ session, loading }}>
+    <AdminSessionContext.Provider value={{ session, loading, refresh: fetchSession }}>
       {children}
     </AdminSessionContext.Provider>
   );

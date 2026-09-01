@@ -5,6 +5,7 @@ import {
   App,
   Button,
   Card,
+  Drawer,
   Form,
   Image,
   Input,
@@ -19,6 +20,7 @@ import {
   EditOutlined,
   EyeOutlined,
   PlusOutlined,
+  SearchOutlined,
   StopOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -591,8 +593,9 @@ const TourismDecorator = () => {
         title={t("admin.tourism.places")}
         extra={
           <Space wrap>
-            <Input.Search
+            <Input
               allowClear
+              prefix={<SearchOutlined />}
               className="w-full! sm:w-44!"
               placeholder={t("common.search")}
               onChange={(e) => setPlaceQuery(e.target.value)}
@@ -622,8 +625,9 @@ const TourismDecorator = () => {
         title={t("admin.tourism.packages")}
         extra={
           <Space wrap>
-            <Input.Search
+            <Input
               allowClear
+              prefix={<SearchOutlined />}
               className="w-full! sm:w-44!"
               placeholder={t("common.search")}
               onChange={(e) => setPackageQuery(e.target.value)}
@@ -671,24 +675,36 @@ const TourismDecorator = () => {
         )}
       </Modal>
 
-      {/* Modal tambah/edit tempat wisata */}
-      <Modal
+      {/* Drawer tambah/edit tempat wisata */}
+      <Drawer
         title={
           editingPlace
             ? `${t("common.edit")} ${t("admin.tourism.places")}`
             : `${t("common.add")} ${t("admin.tourism.places")}`
         }
         open={isPlaceModalOpen}
-        onOk={handleSavePlace}
-        onCancel={() => {
+        onClose={() => {
           placeForm.resetFields();
           setEditingPlace(null);
           setIsPlaceModalOpen(false);
         }}
-        okText={t("common.save")}
-        cancelText={t("common.cancel")}
-        confirmLoading={saving}
         width={560}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => {
+                placeForm.resetFields();
+                setEditingPlace(null);
+                setIsPlaceModalOpen(false);
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button type="primary" loading={saving} onClick={handleSavePlace}>
+              {t("common.save")}
+            </Button>
+          </div>
+        }
         {...modalBodyProps()}
       >
         <FormAdmin
@@ -696,26 +712,42 @@ const TourismDecorator = () => {
           layout={placeFormLayout}
           uploadFolder="places"
         />
-      </Modal>
+      </Drawer>
 
-      {/* Modal tambah/edit paket */}
-      <Modal
+      {/* Drawer tambah/edit paket */}
+      <Drawer
         title={
           editingPackage
             ? `${t("common.edit")} ${t("admin.tourism.packages")}`
             : `${t("common.add")} ${t("admin.tourism.packages")}`
         }
         open={isPackageModalOpen}
-        onOk={handleSavePackage}
-        onCancel={() => {
+        onClose={() => {
           packageForm.resetFields();
           setEditingPackage(null);
           setIsPackageModalOpen(false);
         }}
-        okText={t("common.save")}
-        cancelText={t("common.cancel")}
-        confirmLoading={saving}
         width={560}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => {
+                packageForm.resetFields();
+                setEditingPackage(null);
+                setIsPackageModalOpen(false);
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="primary"
+              loading={saving}
+              onClick={handleSavePackage}
+            >
+              {t("common.save")}
+            </Button>
+          </div>
+        }
         {...modalBodyProps()}
       >
         <FormAdmin
@@ -726,7 +758,7 @@ const TourismDecorator = () => {
             facilities: facilityOptions.map((f) => ({ label: f, value: f })),
           }}
         />
-      </Modal>
+      </Drawer>
     </div>
   );
 };

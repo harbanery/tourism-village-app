@@ -1,19 +1,24 @@
-import type { ModalProps } from "antd";
+import type { CSSProperties } from "react";
 
-/** Opsi body modal admin. */
+/** Opsi body modal/drawer admin. */
 export interface ModalBodyOptions {
-  /** Tinggi maksimum body modal sebelum dapat di-scroll. */
+  /** Tinggi maksimum body sebelum dapat di-scroll. */
   maxHeight?: string;
 }
 
+/** Hasil props yang kompatibel untuk Modal maupun Drawer antd. */
+export interface ModalBodyProps {
+  styles: { body: CSSProperties };
+}
+
 /**
- * Props modal untuk body yang dapat di-scroll dengan scrollbar tersembunyi.
+ * Props body modal/drawer yang dapat di-scroll dengan scrollbar tersembunyi.
  *
- * Pemakaian: `<Modal {...modalBodyProps()}>`.
+ * Pemakaian: `<Modal {...modalBodyProps()}>` atau `<Drawer {...modalBodyProps()}>`.
  */
 export const modalBodyProps = (
   options: ModalBodyOptions = {},
-): Pick<ModalProps, "styles" | "classNames"> => {
+): ModalBodyProps => {
   const { maxHeight = "70vh" } = options;
   return {
     styles: {

@@ -1,7 +1,17 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Avatar, Breadcrumb, Button, Grid, Layout, Space, Tag, theme } from "antd";
+import {
+  Avatar,
+  Breadcrumb,
+  Button,
+  Dropdown,
+  Grid,
+  Layout,
+  Space,
+  Tag,
+  theme,
+} from "antd";
 import { LogoutOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -73,21 +83,54 @@ const HeaderLayout: React.FC<{
       <Space size="middle">
         <LanguageToggle />
         <ThemeToggle />
-        {session && (
-          <Tag color={session.role === "MASTER" ? "green" : session.role === "AUTHOR" ? "blue" : "default"}>
-            {t(`admin.role.${session.role}`)}
-          </Tag>
-        )}
-        <Avatar
-          style={{ backgroundColor: token.colorPrimary, cursor: "pointer" }}
-          icon={<UserOutlined />}
-        />
-        <Button
-          type="text"
-          icon={<LogoutOutlined />}
-          onClick={handleLogout}
-          aria-label={t("nav.logout")}
-        />
+        <Dropdown
+          trigger={["click"]}
+          menu={{
+            items: [
+              {
+                key: "role",
+                disabled: true,
+                label: session ? (
+                  <Tag
+                    className="m-0!"
+                    color={
+                      session.role === "MASTER"
+                        ? "green"
+                        : session.role === "AUTHOR"
+                          ? "blue"
+                          : "default"
+                    }
+                  >
+                    {t(`admin.role.${session.role}`)}
+                  </Tag>
+                ) : (
+                  "-"
+                ),
+              },
+              { key: "divider", type: "divider" },
+              {
+                key: "profile",
+                icon: <UserOutlined />,
+                label: t("nav.profile"),
+                onClick: () => router.push("/admin/profile"),
+              },
+              {
+                key: "logout",
+                icon: <LogoutOutlined />,
+                danger: true,
+                label: t("nav.logout"),
+                onClick: handleLogout,
+              },
+            ],
+          }}
+        >
+          <Avatar
+            style={{ backgroundColor: token.colorPrimary, cursor: "pointer" }}
+            src={session?.avatar}
+            icon={<UserOutlined />}
+            aria-label={t("nav.profile")}
+          />
+        </Dropdown>
       </Space>
     </Header>
   );
