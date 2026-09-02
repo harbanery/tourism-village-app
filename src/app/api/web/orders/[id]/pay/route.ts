@@ -1,23 +1,16 @@
 import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
-import {
-  MIDTRANS_CLIENT_KEY,
-  MIDTRANS_SNAP_SCRIPT_URL,
-} from "@/config/variables";
-import {
-  buildMidtransOrderId,
-  createSnapTransaction,
-  isMidtransConfigured,
-} from "@/server/midtrans";
+import { isMidtransConfigured } from "@/server/midtrans";
 import { isPaymentExpired, paymentDeadline } from "@/server/orderExpiry";
+import { customerFromUser, ensureOrderQris } from "@/server/qris";
 
 /**
  * GET /api/web/orders/[id]/pay — lanjutkan pembayaran order PENDING.
  *
  * Dipakai halaman /payment/[id] dan tombol "Bayar" di riwayat profil:
- * mengembalikan opsi pembayaran (token Snap bila ada / simulator) untuk
- * order milik user login. Token Snap lama dipakai ulang bila masih tersimpan.
+ * memastikan QR QRIS tersedia (dibuat sekali via Core API, lalu dipakai
+ * ulang) untuk order milik user login.
  */
 export async function GET(
   _request: Request,
@@ -76,69 +69,23 @@ export async function GET(
     });
   }
 
-  // Buat token Snap baru bila belum ada (order lama / simulator sebelumnya).
-  let snapToken = order.snapToken;
-  // URL redirect tersimpan ikut dipakai ulang (fallback bila snap.js gagal).
-  let snapRedirectUrl = order.snapRedirectUrl ?? null;
-  // Buat transaksi Snap baru bila token/redirect URL belum lengkap
-  // (order baru tanpa snap, atau order lama sebelum kolom redirect URL ada).
+  // QRIS POS integration: pastikan QR tersedia (dibuat sekali, lalu reuse).
+  const qris = await ensureOrderQris({
+    order,
+    customer: customerFromUser(user),
+  });
+  // Order lama tanpa deadline mendapat deadline baru saat resume.
   let effectiveExpiresAt = order.paymentExpiresAt;
-  if (!snapToken || !snapRedirectUrl) {
-    // item.price menyimpan SUBTOTAL; harga satuan = subtotal/qty.
-    // Selisih pembulatan ditampung di item terakhir agar jumlahnya
-    // persis sama dengan gross_amount (Midtrans menolak selisih).
-    const snapItems = order.items.map((item) => ({
-      id: String(item.packageId),
-      price: Math.round(item.price / Math.max(1, item.quantity)),
-      quantity: item.quantity,
-      name: item.package.name,
-    }));
-    const snapItemsSum = snapItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
-    if (snapItems.length > 0) {
-      const last = snapItems[snapItems.length - 1];
-      last.price += Math.round((order.totalPrice - snapItemsSum) / last.quantity);
-    }
-
-    // Order lama tanpa deadline mendapat deadline baru saat resume.
-    const expiresAt = order.paymentExpiresAt ?? paymentDeadline();
-    effectiveExpiresAt = expiresAt;
-
-    const snap = await createSnapTransaction({
-      midtransOrderId: buildMidtransOrderId(order.id),
-      grossAmount: order.totalPrice,
-      items: snapItems,
-      customer: {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-      },
-      expiryHours: Math.max(
-        1,
-        Math.ceil((expiresAt.getTime() - Date.now()) / (60 * 60 * 1000)),
-      ),
-    });
-    if (snap) {
-      snapToken = snap.token;
-      snapRedirectUrl = snap.redirectUrl;
-      await prisma.order.update({
+  if (!order.paymentExpiresAt) {
+    effectiveExpiresAt = await prisma.order
+      .update({
         where: { id: order.id },
-        data: {
-          snapToken: snap.token,
-          snapRedirectUrl: snap.redirectUrl,
-          paymentExpiresAt: expiresAt,
-        },
-      });
-    } else {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { paymentExpiresAt: expiresAt },
-      });
-    }
+        data: { paymentExpiresAt: paymentDeadline() },
+      })
+      .then((o) => o.paymentExpiresAt);
   }
 
+  // URL redirect tersimpan (warisan alur Snap) tetap dikirim sebagai fallback.
   return NextResponse.json({
     success: true,
     data: {
@@ -147,11 +94,12 @@ export async function GET(
       paymentStatus: order.paymentStatus,
       paymentExpiresAt: effectiveExpiresAt?.toISOString() ?? null,
       payment: {
-        simulator: !snapToken,
-        snapToken,
-        snapRedirectUrl,
-        snapScriptUrl: MIDTRANS_SNAP_SCRIPT_URL,
-        clientKey: MIDTRANS_CLIENT_KEY,
+        /** true = simulator lokal (Midtrans belum dikonfigurasi / QRIS gagal). */
+        simulator: !qris,
+        qris: qris
+          ? { qrString: qris.qrString, qrImageUrl: qris.qrImageUrl }
+          : null,
+        snapRedirectUrl: order.snapRedirectUrl,
         midtransConfigured: isMidtransConfigured(),
       },
     },

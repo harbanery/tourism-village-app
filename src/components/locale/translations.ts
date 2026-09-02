@@ -200,6 +200,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.deadline": "Batas Pembayaran",
     "payment.expired": "Batas waktu pembayaran telah habis — pesanan dibatalkan.",
     "payment.checkStatus": "Periksa Status Pembayaran",
+    "payment.qrisTitle": "Pindai QR untuk Membayar (QRIS)",
+    "payment.qrisHint":
+      "Buka aplikasi e-wallet atau m-banking Anda, pindai QR di atas, lalu selesaikan pembayaran. Status diperiksa otomatis setiap beberapa detik.",
     "payment.status.PENDING": "Menunggu Pembayaran",
     "payment.status.PAID": "Lunas",
     "payment.status.FAILED": "Gagal",
@@ -521,6 +524,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.deadline": "Payment Deadline",
     "payment.expired": "The payment deadline has passed — the order was canceled.",
     "payment.checkStatus": "Check Payment Status",
+    "payment.qrisTitle": "Scan the QR to Pay (QRIS)",
+    "payment.qrisHint":
+      "Open your e-wallet or mobile banking app, scan the QR above, then complete the payment. The status is checked automatically every few seconds.",
     "payment.status.PENDING": "Pending Payment",
     "payment.status.PAID": "Paid",
     "payment.status.FAILED": "Failed",

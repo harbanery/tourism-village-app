@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { QRCodeSVG } from "qrcode.react";
 import { Alert, App, Button, Card, Result, Spin, Tag } from "antd";
 import {
   CheckCircleFilled,
@@ -30,6 +32,15 @@ interface PaymentOrder {
   items: { id: number; packageName: string; quantity: number; price: number }[];
 }
 
+interface QrisInfo {
+  qrString: string;
+  qrImageUrl: string | null;
+}
+
+interface PaymentOptionQris extends PaymentOption {
+  qris?: QrisInfo | null;
+}
+
 const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
   PAID: "green",
   PENDING: "orange",
@@ -37,14 +48,17 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
   CANCELED: "default",
 };
 
+/** Interval auto-poll status (ms) selama menampilkan QR. */
+const POLL_INTERVAL_MS = 10_000;
+
 /**
  * Halaman transaksi pembayaran order (target setelah checkout).
  *
- * - Midtrans terkonfigurasi → tombol Bayar DIRECT ke halaman pembayaran
- *   Midtrans (snapRedirectUrl); setelah selesai Midtrans mengarahkan balik
- *   ke endpoint notification (GET) yang me-redirect kemari dengan status
- *   yang sudah diverifikasi ke API Midtrans.
+ * - QRIS POS integration (Midtrans aktif): QR ditampilkan langsung di
+ *   halaman — pindai dengan e-wallet/m-banking; status dicek otomatis
+ *   berkala ke API Midtrans lewat /api/web/orders/[id]/status.
  * - Simulator (server key kosong) → modal pembayaran lokal.
+ * - Warisan alur Snap: bila hanya ada redirect URL, tombol direct diberikan.
  */
 export default function PaymentClientSection({
   order,
@@ -57,14 +71,18 @@ export default function PaymentClientSection({
   const { notification } = App.useApp();
 
   const [status, setStatus] = useState<PaymentStatus>(order.paymentStatus);
-  const [option, setOption] = useState<PaymentOption | null>(null);
+  const [option, setOption] = useState<PaymentOptionQris | null>(null);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
   const [simOpen, setSimOpen] = useState(false);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
+  const statusRef = useRef(status);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
-  // Ambil opsi pembayaran (token Snap + redirect URL bila perlu).
+  // Ambil opsi pembayaran (membuat QR QRIS bila belum ada).
   const loadOption = useCallback(async () => {
     setLoading(true);
     try {
@@ -97,7 +115,57 @@ export default function PaymentClientSection({
     void Promise.resolve().then(loadOption);
   }, [loadOption]);
 
-  /** Bayar: direct ke halaman Midtrans; simulator lewat modal lokal. */
+  /** Periksa status: konfirmasi ke API Midtrans lewat server. */
+  const handleCheck = useCallback(
+    async (silent = false) => {
+      if (!silent) setChecking(true);
+      try {
+        const res = await fetch(`/api/web/orders/${order.id}/status`);
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error);
+        if (json.data.paymentStatus !== "PENDING") {
+          setStatus(json.data.paymentStatus);
+          if (json.data.paymentStatus === "PAID") {
+            notification.success({
+              title: t("notif.success"),
+              description: t("payment.success"),
+              placement: "bottomRight",
+            });
+          }
+        } else if (!silent) {
+          notification.info({
+            title: t("payment.status.PENDING"),
+            description: t("payment.pendingHint"),
+            placement: "bottomRight",
+          });
+        }
+      } catch {
+        if (!silent) {
+          notification.error({
+            title: t("notif.error"),
+            description: t("notif.fetchFailed"),
+            placement: "bottomRight",
+          });
+        }
+      } finally {
+        if (!silent) setChecking(false);
+      }
+    },
+    [order.id, notification, t],
+  );
+
+  // Auto-poll ringan selama QR ditampilkan dan status masih PENDING.
+  useEffect(() => {
+    if (statusRef.current !== "PENDING" || !option?.qris) return;
+    const timer = setInterval(() => {
+      if (statusRef.current === "PENDING") {
+        void handleCheck(true);
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [option, handleCheck]);
+
+  /** Simulator: bayar lewat modal lokal. */
   const handlePay = () => {
     if (!option) return;
     if (option.simulator) {
@@ -105,48 +173,9 @@ export default function PaymentClientSection({
       return;
     }
     if (option.snapRedirectUrl) {
-      // Direct ke Midtrans — kembali lagi via finish redirect notification.
       window.location.href = option.snapRedirectUrl;
-      return;
     }
-    notification.error({
-      title: t("notif.error"),
-      description: t("payment.failed"),
-      placement: "bottomRight",
-    });
   };
-
-  /** Periksa status: konfirmasi ke API Midtrans lewat server. */
-  const handleCheck = useCallback(async () => {
-    setChecking(true);
-    try {
-      const res = await fetch(`/api/web/orders/${order.id}/status`);
-      const json = await res.json();
-      if (!json.success) throw new Error(json.error);
-      if (json.data.paymentStatus !== "PENDING") {
-        setStatus(json.data.paymentStatus);
-        notification.success({
-          title: t("notif.success"),
-          description: t(`payment.status.${json.data.paymentStatus}`),
-          placement: "bottomRight",
-        });
-      } else {
-        notification.info({
-          title: t("payment.status.PENDING"),
-          description: t("payment.pendingHint"),
-          placement: "bottomRight",
-        });
-      }
-    } catch {
-      notification.error({
-        title: t("notif.error"),
-        description: t("notif.fetchFailed"),
-        placement: "bottomRight",
-      });
-    } finally {
-      setChecking(false);
-    }
-  }, [order.id, notification, t]);
 
   const handleSettled = (result: PaymentResult) => {
     setSimOpen(false);
@@ -194,6 +223,8 @@ export default function PaymentClientSection({
       </div>
     );
   }
+
+  const qris = option?.qris ?? null;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
@@ -244,8 +275,28 @@ export default function PaymentClientSection({
           <div className="mt-6 flex justify-center">
             <Spin indicator={<LoadingOutlined spin />} />
           </div>
-        ) : (
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+        ) : qris ? (
+          // --- QRIS POS: QR tampil langsung di halaman ---
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <p className="text-sm font-medium">{t("payment.qrisTitle")}</p>
+            <div className="rounded-xl border border-black/10 bg-white p-3 dark:border-white/10">
+              {qris.qrImageUrl ? (
+                // URL gambar QR resmi dari Midtrans bila tersedia.
+                <Image
+                  src={qris.qrImageUrl}
+                  alt={`QRIS ${order.id}`}
+                  width={220}
+                  height={220}
+                  unoptimized
+                />
+              ) : (
+                // Render sendiri dari payload QRIS (tanpa pihak ketiga).
+                <QRCodeSVG value={qris.qrString} size={220} />
+              )}
+            </div>
+            <p className="max-w-md text-center text-xs text-foreground/60">
+              {t("payment.qrisHint")}
+            </p>
             <Button
               block
               icon={<SearchOutlined />}
@@ -254,24 +305,46 @@ export default function PaymentClientSection({
             >
               {t("payment.checkStatus")}
             </Button>
-            <Button
-              type="primary"
-              block
-              icon={<CreditCardOutlined />}
-              disabled={!option}
-              onClick={handlePay}
-            >
-              {t("payment.pay")}
-            </Button>
           </div>
+        ) : option?.simulator ? (
+          // --- Simulator lokal ---
+          <Button
+            type="primary"
+            block
+            icon={<CreditCardOutlined />}
+            className="mt-6!"
+            onClick={handlePay}
+          >
+            {t("payment.pay")}
+          </Button>
+        ) : option?.snapRedirectUrl ? (
+          // --- Warisan Snap: direct URL ---
+          <Button
+            type="primary"
+            block
+            icon={<CreditCardOutlined />}
+            className="mt-6!"
+            onClick={handlePay}
+          >
+            {t("payment.pay")}
+          </Button>
+        ) : (
+          <Alert
+            className="mt-6!"
+            type="error"
+            showIcon
+            message={t("payment.failed")}
+          />
         )}
 
-        <Alert
-          className="mt-4!"
-          type="info"
-          showIcon
-          message={t("payment.pendingHint")}
-        />
+        {!loading && !qris && (
+          <Alert
+            className="mt-4!"
+            type="info"
+            showIcon
+            message={t("payment.pendingHint")}
+          />
+        )}
       </Card>
 
       {/* Modal hanya untuk mode simulator (Midtrans tidak dikonfigurasi). */}

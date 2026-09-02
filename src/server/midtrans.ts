@@ -127,7 +127,9 @@ export function verifyMidtransSignature(params: {
 }): boolean {
   if (!isMidtransConfigured()) return false;
   const expected = createHash("sha512")
-    .update(`${params.orderId}${params.statusCode}${params.grossAmount}${MIDTRANS_SERVER_KEY}`)
+    .update(
+      `${params.orderId}${params.statusCode}${params.grossAmount}${MIDTRANS_SERVER_KEY}`,
+    )
     .digest("hex");
   return expected === params.signatureKey;
 }
@@ -155,12 +157,97 @@ export function mapMidtransStatus(
 }
 
 export interface MidtransTransactionStatus {
-  /** order_id Midtrans (TOURISM-{id}-{rand}). */
+  /** order_id Midtrans (TOURISM-{id}). */
   orderId: string;
   transactionStatus: string;
   fraudStatus?: string;
   paymentType?: string;
   statusCode: string;
+}
+
+export interface QrisChargeResult {
+  qrString: string;
+  /** URL gambar QR siap tampil (action generate-qr-code Midtrans). */
+  qrImageUrl: string | null;
+}
+
+/**
+ * Buat transaksi QRIS via Core API (pola GoPay QRIS POS integration):
+ * POST /v2/charge dengan payment_type "qris" — TIDAK butuh snap.js maupun
+ * redirect; QR dirender sendiri di halaman aplikasi.
+ * Mengembalikan null bila Midtrans tidak dikonfigurasi / gagal.
+ */
+export async function createQrisCharge(params: {
+  midtransOrderId: string;
+  grossAmount: number;
+  items: SnapItemDetail[];
+  customer: SnapCustomerDetail;
+  /** Batas waktu pembayaran (menit) — dikirim sebagai custom_expiry. */
+  expiryMinutes?: number;
+}): Promise<QrisChargeResult | null> {
+  if (!isMidtransConfigured()) return null;
+
+  const auth = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString("base64");
+  const charge = async (withExpiry: boolean) =>
+    fetch(`${MIDTRANS_STATUS_API_URL}/charge`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Basic ${auth}`,
+      },
+      cache: "no-store",
+      body: JSON.stringify({
+        payment_type: "qris",
+        transaction_details: {
+          order_id: params.midtransOrderId,
+          gross_amount: params.grossAmount,
+        },
+        item_details: params.items,
+        customer_details: {
+          first_name: params.customer.name,
+          email: params.customer.email,
+          ...(params.customer.phone ? { phone: params.customer.phone } : {}),
+        },
+        qris: { acquirer: "gopay" },
+        ...(withExpiry && params.expiryMinutes
+          ? {
+              custom_expiry: {
+                expiry_duration: params.expiryMinutes,
+                unit: "minute",
+              },
+            }
+          : {}),
+      }),
+    });
+
+  try {
+    let response = await charge(true);
+    // custom_expiry ditolak? Ulangi tanpa expiry (pakai default Midtrans).
+    if (!response.ok && response.status === 400) {
+      response = await charge(false);
+    }
+    if (!response.ok) {
+      console.error(
+        "Midtrans QRIS charge error:",
+        response.status,
+        await response.text(),
+      );
+      return null;
+    }
+    const json = (await response.json()) as {
+      status_code?: string;
+      qr_string?: string;
+      actions?: { name?: string; url?: string }[];
+    };
+    if (!json.qr_string) return null;
+    const qrImageUrl =
+      json.actions?.find((a) => a.name === "generate-qr-code")?.url ?? null;
+    return { qrString: json.qr_string, qrImageUrl };
+  } catch (error) {
+    console.error("Midtrans QRIS charge request failed:", error);
+    return null;
+  }
 }
 
 /**

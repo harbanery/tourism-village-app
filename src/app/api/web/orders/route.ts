@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
-import {
-  MIDTRANS_CLIENT_KEY,
-  MIDTRANS_SNAP_SCRIPT_URL,
-  PAYMENT_EXPIRY_HOURS,
-} from "@/config/variables";
-import {
-  buildMidtransOrderId,
-  createSnapTransaction,
-  isMidtransConfigured,
-} from "@/server/midtrans";
+import { isMidtransConfigured } from "@/server/midtrans";
 import { REMOTE_TX_OPTIONS, withRetry } from "@/server/prismaRetry";
 import { expireStalePendingOrders, paymentDeadline } from "@/server/orderExpiry";
+import { customerFromUser, ensureOrderQris } from "@/server/qris";
 
 /**
  * GET /api/web/orders — riwayat pesanan milik user login
@@ -179,31 +171,10 @@ export async function POST(request: Request) {
       ),
     );
 
-    // --- Buat transaksi Midtrans Snap (bila dikonfigurasi) ---
-    const midtransOrderId = buildMidtransOrderId(order.id);
-    const snap = await createSnapTransaction({
-      midtransOrderId,
-      grossAmount: totalPrice,
-      items: orderItems.map((item) => ({
-        id: String(item.packageId),
-        price: item.price,
-        quantity: item.quantity,
-        name: item.name,
-      })),
-      customer: {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-      },
-      expiryHours: PAYMENT_EXPIRY_HOURS,
-    });
-
-    if (snap) {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { snapToken: snap.token, snapRedirectUrl: snap.redirectUrl },
-      });
-    }
+    // --- Buat QR pembayaran QRIS (bila Midtrans dikonfigurasi) ---
+    // Pola QRIS POS integration: QR dirender di halaman /payment/[id],
+    // tanpa snap.js dan tanpa redirect keluar.
+    const qris = await ensureOrderQris({ order, customer: customerFromUser(user) });
 
     return NextResponse.json(
       {
@@ -226,11 +197,11 @@ export async function POST(request: Request) {
           })),
           payment: {
             /** true = bayar via simulator lokal (Midtrans belum dikonfigurasi). */
-            simulator: !snap,
-            snapToken: snap?.token ?? null,
-            snapRedirectUrl: snap?.redirectUrl ?? null,
-            snapScriptUrl: MIDTRANS_SNAP_SCRIPT_URL,
-            clientKey: MIDTRANS_CLIENT_KEY,
+            simulator: !qris,
+            qris: qris
+              ? { qrString: qris.qrString, qrImageUrl: qris.qrImageUrl }
+              : null,
+            snapRedirectUrl: null,
             midtransConfigured: isMidtransConfigured(),
           },
         },
