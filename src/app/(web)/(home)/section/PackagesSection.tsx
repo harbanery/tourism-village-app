@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, Card, Col, Row } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -18,6 +18,7 @@ interface WebPackage {
 
 export function PackagesSection() {
   const { t } = useT();
+  const router = useRouter();
   const [packages, setPackages] = useState<WebPackage[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,11 +91,14 @@ export function PackagesSection() {
                       </li>
                     ))}
                   </ul>
-                  <Link href="/package" className="mt-6! block!">
-                    <Button type="primary" block>
-                      {t("home.packages.cta")}
-                    </Button>
-                  </Link>
+                  <Button
+                    type="primary"
+                    block
+                    className="mt-6!"
+                    onClick={() => router.push("/package")}
+                  >
+                    {t("home.packages.cta")}
+                  </Button>
                 </Card>
               </Col>
             ))

@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyVideos } from "@/models";
 
 export function DocumentationSection() {
   const { t } = useT();
+  const router = useRouter();
   const mainVideo = dummyVideos[0];
 
   return (
@@ -30,11 +31,13 @@ export function DocumentationSection() {
             <p className="mt-2 text-foreground/70">
               {t("home.video.subtitle")}
             </p>
-            <Link href="/vlog">
-              <Button type="primary" className="mt-6!">
-                {t("common.viewAll")}
-              </Button>
-            </Link>
+            <Button
+              type="primary"
+              className="mt-6!"
+              onClick={() => router.push("/vlog")}
+            >
+              {t("common.viewAll")}
+            </Button>
           </div>
         </div>
       </div>

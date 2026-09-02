@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { dummyBlogs } from "@/models";
@@ -8,6 +8,7 @@ import { formatDate } from "@/utils/format";
 
 export function ArchiveSection() {
   const { t, locale } = useT();
+  const router = useRouter();
 
   const archives = Array.from(new Set(dummyBlogs.map((b) => b.datetime.slice(0, 7))))
     .sort()
@@ -17,13 +18,14 @@ export function ArchiveSection() {
     <Card title={t("articles.archives")}>
       <div className="flex flex-col gap-1">
         {archives.map((month) => (
-          <Link
+          <button
             key={month}
-            href={`/search?date=${month}`}
-            className="text-sm! text-primary! hover:underline!"
+            type="button"
+            onClick={() => router.push(`/search?date=${month}`)}
+            className="cursor-pointer! bg-transparent! text-left! text-sm! text-primary! hover:underline!"
           >
             {formatDate(`${month}-01`, locale)}
-          </Link>
+          </button>
         ))}
       </div>
     </Card>

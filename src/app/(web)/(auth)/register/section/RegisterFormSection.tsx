@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { App, Button, Card, Form, Input } from "antd";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
@@ -113,9 +112,13 @@ export function RegisterFormSection() {
         </Form>
         <p className="text-center text-sm text-foreground/60">
           {t("auth.register.haveAccount")}{" "}
-          <Link href="/login" className="text-primary! hover:underline!">
+          <button
+            type="button"
+            onClick={() => router.push("/login")}
+            className="cursor-pointer! text-primary! hover:underline!"
+          >
             {t("nav.login")}
-          </Link>
+          </button>
         </p>
       </Card>
     </div>

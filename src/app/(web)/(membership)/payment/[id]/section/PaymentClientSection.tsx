@@ -157,6 +157,13 @@ export default function PaymentClientSection({
     return () => clearInterval(timer);
   }, [option, handleCheck]);
 
+  // Pembayaran berhasil → langsung diarahkan ke halaman review-confirm.
+  useEffect(() => {
+    if (status === "PAID") {
+      router.replace("/review-confirm");
+    }
+  }, [status, router]);
+
   if (!mounted) return null;
 
   // Status final: bukan lagi halaman pembayaran.

@@ -1,7 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
-import Link from "next/link";
 import { Button, Card, List, Tag } from "antd";
 import { CreditCardOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -36,6 +36,7 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
 
 export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
   const { t, locale } = useT();
+  const router = useRouter();
   const mounted = useMounted();
   if (!mounted) return null;
 
@@ -89,11 +90,13 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                 </ul>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {order.paymentStatus === "PENDING" ? (
-                    <Link href={`/payment/${order.id}`}>
-                      <Button type="primary" icon={<CreditCardOutlined />}>
-                        {t("payment.pay")}
-                      </Button>
-                    </Link>
+                    <Button
+                      type="primary"
+                      icon={<CreditCardOutlined />}
+                      onClick={() => router.push(`/payment/${order.id}`)}
+                    >
+                      {t("payment.pay")}
+                    </Button>
                   ) : (
                     <Button>{t("profile.downloadReceipt")}</Button>
                   )}
@@ -103,9 +106,9 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
           )}
         />
       )}
-      <Link href="/" className="inline-block! mt-6!">
-        <Button>{t("common.backToHome")}</Button>
-      </Link>
+      <Button className="inline-flex! mt-6!" onClick={() => router.push("/")}>
+        {t("common.backToHome")}
+      </Button>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 
 export function HeroSection() {
   const { t } = useT();
+  const router = useRouter();
 
   return (
     <section className="relative flex min-h-[calc(100dvh-4rem)] items-center">
@@ -21,16 +22,15 @@ export function HeroSection() {
           <span className="block">{t("home.hero.subtitle1")}</span>
           <span className="block">{t("home.hero.subtitle2")}</span>
         </p>
-        <Link href="/package">
-          <Button
-            type="primary"
-            size="large"
-            icon={<ArrowRightOutlined />}
-            className="mt-8!"
-          >
-            {t("home.hero.cta")}
-          </Button>
-        </Link>
+        <Button
+          type="primary"
+          size="large"
+          icon={<ArrowRightOutlined />}
+          className="mt-8!"
+          onClick={() => router.push("/package")}
+        >
+          {t("home.hero.cta")}
+        </Button>
       </div>
     </section>
   );

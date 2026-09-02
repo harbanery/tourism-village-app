@@ -93,7 +93,12 @@ export default function CheckoutClientSection({
         .map((row) => {
           const pkg = packages.find((p) => p.id === row.packageId);
           return pkg
-            ? { packageId: pkg.id, name: pkg.name, price: pkg.price, quantity: row.quantity }
+            ? {
+                packageId: pkg.id,
+                name: pkg.name,
+                price: pkg.price,
+                quantity: row.quantity,
+              }
             : null;
         })
         .filter(Boolean) as {
@@ -104,7 +109,10 @@ export default function CheckoutClientSection({
       }[],
     [cart, packages],
   );
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   const handleProcess = async (values: CheckoutFormValues) => {
     if (items.length === 0) {
@@ -120,7 +128,8 @@ export default function CheckoutClientSection({
           items: cart,
           dateSchedule: values.dateSchedule,
           homestay: values.homestay === "yes",
-          homestayTime: values.homestay === "yes" ? values.homestayTime ?? 1 : null,
+          homestayTime:
+            values.homestay === "yes" ? (values.homestayTime ?? 1) : null,
         }),
       });
       const json = await res.json();
@@ -134,7 +143,7 @@ export default function CheckoutClientSection({
       clearCart();
       setCart([]);
       // Arahkan ke halaman transaksi pembayaran (bukan diam di checkout).
-      router.push(`/payment/${json.data.orderId}`);
+      router.replace(`/payment/${json.data.orderId}`);
     } catch (error) {
       console.error("Error creating order:", error);
       notification.error({
@@ -184,7 +193,10 @@ export default function CheckoutClientSection({
                 <Radio.Button value="yes">{t("common.yes")}</Radio.Button>
               </Radio.Group>
             </Form.Item>
-            <Form.Item noStyle shouldUpdate={(prev, cur) => prev.homestay !== cur.homestay}>
+            <Form.Item
+              noStyle
+              shouldUpdate={(prev, cur) => prev.homestay !== cur.homestay}
+            >
               {({ getFieldValue }) =>
                 getFieldValue("homestay") === "yes" ? (
                   <Form.Item
@@ -218,7 +230,10 @@ export default function CheckoutClientSection({
             <h2 className="font-semibold mt-6">{t("checkout.orders")}</h2>
             <div className="mt-2 divide-y divide-black/5 dark:divide-white/10">
               {items.map((item) => (
-                <div key={item.packageId} className="py-2 flex justify-between text-sm">
+                <div
+                  key={item.packageId}
+                  className="py-2 flex justify-between text-sm"
+                >
                   <span>
                     {item.name} × {item.quantity}
                   </span>

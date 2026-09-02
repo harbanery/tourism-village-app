@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Alert, App, Button, Card, Form, Input, Typography } from "antd";
 import { InfoCircleOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
@@ -105,15 +104,22 @@ export function LoginFormSection() {
         />
         <div className="text-center space-y-2 text-sm">
           <p>
-            <Link href="#" className="text-primary! hover:underline!">
+            <button
+              type="button"
+              className="cursor-pointer! text-primary! hover:underline!"
+            >
               {t("auth.login.forgot")}
-            </Link>
+            </button>
           </p>
           <p className="text-foreground/60">
             {t("auth.login.noAccount")}{" "}
-            <Link href="/register" className="text-primary! hover:underline!">
+            <button
+              type="button"
+              onClick={() => router.push("/register")}
+              className="cursor-pointer! text-primary! hover:underline!"
+            >
               {t("nav.register")}
-            </Link>
+            </button>
           </p>
         </div>
       </Card>

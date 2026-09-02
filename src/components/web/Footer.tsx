@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useT } from "@/components/locale/LocaleProvider";
 
 export function Footer() {
   const { t } = useT();
+  const router = useRouter();
   return (
     <footer className="pt-16 border-t border-black/5 dark:border-white/10 bg-white dark:bg-[#141416]">
       <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 sm:grid-cols-3">
@@ -29,9 +30,13 @@ export function Footer() {
       </div>
       <div className="border-t border-black/5 dark:border-white/10 py-4 text-center text-xs text-foreground/60">
         {t("footer.copyright")} ·{" "}
-        <Link href="/admin" className="hover:underline!">
+        <button
+          type="button"
+          onClick={() => router.push("/admin")}
+          className="cursor-pointer! bg-transparent! hover:underline!"
+        >
           {t("admin.login.title")}
-        </Link>
+        </button>
       </div>
     </footer>
   );

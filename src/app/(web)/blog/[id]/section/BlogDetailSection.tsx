@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, Card, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -9,12 +9,17 @@ import { formatDate } from "@/utils/format";
 
 export function BlogDetailSection({ post }: { post: BlogPost | null }) {
   const { t, locale } = useT();
+  const router = useRouter();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
-      <Link href="/article" className="inline-block! mb-4!">
-        <Button icon={<ArrowLeftOutlined />}>{t("articles.title")}</Button>
-      </Link>
+      <Button
+        icon={<ArrowLeftOutlined />}
+        className="mb-4!"
+        onClick={() => router.push("/article")}
+      >
+        {t("articles.title")}
+      </Button>
       {post ? (
         <Card
           cover={

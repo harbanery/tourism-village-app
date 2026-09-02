@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Col, Row, App } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
-import { writeCart } from "@/helpers/cart";
+import { readCart, writeCart } from "@/helpers/cart";
 import { PackageListSection, type CartItem, type WebPackage } from "./section/PackageListSection";
 import { CartSection } from "./section/CartSection";
 
@@ -21,6 +21,9 @@ export default function PackagePage() {
   const [session, setSession] = useState<{ id: number } | null>(null);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
+  /** true setelah keranjang dihidrasi dari sessionStorage — mencegah
+      effect persist menimpa keranjang tersimpan dengan array kosong. */
+  const [hydrated, setHydrated] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -30,7 +33,24 @@ export default function PackagePage() {
       ]);
       const packagesJson = await packagesRes.json();
       const sessionJson = await sessionRes.json();
-      if (packagesJson.success) setPackages(packagesJson.data);
+      if (packagesJson.success) {
+        const list: WebPackage[] = packagesJson.data;
+        setPackages(list);
+
+        // Hidrasi keranjang dari sessionStorage: item yang dipilih sebelum
+        // pindah ke checkout tetap ada saat kembali ke halaman ini.
+        const byId = new Map(list.map((pkg) => [pkg.id, pkg]));
+        setCart(
+          readCart()
+            .map((row) => {
+              const pkg = byId.get(row.packageId);
+              return pkg
+                ? { packageId: pkg.id, name: pkg.name, price: pkg.price, quantity: row.quantity }
+                : null; // paket sudah tidak ada / nonaktif → buang
+            })
+            .filter(Boolean) as CartItem[],
+        );
+      }
       setSession(sessionJson.success ? sessionJson.data : null);
     } catch (error) {
       console.error("Error fetching packages:", error);
@@ -41,12 +61,20 @@ export default function PackagePage() {
       });
     } finally {
       setFetching(false);
+      setHydrated(true);
     }
   }, [notification, t]);
 
   useEffect(() => {
     void Promise.resolve().then(load);
   }, [load]);
+
+  // Persist keranjang setiap perubahan (tambah/hapus/kosongkan) sehingga
+  // tetap tersimpan saat user berpindah halaman dan kembali lagi.
+  useEffect(() => {
+    if (!hydrated) return;
+    writeCart(cart.map((item) => ({ packageId: item.packageId, quantity: item.quantity })));
+  }, [cart, hydrated]);
 
   const total = useMemo(
     () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -70,7 +98,7 @@ export default function PackagePage() {
   };
 
   const goCheckout = () => {
-    // Simpan keranjang untuk halaman checkout (sessionStorage).
+    // Pastikan keranjang terbaru tersimpan sebelum pindah ke checkout.
     writeCart(cart.map((item) => ({ packageId: item.packageId, quantity: item.quantity })));
     router.push(session ? "/checkout" : "/login");
   };

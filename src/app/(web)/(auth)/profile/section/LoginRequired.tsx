@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, Button } from "antd";
 import { LoginOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -8,6 +8,7 @@ import { useMounted } from "@/helpers/useMounted";
 
 export function LoginRequired() {
   const { t } = useT();
+  const router = useRouter();
   const mounted = useMounted();
   if (!mounted) return null;
 
@@ -21,11 +22,13 @@ export function LoginRequired() {
           {t("auth.login.requiredDesc")}
         </p>
         <div className="mt-6 flex justify-center">
-          <Link href="/login">
-            <Button type="primary" icon={<LoginOutlined />}>
-              {t("nav.login")}
-            </Button>
-          </Link>
+          <Button
+            type="primary"
+            icon={<LoginOutlined />}
+            onClick={() => router.push("/login")}
+          >
+            {t("nav.login")}
+          </Button>
         </div>
       </Card>
     </div>
