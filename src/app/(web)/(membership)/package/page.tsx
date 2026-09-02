@@ -72,7 +72,7 @@ export default function PackagePage() {
   const goCheckout = () => {
     // Simpan keranjang untuk halaman checkout (sessionStorage).
     writeCart(cart.map((item) => ({ packageId: item.packageId, quantity: item.quantity })));
-    router.push(session ? `/checkout/${session.id}` : "/login");
+    router.push(session ? "/checkout" : "/login");
   };
 
   if (!mounted) return null;

@@ -45,7 +45,7 @@ export function LoginFormSection() {
       }
 
       message.success(t("auth.login.success"));
-      router.push(`/profile/${result.data.id}`);
+      router.push("/profile");
       router.refresh();
     } catch {
       message.error(t("notif.error"));

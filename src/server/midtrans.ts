@@ -58,6 +58,8 @@ export async function createSnapTransaction(params: {
   grossAmount: number;
   items: SnapItemDetail[];
   customer: SnapCustomerDetail;
+  /** Batas waktu pembayaran (jam) — dikirim sebagai custom expiry Snap. */
+  expiryHours?: number;
 }): Promise<SnapTransactionResult | null> {
   if (!isMidtransConfigured()) return null;
 
@@ -81,6 +83,9 @@ export async function createSnapTransaction(params: {
           email: params.customer.email,
           ...(params.customer.phone ? { phone: params.customer.phone } : {}),
         },
+        ...(params.expiryHours
+          ? { expiry: { unit: "hour", duration: params.expiryHours } }
+          : {}),
       }),
     });
 

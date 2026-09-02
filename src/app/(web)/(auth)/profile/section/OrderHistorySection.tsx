@@ -3,6 +3,7 @@
 import { useMounted } from "@/helpers/useMounted";
 import Link from "next/link";
 import { Button, Card, List, Tag } from "antd";
+import { CreditCardOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate, formatRupiah } from "@/utils/format";
 
@@ -20,6 +21,8 @@ export interface HistoryOrder {
   homestayTime: number | null;
   totalPrice: number;
   paymentStatus: PaymentStatus;
+  /** Batas waktu pembayaran (ISO) — hanya relevan untuk PENDING. */
+  paymentExpiresAt?: string | null;
   items: { id: number; packageName: string; quantity: number; price: number }[];
 }
 
@@ -64,6 +67,13 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                 <p className="text-sm text-foreground/70">
                   {t("profile.departureDate")}: {formatDate(order.dateSchedule, locale)}
                 </p>
+                {order.paymentStatus === "PENDING" &&
+                  order.paymentExpiresAt && (
+                    <p className="text-sm text-amber-600 dark:text-amber-400">
+                      {t("payment.deadline")}:{" "}
+                      {formatDate(order.paymentExpiresAt, locale, true)}
+                    </p>
+                  )}
                 <p className="text-sm text-foreground/70">
                   {t("checkout.homestay")}:{" "}
                   {order.homestay === "yes"
@@ -77,7 +87,17 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                     </li>
                   ))}
                 </ul>
-                <Button className="mt-4!">{t("profile.downloadReceipt")}</Button>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {order.paymentStatus === "PENDING" ? (
+                    <Link href={`/payment/${order.id}`}>
+                      <Button type="primary" icon={<CreditCardOutlined />}>
+                        {t("payment.pay")}
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button>{t("profile.downloadReceipt")}</Button>
+                  )}
+                </div>
               </Card>
             </List.Item>
           )}

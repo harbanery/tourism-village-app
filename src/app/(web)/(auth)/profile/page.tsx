@@ -1,19 +1,21 @@
 import { getCurrentUser } from "@/server/auth";
 import prisma from "@/server/db";
+import { expireStalePendingOrders } from "@/server/orderExpiry";
 import { ProfileInfoSection } from "./section/ProfileInfoSection";
 import { OrderHistorySection } from "./section/OrderHistorySection";
 import { LoginRequired } from "./section/LoginRequired";
 import type { User } from "@/models";
 
-export default async function ProfilePage({ params }: PageProps<"/profile/[id]">) {
-  const { id } = await params;
-  void id; // profil selalu mengikuti sesi login, bukan param URL
-
+/** Halaman profil — selalu mengikuti sesi login (tanpa param URL). */
+export default async function ProfilePage() {
   const user = await getCurrentUser();
 
   if (!user) {
     return <LoginRequired />;
   }
+
+  // Expire PENDING yang melewati batas waktu pembayaran.
+  await expireStalePendingOrders();
 
   const orderRows = await prisma.order.findMany({
     where: { userId: user.id },
@@ -33,6 +35,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
     homestayTime: order.homestayTime,
     totalPrice: order.totalPrice,
     paymentStatus: order.paymentStatus,
+    paymentExpiresAt: order.paymentExpiresAt?.toISOString() ?? null,
     items: order.items.map((item) => ({
       id: item.id,
       packageName: item.package.name,
@@ -46,7 +49,12 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
     email: user.email,
     phone: user.phone ?? null,
     name: user.name,
-    gender: user.gender === "MALE" ? "male" : user.gender === "FEMALE" ? "female" : null,
+    gender:
+      user.gender === "MALE"
+        ? "male"
+        : user.gender === "FEMALE"
+          ? "female"
+          : null,
     birthDate: user.birthDate ? user.birthDate.toISOString() : null,
     address: user.address ?? null,
     avatar: user.avatar ?? null,

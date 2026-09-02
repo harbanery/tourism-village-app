@@ -15,11 +15,6 @@ import {
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { readCart, clearCart } from "@/helpers/cart";
-import {
-  PaymentModal,
-  type PaymentOption,
-  type PaymentResult,
-} from "@/components/web/payment/PaymentModal";
 import { formatRupiah } from "@/utils/format";
 
 /** Paket aktif dari /api/web/packages (sesuai data admin). */
@@ -67,13 +62,6 @@ export default function CheckoutClientSection({
   );
   const [submitting, setSubmitting] = useState(false);
 
-  const [payOpen, setPayOpen] = useState(false);
-  const [payOrder, setPayOrder] = useState<{
-    orderId: number;
-    totalPrice: number;
-  } | null>(null);
-  const [payOption, setPayOption] = useState<PaymentOption | null>(null);
-
   // Muat keranjang + harga paket terbaru.
   const load = useCallback(async () => {
     const stored = readCart();
@@ -118,17 +106,6 @@ export default function CheckoutClientSection({
   );
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleSettled = (result: PaymentResult) => {
-    setPayOpen(false);
-    if (result === "PAID") {
-      message.success(t("payment.success"));
-      clearCart();
-      router.push("/review-confirm");
-    } else if (result === "CANCELED") {
-      message.warning(t("payment.canceled"));
-    }
-  };
-
   const handleProcess = async (values: CheckoutFormValues) => {
     if (items.length === 0) {
       message.warning(t("checkout.emptyCart"));
@@ -156,9 +133,8 @@ export default function CheckoutClientSection({
       });
       clearCart();
       setCart([]);
-      setPayOrder({ orderId: json.data.orderId, totalPrice: json.data.totalPrice });
-      setPayOption(json.data.payment);
-      setPayOpen(true);
+      // Arahkan ke halaman transaksi pembayaran (bukan diam di checkout).
+      router.push(`/payment/${json.data.orderId}`);
     } catch (error) {
       console.error("Error creating order:", error);
       notification.error({
@@ -268,14 +244,6 @@ export default function CheckoutClientSection({
           </Form>
         </Card>
       )}
-
-      <PaymentModal
-        open={payOpen}
-        order={payOrder}
-        option={payOption}
-        onClose={() => setPayOpen(false)}
-        onSettled={handleSettled}
-      />
     </div>
   );
 }

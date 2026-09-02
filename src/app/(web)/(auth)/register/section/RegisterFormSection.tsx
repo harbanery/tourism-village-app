@@ -49,7 +49,7 @@ export function RegisterFormSection() {
       }
 
       message.success(t("auth.register.success"));
-      router.push(`/profile/${result.data.id}`);
+      router.push("/profile");
       router.refresh();
     } catch {
       message.error(t("notif.error"));

@@ -101,7 +101,7 @@ export function Navbar() {
                     key: "profile",
                     icon: <UserOutlined />,
                     label: t("nav.profile"),
-                    onClick: () => router.push(`/profile/${user.id}`),
+                    onClick: () => router.push("/profile"),
                   },
                   {
                     key: "logout",
@@ -157,7 +157,7 @@ export function Navbar() {
           {user ? (
             <>
               <Link
-                href={`/profile/${user.id}`}
+                href="/profile"
                 onClick={() => setOpen(false)}
                 className={navLinkClass(
                   pathname.startsWith("/profile"),

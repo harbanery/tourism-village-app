@@ -4,12 +4,15 @@ import { getCurrentUser } from "@/server/auth";
 import {
   MIDTRANS_CLIENT_KEY,
   MIDTRANS_SNAP_SCRIPT_URL,
+  PAYMENT_EXPIRY_HOURS,
 } from "@/config/variables";
 import {
   buildMidtransOrderId,
   createSnapTransaction,
   isMidtransConfigured,
 } from "@/server/midtrans";
+import { REMOTE_TX_OPTIONS, withRetry } from "@/server/prismaRetry";
+import { expireStalePendingOrders, paymentDeadline } from "@/server/orderExpiry";
 
 /**
  * GET /api/web/orders — riwayat pesanan milik user login
@@ -23,6 +26,9 @@ export async function GET() {
       { status: 401 },
     );
   }
+
+  // Expire PENDING yang melewati batas waktu pembayaran.
+  await expireStalePendingOrders();
 
   const orders = await prisma.order.findMany({
     where: { userId: user.id },
@@ -42,6 +48,7 @@ export async function GET() {
       paymentStatus: order.paymentStatus,
       paymentMethod: order.paymentMethod,
       paidAt: order.paidAt?.toISOString() ?? null,
+      paymentExpiresAt: order.paymentExpiresAt?.toISOString() ?? null,
       items: order.items.map((item) => ({
         id: item.id,
         packageName: item.package.name,
@@ -141,27 +148,36 @@ export async function POST(request: Request) {
     const totalPrice = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
 
     // --- Simpan order + item (transaksi atomik) ---
-    const order = await prisma.$transaction(async (tx) => {
-      const created = await tx.order.create({
-        data: {
-          userId: user.id,
-          dateSchedule: schedule,
-          homestay,
-          homestayTime,
-          totalPrice,
-          paymentStatus: "PENDING",
-          items: {
-            create: orderItems.map((item) => ({
-              packageId: item.packageId,
-              quantity: item.quantity,
-              price: item.subtotal,
-            })),
-          },
+    // REMOTE_TX_OPTIONS: DB remote (Railway) berlatensi tinggi dari lokal,
+    // default timeout 5s memicu P2028. withRetry menangani transient error.
+    const order = await withRetry(() =>
+      prisma.$transaction(
+        async (tx) => {
+          const created = await tx.order.create({
+            data: {
+              userId: user.id,
+              dateSchedule: schedule,
+              homestay,
+              homestayTime,
+              totalPrice,
+              paymentStatus: "PENDING",
+              // Batas waktu pembayaran (custom expiry Snap mengikuti ini).
+              paymentExpiresAt: paymentDeadline(),
+              items: {
+                create: orderItems.map((item) => ({
+                  packageId: item.packageId,
+                  quantity: item.quantity,
+                  price: item.subtotal,
+                })),
+              },
+            },
+            include: { items: { include: { package: true } } },
+          });
+          return created;
         },
-        include: { items: { include: { package: true } } },
-      });
-      return created;
-    });
+        REMOTE_TX_OPTIONS,
+      ),
+    );
 
     // --- Buat transaksi Midtrans Snap (bila dikonfigurasi) ---
     const midtransOrderId = buildMidtransOrderId(order.id);
@@ -179,12 +195,13 @@ export async function POST(request: Request) {
         email: user.email,
         phone: user.phone,
       },
+      expiryHours: PAYMENT_EXPIRY_HOURS,
     });
 
     if (snap) {
       await prisma.order.update({
         where: { id: order.id },
-        data: { snapToken: snap.token },
+        data: { snapToken: snap.token, snapRedirectUrl: snap.redirectUrl },
       });
     }
 
@@ -198,6 +215,8 @@ export async function POST(request: Request) {
           homestayTime: order.homestayTime,
           totalPrice,
           paymentStatus: "PENDING" as const,
+          paymentExpiresAt:
+            order.paymentExpiresAt?.toISOString() ?? null,
           items: orderItems.map((item) => ({
             packageId: item.packageId,
             name: item.name,

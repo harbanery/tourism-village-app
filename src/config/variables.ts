@@ -55,6 +55,15 @@ export const MIDTRANS_IS_PRODUCTION: boolean =
 /** Midtrans aktif bila server key terisi; selain itu pakai simulator. */
 export const MIDTRANS_IS_CONFIGURED: boolean = MIDTRANS_SERVER_KEY !== "";
 
+/**
+ * Batas waktu pembayaran order (jam). PENDING yang melewati batas ini
+ * di-expire menjadi CANCELED (sinkron dengan custom expiry Snap).
+ */
+export const PAYMENT_EXPIRY_HOURS: number = Math.max(
+  1,
+  Number(process.env.PAYMENT_EXPIRY_HOURS || "24"),
+);
+
 /** Endpoint Snap API sesuai environment. */
 export const MIDTRANS_SNAP_API_URL: string = MIDTRANS_IS_PRODUCTION
   ? "https://app.midtrans.com/snap/v1/transactions"

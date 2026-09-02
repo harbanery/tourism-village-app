@@ -195,6 +195,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.success": "Pembayaran berhasil",
     "payment.canceled": "Pembayaran dibatalkan",
     "payment.failed": "Pembayaran gagal, coba lagi",
+    "payment.pendingHint":
+      "Pesanan menunggu pembayaran — selesaikan lewat tombol Bayar Sekarang kapan saja dari profil Anda.",
+    "payment.deadline": "Batas Pembayaran",
+    "payment.expired": "Batas waktu pembayaran telah habis — pesanan dibatalkan.",
+    "payment.snapFallback":
+      "Popup Midtrans tidak tersedia di jaringan ini — pembayaran akan dibuka sebagai halaman Midtrans di tab baru.",
+    "payment.checkStatus": "Periksa Status Pembayaran",
+    "payment.openLink": "Buka Halaman Pembayaran",
+    "payment.reopenHint":
+      "Popup pembayaran ditutup — tekan Bayar Sekarang untuk membuka kembali.",
     "payment.status.PENDING": "Menunggu Pembayaran",
     "payment.status.PAID": "Lunas",
     "payment.status.FAILED": "Gagal",
@@ -511,6 +521,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.success": "Payment successful",
     "payment.canceled": "Payment canceled",
     "payment.failed": "Payment failed, please try again",
+    "payment.pendingHint":
+      "This order is awaiting payment — finish it anytime with the Pay Now button from your profile.",
+    "payment.deadline": "Payment Deadline",
+    "payment.expired": "The payment deadline has passed — the order was canceled.",
+    "payment.snapFallback":
+      "The Midtrans popup is unavailable on this network — payment will open as a Midtrans page in a new tab.",
+    "payment.checkStatus": "Check Payment Status",
+    "payment.openLink": "Open Payment Page",
+    "payment.reopenHint":
+      "The payment popup was closed — press Pay Now to open it again.",
     "payment.status.PENDING": "Pending Payment",
     "payment.status.PAID": "Paid",
     "payment.status.FAILED": "Failed",
