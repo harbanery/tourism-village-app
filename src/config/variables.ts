@@ -74,6 +74,11 @@ export const MIDTRANS_SNAP_SCRIPT_URL: string = MIDTRANS_IS_PRODUCTION
   ? "https://app.midtrans.com/snap/v2/snap.js"
   : "https://app.sandbox.midtrans.com/snap/v2/snap.js";
 
+/** Base URL API status transaksi Midtrans (Core API v2). */
+export const MIDTRANS_STATUS_API_URL: string = MIDTRANS_IS_PRODUCTION
+  ? "https://api.midtrans.com/v2"
+  : "https://api.sandbox.midtrans.com/v2";
+
 // ---------------------------------------------------------------------------
 // Cloudinary
 // ---------------------------------------------------------------------------

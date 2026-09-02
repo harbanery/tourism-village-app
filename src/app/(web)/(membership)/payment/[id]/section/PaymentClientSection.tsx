@@ -7,6 +7,7 @@ import {
   CheckCircleFilled,
   CreditCardOutlined,
   LoadingOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
@@ -28,6 +29,7 @@ interface PaymentOrder {
   paymentStatus: PaymentStatus;
   items: { id: number; packageName: string; quantity: number; price: number }[];
 }
+
 const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
   PAID: "green",
   PENDING: "orange",
@@ -36,10 +38,13 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
 };
 
 /**
- * Halaman transaksi pembayaran order (target setelah checkout):
- * mengambil opsi pembayaran dari GET /api/web/orders/[id]/pay lalu membuka
- * modal pembayaran (Midtrans Snap / simulator). Order PENDING bisa dibayar
- * di sini kapan saja sampai statusnya final.
+ * Halaman transaksi pembayaran order (target setelah checkout).
+ *
+ * - Midtrans terkonfigurasi → tombol Bayar DIRECT ke halaman pembayaran
+ *   Midtrans (snapRedirectUrl); setelah selesai Midtrans mengarahkan balik
+ *   ke endpoint notification (GET) yang me-redirect kemari dengan status
+ *   yang sudah diverifikasi ke API Midtrans.
+ * - Simulator (server key kosong) → modal pembayaran lokal.
  */
 export default function PaymentClientSection({
   order,
@@ -54,11 +59,12 @@ export default function PaymentClientSection({
   const [status, setStatus] = useState<PaymentStatus>(order.paymentStatus);
   const [option, setOption] = useState<PaymentOption | null>(null);
   const [loading, setLoading] = useState(true);
-  const [payOpen, setPayOpen] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [simOpen, setSimOpen] = useState(false);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
 
-  // Ambil opsi pembayaran (token Snap baru bila perlu).
+  // Ambil opsi pembayaran (token Snap + redirect URL bila perlu).
   const loadOption = useCallback(async () => {
     setLoading(true);
     try {
@@ -73,7 +79,6 @@ export default function PaymentClientSection({
       }
       if (json.data.payment) {
         setOption(json.data.payment);
-        setPayOpen(true); // langsung arahkan ke transaksi pembayaran
       } else {
         setStatus(json.data.paymentStatus);
       }
@@ -92,8 +97,59 @@ export default function PaymentClientSection({
     void Promise.resolve().then(loadOption);
   }, [loadOption]);
 
+  /** Bayar: direct ke halaman Midtrans; simulator lewat modal lokal. */
+  const handlePay = () => {
+    if (!option) return;
+    if (option.simulator) {
+      setSimOpen(true);
+      return;
+    }
+    if (option.snapRedirectUrl) {
+      // Direct ke Midtrans — kembali lagi via finish redirect notification.
+      window.location.href = option.snapRedirectUrl;
+      return;
+    }
+    notification.error({
+      title: t("notif.error"),
+      description: t("payment.failed"),
+      placement: "bottomRight",
+    });
+  };
+
+  /** Periksa status: konfirmasi ke API Midtrans lewat server. */
+  const handleCheck = useCallback(async () => {
+    setChecking(true);
+    try {
+      const res = await fetch(`/api/web/orders/${order.id}/status`);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error);
+      if (json.data.paymentStatus !== "PENDING") {
+        setStatus(json.data.paymentStatus);
+        notification.success({
+          title: t("notif.success"),
+          description: t(`payment.status.${json.data.paymentStatus}`),
+          placement: "bottomRight",
+        });
+      } else {
+        notification.info({
+          title: t("payment.status.PENDING"),
+          description: t("payment.pendingHint"),
+          placement: "bottomRight",
+        });
+      }
+    } catch {
+      notification.error({
+        title: t("notif.error"),
+        description: t("notif.fetchFailed"),
+        placement: "bottomRight",
+      });
+    } finally {
+      setChecking(false);
+    }
+  }, [order.id, notification, t]);
+
   const handleSettled = (result: PaymentResult) => {
-    setPayOpen(false);
+    setSimOpen(false);
     if (result === "PAID") {
       setStatus("PAID");
       notification.success({
@@ -102,7 +158,6 @@ export default function PaymentClientSection({
         placement: "bottomRight",
       });
     } else if (result === "CANCELED") {
-      // Tetap di halaman — user bisa menekan "Bayar" lagi dari profil/pesan.
       notification.warning({
         title: t("payment.canceled"),
         description: t("payment.pendingHint"),
@@ -190,16 +245,21 @@ export default function PaymentClientSection({
             <Spin indicator={<LoadingOutlined spin />} />
           </div>
         ) : (
-          <div className="mt-6 flex gap-2">
-            <Button block onClick={() => router.push("/profile")}>
-              {t("success.goToProfile")}
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+            <Button
+              block
+              icon={<SearchOutlined />}
+              loading={checking}
+              onClick={() => void handleCheck()}
+            >
+              {t("payment.checkStatus")}
             </Button>
             <Button
               type="primary"
               block
               icon={<CreditCardOutlined />}
               disabled={!option}
-              onClick={() => setPayOpen(true)}
+              onClick={handlePay}
             >
               {t("payment.pay")}
             </Button>
@@ -214,21 +274,20 @@ export default function PaymentClientSection({
         />
       </Card>
 
-      <PaymentModal
-        open={payOpen}
-        order={{
-          orderId: order.id,
-          totalPrice: order.totalPrice,
-          expiresAt,
-        }}
-        option={option}
-        onClose={() => setPayOpen(false)}
-        onSettled={handleSettled}
-        onCheck={() => {
-          setPayOpen(false);
-          void loadOption();
-        }}
-      />
+      {/* Modal hanya untuk mode simulator (Midtrans tidak dikonfigurasi). */}
+      {option?.simulator && (
+        <PaymentModal
+          open={simOpen}
+          order={{
+            orderId: order.id,
+            totalPrice: order.totalPrice,
+            expiresAt,
+          }}
+          option={option}
+          onClose={() => setSimOpen(false)}
+          onSettled={handleSettled}
+        />
+      )}
     </div>
   );
 }
