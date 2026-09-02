@@ -42,7 +42,7 @@ interface CheckoutUser {
 /**
  * Checkout nyata: keranjang (sessionStorage) + harga terbaru dari DB,
  * lalu POST /api/web/orders (harga diverifikasi server) dan lanjut ke
- * pembayaran Midtrans Snap / simulator.
+ * pembayaran QRIS (Midtrans Core API).
  */
 export default function CheckoutClientSection({
   user,

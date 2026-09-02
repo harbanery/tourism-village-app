@@ -7,17 +7,11 @@ import { QRCodeSVG } from "qrcode.react";
 import { Alert, App, Button, Card, Result, Spin, Tag } from "antd";
 import {
   CheckCircleFilled,
-  CreditCardOutlined,
   LoadingOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
-import {
-  PaymentModal,
-  type PaymentOption,
-  type PaymentResult,
-} from "@/components/web/payment/PaymentModal";
 import { formatRupiah, formatDate } from "@/utils/format";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
@@ -37,7 +31,7 @@ interface QrisInfo {
   qrImageUrl: string | null;
 }
 
-interface PaymentOptionQris extends PaymentOption {
+interface PaymentOption {
   qris?: QrisInfo | null;
 }
 
@@ -54,11 +48,10 @@ const POLL_INTERVAL_MS = 10_000;
 /**
  * Halaman transaksi pembayaran order (target setelah checkout).
  *
- * - QRIS POS integration (Midtrans aktif): QR ditampilkan langsung di
- *   halaman — pindai dengan e-wallet/m-banking; status dicek otomatis
- *   berkala ke API Midtrans lewat /api/web/orders/[id]/status.
- * - Simulator (server key kosong) → modal pembayaran lokal.
- * - Warisan alur Snap: bila hanya ada redirect URL, tombol direct diberikan.
+ * QRIS POS integration (Midtrans Core API): QR ditampilkan langsung di
+ * halaman — pindai dengan e-wallet/m-banking; status dicek otomatis
+ * berkala ke API Midtrans lewat /api/web/orders/[id]/status dan diperbarui
+ * oleh webhook /api/web/orders/notification.
  */
 export default function PaymentClientSection({
   order,
@@ -71,10 +64,9 @@ export default function PaymentClientSection({
   const { notification } = App.useApp();
 
   const [status, setStatus] = useState<PaymentStatus>(order.paymentStatus);
-  const [option, setOption] = useState<PaymentOptionQris | null>(null);
+  const [option, setOption] = useState<PaymentOption | null>(null);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
-  const [simOpen, setSimOpen] = useState(false);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
   const statusRef = useRef(status);
@@ -164,36 +156,6 @@ export default function PaymentClientSection({
     }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [option, handleCheck]);
-
-  /** Simulator: bayar lewat modal lokal. */
-  const handlePay = () => {
-    if (!option) return;
-    if (option.simulator) {
-      setSimOpen(true);
-      return;
-    }
-    if (option.snapRedirectUrl) {
-      window.location.href = option.snapRedirectUrl;
-    }
-  };
-
-  const handleSettled = (result: PaymentResult) => {
-    setSimOpen(false);
-    if (result === "PAID") {
-      setStatus("PAID");
-      notification.success({
-        title: t("notif.success"),
-        description: t("payment.success"),
-        placement: "bottomRight",
-      });
-    } else if (result === "CANCELED") {
-      notification.warning({
-        title: t("payment.canceled"),
-        description: t("payment.pendingHint"),
-        placement: "bottomRight",
-      });
-    }
-  };
 
   if (!mounted) return null;
 
@@ -306,61 +268,16 @@ export default function PaymentClientSection({
               {t("payment.checkStatus")}
             </Button>
           </div>
-        ) : option?.simulator ? (
-          // --- Simulator lokal ---
-          <Button
-            type="primary"
-            block
-            icon={<CreditCardOutlined />}
-            className="mt-6!"
-            onClick={handlePay}
-          >
-            {t("payment.pay")}
-          </Button>
-        ) : option?.snapRedirectUrl ? (
-          // --- Warisan Snap: direct URL ---
-          <Button
-            type="primary"
-            block
-            icon={<CreditCardOutlined />}
-            className="mt-6!"
-            onClick={handlePay}
-          >
-            {t("payment.pay")}
-          </Button>
         ) : (
+          // Midtrans tidak dikonfigurasi / charge gagal.
           <Alert
             className="mt-6!"
             type="error"
             showIcon
-            message={t("payment.failed")}
-          />
-        )}
-
-        {!loading && !qris && (
-          <Alert
-            className="mt-4!"
-            type="info"
-            showIcon
-            message={t("payment.pendingHint")}
+            message={t("payment.unavailable")}
           />
         )}
       </Card>
-
-      {/* Modal hanya untuk mode simulator (Midtrans tidak dikonfigurasi). */}
-      {option?.simulator && (
-        <PaymentModal
-          open={simOpen}
-          order={{
-            orderId: order.id,
-            totalPrice: order.totalPrice,
-            expiresAt,
-          }}
-          option={option}
-          onClose={() => setSimOpen(false)}
-          onSettled={handleSettled}
-        />
-      )}
     </div>
   );
 }

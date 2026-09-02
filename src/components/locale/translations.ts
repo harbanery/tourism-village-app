@@ -186,11 +186,8 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Keranjang kosong — silakan pilih paket wisata terlebih dahulu.",
 
     "payment.title": "Pembayaran",
-    "payment.simulatorNote":
-      "Mode simulator Midtrans (sandbox) — transaksi tidak menggunakan uang nyata.",
-    "payment.simulatorHint":
-      "Isi MIDTRANS_SERVER_KEY di .env untuk beralih ke Snap sandbox Midtrans asli.",
-    "payment.method": "Metode Pembayaran",
+    "payment.unavailable":
+      "Pembayaran belum tersedia — hubungi admin atau coba lagi nanti.",
     "payment.pay": "Bayar Sekarang",
     "payment.success": "Pembayaran berhasil",
     "payment.canceled": "Pembayaran dibatalkan",
@@ -510,11 +507,8 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Your cart is empty — please pick a tour package first.",
 
     "payment.title": "Payment",
-    "payment.simulatorNote":
-      "Midtrans simulator mode (sandbox) — no real money is transferred.",
-    "payment.simulatorHint":
-      "Set MIDTRANS_SERVER_KEY in .env to switch to the real Midtrans sandbox Snap.",
-    "payment.method": "Payment Method",
+    "payment.unavailable":
+      "Payment is not available yet — please contact the admin or try again later.",
     "payment.pay": "Pay Now",
     "payment.success": "Payment successful",
     "payment.canceled": "Payment canceled",

@@ -11,10 +11,10 @@ import { isPaymentExpired } from "@/server/orderExpiry";
 /**
  * GET /api/web/orders/[id]/status — periksa & sinkronkan status pembayaran.
  *
- * Dipakai tombol "Periksa Status Pembayaran" (mis. setelah kembali dari
- * halaman Midtrans): status ditanyakan langsung ke API Midtrans lalu order
+ * Dipakai tombol "Periksa Status Pembayaran" (dan auto-poll halaman
+ * pembayaran): status ditanyakan langsung ke API Midtrans lalu order
  * diperbarui — sehingga PAID terdeteksi tanpa menunggu webhook.
- * Mode simulator (Midtrans tidak dikonfigurasi) cukup membalas status DB.
+ * Tanpa QR (Midtrans tidak dikonfigurasi) cukup membalas status DB.
  */
 export async function GET(
   _request: Request,
@@ -55,7 +55,11 @@ export async function GET(
       where: { id: order.id },
       data: { paymentStatus: "CANCELED" },
     });
-  } else if (order.paymentStatus === "PENDING" && order.snapToken) {
+  } else if (
+    order.paymentStatus === "PENDING" &&
+    // Ada kanal pembayaran nyata: QR QRIS pernah dibuat.
+    order.qrisString
+  ) {
     // Konfirmasi status ke Midtrans (otoritatif, server-to-server).
     const status = await fetchMidtransStatus(
       buildMidtransOrderId(order.id),

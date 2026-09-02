@@ -2,32 +2,28 @@ import { createHash } from "node:crypto";
 import {
   MIDTRANS_IS_CONFIGURED,
   MIDTRANS_SERVER_KEY,
-  MIDTRANS_SNAP_API_URL,
-  MIDTRANS_STATUS_API_URL,
+  MIDTRANS_CORE_API_URL,
 } from "@/config/variables";
 
 /**
- * Integrasi Midtrans Snap (sandbox/production) di sisi server.
- * Bila MIDTRANS_SERVER_KEY kosong, caller memakai mode simulator lokal
- * sehingga alur transaksi tetap bisa diuji tanpa kredensial.
+ * Integrasi Midtrans Core API (pola QRIS POS integration) di sisi server.
+ * Tidak memakai Snap maupun simulator: QR dibuat via POST /v2/charge
+ * (payment_type "qris") dan status diverifikasi via GET /v2/{order_id}/status.
+ * Bila MIDTRANS_SERVER_KEY kosong, charge mengembalikan null dan UI
+ * menampilkan pesan pembayaran tidak tersedia.
  */
 
-export interface SnapItemDetail {
+export interface MidtransItemDetail {
   id: string;
   price: number;
   quantity: number;
   name: string;
 }
 
-export interface SnapCustomerDetail {
+export interface MidtransCustomerDetail {
   name: string;
   email: string;
   phone?: string | null;
-}
-
-export interface SnapTransactionResult {
-  token: string;
-  redirectUrl: string;
 }
 
 /** Midtrans aktif (server key terisi)? */
@@ -50,119 +46,14 @@ export function parseMidtransOrderId(raw: string): number | null {
   return match ? Number(match[1]) : null;
 }
 
-/**
- * Buat transaksi Snap via API Midtrans.
- * Mengembalikan null bila Midtrans tidak dikonfigurasi / gagal —
- * caller wajib fallback ke simulator.
- */
-export async function createSnapTransaction(params: {
-  midtransOrderId: string;
-  grossAmount: number;
-  items: SnapItemDetail[];
-  customer: SnapCustomerDetail;
-  /** Batas waktu pembayaran (jam) — dikirim sebagai custom expiry Snap. */
-  expiryHours?: number;
-}): Promise<SnapTransactionResult | null> {
-  if (!isMidtransConfigured()) return null;
-
+/** Header Authorization Basic server-key Midtrans. */
+function coreApiHeaders(): HeadersInit {
   const auth = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString("base64");
-  try {
-    const response = await fetch(MIDTRANS_SNAP_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Basic ${auth}`,
-      },
-      body: JSON.stringify({
-        transaction_details: {
-          order_id: params.midtransOrderId,
-          gross_amount: params.grossAmount,
-        },
-        item_details: params.items,
-        customer_details: {
-          first_name: params.customer.name,
-          email: params.customer.email,
-          ...(params.customer.phone ? { phone: params.customer.phone } : {}),
-        },
-        ...(params.expiryHours
-          ? { expiry: { unit: "hour", duration: params.expiryHours } }
-          : {}),
-      }),
-    });
-
-    if (!response.ok) {
-      console.error(
-        "Midtrans snap error:",
-        response.status,
-        await response.text(),
-      );
-      return null;
-    }
-
-    const json = (await response.json()) as {
-      token?: string;
-      redirect_url?: string;
-    };
-    if (!json.token) return null;
-    return {
-      token: json.token,
-      redirectUrl: json.redirect_url ?? "",
-    };
-  } catch (error) {
-    console.error("Midtrans snap request failed:", error);
-    return null;
-  }
-}
-
-/**
- * Verifikasi signature notification Midtrans:
- * sha512(order_id + status_code + gross_amount + serverKey).
- */
-export function verifyMidtransSignature(params: {
-  orderId: string;
-  statusCode: string;
-  grossAmount: string;
-  signatureKey: string;
-}): boolean {
-  if (!isMidtransConfigured()) return false;
-  const expected = createHash("sha512")
-    .update(
-      `${params.orderId}${params.statusCode}${params.grossAmount}${MIDTRANS_SERVER_KEY}`,
-    )
-    .digest("hex");
-  return expected === params.signatureKey;
-}
-
-/** Mapping transaction_status Midtrans → PaymentStatus aplikasi. */
-export function mapMidtransStatus(
-  transactionStatus: string,
-  fraudStatus?: string,
-): "PENDING" | "PAID" | "FAILED" | "CANCELED" {
-  switch (transactionStatus) {
-    case "settlement":
-    case "capture":
-      return fraudStatus === "challenge" ? "PENDING" : "PAID";
-    case "pending":
-      return "PENDING";
-    case "deny":
-    case "failure":
-      return "FAILED";
-    case "cancel":
-    case "expire":
-      return "CANCELED";
-    default:
-      return "PENDING";
-  }
-}
-
-export interface MidtransTransactionStatus {
-  /** order_id Midtrans (TOURISM-{id}). */
-  orderId: string;
-  transactionStatus: string;
-  fraudStatus?: string;
-  paymentType?: string;
-  statusCode: string;
+  return {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    Authorization: `Basic ${auth}`,
+  };
 }
 
 export interface QrisChargeResult {
@@ -180,22 +71,17 @@ export interface QrisChargeResult {
 export async function createQrisCharge(params: {
   midtransOrderId: string;
   grossAmount: number;
-  items: SnapItemDetail[];
-  customer: SnapCustomerDetail;
+  items: MidtransItemDetail[];
+  customer: MidtransCustomerDetail;
   /** Batas waktu pembayaran (menit) — dikirim sebagai custom_expiry. */
   expiryMinutes?: number;
 }): Promise<QrisChargeResult | null> {
   if (!isMidtransConfigured()) return null;
 
-  const auth = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString("base64");
   const charge = async (withExpiry: boolean) =>
-    fetch(`${MIDTRANS_STATUS_API_URL}/charge`, {
+    fetch(`${MIDTRANS_CORE_API_URL}/charge`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Basic ${auth}`,
-      },
+      headers: coreApiHeaders(),
       cache: "no-store",
       body: JSON.stringify({
         payment_type: "qris",
@@ -251,11 +137,61 @@ export async function createQrisCharge(params: {
 }
 
 /**
+ * Verifikasi signature notification Midtrans:
+ * sha512(order_id + status_code + gross_amount + serverKey).
+ */
+export function verifyMidtransSignature(params: {
+  orderId: string;
+  statusCode: string;
+  grossAmount: string;
+  signatureKey: string;
+}): boolean {
+  if (!isMidtransConfigured()) return false;
+  const expected = createHash("sha512")
+    .update(
+      `${params.orderId}${params.statusCode}${params.grossAmount}${MIDTRANS_SERVER_KEY}`,
+    )
+    .digest("hex");
+  return expected === params.signatureKey;
+}
+
+/** Mapping transaction_status Midtrans → PaymentStatus aplikasi. */
+export function mapMidtransStatus(
+  transactionStatus: string,
+  fraudStatus?: string,
+): "PENDING" | "PAID" | "FAILED" | "CANCELED" {
+  switch (transactionStatus) {
+    case "settlement":
+    case "capture":
+      return fraudStatus === "challenge" ? "PENDING" : "PAID";
+    case "pending":
+      return "PENDING";
+    case "deny":
+    case "failure":
+      return "FAILED";
+    case "cancel":
+    case "expire":
+      return "CANCELED";
+    default:
+      return "PENDING";
+  }
+}
+
+export interface MidtransTransactionStatus {
+  /** order_id Midtrans (TOURISM-{id}). */
+  orderId: string;
+  transactionStatus: string;
+  fraudStatus?: string;
+  paymentType?: string;
+  statusCode: string;
+}
+
+/**
  * Ambil status transaksi langsung dari API Midtrans (GET /v2/{order_id}/status).
  *
  * Dipakai untuk memverifikasi status secara otoritatif: query param redirect
- * finish (browser) TIDAK dipercaya — status final selalu dikonfirmasi
- * ke server Midtrans memakai server key.
+ * (browser) TIDAK dipercaya — status final selalu dikonfirmasi ke server
+ * Midtrans memakai server key.
  * Mengembalikan null bila Midtrans tidak dikonfigurasi / gagal.
  */
 export async function fetchMidtransStatus(
@@ -263,12 +199,11 @@ export async function fetchMidtransStatus(
 ): Promise<MidtransTransactionStatus | null> {
   if (!isMidtransConfigured()) return null;
 
-  const auth = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString("base64");
   try {
     const response = await fetch(
-      `${MIDTRANS_STATUS_API_URL}/${encodeURIComponent(midtransOrderId)}/status`,
+      `${MIDTRANS_CORE_API_URL}/${encodeURIComponent(midtransOrderId)}/status`,
       {
-        headers: { Accept: "application/json", Authorization: `Basic ${auth}` },
+        headers: { Accept: "application/json", Authorization: `Basic ${Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString("base64")}` },
         cache: "no-store",
       },
     );

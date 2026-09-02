@@ -7,23 +7,22 @@ import {
   parseMidtransOrderId,
   verifyMidtransSignature,
 } from "@/server/midtrans";
+import { isPaymentExpired } from "@/server/orderExpiry";
 
 /**
- * POST /api/web/orders/[id]/notification — webhook notification Midtrans
+ * POST /api/web/orders/notification — webhook notification Midtrans
  * (Payment Notification URL).
  *
- * Midtrans mengirim status transaksi ke endpoint ini; signature diverifikasi
- * (sha512 order_id+status_code+gross_amount+serverKey) sebelum status order
- * diperbarui. [id] diabaikan — order ditarik dari order_id Midtrans.
+ * URL STATIS tanpa segmen dinamis: Midtrans cukup dipasang satu URL
+ * `https://domain/api/web/orders/notification`. Order ditarik dari
+ * order_id Midtrans pada payload (mis. `TOURISM-7-mtjme5ax` → id 7),
+ * bukan dari path.
  *
- * Link yang sama bisa dipasang sebagai Finish/Redirect URL — lihat GET.
+ * Signature diverifikasi (sha512 order_id+status_code+gross_amount+
+ * serverKey) sebelum status order diperbarui. Status final tidak ditimpa
+ * (webhook bisa datang berkali-kali).
  */
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  void params;
-
+export async function POST(request: Request) {
   let body: {
     order_id?: string;
     status_code?: string;
@@ -83,7 +82,10 @@ export async function POST(
       data: {
         paymentStatus: nextStatus,
         ...(nextStatus === "PAID"
-          ? { paymentMethod: body.payment_type ?? "midtrans", paidAt: new Date() }
+          ? {
+              paymentMethod: body.payment_type ?? "qris",
+              paidAt: new Date(),
+            }
           : {}),
       },
     });
@@ -94,43 +96,46 @@ export async function POST(
 }
 
 /**
- * GET /api/web/orders/[id]/notification?order_id=TOURISM-7-xxx&status_code=200&transaction_status=settlement
+ * GET /api/web/orders/notification?order_id=TOURISM-7-mtjme5ax&status_code=200&transaction_status=settlement
  *
  * Menangani Finish/Redirect URL Midtrans (browser diarahkan ke sini setelah
- * menyelesaikan pembayaran di halaman Midtrans). Query param TIDAK dipercaya
- * langsung — status selalu diverifikasi ulang ke API Midtrans memakai server
- * key, lalu user di-redirect ke halaman pembayaran /payment/{id}.
+ * menyelesaikan pembayaran). Query param TIDAK dipercaya langsung — status
+ * selalu diverifikasi ulang ke API Midtrans memakai server key, lalu user
+ * di-redirect ke halaman pembayaran /payment/{id}.
  */
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  void params;
-
+export async function GET(request: Request) {
   const url = new URL(request.url);
   const midtransOrderId = url.searchParams.get("order_id") ?? "";
   const orderId = parseMidtransOrderId(midtransOrderId);
 
   // Verifikasi otoritatif ke Midtrans (abaikan status di query param).
   if (orderId && midtransOrderId) {
-    const status = await fetchMidtransStatus(midtransOrderId);
-    if (status) {
-      const nextStatus = mapMidtransStatus(
-        status.transactionStatus,
-        status.fraudStatus,
-      );
-      const order = await prisma.order.findUnique({ where: { id: orderId } });
-      // Status final tidak ditimpa (bisa dipanggil berkali-kali).
-      if (order && order.paymentStatus === "PENDING") {
-        await prisma.order.update({
-          where: { id: orderId },
-          data: {
-            paymentStatus: nextStatus,
-            ...(nextStatus === "PAID"
-              ? { paymentMethod: status.paymentType ?? "midtrans", paidAt: new Date() }
-              : {}),
-          },
-        });
+    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    if (
+      order &&
+      order.paymentStatus === "PENDING" &&
+      !isPaymentExpired(order)
+    ) {
+      const status = await fetchMidtransStatus(midtransOrderId);
+      if (status) {
+        const nextStatus = mapMidtransStatus(
+          status.transactionStatus,
+          status.fraudStatus,
+        );
+        if (nextStatus !== "PENDING") {
+          await prisma.order.update({
+            where: { id: orderId },
+            data: {
+              paymentStatus: nextStatus,
+              ...(nextStatus === "PAID"
+                ? {
+                    paymentMethod: status.paymentType ?? "qris",
+                    paidAt: new Date(),
+                  }
+                : {}),
+            },
+          });
+        }
       }
     }
   }

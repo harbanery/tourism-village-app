@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
-import { isMidtransConfigured } from "@/server/midtrans";
 import { REMOTE_TX_OPTIONS, withRetry } from "@/server/prismaRetry";
 import { expireStalePendingOrders, paymentDeadline } from "@/server/orderExpiry";
 import { customerFromUser, ensureOrderQris } from "@/server/qris";
@@ -62,8 +61,8 @@ interface CreateOrderBody {
  * POST /api/web/orders — buat pesanan baru (wajib login).
  *
  * Harga TIDAK dipercaya dari klien: server mengambil harga terbaru dari
- * DB (paket ACTIVE), menghitung subtotal + total, lalu membuat transaksi
- * Midtrans Snap bila terkonfigurasi — selain itu kembali ke simulator.
+ * DB (paket ACTIVE), menghitung subtotal + total, lalu membuat charge QRIS
+ * (Core API) untuk pembayaran di halaman /payment/[id].
  */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -153,7 +152,7 @@ export async function POST(request: Request) {
               homestayTime,
               totalPrice,
               paymentStatus: "PENDING",
-              // Batas waktu pembayaran (custom expiry Snap mengikuti ini).
+              // Batas waktu pembayaran (custom_expiry charge QRIS mengikuti ini).
               paymentExpiresAt: paymentDeadline(),
               items: {
                 create: orderItems.map((item) => ({
@@ -175,7 +174,6 @@ export async function POST(request: Request) {
     // Pola QRIS POS integration: QR dirender di halaman /payment/[id],
     // tanpa snap.js dan tanpa redirect keluar.
     const qris = await ensureOrderQris({ order, customer: customerFromUser(user) });
-
     return NextResponse.json(
       {
         success: true,
@@ -196,13 +194,10 @@ export async function POST(request: Request) {
             subtotal: item.subtotal,
           })),
           payment: {
-            /** true = bayar via simulator lokal (Midtrans belum dikonfigurasi). */
-            simulator: !qris,
+            /** null = QR belum tersedia (Midtrans tidak dikonfigurasi / gagal). */
             qris: qris
               ? { qrString: qris.qrString, qrImageUrl: qris.qrImageUrl }
               : null,
-            snapRedirectUrl: null,
-            midtransConfigured: isMidtransConfigured(),
           },
         },
       },

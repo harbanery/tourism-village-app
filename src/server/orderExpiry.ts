@@ -5,7 +5,7 @@ import { PAYMENT_EXPIRY_HOURS } from "@/config/variables";
  * Batas waktu pembayaran order.
  *
  * - Order baru mendapat deadline `PAYMENT_EXPIRY_HOURS` jam (dikirim juga
- *   sebagai custom expiry ke Midtrans Snap sehingga token-nya ikut kedaluwarsa).
+ *   sebagai custom_expiry ke charge QRIS sehingga QR-nya ikut kedaluwarsa).
  * - PENDING yang melewati deadline di-expire menjadi CANCELED secara lazy
  *   oleh expireStalePendingOrders() (dipanggil di endpoint order web/profil).
  */
