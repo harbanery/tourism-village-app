@@ -18,13 +18,13 @@ function sanitizeRedirect(value: string | undefined): string {
   return value;
 }
 
-/** Halaman login — tidak bisa diakses saat sudah login. */
+/** Halaman login — sudah login dialihkan ke beranda. */
 export default async function LoginPage({
   searchParams,
 }: PageProps<"/login">) {
   const user = await getCurrentUser();
   if (user) {
-    redirect("/profile");
+    redirect("/");
   }
 
   const params = await searchParams;

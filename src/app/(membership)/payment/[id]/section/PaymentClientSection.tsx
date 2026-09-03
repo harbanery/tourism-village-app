@@ -46,6 +46,73 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
 const POLL_INTERVAL_MS = 10_000;
 
 /**
+ * Logo QRIS sederhana (inline SVG) — selalu diberi latar terang agar
+ * terlihat jelas di dark mode.
+ */
+function QrisLogo({ className }: { className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-md bg-white px-1.5 py-0.5 shadow-sm ${className ?? ""}`}
+    >
+      <svg width="52" height="18" viewBox="0 0 52 18" role="img" aria-label="QRIS">
+        <rect x="0" y="1" width="6" height="6" fill="#0B2C4D" />
+        <rect x="1.5" y="2.5" width="3" height="3" fill="#ffffff" />
+        <rect x="0" y="11" width="6" height="6" fill="#ED1164" />
+        <rect x="8" y="1" width="2" height="16" fill="#0B2C4D" />
+        <text
+          x="12"
+          y="8.5"
+          fontFamily="Arial, sans-serif"
+          fontSize="7.5"
+          fontWeight="700"
+          fill="#0B2C4D"
+          letterSpacing="0.5"
+        >
+          QRIS
+        </text>
+        <rect x="12" y="10.5" width="34" height="2" fill="#ED1164" />
+        <text
+          x="12"
+          y="16.5"
+          fontFamily="Arial, sans-serif"
+          fontSize="3.2"
+          fill="#0B2C4D"
+          letterSpacing="0.4"
+        >
+          BANK INDONESIA
+        </text>
+      </svg>
+    </span>
+  );
+}
+
+/** Wordmark Midtrans (inline SVG). */
+function MidtransLogo({ className }: { className?: string }) {
+  return (
+    <svg
+      width="84"
+      height="16"
+      viewBox="0 0 84 16"
+      role="img"
+      aria-label="Midtrans"
+      className={className}
+    >
+      <text
+        x="0"
+        y="12"
+        fontFamily="Arial, sans-serif"
+        fontSize="13"
+        fontWeight="600"
+        fill="currentColor"
+        letterSpacing="-0.3"
+      >
+        midtrans
+      </text>
+    </svg>
+  );
+}
+
+/**
  * Halaman transaksi pembayaran order (target setelah checkout).
  *
  * QRIS POS integration (Midtrans Core API): QR ditampilkan langsung di
@@ -247,7 +314,10 @@ export default function PaymentClientSection({
         ) : qris ? (
           // --- QRIS POS: QR tampil langsung di halaman ---
           <div className="mt-6 flex flex-col items-center gap-3">
-            <p className="text-sm font-medium">{t("payment.qrisTitle")}</p>
+            <p className="flex flex-wrap items-center justify-center gap-2 text-sm font-medium">
+              {t("payment.qrisTitle")}
+              <QrisLogo />
+            </p>
             <div className="rounded-xl border border-black/10 bg-white p-3 dark:border-white/10">
               {qris.qrImageUrl ? (
                 // URL gambar QR resmi dari Midtrans bila tersedia.
@@ -284,6 +354,12 @@ export default function PaymentClientSection({
             message={t("payment.unavailable")}
           />
         )}
+
+        {/* Tanda tangan pembayaran di paling bawah kartu. */}
+        <div className="mt-6 flex items-center justify-center gap-2 border-t border-black/5 pt-4 text-xs text-foreground/50 dark:border-white/10">
+          <span>{t("payment.supportedBy")}</span>
+          <MidtransLogo />
+        </div>
       </Card>
     </div>
   );

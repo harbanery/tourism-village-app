@@ -13,9 +13,22 @@ import type { AuthAdmin, AuthUser } from "@prisma/client";
 
 export const SESSION_TTL_MS = SESSION_TTL_HOURS * 60 * 60 * 1000;
 
-export const MAX_LOGIN_ATTEMPTS = 5;
+/**
+ * Rate limit: 3 percobaan gagal → blokir 24 jam (per IP per scope).
+ * Scope terpisah agar blokir login admin tidak memengaruhi login/register web.
+ */
+export const MAX_LOGIN_ATTEMPTS = 3;
 
-const LOGIN_BLOCK_MINUTES = 15;
+export const LOGIN_BLOCK_MINUTES = 24 * 60;
+
+export const RATE_LIMIT_SCOPES = {
+  adminLogin: "admin-login",
+  webLogin: "web-login",
+  webRegister: "web-register",
+} as const;
+
+export type RateLimitScope =
+  (typeof RATE_LIMIT_SCOPES)[keyof typeof RATE_LIMIT_SCOPES];
 
 const BCRYPT_ROUNDS = 12;
 
@@ -41,7 +54,7 @@ export async function verifyPassword(
 }
 
 // ---------------------------------------------------------------------------
-// Login attempt (rate-limit per IP + scope)
+// Rate limit per IP per scope (login admin/web + register web)
 // ---------------------------------------------------------------------------
 
 export function getClientIp(request: Request): string {
@@ -50,9 +63,17 @@ export function getClientIp(request: Request): string {
   return request.headers.get("x-real-ip") || "unknown";
 }
 
-export async function isIpBlocked(ipAddress: string): Promise<boolean> {
+/** Kunci komposit (ipAddress, scope) model LoginAttempt. */
+function attemptKey(ipAddress: string, scope: RateLimitScope) {
+  return { ipAddress_scope: { ipAddress, scope } };
+}
+
+export async function isIpBlocked(
+  ipAddress: string,
+  scope: RateLimitScope,
+): Promise<boolean> {
   const attempt = await prisma.loginAttempt.findUnique({
-    where: { ipAddress },
+    where: attemptKey(ipAddress, scope),
   });
   if (!attempt?.blockedUntil) return false;
   return attempt.blockedUntil.getTime() > Date.now();
@@ -60,9 +81,10 @@ export async function isIpBlocked(ipAddress: string): Promise<boolean> {
 
 export async function recordFailedAttempt(
   ipAddress: string,
+  scope: RateLimitScope,
 ): Promise<{ blocked: boolean; blockedUntil: Date | null }> {
   const existing = await prisma.loginAttempt.findUnique({
-    where: { ipAddress },
+    where: attemptKey(ipAddress, scope),
   });
 
   const attemptCount = (existing?.attemptCount ?? 0) + 1;
@@ -72,22 +94,27 @@ export async function recordFailedAttempt(
     : null;
 
   await prisma.loginAttempt.upsert({
-    where: { ipAddress },
+    where: attemptKey(ipAddress, scope),
     update: {
       attemptCount: shouldBlock ? 0 : attemptCount,
       blockedUntil,
       lastAttemptAt: new Date(),
     },
-    create: { ipAddress, attemptCount, blockedUntil },
+    create: { ipAddress, scope, attemptCount, blockedUntil },
   });
 
   return { blocked: shouldBlock, blockedUntil };
 }
 
-export async function clearFailedAttempts(ipAddress: string): Promise<void> {
-  await prisma.loginAttempt.updateMany({
-    where: { ipAddress },
+export async function clearFailedAttempts(
+  ipAddress: string,
+  scope: RateLimitScope,
+): Promise<void> {
+  await prisma.loginAttempt.update({
+    where: attemptKey(ipAddress, scope),
     data: { attemptCount: 0, blockedUntil: null, lastAttemptAt: new Date() },
+  }).catch(() => {
+    // Belum ada row untuk IP+scope ini — tidak perlu dibersihkan.
   });
 }
 

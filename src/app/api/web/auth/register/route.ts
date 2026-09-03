@@ -1,32 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import prisma from "@/server/db";
 import {
-  createSession,
+  RATE_LIMIT_SCOPES,
+  clearFailedAttempts,
+  getClientIp,
   hashPassword,
-  sessionCookieOptions,
+  isIpBlocked,
+  recordFailedAttempt,
 } from "@/server/auth";
-import { USER_SESSION_COOKIE, BASE_URL } from "@/config/variables";
-import { sendEmail } from "@/server/email";
-import { buildCredentialEmail } from "@/server/credentialEmail";
+import { NODE_ENV } from "@/config/variables";import { sendEmail, isEmailConfigured } from "@/server/email";
+import { createOtp } from "@/server/otp";
+import { buildOtpEmail } from "@/server/otpEmail";
 
 /**
  * POST /api/web/auth/register — registrasi user web (email + password).
- * Mengirim rich email kredensial bila SMTP dikonfigurasi.
+ *
+ * Rate limit per IP: 3 percobaan gagal → blokir 24 jam.
+ * Setelah akun dibuat, kode OTP verifikasi dikirim ke email dan user
+ * diarahkan ke halaman /otp (login hanya bisa setelah email terverifikasi).
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, email, password } = body as Record<string, unknown>;
 
-    if (
+    const ip = getClientIp(request);
+    const scope = RATE_LIMIT_SCOPES.webRegister;
+
+    if (await isIpBlocked(ip, scope)) {
+      const attempt = await prisma.loginAttempt.findUnique({
+        where: { ipAddress_scope: { ipAddress: ip, scope } },
+      });
+      const minutes = attempt?.blockedUntil
+        ? Math.max(
+            1,
+            Math.ceil(
+              (attempt.blockedUntil.getTime() - Date.now()) / (60 * 1000),
+            ),
+          )
+        : 24 * 60;
+      return NextResponse.json(
+        { success: false, error: "BLOCKED", minutes },
+        { status: 429 },
+      );
+    }
+
+    const invalid =
       typeof name !== "string" ||
       name.trim().length === 0 ||
       typeof email !== "string" ||
       !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ||
       typeof password !== "string" ||
-      password.length < 8
-    ) {
+      password.length < 8;
+
+    if (invalid) {
+      await recordFailedAttempt(ip, scope);
       return NextResponse.json(
         {
           success: false,
@@ -41,6 +69,7 @@ export async function POST(request: NextRequest) {
       where: { email: normalizedEmail },
     });
     if (existing) {
+      await recordFailedAttempt(ip, scope);
       return NextResponse.json(
         { success: false, error: "Email sudah terdaftar." },
         { status: 409 },
@@ -53,28 +82,30 @@ export async function POST(request: NextRequest) {
         name: name.trim(),
         email: normalizedEmail,
         password: hashed,
+        emailVerified: false,
       },
     });
 
-    // Kirim rich email kredensial (best-effort).
-    const payload = buildCredentialEmail({
-      name: user.name,
-      username: user.email,
-      password,
-      loginUrl: `${BASE_URL}/login`,
-      generatedAt: new Date(),
-    });
-    void sendEmail({ to: user.email, ...payload });
+    // OTP verifikasi email (best-effort; cooldown 60 detik antar kirim).
+    const otp = await createOtp(user.id, "REGISTER_VERIFICATION");
+    let devCode: string | undefined;
+    if ("code" in otp) {
+      void sendEmail({
+        to: user.email,
+        ...buildOtpEmail({ name: user.name, code: otp.code, purpose: "REGISTER_VERIFICATION" }),
+      });
+      // Tanpa SMTP (dev): sertakan kode di respons agar alur tetap bisa dites.
+      if (!isEmailConfigured() && NODE_ENV !== "production") {
+        devCode = otp.code;
+      }
+    }
 
-    // Langsung login setelah registrasi.
-    const { token, expiresAt } = await createSession("web", user.id);
-    const store = await cookies();
-    store.set(sessionCookieOptions(USER_SESSION_COOKIE, token, expiresAt));
+    await clearFailedAttempts(ip, scope);
 
     return NextResponse.json(
       {
         success: true,
-        data: { id: user.id, name: user.name, email: user.email },
+        data: { id: user.id, email: user.email, ...(devCode ? { devCode } : {}) },
       },
       { status: 201 },
     );

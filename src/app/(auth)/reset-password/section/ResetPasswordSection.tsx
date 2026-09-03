@@ -2,55 +2,74 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { App, Button, Card, Form, Input } from "antd";
-import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
+import { Alert, App, Button, Card, Form, Input } from "antd";
+import { LockOutlined, SafetyOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 
-interface RegisterFormValues {
-  name: string;
-  email: string;
+interface ResetFormValues {
+  code: string;
   password: string;
   retypePassword: string;
 }
 
-export function RegisterFormSection() {
+/**
+ * Form reset password: OTP 6 digit (dari email) + password baru.
+ * `dev` = kode OTP cadangan (development tanpa SMTP).
+ */
+export function ResetPasswordSection({
+  email,
+  dev,
+}: {
+  email?: string;
+  dev?: string;
+}) {
   const { t } = useT();
   const router = useRouter();
   const mounted = useMounted();
   const { message } = App.useApp();
-  const [form] = Form.useForm<RegisterFormValues>();
+  const [form] = Form.useForm<ResetFormValues>();
   const [loading, setLoading] = useState(false);
 
   if (!mounted) return null;
 
-  const handleRegister = async (values: RegisterFormValues) => {
+  const handleReset = async (values: ResetFormValues) => {
     if (values.password !== values.retypePassword) {
       message.error(t("auth.register.passwordMismatch"));
       return;
     }
+    if (!email) {
+      message.error(t("auth.reset.missingEmail"));
+      return;
+    }
     setLoading(true);
     try {
-      const res = await fetch("/api/web/auth/register", {
+      const res = await fetch("/api/web/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: values.name,
-          email: values.email,
+          email,
+          code: values.code,
           password: values.password,
         }),
       });
       const result = await res.json();
 
       if (!result.success) {
-        message.error(result.error || t("auth.register.failed"));
+        if (result.remainingAttempts !== undefined) {
+          message.error(
+            t("auth.otp.invalidRemaining", {
+              count: result.remainingAttempts,
+            }),
+          );
+        } else {
+          message.error(t(`auth.otp.error.${result.error}`));
+        }
         return;
       }
 
-      // Akun dibuat → verifikasi email via halaman OTP.
-      message.success(t("auth.register.successOtp"));
-      const dev = result.data?.devCode ? `&dev=${result.data.devCode}` : "";
-      router.push(`/otp?userId=${result.data.id}&purpose=REGISTER${dev}`);
+      message.success(t("auth.reset.success"));
+      router.push("/login");
     } catch {
       message.error(t("notif.error"));
     } finally {
@@ -68,32 +87,52 @@ export function RegisterFormSection() {
         ← {t("common.backToHome")}
       </button>
       <Card className="mt-4!">
-        <h1 className="text-2xl font-bold text-center">
-          {t("auth.register.title")}
-        </h1>
-        <p className="mt-1 text-center text-foreground/60">
-          {t("auth.register.subtitle")}
-        </p>
+        <div className="text-center">
+          <SafetyOutlined className="text-4xl text-primary" />
+          <h1 className="mt-3 text-2xl font-bold">{t("auth.reset.title")}</h1>
+          <p className="mt-1 text-foreground/60">
+            {email
+              ? t("auth.reset.subtitle", { email })
+              : t("auth.reset.subtitleNoEmail")}
+          </p>
+        </div>
+
+        {dev && (
+          <Alert
+            className="mt-4!"
+            type="info"
+            showIcon
+            message={t("auth.otp.devCode")}
+            description={
+              <span className="font-mono text-lg font-bold tracking-widest">
+                {dev}
+              </span>
+            }
+          />
+        )}
+
         <Form
           form={form}
           layout="vertical"
           className="mt-6!"
-          onFinish={handleRegister}
+          onFinish={handleReset}
           disabled={loading}
         >
           <Form.Item
-            name="name"
-            label={t("auth.register.name")}
-            rules={[{ required: true }]}
+            name="code"
+            label={t("auth.otp.codeLabel")}
+            rules={[
+              { required: true },
+              { pattern: /^\d{6}$/, message: t("auth.otp.codePattern") },
+            ]}
           >
-            <Input prefix={<UserOutlined />} />
-          </Form.Item>
-          <Form.Item
-            name="email"
-            label={t("common.email")}
-            rules={[{ required: true }, { type: "email" }]}
-          >
-            <Input prefix={<MailOutlined />} placeholder="email@example.com" />
+            <Input
+              size="large"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="••••••"
+              className="text-center! font-mono! text-2xl! tracking-[0.5em]!"
+            />
           </Form.Item>
           <Form.Item
             name="password"
@@ -114,18 +153,17 @@ export function RegisterFormSection() {
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block loading={loading}>
-              {t("auth.register.button")}
+              {t("auth.reset.button")}
             </Button>
           </Form.Item>
         </Form>
         <p className="text-center text-sm text-foreground/60">
-          {t("auth.register.haveAccount")}{" "}
           <button
             type="button"
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/forgot-password")}
             className="cursor-pointer! text-primary! hover:underline!"
           >
-            {t("nav.login")}
+            {t("auth.reset.resend")}
           </button>
         </p>
       </Card>

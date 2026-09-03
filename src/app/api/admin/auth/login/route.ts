@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import prisma from "@/server/db";
 import { ADMIN_SESSION_COOKIE } from "@/config/variables";
 import {
+  RATE_LIMIT_SCOPES,
   clearFailedAttempts,
   createSession,
   getClientIp,
@@ -14,7 +15,7 @@ import {
 } from "@/server/auth";
 
 function toRemainingMinutes(blockedUntil: Date | null | undefined): number {
-  if (!blockedUntil) return 15;
+  if (!blockedUntil) return 24 * 60;
   return Math.max(
     1,
     Math.ceil((blockedUntil.getTime() - Date.now()) / (60 * 1000)),
@@ -53,10 +54,11 @@ export async function POST(request: NextRequest) {
     }
 
     const ip = getClientIp(request);
+    const scope = RATE_LIMIT_SCOPES.adminLogin;
 
-    if (await isIpBlocked(ip)) {
+    if (await isIpBlocked(ip, scope)) {
       const attempt = await prisma.loginAttempt.findUnique({
-        where: { ipAddress: ip },
+        where: { ipAddress_scope: { ipAddress: ip, scope } },
       });
       return NextResponse.json(
         {
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
       : false;
 
     if (!ok || !admin) {
-      const { blocked, blockedUntil } = await recordFailedAttempt(ip);
+      const { blocked, blockedUntil } = await recordFailedAttempt(ip, scope);
       if (blocked) {
         return NextResponse.json(
           {
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
         );
       }
       const attempt = await prisma.loginAttempt.findUnique({
-        where: { ipAddress: ip },
+        where: { ipAddress_scope: { ipAddress: ip, scope } },
       });
       const remaining = Math.max(
         0,
@@ -101,7 +103,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await clearFailedAttempts(ip);
+    await clearFailedAttempts(ip, scope);
     const { token, expiresAt } = await createSession("admin", admin.id);
     const store = await cookies();
     store.set(

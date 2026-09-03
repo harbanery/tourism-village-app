@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Dayjs } from "dayjs";
 import {
   App,
   Button,
@@ -49,7 +50,7 @@ export default function CheckoutClientSection({
 }: {
   user: CheckoutUser;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const router = useRouter();
   const mounted = useMounted();
   const { notification, message } = App.useApp();
@@ -187,28 +188,65 @@ export default function CheckoutClientSection({
             >
               <DatePicker className="w-full!" />
             </Form.Item>
-            <Form.Item label={t("checkout.homestay")} name="homestay">
-              <Radio.Group>
-                <Radio.Button value="no">{t("common.no")}</Radio.Button>
-                <Radio.Button value="yes">{t("common.yes")}</Radio.Button>
-              </Radio.Group>
-            </Form.Item>
+            {/* Menginap dan Jumlah Hari tampil bersebelahan. */}
             <Form.Item
               noStyle
-              shouldUpdate={(prev, cur) => prev.homestay !== cur.homestay}
-            >
-              {({ getFieldValue }) =>
-                getFieldValue("homestay") === "yes" ? (
-                  <Form.Item
-                    label={t("checkout.homestayDays")}
-                    name="homestayTime"
-                    initialValue={1}
-                    rules={[{ required: true }]}
-                  >
-                    <InputNumber min={1} className="w-full!" />
-                  </Form.Item>
-                ) : null
+              shouldUpdate={(prev, cur) =>
+                prev.homestay !== cur.homestay ||
+                prev.homestayTime !== cur.homestayTime ||
+                prev.dateSchedule !== cur.dateSchedule
               }
+            >
+              {({ getFieldValue }) => {
+                const homestay = getFieldValue("homestay") as string;
+                const homestayTime = (getFieldValue("homestayTime") ??
+                  1) as number;
+                const dateSchedule = getFieldValue("dateSchedule") as
+                  | Dayjs
+                  | undefined;
+                // Keterangan tanggal pulang (berangkat + jumlah hari menginap).
+                const returnDate =
+                  homestay === "yes" && dateSchedule
+                    ? dateSchedule.add(homestayTime, "day")
+                    : null;
+                return (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Form.Item
+                      label={t("checkout.homestay")}
+                      name="homestay"
+                      className="mb-0!"
+                    >
+                      <Radio.Group>
+                        <Radio.Button value="no">{t("common.no")}</Radio.Button>
+                        <Radio.Button value="yes">{t("common.yes")}</Radio.Button>
+                      </Radio.Group>
+                    </Form.Item>
+                    <Form.Item
+                      label={t("checkout.homestayDays")}
+                      name="homestayTime"
+                      initialValue={1}
+                      rules={[{ required: true }]}
+                      className="mb-0!"
+                    >
+                      <InputNumber
+                        min={1}
+                        className="w-full!"
+                        disabled={homestay !== "yes"}
+                      />
+                    </Form.Item>
+                    {returnDate && (
+                      <p className="sm:col-span-2 text-sm text-foreground/60">
+                        {t("checkout.returnDate")}:{" "}
+                        <span className="font-medium text-primary">
+                          {returnDate.format(
+                            locale === "id" ? "DD MMMM YYYY" : "MMMM D, YYYY",
+                          )}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                );
+              }}
             </Form.Item>
 
             <h2 className="font-semibold mt-4">{t("checkout.orderer")}</h2>

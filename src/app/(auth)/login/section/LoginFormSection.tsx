@@ -40,10 +40,19 @@ export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
       if (!result.success) {
         if (result.error === "BLOCKED") {
           message.error(
-            t("auth.login.blocked", { minutes: result.minutes ?? 15 }),
+            t("auth.login.blocked", { minutes: result.minutes ?? 1440 }),
           );
+        } else if (result.error === "EMAIL_NOT_VERIFIED") {
+          // Belum verifikasi OTP → arahkan ke halaman OTP.
+          message.warning(t("auth.otp.needVerification"));
+          router.push(`/otp?userId=${result.userId}&purpose=REGISTER`);
+          return;
         } else {
-          message.error(t("auth.login.invalid"));
+          message.error(
+            result.remaining !== undefined && result.remaining > 0
+              ? t("auth.login.invalidRemaining", { count: result.remaining })
+              : t("auth.login.invalid"),
+          );
         }
         return;
       }
@@ -119,6 +128,7 @@ export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
           <p>
             <button
               type="button"
+              onClick={() => router.push("/forgot-password")}
               className="cursor-pointer! text-primary! hover:underline!"
             >
               {t("auth.login.forgot")}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useMounted } from "@/helpers/useMounted";
-import { Button, Card, Col, Empty, InputNumber, Row } from "antd";
-import { ShoppingCartOutlined } from "@ant-design/icons";
+import { Button, Card, Col, Empty, InputNumber, Row, Tag } from "antd";
+import { FireOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatRupiah } from "@/utils/format";
 
@@ -14,6 +14,8 @@ export interface WebPackage {
   placeName: string | null;
   facilities: string[];
   price: number;
+  /** Berapa kali paket ini berhasil dibayar (PAID). */
+  timesPurchased: number;
 }
 
 export interface CartItem {
@@ -41,7 +43,7 @@ export function PackageListSection({
   if (packages.length === 0) {
     return (
       <Card>
-        <Empty description={t("common.dummyDataNote")} className="py-8!" />
+        <Empty description={t("package.noResults")} className="py-8!" />
       </Card>
     );
   }
@@ -51,7 +53,16 @@ export function PackageListSection({
       {packages.map((pkg) => (
         <Col xs={24} sm={12} key={pkg.id}>
           <Card
-            title={pkg.name}
+            title={
+              <span className="inline-flex items-center gap-2">
+                {pkg.name}
+                {(pkg.timesPurchased ?? 0) > 0 && (
+                  <Tag color="orange" icon={<FireOutlined />} className="m-0!">
+                    {t("package.popularTag")}
+                  </Tag>
+                )}
+              </span>
+            }
             extra={
               <span className="text-xs text-foreground/50">{pkg.placeName ?? "-"}</span>
             }

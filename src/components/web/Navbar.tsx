@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar, Button, Drawer, Dropdown } from "antd";
-import { LoginOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  LoginOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
@@ -79,12 +84,15 @@ export function Navbar() {
         <button
           type="button"
           onClick={() => router.push("/")}
-          className="cursor-pointer! bg-transparent! text-lg! font-bold! tracking-tight!"
+          className="group cursor-pointer bg-transparent text-lg font-bold tracking-tight"
         >
-          <span className="text-foreground transition-colors hover:text-foreground/70">
+          {/* Hover di area brand → seluruh teks berubah warna bersamaan. */}
+          <span className="text-foreground transition-colors group-hover:text-foreground/60">
             Desaku
           </span>
-          <span className="text-primary">Wisataku</span>
+          <span className="text-primary transition-colors group-hover:text-primary/60">
+            Wisataku
+          </span>
         </button>
 
         {/* Laptop/desktop: menu biasa. Tablet/mobile: drawer (tombol di bawah). */}
@@ -173,10 +181,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => goTo("/profile")}
-                className={navLinkClass(
-                  pathname.startsWith("/profile"),
-                  true,
-                )}
+                className={navLinkClass(pathname.startsWith("/profile"), true)}
               >
                 {t("nav.profile")}
               </button>

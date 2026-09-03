@@ -14,19 +14,33 @@ export interface ActivePackage {
   placeName: string | null;
   facilities: string[];
   price: number;
+  /** Berapa kali paket ini berhasil dibayar (untuk "sering dibeli"). */
+  timesPurchased: number;
 }
 
 /**
  * Paket aktif untuk pengunjung web: hanya paket ACTIVE yang tempatnya
  * juga ACTIVE (atau tanpa tempat) yang ditampilkan, sehingga selalu
- * sesuai data admin.
+ * sesuai data admin. `timesPurchased` dihitung dari order item berstatus
+ * PAID (transaksi nyata, bukan sekadar draft PENDING).
  */
 export async function getActivePackages(): Promise<ActivePackage[]> {
-  const packages = await prisma.package.findMany({
-    where: { status: "ACTIVE" },
-    orderBy: { id: "asc" },
-    include: { place: { select: { id: true, name: true, status: true } } },
-  });
+  const [packages, purchaseCounts] = await Promise.all([
+    prisma.package.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: { id: "asc" },
+      include: { place: { select: { id: true, name: true, status: true } } },
+    }),
+    prisma.orderItem.groupBy({
+      by: ["packageId"],
+      where: { order: { paymentStatus: "PAID" } },
+      _sum: { quantity: true },
+    }),
+  ]);
+
+  const countByPackage = new Map(
+    purchaseCounts.map((row) => [row.packageId, row._sum.quantity ?? 0]),
+  );
 
   return packages
     .filter((pkg) => pkg.placeId === null || pkg.place?.status === "ACTIVE")
@@ -37,5 +51,6 @@ export async function getActivePackages(): Promise<ActivePackage[]> {
       placeName: pkg.place?.name ?? null,
       facilities: pkg.facilities,
       price: pkg.price,
+      timesPurchased: countByPackage.get(pkg.id) ?? 0,
     }));
 }

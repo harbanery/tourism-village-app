@@ -68,9 +68,17 @@ model AuthUser {
   address   String?  @map("alamat")
   avatar    String?
   status    Status   @default(ACTIVE)
+  /** Verifikasi email via OTP (REGISTER_VERIFICATION). */
+  emailVerified Boolean @default(false) @map("email_verified")
+  /** Email baru yang menunggu verifikasi OTP (EMAIL_CHANGE). */
+  pendingEmail  String? @map("pending_email")
+  /** Preferensi notifikasi in-app & email (dipakai notif/cron). */
+  notifWeb   Boolean  @default(true) @map("notif_web")
+  notifEmail Boolean  @default(true) @map("notif_email")
   orders       Order[]
   testimonials Testimonial[]
   sessions  UserSession[]
+  otpCodes  OtpCode[]
 
   @@map("auth_user")
 }
@@ -99,16 +107,33 @@ model UserSession {
   @@map("user_session")
 }
 
-/** Rate-limit login per IP (admin & web). */
+/** Rate-limit per IP per scope (admin-login | web-login | web-register). */
 model LoginAttempt {
-  id            Int       @id @default(autoincrement())
-  ipAddress     String    @unique @map("ip_address")
-  scope         String    @default("admin") // admin | web
+  ipAddress     String    @map("ip_address")
+  scope         String    @default("admin") // admin-login | web-login | web-register
   attemptCount  Int       @default(0) @map("attempt_count")
   blockedUntil  DateTime? @map("blocked_until")
   lastAttemptAt DateTime  @default(now()) @map("last_attempt_at")
 
+  @@id([ipAddress, scope])
   @@map("login_attempt")
+}
+
+/** Kode OTP sekali pakai (verifikasi register, reset password, ganti email). */
+model OtpCode {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @map("user_id")
+  purpose    String // REGISTER_VERIFICATION | RESET_PASSWORD | EMAIL_CHANGE
+  codeHash   String    @map("code_hash")
+  expiresAt  DateTime  @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@map("otp_code")
 }
 
 // ============================================================

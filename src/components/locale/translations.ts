@@ -178,6 +178,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "checkout.title": "Checkout",
     "checkout.scheduleDate": "Tanggal Berangkat",
+    "checkout.returnDate": "Tanggal Pulang",
     "checkout.homestay": "Menginap",
     "checkout.homestayDays": "Jumlah Hari",
     "checkout.orderer": "Data Pemesan",
@@ -185,6 +186,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.orders": "Pesanan",
     "checkout.emptyCart":
       "Keranjang kosong — silakan pilih paket wisata terlebih dahulu.",
+
+    "package.searchPlaceholder": "Cari paket, tempat, atau fasilitas...",
+    "package.filterPlace": "Semua Tempat",
+    "package.sort.default": "Urutan Default",
+    "package.sort.popular": "Terpopuler",
+    "package.sort.priceAsc": "Harga Termurah",
+    "package.sort.priceDesc": "Harga Termahal",
+    "package.frequentlyBought": "Sering Dibeli",
+    "package.popularTag": "Populer",
+    "package.noResults": "Paket tidak ditemukan",
 
     "payment.title": "Pembayaran",
     "payment.unavailable":
@@ -198,9 +209,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.deadline": "Batas Pembayaran",
     "payment.expired": "Batas waktu pembayaran telah habis — pesanan dibatalkan.",
     "payment.checkStatus": "Periksa Status Pembayaran",
-    "payment.qrisTitle": "Pindai QR untuk Membayar (QRIS)",
+    "payment.qrisTitle": "Pindai QR untuk Membayar",
     "payment.qrisHint":
       "Buka aplikasi e-wallet atau m-banking Anda, pindai QR di atas, lalu selesaikan pembayaran. Status diperiksa otomatis setiap beberapa detik.",
+    "payment.supportedBy": "Didukung oleh",
     "payment.status.PENDING": "Menunggu Pembayaran",
     "payment.status.PAID": "Lunas",
     "payment.status.FAILED": "Gagal",
@@ -224,6 +236,53 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.forgot": "Lupa Password?",
     "auth.login.noAccount": "Belum punya akun?",
     "auth.login.credentialsTitle": "Kredensial demo (seed):",
+    "auth.login.invalidRemaining":
+      "Email/password salah. Sisa percobaan: {count}",
+    "auth.register.successOtp":
+      "Akun dibuat! Silakan verifikasi email lewat kode OTP.",
+
+    "auth.forgot.title": "Lupa Password",
+    "auth.forgot.subtitle": "Masukkan email akun Anda untuk menerima kode OTP",
+    "auth.forgot.button": "Kirim Kode OTP",
+    "auth.forgot.info":
+      "Jika email terdaftar, kode OTP akan dikirim dalam beberapa menit.",
+    "auth.forgot.backToLogin": "Kembali ke halaman masuk",
+    "auth.reset.title": "Atur Ulang Password",
+    "auth.reset.subtitle": "Kode OTP telah dikirim ke {email}",
+    "auth.reset.subtitleNoEmail":
+      "Buka halaman lupa password terlebih dahulu",
+    "auth.reset.button": "Simpan Password Baru",
+    "auth.reset.success": "Password berhasil diganti — silakan masuk",
+    "auth.reset.otpSent": "Jika email terdaftar, kode OTP telah dikirim",
+    "auth.reset.resend": "Tidak menerima kode? Kirim ulang",
+    "auth.reset.missingEmail":
+      "Email tidak diketahui — ulangi dari halaman lupa password",
+
+    "auth.otp.title": "Verifikasi OTP",
+    "auth.otp.subtitleRegister":
+      "Masukkan kode 6 digit yang dikirim ke email Anda",
+    "auth.otp.subtitleEmailChange":
+      "Masukkan kode 6 digit yang dikirim ke email baru Anda",
+    "auth.otp.codeLabel": "Kode OTP",
+    "auth.otp.codePattern": "Kode harus 6 digit angka",
+    "auth.otp.verify": "Verifikasi",
+    "auth.otp.notReceived": "Tidak menerima kode?",
+    "auth.otp.resend": "Kirim ulang kode",
+    "auth.otp.resent": "Kode baru telah dikirim",
+    "auth.otp.cooldown": "Tunggu {seconds} detik sebelum kirim ulang",
+    "auth.otp.invalidRemaining": "Kode salah. Sisa percobaan: {count}",
+    "auth.otp.needVerification":
+      "Email belum terverifikasi — lanjutkan verifikasi OTP",
+    "auth.otp.devCode": "Kode OTP (mode dev — SMTP belum aktif):",
+    "auth.otp.resendEmailChange":
+      "Untuk kirim ulang, ajukan ulang ganti email dari pengaturan profil.",
+    "auth.otp.error.NOT_FOUND": "Kode OTP salah atau tidak ditemukan",
+    "auth.otp.error.EXPIRED": "Kode OTP kedaluwarsa — minta kode baru",
+    "auth.otp.error.TOO_MANY_ATTEMPTS":
+      "Terlalu banyak percobaan salah — minta kode baru",
+    "auth.otp.error.INVALID_OTP": "Kode OTP tidak valid",
+    "auth.otp.error.INVALID_BODY": "Data tidak valid",
+    "auth.otp.error.SERVER_ERROR": "Terjadi kesalahan — coba lagi",
     "auth.register.title": "Registrasi",
     "auth.register.subtitle": "Buat akun untuk memesan paket wisata",
     "auth.register.button": "Daftar",
@@ -240,10 +299,40 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.address": "Alamat",
     "profile.orderHistory": "Riwayat Belanja",
     "profile.noOrders": "Belum ada pesanan",
+    "profile.orderDate": "Tanggal Pemesanan",
+    "profile.paidAt": "Dibayar",
     "profile.departureDate": "Tanggal Berangkat",
     "profile.downloadReceipt": "Download Bukti Pembayaran",
     "profile.changePassword": "Ganti Password",
     "profile.editProfile": "Ubah Profil",
+    "profile.emailVerified": "Email terverifikasi",
+    "profile.emailNotVerified": "Email belum terverifikasi",
+    "profile.verified": "Terverifikasi",
+    "profile.pendingEmail": "Menunggu verifikasi email baru: {email}",
+
+    "settings.title": "Pengaturan",
+    "settings.tab.profile": "Profil",
+    "settings.tab.avatar": "Avatar",
+    "settings.tab.email": "Email",
+    "settings.tab.notifications": "Notifikasi",
+    "settings.avatar.upload": "Unggah Avatar",
+    "settings.avatar.hint":
+      "Gambar persegi disarankan, format umum (JPG/PNG/WebP), maks 2MB.",
+    "settings.email.current": "Email aktif",
+    "settings.email.new": "Email baru",
+    "settings.email.same": "Email harus berbeda dengan email aktif",
+    "settings.email.sendOtp": "Kirim Kode OTP",
+    "settings.email.otpSent": "Kode OTP dikirim ke email baru",
+    "settings.email.hint":
+      "Email baru hanya aktif setelah kode OTP diverifikasi.",
+    "settings.email.changed": "Email berhasil diganti",
+    "settings.notif.web": "Notifikasi Web",
+    "settings.notif.webDesc":
+      "Notifikasi di dalam aplikasi (status pesanan, pengingat).",
+    "settings.notif.email": "Notifikasi Email",
+    "settings.notif.emailDesc": "Email transaksi dan pengingat jadwal.",
+    "settings.notif.cronHint":
+      "Preferensi ini juga dipakai tugas terjadwal (cron) agar pengiriman hanya ke yang mengizinkan.",
 
     "footer.location": "Lokasi",
     "footer.hours": "Jam Buka",
@@ -501,6 +590,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "checkout.title": "Checkout",
     "checkout.scheduleDate": "Departure Date",
+    "checkout.returnDate": "Return Date",
     "checkout.homestay": "Homestay",
     "checkout.homestayDays": "Number of Days",
     "checkout.orderer": "Orderer Data",
@@ -508,6 +598,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.orders": "Orders",
     "checkout.emptyCart":
       "Your cart is empty — please pick a tour package first.",
+
+    "package.searchPlaceholder": "Search packages, places, or facilities...",
+    "package.filterPlace": "All Places",
+    "package.sort.default": "Default Order",
+    "package.sort.popular": "Most Popular",
+    "package.sort.priceAsc": "Price: Low to High",
+    "package.sort.priceDesc": "Price: High to Low",
+    "package.frequentlyBought": "Frequently Bought",
+    "package.popularTag": "Popular",
+    "package.noResults": "No packages found",
 
     "payment.title": "Payment",
     "payment.unavailable":
@@ -521,9 +621,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.deadline": "Payment Deadline",
     "payment.expired": "The payment deadline has passed — the order was canceled.",
     "payment.checkStatus": "Check Payment Status",
-    "payment.qrisTitle": "Scan the QR to Pay (QRIS)",
+    "payment.qrisTitle": "Scan the QR to Pay",
     "payment.qrisHint":
       "Open your e-wallet or mobile banking app, scan the QR above, then complete the payment. The status is checked automatically every few seconds.",
+    "payment.supportedBy": "Supported by",
     "payment.status.PENDING": "Pending Payment",
     "payment.status.PAID": "Paid",
     "payment.status.FAILED": "Failed",
@@ -547,6 +648,52 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.forgot": "Forgot Password?",
     "auth.login.noAccount": "No account yet?",
     "auth.login.credentialsTitle": "Demo credentials (seed):",
+    "auth.login.invalidRemaining":
+      "Invalid email/password. Attempts left: {count}",
+    "auth.register.successOtp":
+      "Account created! Please verify your email with the OTP code.",
+
+    "auth.forgot.title": "Forgot Password",
+    "auth.forgot.subtitle": "Enter your account email to receive an OTP code",
+    "auth.forgot.button": "Send OTP Code",
+    "auth.forgot.info":
+      "If the email is registered, an OTP code will arrive within minutes.",
+    "auth.forgot.backToLogin": "Back to login page",
+    "auth.reset.title": "Reset Password",
+    "auth.reset.subtitle": "An OTP code has been sent to {email}",
+    "auth.reset.subtitleNoEmail": "Open the forgot password page first",
+    "auth.reset.button": "Save New Password",
+    "auth.reset.success": "Password changed — please log in",
+    "auth.reset.otpSent": "If the email is registered, an OTP code has been sent",
+    "auth.reset.resend": "Didn't receive the code? Resend",
+    "auth.reset.missingEmail":
+      "Email unknown — restart from the forgot password page",
+
+    "auth.otp.title": "OTP Verification",
+    "auth.otp.subtitleRegister":
+      "Enter the 6-digit code sent to your email",
+    "auth.otp.subtitleEmailChange":
+      "Enter the 6-digit code sent to your new email",
+    "auth.otp.codeLabel": "OTP Code",
+    "auth.otp.codePattern": "Code must be 6 digits",
+    "auth.otp.verify": "Verify",
+    "auth.otp.notReceived": "Didn't receive the code?",
+    "auth.otp.resend": "Resend code",
+    "auth.otp.resent": "A new code has been sent",
+    "auth.otp.cooldown": "Wait {seconds} seconds before resending",
+    "auth.otp.invalidRemaining": "Wrong code. Attempts left: {count}",
+    "auth.otp.needVerification":
+      "Email not verified yet — continue with OTP verification",
+    "auth.otp.devCode": "OTP code (dev mode — SMTP not configured):",
+    "auth.otp.resendEmailChange":
+      "To resend, request the email change again from profile settings.",
+    "auth.otp.error.NOT_FOUND": "OTP code is wrong or not found",
+    "auth.otp.error.EXPIRED": "OTP code expired — request a new one",
+    "auth.otp.error.TOO_MANY_ATTEMPTS":
+      "Too many wrong attempts — request a new code",
+    "auth.otp.error.INVALID_OTP": "Invalid OTP code",
+    "auth.otp.error.INVALID_BODY": "Invalid data",
+    "auth.otp.error.SERVER_ERROR": "Something went wrong — try again",
     "auth.register.title": "Registration",
     "auth.register.subtitle": "Create an account to order tour packages",
     "auth.register.button": "Register",
@@ -563,10 +710,40 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.address": "Address",
     "profile.orderHistory": "Order History",
     "profile.noOrders": "No orders yet",
+    "profile.orderDate": "Order Date",
+    "profile.paidAt": "Paid",
     "profile.departureDate": "Departure Date",
     "profile.downloadReceipt": "Download Payment Receipt",
     "profile.changePassword": "Change Password",
     "profile.editProfile": "Edit Profile",
+    "profile.emailVerified": "Email verified",
+    "profile.emailNotVerified": "Email not verified yet",
+    "profile.verified": "Verified",
+    "profile.pendingEmail": "Awaiting verification of new email: {email}",
+
+    "settings.title": "Settings",
+    "settings.tab.profile": "Profile",
+    "settings.tab.avatar": "Avatar",
+    "settings.tab.email": "Email",
+    "settings.tab.notifications": "Notifications",
+    "settings.avatar.upload": "Upload Avatar",
+    "settings.avatar.hint":
+      "Square image recommended, common formats (JPG/PNG/WebP), max 2MB.",
+    "settings.email.current": "Current email",
+    "settings.email.new": "New email",
+    "settings.email.same": "Email must differ from the current one",
+    "settings.email.sendOtp": "Send OTP Code",
+    "settings.email.otpSent": "OTP code sent to the new email",
+    "settings.email.hint":
+      "The new email only becomes active after the OTP code is verified.",
+    "settings.email.changed": "Email changed successfully",
+    "settings.notif.web": "Web Notifications",
+    "settings.notif.webDesc":
+      "In-app notifications (order status, reminders).",
+    "settings.notif.email": "Email Notifications",
+    "settings.notif.emailDesc": "Transactional emails and schedule reminders.",
+    "settings.notif.cronHint":
+      "Scheduled jobs (cron) also use these preferences to only send to users who opted in.",
 
     "footer.location": "Location",
     "footer.hours": "Opening Hours",

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import prisma from "@/server/db";
 import {
+  RATE_LIMIT_SCOPES,
   clearFailedAttempts,
   createSession,
   getClientIp,
@@ -14,7 +15,7 @@ import {
 import { USER_SESSION_COOKIE } from "@/config/variables";
 
 function toRemainingMinutes(blockedUntil: Date | null | undefined): number {
-  if (!blockedUntil) return 15;
+  if (!blockedUntil) return 24 * 60;
   return Math.max(
     1,
     Math.ceil((blockedUntil.getTime() - Date.now()) / (60 * 1000)),
@@ -40,10 +41,11 @@ export async function POST(request: NextRequest) {
     }
 
     const ip = getClientIp(request);
+    const scope = RATE_LIMIT_SCOPES.webLogin;
 
-    if (await isIpBlocked(ip)) {
+    if (await isIpBlocked(ip, scope)) {
       const attempt = await prisma.loginAttempt.findUnique({
-        where: { ipAddress: ip },
+        where: { ipAddress_scope: { ipAddress: ip, scope } },
       });
       return NextResponse.json(
         {
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
       : false;
 
     if (!ok || !user) {
-      const { blocked, blockedUntil } = await recordFailedAttempt(ip);
+      const { blocked, blockedUntil } = await recordFailedAttempt(ip, scope);
       if (blocked) {
         return NextResponse.json(
           {
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
         );
       }
       const attempt = await prisma.loginAttempt.findUnique({
-        where: { ipAddress: ip },
+        where: { ipAddress_scope: { ipAddress: ip, scope } },
       });
       const remaining = Math.max(
         0,
@@ -89,7 +91,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await clearFailedAttempts(ip);
+    // Email belum diverifikasi via OTP → arahkan ke halaman OTP dulu.
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { success: false, error: "EMAIL_NOT_VERIFIED", userId: user.id },
+        { status: 403 },
+      );
+    }
+
+    await clearFailedAttempts(ip, scope);
     const { token, expiresAt } = await createSession("web", user.id);
     const store = await cookies();
     store.set(sessionCookieOptions(USER_SESSION_COOKIE, token, expiresAt));
