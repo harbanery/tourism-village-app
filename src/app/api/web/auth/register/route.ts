@@ -8,16 +8,22 @@ import {
   isIpBlocked,
   recordFailedAttempt,
 } from "@/server/auth";
-import { NODE_ENV } from "@/config/variables";import { sendEmail, isEmailConfigured } from "@/server/email";
+import { NODE_ENV } from "@/config/variables";
+import { sendEmail, isEmailConfigured } from "@/server/email";
 import { createOtp } from "@/server/otp";
 import { buildOtpEmail } from "@/server/otpEmail";
 
 /**
  * POST /api/web/auth/register — registrasi user web (email + password).
  *
- * Rate limit per IP: 3 percobaan gagal → blokir 24 jam.
- * Setelah akun dibuat, kode OTP verifikasi dikirim ke email dan user
- * diarahkan ke halaman /otp (login hanya bisa setelah email terverifikasi).
+ * Validasi lengkap (server-trusted):
+ * - Nama: 2–60 karakter.
+ * - Email: format valid, lowercase-unik.
+ * - Password: minimal 8 karakter, mengandung huruf dan angka.
+ *
+ * Error terstruktur (dipetakan klien): VALIDATION, EMAIL_TAKEN,
+ * BLOCKED (rate limit IP 3x gagal → 24 jam), SERVER_ERROR.
+ * Setelah akun dibuat, OTP verifikasi dikirim dan user diarahkan ke /otp.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -45,21 +51,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const invalid =
-      typeof name !== "string" ||
-      name.trim().length === 0 ||
-      typeof email !== "string" ||
-      !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ||
-      typeof password !== "string" ||
-      password.length < 8;
+    // --- Validasi input (per field, server-trusted) ---
+    const nameValid =
+      typeof name === "string" &&
+      name.trim().length >= 2 &&
+      name.trim().length <= 60;
+    const emailValid =
+      typeof email === "string" &&
+      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
+    // Password kuat: min 8 karakter, harus ada huruf dan angka.
+    const passwordValid =
+      typeof password === "string" &&
+      password.length >= 8 &&
+      /[A-Za-z]/.test(password) &&
+      /\d/.test(password);
 
-    if (invalid) {
+    if (!nameValid || !emailValid || !passwordValid) {
       await recordFailedAttempt(ip, scope);
       return NextResponse.json(
-        {
-          success: false,
-          error: "Data tidak valid. Password minimal 8 karakter.",
-        },
+        { success: false, error: "VALIDATION" },
         { status: 400 },
       );
     }
@@ -71,7 +81,7 @@ export async function POST(request: NextRequest) {
     if (existing) {
       await recordFailedAttempt(ip, scope);
       return NextResponse.json(
-        { success: false, error: "Email sudah terdaftar." },
+        { success: false, error: "EMAIL_TAKEN" },
         { status: 409 },
       );
     }

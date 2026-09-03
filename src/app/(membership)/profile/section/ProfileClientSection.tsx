@@ -17,19 +17,25 @@ export type ProfileView = "history" | "settings";
  * Konten halaman profil: kartu identitas kiri (sticky, tinggi maksimal
  * viewport dikurangi navbar) + kolom kanan ber-Tab: Riwayat Belanja dan
  * Pengaturan (bukan modal — menggantikan section riwayat).
+ * `initialView`/`initialSettingsTab` dipakai saat kembali dari verifikasi
+ * OTP ganti email agar langsung terbuka di tab ganti email.
  */
 export default function ProfileClientSection({
   user,
   settings,
   orders,
+  initialView = "history",
+  initialSettingsTab = "profile",
 }: {
   user: User;
   settings: ProfileSettings;
   orders: HistoryOrder[];
+  initialView?: ProfileView;
+  initialSettingsTab?: "profile" | "avatar" | "email" | "notifications";
 }) {
   const { t } = useT();
   const mounted = useMounted();
-  const [view, setView] = useState<ProfileView>("history");
+  const [view, setView] = useState<ProfileView>(initialView);
   if (!mounted) return null;
 
   return (
@@ -54,7 +60,13 @@ export default function ProfileClientSection({
             key: "settings",
             icon: <SettingOutlined />,
             label: t("settings.title"),
-            children: <SettingsSection user={user} settings={settings} />,
+            children: (
+              <SettingsSection
+                user={user}
+                settings={settings}
+                initialTab={initialSettingsTab}
+              />
+            ),
           },
         ]}
       />

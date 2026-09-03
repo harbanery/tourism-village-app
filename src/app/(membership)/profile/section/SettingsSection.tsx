@@ -120,9 +120,12 @@ function NotifSwitches({ settings }: { settings: ProfileSettings }) {
 export function SettingsSection({
   user,
   settings,
+  initialTab = "profile",
 }: {
   user: User | null;
   settings: ProfileSettings;
+  /** Tab awal (mis. "email" saat kembali dari verifikasi OTP ganti email). */
+  initialTab?: "profile" | "avatar" | "email" | "notifications";
 }) {
   const { t } = useT();
   const router = useRouter();
@@ -131,7 +134,7 @@ export function SettingsSection({
 
   const [profileForm] = Form.useForm<ProfileFormValues>();
   const [emailForm] = Form.useForm<EmailFormValues>();
-  const [tab, setTab] = useState("profile");
+  const [tab, setTab] = useState<string>(initialTab);
   const [savingProfile, setSavingProfile] = useState(false);
   const [requestingEmail, setRequestingEmail] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);

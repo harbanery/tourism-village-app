@@ -3,10 +3,11 @@ import { getCurrentUser } from "@/server/auth";
 import { OtpSection } from "./section/OtpSection";
 
 /**
- * Halaman OTP — dipakai dua alur:
- * - REGISTER (belum login): verifikasi email setelah register.
- * - EMAIL_CHANGE (wajib login): verifikasi email baru dari pengaturan.
- * Guard menyesuaikan purpose; purpose selain itu kembali ke beranda.
+ * Halaman OTP terpisah — dipakai tiga alur (via param purpose):
+ * - REGISTER (belum login): verifikasi email setelah register → login.
+ * - RESET_PASSWORD (belum login): bukti kepemilikan akun → reset password.
+ * - EMAIL_CHANGE (wajib login): verifikasi email baru → profil.
+ * Guard menyesuaikan purpose; purpose lain kembali ke beranda.
  */
 export default async function OtpPage({
   searchParams,
@@ -31,6 +32,14 @@ export default async function OtpPage({
     }
     // OTP ganti email selalu milik user sesi (bukan userId dari query).
     return <OtpSection userId={user.id} purpose="EMAIL_CHANGE" dev={dev} />;
+  }
+
+  if (purpose === "RESET_PASSWORD") {
+    // Alur lupa password: user belum (tidak) login.
+    if (user) {
+      redirect("/");
+    }
+    return <OtpSection userId={userId} purpose="RESET_PASSWORD" dev={dev} />;
   }
 
   if (purpose !== "REGISTER") {

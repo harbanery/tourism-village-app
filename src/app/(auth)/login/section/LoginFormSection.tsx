@@ -69,15 +69,8 @@ export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <button
-        type="button"
-        onClick={() => router.push("/")}
-        className="cursor-pointer! bg-transparent! text-sm! text-foreground/60! hover:text-foreground!"
-      >
-        ← {t("common.backToHome")}
-      </button>
-      <Card className="mt-4!">
+    <div className="mx-auto w-full max-w-lg px-4 py-8">
+      <Card>
         <h1 className="text-2xl font-bold text-center">{t("auth.login.title")}</h1>
         <p className="mt-1 text-center text-foreground/60">
           {t("auth.login.subtitle")}

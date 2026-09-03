@@ -2,7 +2,10 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/server/auth";
 import { ResetPasswordSection } from "./section/ResetPasswordSection";
 
-/** Halaman reset password — sudah login dialihkan ke beranda. */
+/**
+ * Halaman reset password — sudah login dialihkan ke beranda.
+ * `userId` dipakai konsumsi OTP reset (flow: lupa password → otp → reset).
+ */
 export default async function ResetPasswordPage({
   searchParams,
 }: PageProps<"/reset-password">) {
@@ -12,9 +15,14 @@ export default async function ResetPasswordPage({
   }
 
   const params = await searchParams;
-  const email =
-    typeof params.email === "string" ? params.email : undefined;
+  const userId = Number(
+    typeof params.userId === "string" ? params.userId : NaN,
+  );
   const dev = typeof params.dev === "string" ? params.dev : undefined;
 
-  return <ResetPasswordSection email={email} dev={dev} />;
+  if (!Number.isInteger(userId)) {
+    redirect("/forgot-password");
+  }
+
+  return <ResetPasswordSection userId={userId} dev={dev} />;
 }

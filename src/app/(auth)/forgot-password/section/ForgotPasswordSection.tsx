@@ -33,16 +33,31 @@ export function ForgotPasswordSection() {
       const result = await res.json();
 
       if (!result.success) {
-        message.error(t("notif.error"));
-        return;
+        // Email tidak terdaftar → gagal (permintaan: validasi email di DB).
+        if (result.error === "EMAIL_NOT_FOUND") {
+          message.error(t("auth.forgot.emailNotFound"));
+          return;
+        }
+        if (result.error === "COOLDOWN") {
+          // Kode lama masih aktif — lanjut ke OTP agar bisa dipakai.
+          message.warning(
+            t("auth.otp.cooldown", { seconds: result.seconds ?? 60 }),
+          );
+        } else {
+          message.error(t("notif.error"));
+          return;
+        }
+      } else {
+        message.success(t("auth.reset.otpSent"));
       }
 
-      // Selalu sukses (tidak membocokan keberadaan akun) → lanjut ke reset.
-      message.success(t("auth.reset.otpSent"));
+      // Flow: lupa password → OTP (verifikasi kepemilikan akun) → reset.
       const dev = result.data?.devCode
         ? `&dev=${result.data.devCode}`
         : "";
-      router.push(`/reset-password?email=${encodeURIComponent(values.email)}${dev}`);
+      router.push(
+        `/otp?userId=${result.data.userId}&purpose=RESET_PASSWORD${dev}`,
+      );
     } catch {
       message.error(t("notif.error"));
     } finally {
@@ -51,15 +66,8 @@ export function ForgotPasswordSection() {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <button
-        type="button"
-        onClick={() => router.push("/")}
-        className="cursor-pointer! bg-transparent! text-sm! text-foreground/60! hover:text-foreground!"
-      >
-        ← {t("common.backToHome")}
-      </button>
-      <Card className="mt-4!">
+    <div className="mx-auto w-full max-w-lg px-4 py-8">
+      <Card>
         <h1 className="text-2xl font-bold text-center">
           {t("auth.forgot.title")}
         </h1>

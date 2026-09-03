@@ -72,12 +72,19 @@ export type OtpVerifyResult =
   | { ok: true }
   | { ok: false; reason: "NOT_FOUND" | "EXPIRED" | "TOO_MANY_ATTEMPTS"; remainingAttempts?: number };
 
-/** Verifikasi kode OTP: konsumsi saat cocok, hitung percobaan saat salah. */
+/**
+ * Verifikasi kode OTP: hitung percobaan saat salah, dan konsumsi saat
+ * cocok (default). Untuk flow reset password (otp → reset → login),
+ * langkah OTP memakai `consume: false`: kode hanya dicek tanpa dikonsumsi
+ * karena konsumsi final terjadi di route reset-password.
+ */
 export async function verifyOtp(
   userId: number,
   purpose: OtpPurpose,
   code: string,
+  options: { consume?: boolean } = {},
 ): Promise<OtpVerifyResult> {
+  const { consume = true } = options;
   const otp = await prisma.otpCode.findFirst({
     where: { userId, purpose, consumedAt: null },
     orderBy: { createdAt: "desc" },
@@ -113,9 +120,12 @@ export async function verifyOtp(
     };
   }
 
-  await prisma.otpCode.update({
-    where: { id: otp.id },
-    data: { consumedAt: new Date() },
-  });
+  // Kode cocok — konsumsi kecuali diminta peek (reset password).
+  if (consume) {
+    await prisma.otpCode.update({
+      where: { id: otp.id },
+      data: { consumedAt: new Date() },
+    });
+  }
   return { ok: true };
 }

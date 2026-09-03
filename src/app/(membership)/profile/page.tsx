@@ -13,14 +13,27 @@ export interface ProfileSettings {
 }
 
 /**
- * Halaman profil (area membership) — selalu mengikuti sesi login
- * (tanpa param URL); belum login dikembalikan ke halaman login.
+ * Halaman profil (area membership) — selalu mengikuti sesi login;
+ * belum login dikembalikan ke halaman login.
+ * Param opsional: `?view=settings` buka tab pengaturan, `&tab=email`
+ * langsung ke tab ganti email (tujuan kembali dari verifikasi OTP).
  */
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: PageProps<"/profile">) {
   const user = await getCurrentUser();
   if (!user) {
     redirect("/login?redirect=/profile");
   }
+
+  const params = await searchParams;
+  const view = params.view === "settings" ? "settings" : "history";
+  const settingsTab =
+    params.tab === "email" ||
+    params.tab === "avatar" ||
+    params.tab === "notifications"
+      ? params.tab
+      : "profile";
 
   const orders = await getUserOrders(user);
 
@@ -47,5 +60,13 @@ export default async function ProfilePage() {
     notifEmail: user.notifEmail,
   };
 
-  return <ProfileClientSection user={profile} settings={settings} orders={orders} />;
+  return (
+    <ProfileClientSection
+      user={profile}
+      settings={settings}
+      orders={orders}
+      initialView={view}
+      initialSettingsTab={settingsTab}
+    />
+  );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Avatar, Badge, Button, Card, Tag } from "antd";
+import { Avatar, Badge, Button, Card } from "antd";
 import {
   CheckCircleFilled,
   LeftOutlined,

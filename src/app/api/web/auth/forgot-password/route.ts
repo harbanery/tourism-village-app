@@ -7,8 +7,8 @@ import { NODE_ENV } from "@/config/variables";
 
 /**
  * POST /api/web/auth/forgot-password — minta OTP reset password.
- * Selalu merespons sukses (tidak membocokan keberadaan akun); OTP hanya
- * dikirim bila email terdaftar.
+ * Email divalidasi: bila tidak terdaftar → gagal dengan EMAIL_NOT_FOUND.
+ * (Permintaan: validasi email, jika tidak ada di DB maka gagal.)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -25,23 +25,41 @@ export async function POST(request: NextRequest) {
       where: { email: email.toLowerCase().trim() },
     });
 
+    // Email tidak terdaftar / akun nonaktif → gagal (permintaan eksplisit).
+    if (!user || user.status !== "ACTIVE") {
+      return NextResponse.json(
+        { success: false, error: "EMAIL_NOT_FOUND" },
+        { status: 404 },
+      );
+    }
+
+    const otp = await createOtp(user.id, "RESET_PASSWORD");
     let devCode: string | undefined;
-    if (user && user.status === "ACTIVE") {
-      const otp = await createOtp(user.id, "RESET_PASSWORD");
-      if ("code" in otp) {
-        void sendEmail({
-          to: user.email,
-          ...buildOtpEmail({ name: user.name, code: otp.code, purpose: "RESET_PASSWORD" }),
-        });
-        if (!isEmailConfigured() && NODE_ENV !== "production") {
-          devCode = otp.code;
-        }
+    if ("code" in otp) {
+      void sendEmail({
+        to: user.email,
+        ...buildOtpEmail({ name: user.name, code: otp.code, purpose: "RESET_PASSWORD" }),
+      });
+      if (!isEmailConfigured() && NODE_ENV !== "production") {
+        devCode = otp.code;
       }
+    } else {
+      // Cooldown resend — tetap lanjut ke halaman OTP dengan kode lama
+      // (userId disertakan agar klien bisa melanjutkan alur).
+      return NextResponse.json(
+        {
+          success: false,
+          error: "COOLDOWN",
+          seconds: otp.cooldownSeconds,
+          data: { userId: user.id },
+        },
+        { status: 429 },
+      );
     }
 
     return NextResponse.json({
       success: true,
-      ...(devCode ? { data: { devCode } } : {}),
+      data: { userId: user.id, email: user.email, ...(devCode ? { devCode } : {}) },
     });
   } catch (error) {
     console.error("Error forgot password:", error);

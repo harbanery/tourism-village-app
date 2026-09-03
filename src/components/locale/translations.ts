@@ -266,22 +266,29 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.forgot.info":
       "Jika email terdaftar, kode OTP akan dikirim dalam beberapa menit.",
     "auth.forgot.backToLogin": "Kembali ke halaman masuk",
+    "auth.forgot.emailNotFound": "Email tidak terdaftar",
     "auth.reset.title": "Atur Ulang Password",
-    "auth.reset.subtitle": "Kode OTP telah dikirim ke {email}",
+    "auth.reset.subtitle": "Kode OTP sudah diverifikasi — buat password baru Anda",
     "auth.reset.subtitleNoEmail":
       "Buka halaman lupa password terlebih dahulu",
     "auth.reset.button": "Simpan Password Baru",
     "auth.reset.success": "Password berhasil diganti — silakan masuk",
     "auth.reset.otpSent": "Jika email terdaftar, kode OTP telah dikirim",
     "auth.reset.resend": "Tidak menerima kode? Kirim ulang",
+    "auth.reset.sameAsOld": "Password baru tidak boleh sama dengan password lama",
     "auth.reset.missingEmail":
       "Email tidak diketahui — ulangi dari halaman lupa password",
 
     "auth.otp.title": "Verifikasi OTP",
     "auth.otp.subtitleRegister":
       "Masukkan kode 6 digit yang dikirim ke email Anda",
+    "auth.otp.subtitleReset":
+      "Masukkan kode 6 digit yang dikirim ke email Anda untuk reset password",
     "auth.otp.subtitleEmailChange":
       "Masukkan kode 6 digit yang dikirim ke email baru Anda",
+    "auth.otp.verified": "Email terverifikasi — silakan masuk",
+    "auth.otp.verifiedReset": "Kode valid — silakan buat password baru",
+    "auth.otp.backToEmailSettings": "Kembali ke pengaturan email",
     "auth.otp.codeLabel": "Kode OTP",
     "auth.otp.codePattern": "Kode harus 6 digit angka",
     "auth.otp.verify": "Verifikasi",
@@ -307,8 +314,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.register.button": "Daftar",
     "auth.register.haveAccount": "Sudah punya akun?",
     "auth.register.name": "Nama Lengkap",
+    "auth.register.nameMin": "Nama harus 2–60 karakter",
+    "auth.register.namePlaceholder": "Nama lengkap Anda",
     "auth.register.password": "Password",
+    "auth.register.passwordPattern": "Password harus mengandung huruf dan angka",
+    "auth.register.passwordPlaceholder": "Minimal 8 karakter, huruf & angka",
     "auth.register.retypePassword": "Ulangi Password",
+    "auth.register.retypePlaceholder": "Ulangi password Anda",
+    "auth.register.emailTaken": "Email sudah terdaftar — gunakan email lain",
 
     "profile.title": "Profil",
     "profile.gender": "Jenis Kelamin",
@@ -701,21 +714,28 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.forgot.info":
       "If the email is registered, an OTP code will arrive within minutes.",
     "auth.forgot.backToLogin": "Back to login page",
+    "auth.forgot.emailNotFound": "Email is not registered",
     "auth.reset.title": "Reset Password",
-    "auth.reset.subtitle": "An OTP code has been sent to {email}",
+    "auth.reset.subtitle": "OTP code verified — create your new password",
     "auth.reset.subtitleNoEmail": "Open the forgot password page first",
     "auth.reset.button": "Save New Password",
     "auth.reset.success": "Password changed — please log in",
     "auth.reset.otpSent": "If the email is registered, an OTP code has been sent",
     "auth.reset.resend": "Didn't receive the code? Resend",
+    "auth.reset.sameAsOld": "The new password must differ from the old one",
     "auth.reset.missingEmail":
       "Email unknown — restart from the forgot password page",
 
     "auth.otp.title": "OTP Verification",
     "auth.otp.subtitleRegister":
       "Enter the 6-digit code sent to your email",
+    "auth.otp.subtitleReset":
+      "Enter the 6-digit code sent to your email to reset your password",
     "auth.otp.subtitleEmailChange":
       "Enter the 6-digit code sent to your new email",
+    "auth.otp.verified": "Email verified — please log in",
+    "auth.otp.verifiedReset": "Code valid — please set a new password",
+    "auth.otp.backToEmailSettings": "Back to email settings",
     "auth.otp.codeLabel": "OTP Code",
     "auth.otp.codePattern": "Code must be 6 digits",
     "auth.otp.verify": "Verify",
@@ -741,8 +761,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.register.button": "Register",
     "auth.register.haveAccount": "Already have an account?",
     "auth.register.name": "Full Name",
+    "auth.register.nameMin": "Name must be 2–60 characters",
+    "auth.register.namePlaceholder": "Your full name",
     "auth.register.password": "Password",
+    "auth.register.passwordPattern": "Password must contain letters and numbers",
+    "auth.register.passwordPlaceholder": "Min 8 characters, letters & numbers",
     "auth.register.retypePassword": "Retype Password",
+    "auth.register.retypePlaceholder": "Retype your password",
+    "auth.register.emailTaken": "Email already registered — use another email",
 
     "profile.title": "Profile",
     "profile.gender": "Gender",

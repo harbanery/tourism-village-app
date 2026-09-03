@@ -43,7 +43,18 @@ export function RegisterFormSection() {
       const result = await res.json();
 
       if (!result.success) {
-        message.error(result.error || t("auth.register.failed"));
+        // Mapping error terstruktur dari API → pesan ter-translate.
+        if (result.error === "EMAIL_TAKEN") {
+          message.error(t("auth.register.emailTaken"));
+        } else if (result.error === "VALIDATION") {
+          message.error(t("notif.validationError"));
+        } else if (result.error === "BLOCKED") {
+          message.error(
+            t("auth.login.blocked", { minutes: result.minutes ?? 1440 }),
+          );
+        } else {
+          message.error(t("auth.register.failed"));
+        }
         return;
       }
 
@@ -59,15 +70,8 @@ export function RegisterFormSection() {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <button
-        type="button"
-        onClick={() => router.push("/")}
-        className="cursor-pointer! bg-transparent! text-sm! text-foreground/60! hover:text-foreground!"
-      >
-        ← {t("common.backToHome")}
-      </button>
-      <Card className="mt-4!">
+    <div className="mx-auto w-full max-w-lg px-4 py-8">
+      <Card>
         <h1 className="text-2xl font-bold text-center">
           {t("auth.register.title")}
         </h1>
@@ -84,9 +88,16 @@ export function RegisterFormSection() {
           <Form.Item
             name="name"
             label={t("auth.register.name")}
-            rules={[{ required: true }]}
+            rules={[
+              { required: true },
+              { min: 2, message: t("auth.register.nameMin") },
+              { max: 60, message: t("auth.register.nameMin") },
+            ]}
           >
-            <Input prefix={<UserOutlined />} />
+            <Input
+              prefix={<UserOutlined />}
+              placeholder={t("auth.register.namePlaceholder")}
+            />
           </Form.Item>
           <Form.Item
             name="email"
@@ -101,16 +112,39 @@ export function RegisterFormSection() {
             rules={[
               { required: true },
               { min: 8, message: t("auth.register.passwordMin") },
+              {
+                pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
+                message: t("auth.register.passwordPattern"),
+              },
             ]}
           >
-            <Input.Password prefix={<LockOutlined />} />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder={t("auth.register.passwordPlaceholder")}
+            />
           </Form.Item>
           <Form.Item
             name="retypePassword"
             label={t("auth.register.retypePassword")}
-            rules={[{ required: true }]}
+            dependencies={["password"]}
+            rules={[
+              { required: true },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(t("auth.register.passwordMismatch")),
+                  );
+                },
+              }),
+            ]}
           >
-            <Input.Password prefix={<LockOutlined />} />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder={t("auth.register.retypePlaceholder")}
+            />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block loading={loading}>

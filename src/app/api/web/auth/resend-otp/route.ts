@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Reset password hanya boleh dikirim ulang dari halaman lupa password.
-    if (purpose === "RESET_PASSWORD") {
+    // Email ganti (EMAIL_CHANGE) dikelola lewat pengaturan profil, bukan di sini.
+    if (purpose === "EMAIL_CHANGE") {
       return NextResponse.json(
         { success: false, error: "INVALID_BODY" },
         { status: 400 },

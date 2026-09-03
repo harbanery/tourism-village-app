@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import prisma from "@/server/db";
-import { createSession, sessionCookieOptions } from "@/server/auth";
-import { USER_SESSION_COOKIE } from "@/config/variables";
 import { verifyOtp } from "@/server/otp";
 
 /**
- * POST /api/web/auth/verify-otp — verifikasi kode OTP registrasi.
+ * POST /api/web/auth/verify-otp — verifikasi kode OTP di halaman /otp.
  *
- * - REGISTER_VERIFICATION: tandai email terverifikasi lalu auto-login
- *   (sesi baru dibuat di sini).
- * - RESET_PASSWORD diverifikasi terpisah di route reset-password.
+ * Purpose (dipilih klien):
+ * - REGISTER_VERIFICATION: tandai email terverifikasi → user lanjut ke
+ *   /login sendiri (flow: registrasi → otp → login, TANPA auto-login).
+ * - RESET_PASSWORD: cukup memverifikasi kepemilikan akun — kode TIDAK
+ *   dikonsumsi (peek) karena diverifikasi ulang + dikonsumsi final oleh
+ *   route reset-password saat password baru disimpan.
  * - EMAIL_CHANGE diverifikasi terpisah di /api/web/profile/email/verify
  *   (berbasis sesi login).
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, code } = body as Record<string, unknown>;
+    const { userId, code, purpose } = body as Record<string, unknown>;
 
     const parsedUserId = Number(userId);
     if (
@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const otpPurpose =
+      purpose === "RESET_PASSWORD" ? "RESET_PASSWORD" : "REGISTER_VERIFICATION";
+
     const user = await prisma.authUser.findUnique({
       where: { id: parsedUserId },
     });
@@ -41,7 +44,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await verifyOtp(user.id, "REGISTER_VERIFICATION", code);
+    // Reset password peek saja (konsumsi final di reset-password).
+    const result = await verifyOtp(user.id, otpPurpose, code, {
+      consume: otpPurpose !== "RESET_PASSWORD",
+    });
     if (!result.ok) {
       return NextResponse.json(
         {
@@ -55,6 +61,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (otpPurpose === "RESET_PASSWORD") {
+      // OTP reset valid → lanjut ke halaman reset password (tanpa sesi).
+      return NextResponse.json({
+        success: true,
+        data: { next: "reset-password" },
+      });
+    }
+
     if (!user.emailVerified) {
       await prisma.authUser.update({
         where: { id: user.id },
@@ -62,11 +76,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Auto-login setelah verifikasi register (belum punya sesi sebelumnya).
-    const { token, expiresAt } = await createSession("web", user.id);
-    const store = await cookies();
-    store.set(sessionCookieOptions(USER_SESSION_COOKIE, token, expiresAt));
-
+    // Registrasi selesai → user login sendiri di /login (tanpa auto-login).
     return NextResponse.json({
       success: true,
       data: { id: user.id, name: user.name, email: user.email },

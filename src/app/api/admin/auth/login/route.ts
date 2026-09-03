@@ -8,6 +8,7 @@ import {
   createSession,
   getClientIp,
   isIpBlocked,
+  LOGIN_BLOCK_MINUTES,
   MAX_LOGIN_ATTEMPTS,
   recordFailedAttempt,
   sessionCookieOptions,
@@ -15,7 +16,7 @@ import {
 } from "@/server/auth";
 
 function toRemainingMinutes(blockedUntil: Date | null | undefined): number {
-  if (!blockedUntil) return 24 * 60;
+  if (!blockedUntil) return LOGIN_BLOCK_MINUTES;
   return Math.max(
     1,
     Math.ceil((blockedUntil.getTime() - Date.now()) / (60 * 1000)),
@@ -79,7 +80,10 @@ export async function POST(request: NextRequest) {
       : false;
 
     if (!ok || !admin) {
-      const { blocked, blockedUntil } = await recordFailedAttempt(ip, scope);
+      const { blocked, blockedUntil, attemptCount } = await recordFailedAttempt(
+        ip,
+        scope,
+      );
       if (blocked) {
         return NextResponse.json(
           {
@@ -90,13 +94,7 @@ export async function POST(request: NextRequest) {
           { status: 429 },
         );
       }
-      const attempt = await prisma.loginAttempt.findUnique({
-        where: { ipAddress_scope: { ipAddress: ip, scope } },
-      });
-      const remaining = Math.max(
-        0,
-        MAX_LOGIN_ATTEMPTS - (attempt?.attemptCount ?? 1),
-      );
+      const remaining = Math.max(0, MAX_LOGIN_ATTEMPTS - attemptCount);
       return NextResponse.json(
         { success: false, error: "INVALID", remaining },
         { status: 401 },

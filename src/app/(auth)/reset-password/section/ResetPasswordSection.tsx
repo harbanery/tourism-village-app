@@ -13,15 +13,21 @@ interface ResetFormValues {
   retypePassword: string;
 }
 
+/** Kunci sessionStorage: kode OTP yang barusan diverifikasi di /otp. */
+const RESET_OTP_STORAGE_KEY = "resetOtpCode";
+
 /**
  * Form reset password: OTP 6 digit (dari email) + password baru.
+ * Flow: lupa password → OTP (di /otp, peek) → reset di sini → login.
+ * Kode diverifikasi ULANG + dikonsumsi final oleh API reset (keamanan:
+ * bukti kepemilikan akun wajib sampai ke server, bukan sekadar lewat gate).
  * `dev` = kode OTP cadangan (development tanpa SMTP).
  */
 export function ResetPasswordSection({
-  email,
+  userId,
   dev,
 }: {
-  email?: string;
+  userId: number;
   dev?: string;
 }) {
   const { t } = useT();
@@ -38,24 +44,21 @@ export function ResetPasswordSection({
       message.error(t("auth.register.passwordMismatch"));
       return;
     }
-    if (!email) {
-      message.error(t("auth.reset.missingEmail"));
-      return;
-    }
     setLoading(true);
     try {
       const res = await fetch("/api/web/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          code: values.code,
-          password: values.password,
-        }),
+        body: JSON.stringify({ userId, code: values.code, password: values.password }),
       });
       const result = await res.json();
 
       if (!result.success) {
+        if (result.error === "PASSWORD_SAME_AS_OLD") {
+          // Password baru sama dengan lama → validasi gagal (permintaan).
+          message.error(t("auth.reset.sameAsOld"));
+          return;
+        }
         if (result.remainingAttempts !== undefined) {
           message.error(
             t("auth.otp.invalidRemaining", {
@@ -68,6 +71,7 @@ export function ResetPasswordSection({
         return;
       }
 
+      sessionStorage.removeItem(RESET_OTP_STORAGE_KEY);
       message.success(t("auth.reset.success"));
       router.push("/login");
     } catch {
@@ -78,22 +82,13 @@ export function ResetPasswordSection({
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <button
-        type="button"
-        onClick={() => router.push("/")}
-        className="cursor-pointer! bg-transparent! text-sm! text-foreground/60! hover:text-foreground!"
-      >
-        ← {t("common.backToHome")}
-      </button>
-      <Card className="mt-4!">
+    <div className="mx-auto w-full max-w-lg px-4 py-8">
+      <Card>
         <div className="text-center">
           <SafetyOutlined className="text-4xl text-primary" />
           <h1 className="mt-3 text-2xl font-bold">{t("auth.reset.title")}</h1>
           <p className="mt-1 text-foreground/60">
-            {email
-              ? t("auth.reset.subtitle", { email })
-              : t("auth.reset.subtitleNoEmail")}
+            {t("auth.reset.subtitle")}
           </p>
         </div>
 
@@ -117,6 +112,13 @@ export function ResetPasswordSection({
           className="mt-6!"
           onFinish={handleReset}
           disabled={loading}
+          initialValues={{
+            // Kode barusan diverifikasi di /otp → pra-isi (tetap bisa diubah).
+            code:
+              typeof window !== "undefined"
+                ? (sessionStorage.getItem(RESET_OTP_STORAGE_KEY) ?? "")
+                : "",
+          }}
         >
           <Form.Item
             name="code"
@@ -140,16 +142,39 @@ export function ResetPasswordSection({
             rules={[
               { required: true },
               { min: 8, message: t("auth.register.passwordMin") },
+              {
+                pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
+                message: t("auth.register.passwordPattern"),
+              },
             ]}
           >
-            <Input.Password prefix={<LockOutlined />} />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="••••••••"
+            />
           </Form.Item>
           <Form.Item
             name="retypePassword"
             label={t("auth.register.retypePassword")}
-            rules={[{ required: true }]}
+            dependencies={["password"]}
+            rules={[
+              { required: true },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(t("auth.register.passwordMismatch")),
+                  );
+                },
+              }),
+            ]}
           >
-            <Input.Password prefix={<LockOutlined />} />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="••••••••"
+            />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block loading={loading}>

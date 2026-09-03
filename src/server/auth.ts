@@ -14,12 +14,17 @@ import type { AuthAdmin, AuthUser } from "@prisma/client";
 export const SESSION_TTL_MS = SESSION_TTL_HOURS * 60 * 60 * 1000;
 
 /**
- * Rate limit: 3 percobaan gagal → blokir 24 jam (per IP per scope).
+ * Rate limit: 3 percobaan gagal → blokir 15 menit (per IP per scope).
  * Scope terpisah agar blokir login admin tidak memengaruhi login/register web.
+ * Counter hanya diakumulasi dalam window 15 menit — kegagalan lama tidak
+ * membuat user mendadak terblokir ("BLOCKED padahal belum gagal 3x").
  */
 export const MAX_LOGIN_ATTEMPTS = 3;
 
-export const LOGIN_BLOCK_MINUTES = 24 * 60;
+export const LOGIN_BLOCK_MINUTES = 15;
+
+/** Jendela akumulasi kegagalan (samakan dengan durasi blokir). */
+export const LOGIN_ATTEMPT_WINDOW_MS = LOGIN_BLOCK_MINUTES * 60 * 1000;
 
 export const RATE_LIMIT_SCOPES = {
   adminLogin: "admin-login",
@@ -82,12 +87,19 @@ export async function isIpBlocked(
 export async function recordFailedAttempt(
   ipAddress: string,
   scope: RateLimitScope,
-): Promise<{ blocked: boolean; blockedUntil: Date | null }> {
+): Promise<{ blocked: boolean; blockedUntil: Date | null; attemptCount: number }> {
   const existing = await prisma.loginAttempt.findUnique({
     where: attemptKey(ipAddress, scope),
   });
 
-  const attemptCount = (existing?.attemptCount ?? 0) + 1;
+  // Kegagalan di luar window dianggap perhitungan baru (tidak menumpuk
+  // dengan kegagalan lama) — mencegah blokir mendadak dari akumulasi
+  // percobaan yang berjarak berjam-jam/hari.
+  const isStale =
+    !!existing &&
+    Date.now() - existing.lastAttemptAt.getTime() > LOGIN_ATTEMPT_WINDOW_MS;
+
+  const attemptCount = isStale ? 1 : (existing?.attemptCount ?? 0) + 1;
   const shouldBlock = attemptCount >= MAX_LOGIN_ATTEMPTS;
   const blockedUntil = shouldBlock
     ? new Date(Date.now() + LOGIN_BLOCK_MINUTES * 60 * 1000)
@@ -103,7 +115,7 @@ export async function recordFailedAttempt(
     create: { ipAddress, scope, attemptCount, blockedUntil },
   });
 
-  return { blocked: shouldBlock, blockedUntil };
+  return { blocked: shouldBlock, blockedUntil, attemptCount };
 }
 
 export async function clearFailedAttempts(
