@@ -2,13 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, Col, Input, Row, Select, App, Button, Tag } from "antd";
-import { FireOutlined, SearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { Col, Input, Row, Select, App } from "antd";
+import { FireOutlined, SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { readCart, writeCart } from "@/helpers/cart";
-import { formatRupiah } from "@/utils/format";
-import { PackageListSection, type CartItem, type WebPackage } from "./PackageListSection";
+import {
+  PackageCard,
+  PackageListSection,
+  type CartItem,
+  type WebPackage,
+} from "./PackageListSection";
 import { CartSection } from "./CartSection";
 
 /** Opsi urutan daftar paket. */
@@ -126,6 +130,28 @@ export default function PackageClientSection() {
     [packages],
   );
 
+  /**
+   * Bagian "sering dibeli" hanya relevan saat menjelajah tanpa filter —
+   * saat mencari/menyaring, user fokus pada hasilnya.
+   */
+  const showPopular =
+    popularPackages.length > 0 && !search.trim() && !placeFilter;
+
+  /** ID paket populer — dikeluarkan dari daftar "paket lainnya". */
+  const popularIds = useMemo(
+    () => new Set(popularPackages.map((pkg) => pkg.id)),
+    [popularPackages],
+  );
+
+  /** Daftar paket lainnya: hasil filter dikurangi bagian populer. */
+  const otherPackages = useMemo(
+    () =>
+      showPopular
+        ? filteredPackages.filter((pkg) => !popularIds.has(pkg.id))
+        : filteredPackages,
+    [filteredPackages, popularIds, showPopular],
+  );
+
   const addToCart = (pkg: WebPackage) => {
     const quantity = quantities[pkg.id] ?? 1;
     setCart((prev) => {
@@ -191,65 +217,55 @@ export default function PackageClientSection() {
       ) : (
         <Row gutter={[24, 24]} className="mt-6!">
           <Col xs={24} lg={16}>
-            {/* Paket yang sering dibeli user (top 3). */}
-            {popularPackages.length > 0 && (
-              <Card
-                size="small"
-                className="mb-6!"
-                title={
-                  <span className="inline-flex items-center gap-2">
-                    <FireOutlined className="text-orange-500" />
-                    {t("package.frequentlyBought")}
-                  </span>
-                }
-              >
-                <div className="grid gap-3 sm:grid-cols-3">
+            {/* Paket sering dibeli — kartu bergaya sama dengan daftar utama. */}
+            {showPopular && (
+              <section className="mb-8!">
+                <h2 className="mb-3 inline-flex items-center gap-2 text-lg font-semibold">
+                  <FireOutlined className="text-orange-500" />
+                  {t("package.frequentlyBought")}
+                </h2>
+                <Row gutter={[16, 16]}>
                   {popularPackages.map((pkg) => (
-                    <div
-                      key={pkg.id}
-                      className="rounded-lg border border-black/10 p-3 dark:border-white/10"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium leading-tight">{pkg.name}</p>
-                        <Tag color="orange" className="m-0!">
-                          ×{pkg.timesPurchased}
-                        </Tag>
-                      </div>
-                      <p className="mt-1 text-sm text-primary">
-                        {formatRupiah(pkg.price)}
-                        <span className="text-xs font-normal text-foreground/60">
-                          {t("common.perPerson")}
-                        </span>
-                      </p>
-                      <Button
-                        size="small"
-                        type="primary"
-                        ghost
-                        block
-                        className="mt-2!"
-                        icon={<ShoppingCartOutlined />}
-                        onClick={() => addToCart(pkg)}
-                      >
-                        {t("cart.order")}
-                      </Button>
-                    </div>
+                    <Col xs={24} sm={12} lg={8} key={pkg.id}>
+                      <PackageCard
+                        pkg={pkg}
+                        quantity={1}
+                        onAdd={() => addToCart(pkg)}
+                      />
+                    </Col>
                   ))}
-                </div>
-              </Card>
+                </Row>
+              </section>
             )}
-            <PackageListSection
-              packages={filteredPackages}
-              quantities={quantities}
-              setQuantities={setQuantities}
-              onAdd={addToCart}
-            />
+            {/* Paket lainnya: di luar daftar sering dibeli. */}
+            {(!showPopular || otherPackages.length > 0) && (
+              <>
+                {showPopular && (
+                  <h2 className="mb-3 text-lg font-semibold">
+                    {t("package.otherPackages")}
+                  </h2>
+                )}
+                <PackageListSection
+                  packages={otherPackages}
+                  quantities={quantities}
+                  setQuantities={setQuantities}
+                  onAdd={addToCart}
+                />
+              </>
+            )}
           </Col>
           <Col xs={24} lg={8}>
             <CartSection
               cart={cart}
               total={total}
-              onRemove={(packageId) =>
-                setCart((prev) => prev.filter((c) => c.packageId !== packageId))
+              onChangeQuantity={(packageId, quantity) =>
+                setCart((prev) =>
+                  quantity <= 0
+                    ? prev.filter((c) => c.packageId !== packageId)
+                    : prev.map((c) =>
+                        c.packageId === packageId ? { ...c, quantity } : c,
+                      ),
+                )
               }
               onClear={() => setCart([])}
               onCheckout={goCheckout}

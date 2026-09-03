@@ -2,7 +2,7 @@
 
 import { useMounted } from "@/helpers/useMounted";
 import { Button, Card, Popconfirm } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatRupiah } from "@/utils/format";
 import type { CartItem } from "./PackageListSection";
@@ -10,13 +10,14 @@ import type { CartItem } from "./PackageListSection";
 export function CartSection({
   cart,
   total,
-  onRemove,
+  onChangeQuantity,
   onClear,
   onCheckout,
 }: {
   cart: CartItem[];
   total: number;
-  onRemove: (packageId: number) => void;
+  /** Set kuantitas item; 0 atau kurang → item dihapus dari keranjang. */
+  onChangeQuantity: (packageId: number, quantity: number) => void;
   onClear: () => void;
   onCheckout: () => void;
 }) {
@@ -32,22 +33,47 @@ export function CartSection({
         <>
           <div className="divide-y divide-black/5 dark:divide-white/10">
             {cart.map((item) => (
-              <div key={item.packageId} className="py-3 flex items-center justify-between gap-2">
-                <div>
-                  <p className="font-medium text-sm">{item.name}</p>
+              <div
+                key={item.packageId}
+                className="flex items-center justify-between gap-2 py-3"
+              >
+                <div className="min-w-0">
+                  <p
+                    className="truncate text-sm font-medium"
+                    title={item.name}
+                  >
+                    {item.name}
+                  </p>
                   <p className="text-xs text-foreground/60">
                     {formatRupiah(item.price)} × {item.quantity} ={" "}
                     {formatRupiah(item.price * item.quantity)}
                   </p>
                 </div>
-                <Button
-                  size="small"
-                  danger
-                  type="text"
-                  icon={<DeleteOutlined />}
-                  aria-label={t("common.delete")}
-                  onClick={() => onRemove(item.packageId)}
-                />
+                {/* Stepper +/-: kurang dari 1 menghapus item dari keranjang. */}
+                <div className="flex shrink-0 items-center">
+                  <Button
+                    size="small"
+                    icon={<MinusOutlined />}
+                    aria-label={t("cart.decrease")}
+                    onClick={() =>
+                      onChangeQuantity(item.packageId, item.quantity - 1)
+                    }
+                  />
+                  <span
+                    className="w-8 text-center text-sm font-medium"
+                    aria-label={t("cart.quantity")}
+                  >
+                    {item.quantity}
+                  </span>
+                  <Button
+                    size="small"
+                    icon={<PlusOutlined />}
+                    aria-label={t("cart.increase")}
+                    onClick={() =>
+                      onChangeQuantity(item.packageId, item.quantity + 1)
+                    }
+                  />
+                </div>
               </div>
             ))}
           </div>

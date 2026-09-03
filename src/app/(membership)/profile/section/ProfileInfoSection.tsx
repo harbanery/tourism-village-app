@@ -5,15 +5,12 @@ import { Avatar, Badge, Button, Card, Tag } from "antd";
 import {
   CheckCircleOutlined,
   LeftOutlined,
-  SettingOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import type { User } from "@/models";
 import { formatDate } from "@/utils/format";
-import { SettingsSection } from "./SettingsSection";
 import type { ProfileSettings } from "../page";
 
 export function ProfileInfoSection({
@@ -26,18 +23,17 @@ export function ProfileInfoSection({
   const { t, locale } = useT();
   const router = useRouter();
   const mounted = useMounted();
-  const [settingsOpen, setSettingsOpen] = useState(false);
   if (!mounted) return null;
 
   return (
-    <Card>
-      {/* Kembali ke beranda — dipindah ke bagian atas kartu kiri. */}
+    <Card className="flex flex-col!">
+      {/* Kembali ke beranda — di bagian atas kartu kiri. */}
       <Button
         size="small"
         type="text"
         icon={<LeftOutlined />}
         onClick={() => router.push("/")}
-        className="mb-4! inline-flex! px-1! -ml-1!"
+        className="mb-4! self-start! px-1! -ml-1!"
       >
         {t("common.backToHome")}
       </Button>
@@ -79,39 +75,32 @@ export function ProfileInfoSection({
         )}
       </div>
 
-      <div className="mt-6 divide-y divide-black/5 dark:divide-white/10">
+      <div className="mt-6 flex-1 divide-y divide-black/5 overflow-y-auto dark:divide-white/10">
         {[
           [t("common.name"), user?.name],
           [t("common.email"), user?.email],
           [t("common.phone"), user?.phone ?? "-"],
-          [t("profile.gender"), user?.gender ? t(`profile.${user.gender}`) : "-"],
-          [t("profile.birthDate"), user?.birthDate ? formatDate(user.birthDate, locale) : "-"],
+          [
+            t("profile.gender"),
+            user?.gender ? t(`profile.${user.gender}`) : "-",
+          ],
+          [
+            t("profile.birthDate"),
+            user?.birthDate ? formatDate(user.birthDate, locale) : "-",
+          ],
           [t("profile.address"), user?.address ?? "-"],
         ].map(([label, value]) => (
-          <div key={String(label)} className="py-3 flex justify-between gap-4 text-sm">
-            <span className="text-foreground/60">{label}</span>
-            <span className="font-medium text-right">{value}</span>
+          <div
+            key={String(label)}
+            className="py-3 flex justify-between gap-4 text-sm"
+          >
+            <span className="shrink-0 text-foreground/60">{label}</span>
+            <span className="min-w-0 break-words text-right font-medium">
+              {value}
+            </span>
           </div>
         ))}
       </div>
-
-      <Button
-        type="primary"
-        ghost
-        block
-        icon={<SettingOutlined />}
-        className="mt-6!"
-        onClick={() => setSettingsOpen(true)}
-      >
-        {t("settings.title")}
-      </Button>
-
-      <SettingsSection
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        user={user}
-        settings={settings}
-      />
     </Card>
   );
 }

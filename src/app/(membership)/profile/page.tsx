@@ -1,8 +1,7 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/server/auth";
 import { getUserOrders } from "@/services/orderService";
-import { ProfileInfoSection } from "./section/ProfileInfoSection";
-import { OrderHistorySection } from "./section/OrderHistorySection";
+import ProfileClientSection from "./section/ProfileClientSection";
 import type { User } from "@/models";
 
 /** Preferensi & status verifikasi akun (dipakai panel pengaturan). */
@@ -48,14 +47,5 @@ export default async function ProfilePage() {
     notifEmail: user.notifEmail,
   };
 
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 lg:grid-cols-[320px_1fr] items-start">
-      {/* Kartu kiri: tinggi mengikuti konten (tidak full) dan sticky
-          sehingga tetap terlihat saat halaman riwayat di-scroll. */}
-      <div className="lg:sticky lg:top-20">
-        <ProfileInfoSection user={profile} settings={settings} />
-      </div>
-      <OrderHistorySection orders={orders} />
-    </div>
-  );
+  return <ProfileClientSection user={profile} settings={settings} orders={orders} />;
 }

@@ -175,6 +175,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "cart.empty": "Keranjang kosong",
     "cart.order": "Pesan",
     "cart.quantity": "Jumlah",
+    "cart.increase": "Tambah jumlah",
+    "cart.decrease": "Kurangi jumlah",
 
     "checkout.title": "Checkout",
     "checkout.scheduleDate": "Tanggal Berangkat",
@@ -195,6 +197,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "package.sort.priceDesc": "Harga Termahal",
     "package.frequentlyBought": "Sering Dibeli",
     "package.popularTag": "Populer",
+    "package.otherPackages": "Paket Lainnya",
     "package.noResults": "Paket tidak ditemukan",
 
     "payment.title": "Pembayaran",
@@ -587,6 +590,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "cart.empty": "Cart is empty",
     "cart.order": "Order",
     "cart.quantity": "Quantity",
+    "cart.increase": "Increase quantity",
+    "cart.decrease": "Decrease quantity",
 
     "checkout.title": "Checkout",
     "checkout.scheduleDate": "Departure Date",
@@ -607,6 +612,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "package.sort.priceDesc": "Price: High to Low",
     "package.frequentlyBought": "Frequently Bought",
     "package.popularTag": "Popular",
+    "package.otherPackages": "Other Packages",
     "package.noResults": "No packages found",
 
     "payment.title": "Payment",

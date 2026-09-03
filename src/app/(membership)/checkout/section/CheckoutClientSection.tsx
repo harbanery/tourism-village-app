@@ -221,19 +221,18 @@ export default function CheckoutClientSection({
                         <Radio.Button value="yes">{t("common.yes")}</Radio.Button>
                       </Radio.Group>
                     </Form.Item>
-                    <Form.Item
-                      label={t("checkout.homestayDays")}
-                      name="homestayTime"
-                      initialValue={1}
-                      rules={[{ required: true }]}
-                      className="mb-0!"
-                    >
-                      <InputNumber
-                        min={1}
-                        className="w-full!"
-                        disabled={homestay !== "yes"}
-                      />
-                    </Form.Item>
+                    {/* Jumlah Hari hanya tampil bila menginap. */}
+                    {homestay === "yes" && (
+                      <Form.Item
+                        label={t("checkout.homestayDays")}
+                        name="homestayTime"
+                        initialValue={1}
+                        rules={[{ required: true }]}
+                        className="mb-0!"
+                      >
+                        <InputNumber min={1} className="w-full!" />
+                      </Form.Item>
+                    )}
                     {returnDate && (
                       <p className="sm:col-span-2 text-sm text-foreground/60">
                         {t("checkout.returnDate")}:{" "}

@@ -54,7 +54,7 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
   const { message } = App.useApp();
   if (!mounted) return null;
 
-  /** Unduh bukti pembayaran (invoice Midtrans + data order). */
+  /** Unduh bukti pembayaran (invoice Midtrans + data order) sebagai PDF. */
   const handleDownloadInvoice = async (orderId: number) => {
     try {
       const res = await fetch(`/api/web/orders/${orderId}/invoice`);
@@ -65,109 +65,94 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
       }
       const data = result.data;
 
-      // Rakit invoice HTML sederhana (self-contained, siap print ke PDF).
-      const rows = data.items
-        .map(
-          (item: {
-            id: number;
-            packageName: string;
-            quantity: number;
-            price: number;
-          }) => `
-            <tr>
-              <td>${item.packageName}</td>
-              <td style="text-align:center">${item.quantity}</td>
-              <td style="text-align:right">${formatRupiah(item.price)}</td>
-            </tr>`,
-        )
-        .join("");
+      // jsPDF di-import dinamis agar tidak membebani bundle utama.
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF();
 
-      // Bagian kondisional dirakit terpisah agar template utama datar.
-      const statusDetail = data.midtrans
-        ? " &middot; " +
-          String(data.midtrans.paymentType ?? "qris").toUpperCase() +
-          " (Midtrans: " +
-          data.midtrans.transactionStatus +
-          ")"
-        : "";
-      const homestayDetail = data.homestay
-        ? " &mdash; " +
-          t("checkout.homestay") +
-          ": " +
-          t("common.yes") +
-          " (" +
-          data.homestayTime +
-          " " +
-          t("checkout.homestayDays") +
-          ", " +
-          t("checkout.returnDate") +
-          ": " +
-          formatDate(
+      // Kop invoice.
+      doc.setFontSize(16);
+      doc.setTextColor(13, 122, 95);
+      doc.text("Desaku Wisataku", 14, 18);
+      doc.setFontSize(9);
+      doc.setTextColor(90);
+      doc.text(
+        locale === "id"
+          ? "Bukti Pembayaran (Invoice Midtrans)"
+          : "Payment Receipt (Midtrans Invoice)",
+        14,
+        24,
+      );
+      doc.setDrawColor(13, 122, 95);
+      doc.line(14, 27, 196, 27);
+
+      // Meta pesanan.
+      doc.setFontSize(10);
+      doc.setTextColor(30);
+      let y = 34;
+      const metaLines: string[] = [
+        `Order: #${data.orderId}  |  Midtrans: ${data.midtransOrderId}`,
+        `Status: ${data.paymentStatus}${
+          data.midtrans
+            ? `  |  ${String(data.midtrans.paymentType ?? "qris").toUpperCase()} (Midtrans: ${data.midtrans.transactionStatus})`
+            : ""
+        }`,
+        `${locale === "id" ? "Pemesan" : "Customer"}: ${data.customer.name} (${data.customer.email})`,
+        `${t("profile.orderDate")}: ${formatDate(data.dateOrder, locale, true)}`,
+        `${t("profile.departureDate")}: ${formatDate(data.dateSchedule, locale)}`,
+      ];
+      if (data.homestay) {
+        metaLines.push(
+          `${t("checkout.homestay")}: ${t("common.yes")} (${data.homestayTime} ${t("checkout.homestayDays")})`,
+        );
+        metaLines.push(
+          `${t("checkout.returnDate")}: ${formatDate(
             addDays(data.dateSchedule, data.homestayTime ?? 1),
             locale,
-          ) +
-          ")"
-        : "";
-      const paidLine = data.paidAt
-        ? "<p><b>" +
-          t("profile.paidAt") +
-          ":</b> " +
-          formatDate(data.paidAt, locale, true) +
-          "</p>"
-        : "";
+          )}`,
+        );
+      }
+      if (data.paidAt) {
+        metaLines.push(
+          `${t("profile.paidAt")}: ${formatDate(data.paidAt, locale, true)}`,
+        );
+      }
+      for (const line of metaLines) {
+        doc.text(line, 14, y);
+        y += 6;
+      }
 
-      const html = `<!DOCTYPE html>
-<html lang="${locale}">
-<head>
-  <meta charset="utf-8" />
-  <title>Invoice ${data.midtransOrderId}</title>
-  <style>
-    body { font-family: Arial, sans-serif; color: #1f2933; margin: 32px; }
-    h1 { color: #0d7a5f; margin-bottom: 0; }
-    .muted { color: #52606d; font-size: 13px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { border-bottom: 1px solid #e5e9ec; padding: 8px 6px; font-size: 14px; }
-    th { text-align: left; background: #f0faf7; }
-    .total td { font-weight: bold; border-top: 2px solid #0d7a5f; }
-    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #f0faf7; color: #0d7a5f; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <h1>Desaku Wisataku</h1>
-  <p class="muted">Bukti Pembayaran / Payment Receipt</p>
-  <hr />
-  <p><b>Order:</b> #${data.orderId} &middot; Midtrans: ${data.midtransOrderId}</p>
-  <p><b>Status:</b> <span class="badge">${data.paymentStatus}</span>${statusDetail}</p>
-  <p><b>Pemesan:</b> ${data.customer.name} (${data.customer.email})</p>
-  <p><b>${t("profile.orderDate")}:</b> ${formatDate(data.dateOrder, locale, true)}</p>
-  <p><b>${t("profile.departureDate")}:</b> ${formatDate(data.dateSchedule, locale)}${homestayDetail}</p>
-  ${paidLine}
-  <table>
-    <thead>
-      <tr><th>${t("cart.package")}</th><th style="text-align:center">${t("cart.qty")}</th><th style="text-align:right">${t("cart.price")}</th></tr>
-    </thead>
-    <tbody>
-      ${rows}
-      <tr class="total">
-        <td colspan="2">${t("cart.totalPrice")}</td>
-        <td style="text-align:right">${formatRupiah(data.totalPrice)}</td>
-      </tr>
-    </tbody>
-  </table>
-  <p class="muted" style="margin-top:24px">Powered by Midtrans QRIS</p>
-</body>
-</html>`;
+      // Tabel item.
+      y += 4;
+      doc.setFillColor(240, 250, 247);
+      doc.rect(14, y - 4, 182, 8, "F");
+      doc.setFontSize(9);
+      doc.text(t("cart.package"), 16, y + 1.5);
+      doc.text(t("cart.qty"), 130, y + 1.5, { align: "center" });
+      doc.text(t("cart.price"), 194, y + 1.5, { align: "right" });
+      y += 10;
+      for (const item of data.items as {
+        id: number;
+        packageName: string;
+        quantity: number;
+        price: number;
+      }[]) {
+        doc.text(String(item.packageName), 16, y);
+        doc.text(String(item.quantity), 130, y, { align: "center" });
+        doc.text(formatRupiah(item.price), 194, y, { align: "right" });
+        y += 6;
+      }
+      doc.setDrawColor(13, 122, 95);
+      doc.line(14, y - 2, 196, y - 2);
+      doc.setFontSize(11);
+      doc.text(t("cart.totalPrice"), 16, y + 4);
+      doc.setTextColor(13, 122, 95);
+      doc.text(formatRupiah(data.totalPrice), 194, y + 4, { align: "right" });
 
-      // Unduh sebagai file HTML (buka di browser → print/save PDF).
-      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `invoice-${data.midtransOrderId}.html`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(url);
+      doc.setFontSize(8);
+      doc.setTextColor(120);
+      doc.text("Powered by Midtrans QRIS", 14, 285);
+
+      doc.save(`invoice-${data.midtransOrderId}.pdf`);
     } catch {
       message.error(t("notif.error"));
     }
@@ -175,7 +160,6 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-xl font-bold">{t("profile.orderHistory")}</h2>
       {orders.length === 0 ? (
         <Card className="mt-6!">
           <p className="text-foreground/60">{t("profile.noOrders")}</p>
@@ -232,18 +216,24 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                         {t("checkout.homestay")}:
                       </span>{" "}
                       {order.homestay === "yes"
-                        ? `${t("common.yes")} — ${order.homestayTime} ${t(
-                            "checkout.homestayDays",
-                          )} (${t("checkout.returnDate")}: ${formatDate(
-                            addDays(
-                              order.dateSchedule,
-                              order.homestayTime ?? 1,
-                            ),
-                            locale,
-                          )})`
+                        ? `${t("common.yes")} — ${order.homestayTime} ${t("checkout.homestayDays")}`
                         : t("common.no")}
                     </span>
                   </p>
+                  {order.homestay === "yes" && (
+                    <p className="flex items-center gap-2 text-foreground/70">
+                      <CalendarOutlined className="text-foreground/40" />
+                      <span>
+                        <span className="text-foreground/50">
+                          {t("checkout.returnDate")}:
+                        </span>{" "}
+                        {formatDate(
+                          addDays(order.dateSchedule, order.homestayTime ?? 1),
+                          locale,
+                        )}
+                      </span>
+                    </p>
+                  )}
                 </div>
 
                 {/* List wisata: paket, kuantitas, harga — rapi per baris. */}

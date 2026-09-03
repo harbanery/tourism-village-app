@@ -6,10 +6,10 @@ import {
   App,
   Avatar,
   Button,
+  Card,
   DatePicker,
   Form,
   Input,
-  Modal,
   Select,
   Switch,
   Tabs,
@@ -35,8 +35,8 @@ interface EmailFormValues {
 }
 
 /**
- * Switch notifikasi — komponen terpisah agar state-nya di-reset tiap kali
- * modal dibuka (Modal memakai destroyOnHidden) tanpa setState di effect.
+ * Switch notifikasi — komponen terpisah agar state-nya bersih tanpa
+ * perlu setState di effect.
  */
 function NotifSwitches({ settings }: { settings: ProfileSettings }) {
   const { t } = useT();
@@ -110,19 +110,14 @@ function NotifSwitches({ settings }: { settings: ProfileSettings }) {
 }
 
 /**
- * Panel pengaturan akun: ubah profil, ubah avatar, ganti email (via OTP),
- * dan preferensi notifikasi (web notif + email + cron mendatang).
- * Modal memakai destroyOnHidden sehingga seluruh isi (form + switch)
- * selalu segar setiap dibuka — tanpa perlu sinkronisasi via effect.
+ * Section pengaturan akun (menggantikan section riwayat belanja, bukan
+ * modal): ubah profil, ubah avatar, ganti email (via OTP), dan preferensi
+ * notifikasi (web notif + email + cron mendatang).
  */
 export function SettingsSection({
-  open,
-  onClose,
   user,
   settings,
 }: {
-  open: boolean;
-  onClose: () => void;
   user: User | null;
   settings: ProfileSettings;
 }) {
@@ -162,7 +157,6 @@ export function SettingsSection({
         return;
       }
       message.success(t("common.saved"));
-      onClose();
       router.refresh();
     } catch {
       message.error(t("notif.error"));
@@ -187,7 +181,6 @@ export function SettingsSection({
       // OTP dikirim ke email baru → lanjut ke halaman OTP.
       message.success(t("settings.email.otpSent"));
       const dev = result.data?.devCode ? `&dev=${result.data.devCode}` : "";
-      onClose();
       router.push(`/otp?purpose=EMAIL_CHANGE${dev}`);
     } catch {
       message.error(t("notif.error"));
@@ -200,14 +193,7 @@ export function SettingsSection({
     value ? t(`profile.${value}`) : undefined;
 
   return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      footer={null}
-      title={t("settings.title")}
-      width={520}
-      destroyOnHidden
-    >
+    <Card title={t("settings.title")} className="mt-6!">
       <Tabs
         activeKey={tab}
         onChange={setTab}
@@ -221,7 +207,7 @@ export function SettingsSection({
                 layout="vertical"
                 onFinish={handleSaveProfile}
                 disabled={savingProfile}
-                className="mt-2!"
+                className="mt-2! max-w-md!"
                 initialValues={{
                   name: user?.name,
                   phone: user?.phone ?? undefined,
@@ -258,7 +244,7 @@ export function SettingsSection({
                 <Form.Item name="address" label={t("profile.address")}>
                   <Input.TextArea rows={2} />
                 </Form.Item>
-                <Button type="primary" htmlType="submit" loading={savingProfile} block>
+                <Button type="primary" htmlType="submit" loading={savingProfile}>
                   {t("common.save")}
                 </Button>
               </Form>
@@ -291,7 +277,6 @@ export function SettingsSection({
                       }
                       onSuccess?.(result);
                       message.success(t("common.saved"));
-                      onClose();
                       router.refresh();
                     } catch (err) {
                       onError?.(err as Error);
@@ -318,7 +303,7 @@ export function SettingsSection({
             key: "email",
             label: t("settings.tab.email"),
             children: (
-              <div className="mt-2">
+              <div className="mt-2 max-w-md">
                 <p className="text-sm text-foreground/60">
                   {t("settings.email.current")}: <b>{user?.email}</b>
                 </p>
@@ -361,7 +346,6 @@ export function SettingsSection({
                     type="primary"
                     htmlType="submit"
                     loading={requestingEmail}
-                    block
                   >
                     {t("settings.email.sendOtp")}
                   </Button>
@@ -379,6 +363,6 @@ export function SettingsSection({
           },
         ]}
       />
-    </Modal>
+    </Card>
   );
 }

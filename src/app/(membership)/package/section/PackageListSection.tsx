@@ -25,6 +25,83 @@ export interface CartItem {
   quantity: number;
 }
 
+/**
+ * Kartu paket — satu gaya untuk semua daftar (paket utama maupun
+ * "sering dibeli"). Judul, badge, dan lokasi dipotong (truncate) agar
+ * nama panjang tidak merusak tata letak kartu.
+ */
+export function PackageCard({
+  pkg,
+  quantity,
+  onQuantity,
+  onAdd,
+}: {
+  pkg: WebPackage;
+  quantity: number;
+  /** Tanpa onQuantity → kartu tanpa stepper (mis. bagian sering dibeli). */
+  onQuantity?: (value: number) => void;
+  onAdd: () => void;
+}) {
+  const { t } = useT();
+
+  return (
+    <Card
+      title={
+        <span className="flex w-full min-w-0 items-center gap-2">
+          <span className="min-w-0 flex-1 truncate font-medium" title={pkg.name}>
+            {pkg.name}
+          </span>
+          {pkg.timesPurchased > 0 && (
+            <Tag
+              color="orange"
+              icon={<FireOutlined />}
+              className="m-0! shrink-0!"
+            >
+              {t("package.popularTag")}
+            </Tag>
+          )}
+        </span>
+      }
+      extra={
+        <span
+          className="block max-w-[10rem] truncate text-xs text-foreground/50"
+          title={pkg.placeName ?? undefined}
+        >
+          {pkg.placeName ?? "-"}
+        </span>
+      }
+    >
+      <div className="text-2xl font-bold text-primary">
+        {formatRupiah(pkg.price)}
+        <span className="text-sm font-normal text-foreground/60">
+          {" "}
+          {t("common.perPerson")}
+        </span>
+      </div>
+      <ul className="mt-3 space-y-1">
+        {pkg.facilities.filter(Boolean).map((f) => (
+          <li key={f} className="truncate text-sm text-foreground/80" title={f}>
+            ✓ {f}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 flex items-center gap-2">
+        {onQuantity && (
+          <InputNumber
+            min={1}
+            value={quantity}
+            onChange={(value) => onQuantity(value ?? 1)}
+            aria-label={t("cart.quantity")}
+          />
+        )}
+        <Button type="primary" icon={<ShoppingCartOutlined />} onClick={onAdd}>
+          {t("cart.order")}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 export function PackageListSection({
   packages,
   quantities,
@@ -52,50 +129,14 @@ export function PackageListSection({
     <Row gutter={[16, 16]}>
       {packages.map((pkg) => (
         <Col xs={24} sm={12} key={pkg.id}>
-          <Card
-            title={
-              <span className="inline-flex items-center gap-2">
-                {pkg.name}
-                {(pkg.timesPurchased ?? 0) > 0 && (
-                  <Tag color="orange" icon={<FireOutlined />} className="m-0!">
-                    {t("package.popularTag")}
-                  </Tag>
-                )}
-              </span>
+          <PackageCard
+            pkg={pkg}
+            quantity={quantities[pkg.id] ?? 1}
+            onQuantity={(value) =>
+              setQuantities((prev) => ({ ...prev, [pkg.id]: value }))
             }
-            extra={
-              <span className="text-xs text-foreground/50">{pkg.placeName ?? "-"}</span>
-            }
-          >
-            <div className="text-2xl font-bold text-primary">
-              {formatRupiah(pkg.price)}
-              <span className="text-sm font-normal text-foreground/60">
-                {t("common.perPerson")}
-              </span>
-            </div>
-            <ul className="mt-3 space-y-1">
-              {pkg.facilities.filter(Boolean).map((f) => (
-                <li key={f} className="text-sm text-foreground/80">✓ {f}</li>
-              ))}
-            </ul>
-            <div className="mt-4 flex items-center gap-2">
-              <InputNumber
-                min={1}
-                value={quantities[pkg.id] ?? 1}
-                onChange={(value) =>
-                  setQuantities((prev) => ({ ...prev, [pkg.id]: value ?? 1 }))
-                }
-                aria-label={t("cart.quantity")}
-              />
-              <Button
-                type="primary"
-                icon={<ShoppingCartOutlined />}
-                onClick={() => onAdd(pkg)}
-              >
-                {t("cart.order")}
-              </Button>
-            </div>
-          </Card>
+            onAdd={() => onAdd(pkg)}
+          />
         </Col>
       ))}
     </Row>
