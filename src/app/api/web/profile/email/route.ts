@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/server/db";
-import { getCurrentUser } from "@/server/auth";
+import { getCurrentUser, verifyPassword } from "@/server/auth";
 import { sendEmail, isEmailConfigured } from "@/server/email";
 import { createOtp } from "@/server/otp";
 import { buildOtpEmail } from "@/server/otpEmail";
@@ -8,6 +8,7 @@ import { NODE_ENV } from "@/config/variables";
 
 /**
  * POST /api/web/profile/email — minta ganti email (wajib login).
+ * Wajib menyertakan password aktif (keamanan: memastikan pemilik akun).
  * Email baru disimpan sementara (pendingEmail) dan OTP dikirim ke email
  * BARU tersebut; email aktif berubah hanya setelah OTP diverifikasi.
  */
@@ -21,7 +22,22 @@ export async function POST(request: NextRequest) {
   }
   try {
     const body = await request.json();
-    const { email } = body as Record<string, unknown>;
+    const { email, password } = body as Record<string, unknown>;
+
+    // Verifikasi password: hanya pemilik akun yang boleh mengajukan ganti email.
+    if (typeof password !== "string" || !password) {
+      return NextResponse.json(
+        { success: false, error: "PASSWORD_REQUIRED" },
+        { status: 400 },
+      );
+    }
+    const passwordValid = await verifyPassword(password, user.password);
+    if (!passwordValid) {
+      return NextResponse.json(
+        { success: false, error: "INVALID_PASSWORD" },
+        { status: 403 },
+      );
+    }
 
     if (typeof email !== "string" || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       return NextResponse.json(

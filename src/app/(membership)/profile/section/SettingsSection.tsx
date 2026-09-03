@@ -32,6 +32,7 @@ interface ProfileFormValues {
 
 interface EmailFormValues {
   email: string;
+  password: string;
 }
 
 /**
@@ -173,10 +174,20 @@ export function SettingsSection({
       const res = await fetch("/api/web/profile/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: values.email }),
+        body: JSON.stringify({ email: values.email, password: values.password }),
       });
       const result = await res.json();
       if (!result.success) {
+        // Password salah → tampilkan error pada field password-nya langsung.
+        if (result.error === "INVALID_PASSWORD" || result.error === "PASSWORD_REQUIRED") {
+          emailForm.setFields([
+            {
+              name: "password",
+              errors: [t("settings.email.wrongPassword")],
+            },
+          ]);
+          return;
+        }
         message.error(result.error || t("notif.error"));
         return;
       }
@@ -344,6 +355,18 @@ export function SettingsSection({
                     ]}
                   >
                     <Input placeholder="email-baru@example.com" />
+                  </Form.Item>
+                  {/* Password aktif: keamanan — pastikan pengajuan datang
+                      dari pemilik akun (bukan orang lain di sesi terbuka). */}
+                  <Form.Item
+                    name="password"
+                    label={t("settings.email.password")}
+                    rules={[{ required: true }]}
+                  >
+                    <Input.Password
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                    />
                   </Form.Item>
                   <Button
                     type="primary"

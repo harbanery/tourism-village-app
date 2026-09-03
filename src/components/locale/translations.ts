@@ -181,6 +181,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "checkout.title": "Checkout",
     "checkout.scheduleDate": "Tanggal Berangkat",
+    "checkout.minDateError": "Tanggal berangkat minimal 2 hari setelah hari ini",
     "checkout.returnDate": "Tanggal Pulang",
     "checkout.homestay": "Menginap",
     "checkout.homestayDays": "Jumlah Hari",
@@ -202,6 +203,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "package.noResults": "Paket tidak ditemukan",
 
     "payment.title": "Pembayaran",
+    "payment.countdown.deadline": "Batas Pembayaran",
+    "payment.countdown.timeout": "Batas Waktu",
     "payment.unavailable":
       "Pembayaran belum tersedia — hubungi admin atau coba lagi nanti.",
     "payment.pay": "Bayar Sekarang",
@@ -224,6 +227,12 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "notif.orderCreated": "Pesanan dibuat — selesaikan pembayaran",
     "notif.orderFailed": "Gagal membuat pesanan",
+    "notif.orderLimitTitle": "Limit pesanan tercapai",
+    "notif.orderLimitReached":
+      "Anda sudah membuat 5 pesanan dalam 24 jam terakhir. Silakan tunggu 24 jam sebelum memesan lagi.",
+    "notif.reviewCooldownTitle": "Ulasan terkirim",
+    "notif.reviewCooldown":
+      "Anda sudah memberikan ulasan dalam 24 jam terakhir — tunggu 24 jam untuk bisa mengirim ulasan lagi.",
     "notif.reviewSubmitted": "Ulasan terkirim — menunggu moderasi admin",
 
     "success.title": "Pesanan Berhasil!",
@@ -233,6 +242,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     "success.review.title": "Berikan Ulasan",
     "success.review.comment": "Komentar",
     "success.review.submit": "Kirim Ulasan",
+    "success.review.thanks.title": "Terima kasih atas ulasan Anda!",
+    "success.review.thanks.message":
+      "Terima kasih sudah memberikan feedback — ulasan Anda membantu desa kami menjadi lebih baik. Anda bisa memberi ulasan lagi setelah 24 jam.",
+    "success.review.cooldownTitle": "Anda sudah memberikan ulasan",
+    "success.review.cooldownMessage":
+      "Ulasan hanya bisa dikirim sekali setiap 24 jam. Silakan coba lagi dalam:",
 
     "auth.login.title": "Masuk",
     "auth.login.subtitle": "Masuk untuk memesan paket wisata",
@@ -325,6 +340,8 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Gambar persegi disarankan, format umum (JPG/PNG/WebP), maks 2MB.",
     "settings.email.current": "Email aktif",
     "settings.email.new": "Email baru",
+    "settings.email.password": "Password aktif",
+    "settings.email.wrongPassword": "Password salah",
     "settings.email.same": "Email harus berbeda dengan email aktif",
     "settings.email.sendOtp": "Kirim Kode OTP",
     "settings.email.otpSent": "Kode OTP dikirim ke email baru",
@@ -598,6 +615,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "checkout.title": "Checkout",
     "checkout.scheduleDate": "Departure Date",
+    "checkout.minDateError":
+      "Departure date must be at least 2 days after today",
     "checkout.returnDate": "Return Date",
     "checkout.homestay": "Homestay",
     "checkout.homestayDays": "Number of Days",
@@ -619,6 +638,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "package.noResults": "No packages found",
 
     "payment.title": "Payment",
+    "payment.countdown.deadline": "Payment Deadline",
+    "payment.countdown.timeout": "Time Left",
     "payment.unavailable":
       "Payment is not available yet — please contact the admin or try again later.",
     "payment.pay": "Pay Now",
@@ -641,6 +662,12 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "notif.orderCreated": "Order created — complete the payment",
     "notif.orderFailed": "Failed to create order",
+    "notif.orderLimitTitle": "Order limit reached",
+    "notif.orderLimitReached":
+      "You have created 5 orders in the last 24 hours. Please wait 24 hours before ordering again.",
+    "notif.reviewCooldownTitle": "Review already submitted",
+    "notif.reviewCooldown":
+      "You already submitted a review within the last 24 hours — wait 24 hours before submitting another one.",
     "notif.reviewSubmitted": "Review submitted — awaiting admin moderation",
 
     "success.title": "Order Successful!",
@@ -650,6 +677,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     "success.review.title": "Give a Review",
     "success.review.comment": "Comment",
     "success.review.submit": "Submit Review",
+    "success.review.thanks.title": "Thanks for your review!",
+    "success.review.thanks.message":
+      "Thank you for your feedback — your review helps our village improve. You can review again after 24 hours.",
+    "success.review.cooldownTitle": "You already submitted a review",
+    "success.review.cooldownMessage":
+      "Reviews can only be submitted once every 24 hours. Please try again in:",
 
     "auth.login.title": "Login",
     "auth.login.subtitle": "Log in to order tour packages",
@@ -741,6 +774,8 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Square image recommended, common formats (JPG/PNG/WebP), max 2MB.",
     "settings.email.current": "Current email",
     "settings.email.new": "New email",
+    "settings.email.password": "Current password",
+    "settings.email.wrongPassword": "Incorrect password",
     "settings.email.same": "Email must differ from the current one",
     "settings.email.sendOtp": "Send OTP Code",
     "settings.email.otpSent": "OTP code sent to the new email",

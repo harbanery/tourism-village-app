@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import { Layout } from "antd";
+import { useState } from "react";
 import SiderLayout from "./sider";
 import HeaderLayout from "./header";
 import ContentLayout from "./content";
 import Footer from "./footer";
 
-/** Shell panel admin: sider + header + konten + footer, sesi via context. */
+/**
+ * Shell panel admin (pola admin-portfolio): sider + header + konten +
+ * footer, sesi via context. Struktur & class mengikuti BaseLayout
+ * admin-portfolio (hide-scrollbar, tinggi flex, footer terdorong bawah).
+ */
 const AdminShell = ({ children }: { children: React.ReactNode }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <Layout style={{ minHeight: "100vh" }} hasSider>
+    <Layout className="hide-scrollbar" style={{ minHeight: "100vh" }} hasSider>
       <SiderLayout
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
@@ -23,12 +27,16 @@ const AdminShell = ({ children }: { children: React.ReactNode }) => {
           display: "flex",
           flexDirection: "column",
           flex: 1,
-          minWidth: 0,
+          height: "100%",
+          minHeight: "inherit",
+          justifyContent: "space-between",
           position: "relative",
+          minWidth: 0,
         }}
       >
         <HeaderLayout onMobileMenuClick={() => setMobileOpen(true)} />
         <ContentLayout>{children}</ContentLayout>
+
         <Footer />
       </Layout>
     </Layout>

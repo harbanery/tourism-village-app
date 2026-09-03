@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Dayjs } from "dayjs";
 import {
   App,
   Button,
@@ -17,6 +16,7 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { readCart, clearCart } from "@/helpers/cart";
 import { formatRupiah } from "@/utils/format";
+import dayjs, { type Dayjs } from "dayjs";
 
 /** Paket aktif dari /api/web/packages (sesuai data admin). */
 interface WebPackage {
@@ -38,6 +38,11 @@ interface CheckoutUser {
   name: string;
   email: string;
   phone: string | null;
+}
+
+/** Tanggal berangkat paling cepat: 2 hari setelah hari ini (H+2). */
+function minDepartureDate(): Dayjs {
+  return dayjs().add(2, "day").startOf("day");
 }
 
 /**
@@ -134,7 +139,19 @@ export default function CheckoutClientSection({
         }),
       });
       const json = await res.json();
-      if (!json.success) throw new Error(json.error);
+      if (!json.success) {
+        // Error bisnis dari server → pesan spesifik sesuai kode error.
+        if (json.error === "ORDER_LIMIT_REACHED") {
+          notification.warning({
+            title: t("notif.orderLimitTitle"),
+            description: t("notif.orderLimitReached"),
+            placement: "bottomRight",
+          });
+        } else if (json.error === "SCHEDULE_TOO_SOON") {
+          message.warning(t("checkout.minDateError"));
+        }
+        throw new Error(json.error);
+      }
 
       notification.success({
         title: t("notif.success"),
@@ -184,9 +201,28 @@ export default function CheckoutClientSection({
             <Form.Item
               label={t("checkout.scheduleDate")}
               name="dateSchedule"
-              rules={[{ required: true }]}
+              rules={[
+                { required: true },
+                {
+                  // Minimal H+2: hanya tanggal 2 hari ke depan ke atas yang valid.
+                  validator(_, value: Dayjs | undefined) {
+                    if (!value) return Promise.resolve();
+                    if (value.isBefore(minDepartureDate(), "day")) {
+                      return Promise.reject(
+                        new Error(t("checkout.minDateError")),
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
             >
-              <DatePicker className="w-full!" />
+              <DatePicker
+                className="w-full!"
+                disabledDate={(current) =>
+                  current.isBefore(minDepartureDate(), "day")
+                }
+              />
             </Form.Item>
             {/* Menginap dan Jumlah Hari tampil bersebelahan. */}
             <Form.Item

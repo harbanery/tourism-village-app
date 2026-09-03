@@ -6,7 +6,9 @@ import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
 import { Alert, App, Button, Card, Result, Spin, Tag } from "antd";
 import {
+  CalendarOutlined,
   CheckCircleFilled,
+  ClockCircleOutlined,
   LoadingOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
@@ -44,6 +46,83 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
 
 /** Interval auto-poll status (ms) selama menampilkan QR. */
 const POLL_INTERVAL_MS = 10_000;
+
+/**
+ * Card countdown pembayaran — bg gradient dari default (netral) ke primary.
+ * Kiri: tanggal batas pembayaran; kanan: sisa waktu --:--:--.
+ * Dipasang di antara judul halaman dan card pembayaran.
+ */
+function PaymentCountdown({
+  expiresAt,
+  expired,
+}: {
+  expiresAt: string | null;
+  expired: boolean;
+}) {
+  const { t, locale } = useT();
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  // Tick tiap detik: hitung sisa waktu dari deadline.
+  useEffect(() => {
+    if (!expiresAt) return;
+    const deadline = new Date(expiresAt).getTime();
+    const tick = () => setRemaining(Math.max(0, deadline - Date.now()));
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [expiresAt]);
+
+  const totalSeconds = remaining === null ? null : Math.floor(remaining / 1000);
+  const hh =
+    totalSeconds === null
+      ? "--"
+      : String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const mm =
+    totalSeconds === null
+      ? "--"
+      : String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+  const ss =
+    totalSeconds === null ? "--" : String(totalSeconds % 60).padStart(2, "0");
+  const timeText = `${hh}:${mm}:${ss}`;
+  const isUrgent = totalSeconds !== null && totalSeconds <= 60 * 60; // ≤ 1 jam
+
+  return (
+    <div
+      className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-black/5 p-4 text-white dark:border-white/10"
+      style={{
+        background:
+          "linear-gradient(135deg, #52525b 0%, var(--ant-color-primary, #0d7a5f) 100%)",
+      }}
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <CalendarOutlined className="shrink-0 text-xl opacity-90" />
+        <div className="min-w-0">
+          <p className="text-xs uppercase tracking-wide opacity-80">
+            {t("payment.countdown.deadline")}
+          </p>
+          <p className="truncate text-sm font-semibold">
+            {expiresAt ? formatDate(expiresAt, locale, true) : "-"}
+          </p>
+        </div>
+      </div>
+      <div className="flex flex-row-reverse shrink-0 items-center gap-3">
+        <ClockCircleOutlined className="text-xl opacity-90" />
+        <div className="text-right">
+          <p className="text-xs uppercase tracking-wide opacity-80">
+            {t("payment.countdown.timeout")}
+          </p>
+          <p
+            className={`font-mono text-sm font-bold tabular-nums ${
+              expired ? "animate-pulse" : isUrgent ? "text-amber-300" : ""
+            }`}
+          >
+            {expired ? "00:00:00" : timeText}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Logo QRIS dari aset partner (/public/images/partners) — selalu diberi
@@ -233,7 +312,10 @@ export default function PaymentClientSection({
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl md:text-3xl font-bold">{t("payment.title")}</h1>
 
-      <Card className="mt-6!">
+      {/* Countdown batas pembayaran: deadline (kiri) + sisa waktu (kanan). */}
+      <PaymentCountdown expiresAt={expiresAt} expired={expired} />
+
+      <Card className="mt-4!">
         <div className="flex items-center justify-between">
           <span className="font-medium">
             {t("checkout.orders")} #{order.id}
@@ -260,12 +342,6 @@ export default function PaymentClientSection({
             ? ` — ${t("checkout.homestay")}: ${t("common.yes")} (${order.homestayTime} ${t("checkout.homestayDays")})`
             : ""}
         </p>
-
-        {expiresAt && (
-          <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
-            {t("payment.deadline")}: {formatDate(expiresAt, locale, true)}
-          </p>
-        )}
 
         <div className="mt-4 flex items-center justify-between">
           <span className="font-medium">{t("cart.totalPrice")}</span>

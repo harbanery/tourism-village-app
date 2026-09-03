@@ -54,3 +54,33 @@ body {
 .ant-table-body::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/*
+ * Utility `hide-scrollbar` (Tailwind v4) ala admin-portfolio.
+ * Didefinisikan dengan `@utility` agar dapat dipakai via `@apply`
+ * maupun sebagai class biasa (dipakai shell admin).
+ */
+@utility hide-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Sider admin di layar kecil: fixed overlay ala admin-portfolio. */
+@media (max-width: 768px) {
+  .admin-sider {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+  }
+  .admin-sider.ant-layout-sider-collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    overflow: hidden;
+  }
+}

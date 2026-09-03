@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { Avatar, Badge, Button, Card, Tag } from "antd";
 import {
-  CheckCircleOutlined,
+  CheckCircleFilled,
   LeftOutlined,
+  WarningFilled,
   UserOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -25,6 +26,13 @@ export function ProfileInfoSection({
   const mounted = useMounted();
   if (!mounted) return null;
 
+  /** Warna dot badge avatar mengikuti status verifikasi email. */
+  const verificationDot = settings.emailVerified ? (
+    <CheckCircleFilled className="text-green-500!" />
+  ) : (
+    <WarningFilled className="text-amber-500!" />
+  );
+
   return (
     <Card className="flex flex-col! lg:max-h-[calc(100vh-6rem)]!">
       {/* Kembali ke beranda — di bagian atas kartu kiri. */}
@@ -39,23 +47,13 @@ export function ProfileInfoSection({
       </Button>
 
       <div className="flex flex-col items-center text-center">
-        <Avatar size={96} src={user?.avatar} icon={<UserOutlined />} />
+        {/* Badge dot verifikasi di kanan bawah avatar (ceklis / warning). */}
+        <Badge offset={[-15, 84]} count={verificationDot}>
+          <Avatar size={96} src={user?.avatar} icon={<UserOutlined />} />
+        </Badge>
         <h1 className="mt-4 text-xl font-bold">{user?.name ?? "-"}</h1>
         <div className="mt-1 flex items-center gap-2">
           <p className="text-foreground/60">{user?.email}</p>
-          {settings.emailVerified ? (
-            <Tag
-              color="success"
-              icon={<CheckCircleOutlined />}
-              className="m-0!"
-            >
-              {t("profile.verified")}
-            </Tag>
-          ) : (
-            <Tag color="warning" className="m-0!">
-              {t("profile.emailNotVerified")}
-            </Tag>
-          )}
         </div>
         {settings.pendingEmail && (
           <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
@@ -66,8 +64,6 @@ export function ProfileInfoSection({
 
       <div className="mt-6 min-h-0 flex-1 divide-y divide-black/5 overflow-y-auto dark:divide-white/10">
         {[
-          [t("common.name"), user?.name],
-          [t("common.email"), user?.email],
           [t("common.phone"), user?.phone ?? "-"],
           [
             t("profile.gender"),

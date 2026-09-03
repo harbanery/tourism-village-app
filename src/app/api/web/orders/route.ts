@@ -4,6 +4,10 @@ import { getCurrentUser } from "@/server/auth";
 import { REMOTE_TX_OPTIONS, withRetry } from "@/server/prismaRetry";
 import { expireStalePendingOrders, paymentDeadline } from "@/server/orderExpiry";
 import { customerFromUser, ensureOrderQris } from "@/server/qris";
+import {
+  MAX_ORDERS_PER_DAY,
+  countRecentOrders,
+} from "@/services/orderService";
 
 /**
  * GET /api/web/orders — riwayat pesanan milik user login
@@ -102,6 +106,26 @@ export async function POST(request: Request) {
     );
   }
   schedule.setHours(12, 0, 0, 0); // netralkan zona waktu (@db.Date)
+
+  // Tanggal berangkat minimal H+2 (2 hari setelah hari ini).
+  const minSchedule = new Date();
+  minSchedule.setHours(0, 0, 0, 0);
+  minSchedule.setDate(minSchedule.getDate() + 2);
+  if (schedule.getTime() < minSchedule.getTime()) {
+    return NextResponse.json(
+      { success: false, error: "SCHEDULE_TOO_SOON" },
+      { status: 400 },
+    );
+  }
+
+  // Rate limit: maksimal 5 order per 24 jam per user.
+  const recentOrders = await countRecentOrders(user.id);
+  if (recentOrders >= MAX_ORDERS_PER_DAY) {
+    return NextResponse.json(
+      { success: false, error: "ORDER_LIMIT_REACHED" },
+      { status: 429 },
+    );
+  }
 
   const homestay = body.homestay === true;
   const homestayTime = homestay ? Math.max(1, Number(body.homestayTime) || 1) : null;

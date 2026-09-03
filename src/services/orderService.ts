@@ -26,6 +26,25 @@ export interface UserOrder {
 }
 
 /**
+ * Rate limit pembuatan order: maksimal 5 order per 24 jam per user.
+ * Semua order (termasuk yang lalu dibatalkan) dihitung supaya user tidak
+ * bisa mem-bypass limit dengan membatalkan order.
+ */
+export const MAX_ORDERS_PER_DAY = 5;
+
+export async function countRecentOrders(userId: number): Promise<number> {
+  return prisma.order.count({
+    where: {
+      userId,
+      dateOrder: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    },
+  });
+}
+
+/** Error rate limit order — dipetakan ke pesan terjemahan di klien. */
+export class OrderLimitError extends Error {}
+
+/**
  * Riwayat order milik user (terbaru dululu). PENDING yang melewati batas
  * waktu pembayaran di-expire menjadi CANCELED dulu supaya status yang
  * tampil selalu segar.

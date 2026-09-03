@@ -35,7 +35,10 @@ const SiderLayout: React.FC<SiderLayoutProps> = ({
 
   // Filter menu sesuai role (AUTHOR hanya dashboard + blog).
   const filteredMenu = useMemo(
-    () => menuAdminConfig.filter((item) => role === null || item.roles.includes(role)),
+    () =>
+      menuAdminConfig.filter(
+        (item) => role === null || item.roles.includes(role),
+      ),
     [role],
   );
 
@@ -60,7 +63,8 @@ const SiderLayout: React.FC<SiderLayoutProps> = ({
   });
 
   const toggleMenu = ({ key }: { key: string }) => {
-    router.push(key);
+    // Pola admin-portfolio: replace (bukan push) agar history panel bersih.
+    router.replace(key);
     onMobileClose();
   };
 
@@ -94,13 +98,14 @@ const SiderLayout: React.FC<SiderLayoutProps> = ({
     );
   }
 
-  // Desktop: sider sticky + collapsible.
+  // Desktop: sider sticky + collapsible (class admin-sider ala admin-portfolio).
   return (
     <Sider
       collapsed={collapsed}
       width={220}
       collapsedWidth={64}
       theme="light"
+      className="admin-sider"
       style={{
         position: "sticky",
         top: 0,

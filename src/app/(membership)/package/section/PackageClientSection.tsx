@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Col, Input, Row, Select, App } from "antd";
+import { App, Col, Input, Row, Select } from "antd";
 import { FireOutlined, SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
@@ -27,7 +27,6 @@ export default function PackageClientSection() {
 
   const [fetching, setFetching] = useState(true);
   const [packages, setPackages] = useState<WebPackage[]>([]);
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
   /** Pencarian & filter daftar paket. */
   const [search, setSearch] = useState("");
@@ -162,20 +161,18 @@ export default function PackageClientSection() {
     [filteredPackages, popularIds, showPopular],
   );
 
+  /** Tambah 1 paket ke keranjang (kuantitas diatur lewat stepper keranjang). */
   const addToCart = (pkg: WebPackage) => {
-    const quantity = quantities[pkg.id] ?? 1;
     setCart((prev) => {
       const existing = prev.find((c) => c.packageId === pkg.id);
       if (existing) {
         return prev.map((c) =>
-          c.packageId === pkg.id
-            ? { ...c, quantity: c.quantity + quantity }
-            : c,
+          c.packageId === pkg.id ? { ...c, quantity: c.quantity + 1 } : c,
         );
       }
       return [
         ...prev,
-        { packageId: pkg.id, name: pkg.name, price: pkg.price, quantity },
+        { packageId: pkg.id, name: pkg.name, price: pkg.price, quantity: 1 },
       ];
     });
   };
@@ -246,11 +243,7 @@ export default function PackageClientSection() {
                 <Row gutter={[16, 16]}>
                   {popularPackages.map((pkg) => (
                     <Col xs={24} sm={12} key={pkg.id}>
-                      <PackageCard
-                        pkg={pkg}
-                        quantity={1}
-                        onAdd={() => addToCart(pkg)}
-                      />
+                      <PackageCard pkg={pkg} onAdd={() => addToCart(pkg)} />
                     </Col>
                   ))}
                 </Row>
@@ -266,8 +259,6 @@ export default function PackageClientSection() {
                 )}
                 <PackageListSection
                   packages={otherPackages}
-                  quantities={quantities}
-                  setQuantities={setQuantities}
                   onAdd={addToCart}
                 />
               </>
