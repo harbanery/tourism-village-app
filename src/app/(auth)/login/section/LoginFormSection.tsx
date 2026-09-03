@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, App, Button, Card, Form, Input, Typography } from "antd";
-import { InfoCircleOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
+import {
+  InfoCircleOutlined,
+  LockOutlined,
+  MailOutlined,
+} from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 
@@ -71,7 +75,9 @@ export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       <Card>
-        <h1 className="text-2xl font-bold text-center">{t("auth.login.title")}</h1>
+        <h1 className="text-2xl font-bold text-center">
+          {t("auth.login.title")}
+        </h1>
         <p className="mt-1 text-center text-foreground/60">
           {t("auth.login.subtitle")}
         </p>
@@ -85,10 +91,7 @@ export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
           <Form.Item
             name="email"
             label={t("common.email")}
-            rules={[
-              { required: true },
-              { type: "email" },
-            ]}
+            rules={[{ required: true }, { type: "email" }]}
           >
             <Input prefix={<MailOutlined />} placeholder="email@example.com" />
           </Form.Item>
