@@ -3,9 +3,11 @@
 import { Dropdown } from "antd";
 import { GlobalOutlined } from "@ant-design/icons";
 import { useTheme, setLocale } from "@/components/theme/ThemeProvider";
+import { useT } from "@/components/locale/LocaleProvider";
 
 export function LanguageToggle() {
   const { locale } = useTheme();
+  const { t } = useT();
   return (
     <Dropdown
       menu={{
@@ -20,7 +22,7 @@ export function LanguageToggle() {
     >
       <button
         type="button"
-        aria-label="Change language"
+        aria-label={t("nav.language.toggle")}
         className="inline-flex items-center gap-1.5 cursor-pointer px-2 py-1 text-sm rounded-md hover:bg-black/5 dark:hover:bg-white/10"
       >
         <GlobalOutlined />

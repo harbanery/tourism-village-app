@@ -6,11 +6,11 @@ import { Col, Row, App } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { readCart, writeCart } from "@/helpers/cart";
-import { PackageListSection, type CartItem, type WebPackage } from "./section/PackageListSection";
-import { CartSection } from "./section/CartSection";
+import { PackageListSection, type CartItem, type WebPackage } from "./PackageListSection";
+import { CartSection } from "./CartSection";
 
-/** Halaman paket wisata — data live dari DB (sesuai kelola admin). */
-export default function PackagePage() {
+/** Konten halaman paket wisata — data live dari DB (kelola admin). */
+export default function PackageClientSection() {
   const { t } = useT();
   const router = useRouter();
   const mounted = useMounted();
@@ -18,7 +18,6 @@ export default function PackagePage() {
 
   const [fetching, setFetching] = useState(true);
   const [packages, setPackages] = useState<WebPackage[]>([]);
-  const [session, setSession] = useState<{ id: number } | null>(null);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
   /** true setelah keranjang dihidrasi dari sessionStorage — mencegah
@@ -27,12 +26,8 @@ export default function PackagePage() {
 
   const load = useCallback(async () => {
     try {
-      const [packagesRes, sessionRes] = await Promise.all([
-        fetch("/api/web/packages"),
-        fetch("/api/web/auth/session"),
-      ]);
+      const packagesRes = await fetch("/api/web/packages");
       const packagesJson = await packagesRes.json();
-      const sessionJson = await sessionRes.json();
       if (packagesJson.success) {
         const list: WebPackage[] = packagesJson.data;
         setPackages(list);
@@ -51,7 +46,6 @@ export default function PackagePage() {
             .filter(Boolean) as CartItem[],
         );
       }
-      setSession(sessionJson.success ? sessionJson.data : null);
     } catch (error) {
       console.error("Error fetching packages:", error);
       notification.error({
@@ -100,7 +94,7 @@ export default function PackagePage() {
   const goCheckout = () => {
     // Pastikan keranjang terbaru tersimpan sebelum pindah ke checkout.
     writeCart(cart.map((item) => ({ packageId: item.packageId, quantity: item.quantity })));
-    router.push(session ? "/checkout" : "/login");
+    router.push("/checkout");
   };
 
   if (!mounted) return null;

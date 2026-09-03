@@ -59,7 +59,14 @@ export function RegisterFormSection() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
-      <Card>
+      <button
+        type="button"
+        onClick={() => router.push("/")}
+        className="cursor-pointer! bg-transparent! text-sm! text-foreground/60! hover:text-foreground!"
+      >
+        ← {t("common.backToHome")}
+      </button>
+      <Card className="mt-4!">
         <h1 className="text-2xl font-bold text-center">
           {t("auth.register.title")}
         </h1>

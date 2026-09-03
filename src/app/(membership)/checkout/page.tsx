@@ -6,7 +6,7 @@ import CheckoutClientSection from "./section/CheckoutClientSection";
 export default async function CheckoutPage() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/login");
+    redirect("/login?redirect=/checkout");
   }
 
   return (

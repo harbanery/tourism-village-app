@@ -126,7 +126,7 @@ export function Navbar() {
               trigger={["click"]}
             >
               <Avatar
-                className="ml-1 cursor-pointer"
+                className="ml-1! cursor-pointer!"
                 icon={<UserOutlined />}
               />
             </Dropdown>
@@ -143,7 +143,7 @@ export function Navbar() {
           <Button
             className="lg:hidden!"
             type="text"
-            aria-label="Menu"
+            aria-label={t("nav.menu")}
             icon={<MenuOutlined />}
             onClick={() => setOpen(true)}
           />

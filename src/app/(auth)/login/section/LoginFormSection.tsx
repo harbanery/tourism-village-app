@@ -12,7 +12,12 @@ interface LoginFormValues {
   password: string;
 }
 
-export function LoginFormSection() {
+/**
+ * Form login.
+ * `redirectTo`: halaman tujuan setelah login sukses (mis. user belum login
+ * saat membuka /package → kembali ke /package, bukan ke profile).
+ */
+export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
   const { t } = useT();
   const router = useRouter();
   const mounted = useMounted();
@@ -44,7 +49,8 @@ export function LoginFormSection() {
       }
 
       message.success(t("auth.login.success"));
-      router.push("/profile");
+      // Kembali ke halaman asal (mis. /package) bila ada; selain itu profile.
+      router.push(redirectTo);
       router.refresh();
     } catch {
       message.error(t("notif.error"));
@@ -55,7 +61,14 @@ export function LoginFormSection() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
-      <Card>
+      <button
+        type="button"
+        onClick={() => router.push("/")}
+        className="cursor-pointer! bg-transparent! text-sm! text-foreground/60! hover:text-foreground!"
+      >
+        ← {t("common.backToHome")}
+      </button>
+      <Card className="mt-4!">
         <h1 className="text-2xl font-bold text-center">{t("auth.login.title")}</h1>
         <p className="mt-1 text-center text-foreground/60">
           {t("auth.login.subtitle")}
@@ -94,7 +107,7 @@ export function LoginFormSection() {
           type="info"
           showIcon
           icon={<InfoCircleOutlined />}
-          message={t("admin.login.credentials.title")}
+          message={t("auth.login.credentialsTitle")}
           description={
             <Typography.Text className="text-xs!">
               raihan@example.com / User#1234

@@ -115,7 +115,7 @@ const SiderLayout: React.FC<SiderLayoutProps> = ({
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={() => setCollapsed(!collapsed)}
           style={{ width: "100%" }}
-          aria-label="Toggle sidebar"
+          aria-label={t("menu.toggle")}
         />
       }
     >

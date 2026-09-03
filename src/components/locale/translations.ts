@@ -28,6 +28,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "menu.order": "Pemesanan",
     "menu.sponsor": "Sponsor",
     "menu.review": "Ulasan",
+    "menu.toggle": "Buka/Tutup Menu",
 
     "notif.error": "Terjadi kesalahan",
     "notif.success": "Berhasil",
@@ -222,6 +223,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.button": "Masuk",
     "auth.login.forgot": "Lupa Password?",
     "auth.login.noAccount": "Belum punya akun?",
+    "auth.login.credentialsTitle": "Kredensial demo (seed):",
     "auth.register.title": "Registrasi",
     "auth.register.subtitle": "Buat akun untuk memesan paket wisata",
     "auth.register.button": "Daftar",
@@ -351,6 +353,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "menu.order": "Orders",
     "menu.sponsor": "Sponsors",
     "menu.review": "Reviews",
+    "menu.toggle": "Toggle Menu",
 
     "notif.error": "An error occurred",
     "notif.success": "Success",
@@ -543,6 +546,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.button": "Login",
     "auth.login.forgot": "Forgot Password?",
     "auth.login.noAccount": "No account yet?",
+    "auth.login.credentialsTitle": "Demo credentials (seed):",
     "auth.register.title": "Registration",
     "auth.register.subtitle": "Create an account to order tour packages",
     "auth.register.button": "Register",

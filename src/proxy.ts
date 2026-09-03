@@ -9,13 +9,27 @@ import { ADMIN_SESSION_COOKIE, USER_SESSION_COOKIE } from "@/config/variables";
  * - /api/admin/**: tanpa cookie sesi admin → 401 JSON.
  * - /api/upload: tanpa cookie sesi admin → 401 JSON.
  * - /api/web/profile*: tanpa cookie sesi user → 401 JSON.
+ * - Halaman membership (/profile, /package, /checkout, /payment/**,
+ *   /review-confirm): tanpa cookie sesi user → redirect ke
+ *   /login?redirect=<halaman asal> agar setelah login kembali ke sana.
+ * - /login & /register dengan cookie sesi user → redirect /profile
+ *   (sudah login tidak boleh membuka form auth lagi).
  *
- * Validasi sesi penuh (terhadap database) dilakukan di route handler;
- * proxy hanya memeriksa keberadaan cookie agar cepat.
+ * Validasi sesi penuh (terhadap database) dilakukan di route handler /
+ * page; proxy hanya memeriksa keberadaan cookie agar cepat.
  */
 
+/** Halaman membership yang wajib login (prefix match). */
+const MEMBERSHIP_PAGE_PREFIXES = [
+  "/profile",
+  "/package",
+  "/checkout",
+  "/payment",
+  "/review-confirm",
+];
+
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
   const hasAdminCookie = request.cookies.has(ADMIN_SESSION_COOKIE);
   const hasUserCookie = request.cookies.has(USER_SESSION_COOKIE);
 
@@ -65,6 +79,25 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Form auth web: sudah login → tidak bisa diakses lagi (hanya profile).
+  if (pathname === "/login" || pathname === "/register") {
+    if (hasUserCookie) {
+      return NextResponse.redirect(new URL("/profile", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Halaman membership: wajib cookie sesi user. Setelah login, user
+  // dikembalikan ke halaman asal via param ?redirect=.
+  const isMembershipPage = MEMBERSHIP_PAGE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+  if (isMembershipPage && !hasUserCookie) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", `${pathname}${search}`);
+    return NextResponse.redirect(loginUrl);
+  }
+
   return NextResponse.next();
 }
 
@@ -74,5 +107,12 @@ export const config = {
     "/api/admin/:path*",
     "/api/upload",
     "/api/web/profile/:path*",
+    "/login",
+    "/register",
+    "/profile/:path*",
+    "/package",
+    "/checkout",
+    "/payment/:path*",
+    "/review-confirm",
   ],
 };

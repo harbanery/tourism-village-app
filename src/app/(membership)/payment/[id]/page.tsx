@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
+import { getOrderForUser } from "@/services/orderService";
 import PaymentClientSection from "./section/PaymentClientSection";
 
 /**
@@ -11,21 +11,19 @@ import PaymentClientSection from "./section/PaymentClientSection";
 export default async function PaymentPage({
   params,
 }: PageProps<"/payment/[id]">) {
+  const { id } = await params;
+
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/login");
+    redirect(`/login?redirect=/payment/${id}`);
   }
 
-  const { id } = await params;
   const orderId = Number(id);
   if (!Number.isInteger(orderId)) {
     notFound();
   }
 
-  const order = await prisma.order.findFirst({
-    where: { id: orderId, userId: user.id },
-    include: { items: { include: { package: true } } },
-  });
+  const order = await getOrderForUser(orderId, user.id);
   if (!order) {
     notFound();
   }
@@ -34,17 +32,12 @@ export default async function PaymentPage({
     <PaymentClientSection
       order={{
         id: order.id,
-        dateSchedule: order.dateSchedule.toISOString(),
-        homestay: order.homestay,
+        dateSchedule: order.dateSchedule,
+        homestay: order.homestay === "yes",
         homestayTime: order.homestayTime,
         totalPrice: order.totalPrice,
         paymentStatus: order.paymentStatus,
-        items: order.items.map((item) => ({
-          id: item.id,
-          packageName: item.package.name,
-          quantity: item.quantity,
-          price: item.price,
-        })),
+        items: order.items,
       }}
     />
   );

@@ -76,7 +76,7 @@ const HeaderLayout: React.FC<{
             type="text"
             icon={<MenuOutlined />}
             onClick={onMobileMenuClick}
-            aria-label="Open menu"
+            aria-label={t("menu.toggle")}
           />
         )}
         <Breadcrumb style={{ fontWeight: 600 }} items={breadcrumbItems} />
