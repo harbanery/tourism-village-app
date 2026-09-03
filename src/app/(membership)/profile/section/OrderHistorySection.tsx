@@ -180,60 +180,63 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                 }
               >
                 {/* Ringkasan tanggal-tanggal penting pesanan. */}
-                <div className="grid gap-2 text-sm sm:grid-cols-2">
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    <CalendarOutlined className="text-foreground/40" />
-                    <span>
-                      <span className="text-foreground/50">
-                        {t("profile.orderDate")}:
-                      </span>{" "}
-                      {formatDate(order.dateOrder, locale, true)}
-                    </span>
-                  </p>
-                  {order.paymentStatus === "PENDING" &&
-                  order.paymentExpiresAt ? (
-                    <p className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                      <FieldTimeOutlined />
-                      <span>
-                        {t("payment.deadline")}:{" "}
-                        {formatDate(order.paymentExpiresAt, locale, true)}
-                      </span>
-                    </p>
-                  ) : null}
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    <CalendarOutlined className="text-foreground/40" />
-                    <span>
-                      <span className="text-foreground/50">
-                        {t("profile.departureDate")}:
-                      </span>{" "}
-                      {formatDate(order.dateSchedule, locale)}
-                    </span>
-                  </p>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    <HomeOutlined className="text-foreground/40" />
-                    <span>
-                      <span className="text-foreground/50">
-                        {t("checkout.homestay")}:
-                      </span>{" "}
-                      {order.homestay === "yes"
-                        ? `${t("common.yes")} — ${order.homestayTime} ${t("checkout.homestayDays")}`
-                        : t("common.no")}
-                    </span>
-                  </p>
-                  {order.homestay === "yes" && (
+                <div className="flex flex-col gap-2 text-sm">
+                  {/* Baris 1: tanggal pemesanan (kiri) + batas pembayaran (kanan). */}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="flex items-center gap-2 text-foreground/70">
                       <CalendarOutlined className="text-foreground/40" />
                       <span>
                         <span className="text-foreground/50">
-                          {t("checkout.returnDate")}:
+                          {t("profile.orderDate")}:
                         </span>{" "}
-                        {formatDate(
-                          addDays(order.dateSchedule, order.homestayTime ?? 1),
-                          locale,
-                        )}
+                        {formatDate(order.dateOrder, locale, true)}
                       </span>
                     </p>
-                  )}
+                    {order.paymentStatus === "PENDING" &&
+                    order.paymentExpiresAt ? (
+                      <p className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                        <FieldTimeOutlined />
+                        <span>
+                          {t("payment.deadline")}:{" "}
+                          {formatDate(order.paymentExpiresAt, locale, true)}
+                        </span>
+                      </p>
+                    ) : null}
+                  </div>
+                  {/* Baris 2: tanggal reservasi full (berangkat s/d pulang bila
+                      menginap) + badge menginap. */}
+                  <p className="flex flex-wrap items-center gap-2 text-foreground/70">
+                    <CalendarOutlined className="text-foreground/40" />
+                    <span>
+                      <span className="text-foreground/50">
+                        {t("profile.reservationDate")}:
+                      </span>{" "}
+                      {formatDate(order.dateSchedule, locale)}
+                      {order.homestay === "yes" && (
+                        <>
+                          {" "}
+                          {t("common.until")}{" "}
+                          {formatDate(
+                            addDays(
+                              order.dateSchedule,
+                              order.homestayTime ?? 1,
+                            ),
+                            locale,
+                          )}
+                        </>
+                      )}
+                    </span>
+                    {order.homestay === "yes" && (
+                      <Tag
+                        color="green"
+                        icon={<HomeOutlined />}
+                        className="m-0!"
+                      >
+                        {t("checkout.homestay")} {order.homestayTime}{" "}
+                        {t("checkout.homestayDays")}
+                      </Tag>
+                    )}
+                  </p>
                 </div>
 
                 {/* List wisata: paket, kuantitas, harga — rapi per baris. */}

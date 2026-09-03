@@ -53,7 +53,12 @@ export default function PackageClientSection() {
             .map((row) => {
               const pkg = byId.get(row.packageId);
               return pkg
-                ? { packageId: pkg.id, name: pkg.name, price: pkg.price, quantity: row.quantity }
+                ? {
+                    packageId: pkg.id,
+                    name: pkg.name,
+                    price: pkg.price,
+                    quantity: row.quantity,
+                  }
                 : null; // paket sudah tidak ada / nonaktif → buang
             })
             .filter(Boolean) as CartItem[],
@@ -80,7 +85,12 @@ export default function PackageClientSection() {
   // tetap tersimpan saat user berpindah halaman dan kembali lagi.
   useEffect(() => {
     if (!hydrated) return;
-    writeCart(cart.map((item) => ({ packageId: item.packageId, quantity: item.quantity })));
+    writeCart(
+      cart.map((item) => ({
+        packageId: item.packageId,
+        quantity: item.quantity,
+      })),
+    );
   }, [cart, hydrated]);
 
   const total = useMemo(
@@ -120,13 +130,13 @@ export default function PackageClientSection() {
     }
   }, [packages, search, placeFilter, sortKey]);
 
-  /** Paket yang paling sering dibeli user (top 3, berdasarkan order PAID). */
+  /** Paket yang paling sering dibeli user (maks 2, berdasarkan order PAID). */
   const popularPackages = useMemo(
     () =>
       [...packages]
         .filter((pkg) => pkg.timesPurchased > 0)
         .sort((a, b) => b.timesPurchased - a.timesPurchased)
-        .slice(0, 3),
+        .slice(0, 2),
     [packages],
   );
 
@@ -158,7 +168,9 @@ export default function PackageClientSection() {
       const existing = prev.find((c) => c.packageId === pkg.id);
       if (existing) {
         return prev.map((c) =>
-          c.packageId === pkg.id ? { ...c, quantity: c.quantity + quantity } : c,
+          c.packageId === pkg.id
+            ? { ...c, quantity: c.quantity + quantity }
+            : c,
         );
       }
       return [
@@ -170,7 +182,12 @@ export default function PackageClientSection() {
 
   const goCheckout = () => {
     // Pastikan keranjang terbaru tersimpan sebelum pindah ke checkout.
-    writeCart(cart.map((item) => ({ packageId: item.packageId, quantity: item.quantity })));
+    writeCart(
+      cart.map((item) => ({
+        packageId: item.packageId,
+        quantity: item.quantity,
+      })),
+    );
     router.push("/checkout");
   };
 
@@ -178,7 +195,9 @@ export default function PackageClientSection() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-2xl md:text-3xl font-bold">{t("home.packages.title")}</h1>
+      <h1 className="text-2xl md:text-3xl font-bold">
+        {t("home.packages.title")}
+      </h1>
 
       {/* Pencarian & filter paket. */}
       <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
@@ -191,7 +210,7 @@ export default function PackageClientSection() {
           aria-label={t("common.search")}
         />
         <Select
-          className="sm:w-48!"
+          className="sm:w-44!"
           placeholder={t("package.filterPlace")}
           allowClear
           showSearch
@@ -200,7 +219,7 @@ export default function PackageClientSection() {
           onChange={setPlaceFilter}
         />
         <Select
-          className="sm:w-44!"
+          className="sm:w-42!"
           value={sortKey}
           onChange={setSortKey}
           options={[
@@ -226,7 +245,7 @@ export default function PackageClientSection() {
                 </h2>
                 <Row gutter={[16, 16]}>
                   {popularPackages.map((pkg) => (
-                    <Col xs={24} sm={12} lg={8} key={pkg.id}>
+                    <Col xs={24} sm={12} key={pkg.id}>
                       <PackageCard
                         pkg={pkg}
                         quantity={1}

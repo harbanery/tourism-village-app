@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Segmented } from "antd";
+import { Tabs } from "antd";
 import { HistoryOutlined, SettingOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
@@ -14,9 +14,9 @@ import type { ProfileSettings } from "../page";
 export type ProfileView = "history" | "settings";
 
 /**
- * Konten halaman profil: kartu identitas kiri (sticky, tinggi viewport
- * dikurangi navbar) + kolom kanan yang berganti antara Riwayat Belanja
- * dan Pengaturan (bukan modal — menggantikan section riwayat).
+ * Konten halaman profil: kartu identitas kiri (sticky, tinggi maksimal
+ * viewport dikurangi navbar) + kolom kanan ber-Tab: Riwayat Belanja dan
+ * Pengaturan (bukan modal — menggantikan section riwayat).
  */
 export default function ProfileClientSection({
   user,
@@ -33,35 +33,31 @@ export default function ProfileClientSection({
   if (!mounted) return null;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 lg:grid-cols-[320px_1fr] items-start">
-      {/* Kartu kiri: sticky dengan tinggi viewport - navbar (h-16). */}
-      <div className="lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)]">
+    <div className="mx-auto max-w-6xl px-4 py-6 grid gap-8 lg:grid-cols-[320px_1fr] items-start">
+      {/* Kartu kiri: sticky; tinggi menyesuaikan konten namun dibatasi
+          viewport - navbar, detail profil di-scroll bila melebihi. */}
+      <div className="lg:sticky lg:top-20">
         <ProfileInfoSection user={user} settings={settings} />
       </div>
 
-      <div>
-        <Segmented
-          value={view}
-          onChange={(value) => setView(value as ProfileView)}
-          options={[
-            {
-              value: "history",
-              icon: <HistoryOutlined />,
-              label: t("profile.orderHistory"),
-            },
-            {
-              value: "settings",
-              icon: <SettingOutlined />,
-              label: t("settings.title"),
-            },
-          ]}
-        />
-        {view === "history" ? (
-          <OrderHistorySection orders={orders} />
-        ) : (
-          <SettingsSection user={user} settings={settings} />
-        )}
-      </div>
+      <Tabs
+        activeKey={view}
+        onChange={(key) => setView(key as ProfileView)}
+        items={[
+          {
+            key: "history",
+            icon: <HistoryOutlined />,
+            label: t("profile.orderHistory"),
+            children: <OrderHistorySection orders={orders} />,
+          },
+          {
+            key: "settings",
+            icon: <SettingOutlined />,
+            label: t("settings.title"),
+            children: <SettingsSection user={user} settings={settings} />,
+          },
+        ]}
+      />
     </div>
   );
 }

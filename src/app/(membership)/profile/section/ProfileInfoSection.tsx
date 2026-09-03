@@ -26,7 +26,7 @@ export function ProfileInfoSection({
   if (!mounted) return null;
 
   return (
-    <Card className="flex flex-col!">
+    <Card className="flex flex-col! lg:max-h-[calc(100vh-6rem)]!">
       {/* Kembali ke beranda — di bagian atas kartu kiri. */}
       <Button
         size="small"
@@ -39,18 +39,7 @@ export function ProfileInfoSection({
       </Button>
 
       <div className="flex flex-col items-center text-center">
-        <Badge
-          dot
-          color={settings.emailVerified ? "#52c41a" : "#faad14"}
-          offset={[-8, 84]}
-          title={
-            settings.emailVerified
-              ? t("profile.emailVerified")
-              : t("profile.emailNotVerified")
-          }
-        >
-          <Avatar size={96} src={user?.avatar} icon={<UserOutlined />} />
-        </Badge>
+        <Avatar size={96} src={user?.avatar} icon={<UserOutlined />} />
         <h1 className="mt-4 text-xl font-bold">{user?.name ?? "-"}</h1>
         <div className="mt-1 flex items-center gap-2">
           <p className="text-foreground/60">{user?.email}</p>
@@ -75,7 +64,7 @@ export function ProfileInfoSection({
         )}
       </div>
 
-      <div className="mt-6 flex-1 divide-y divide-black/5 overflow-y-auto dark:divide-white/10">
+      <div className="mt-6 min-h-0 flex-1 divide-y divide-black/5 overflow-y-auto dark:divide-white/10">
         {[
           [t("common.name"), user?.name],
           [t("common.email"), user?.email],

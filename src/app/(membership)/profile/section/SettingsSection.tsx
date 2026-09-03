@@ -104,7 +104,9 @@ function NotifSwitches({ settings }: { settings: ProfileSettings }) {
           onChange={(value) => handleChange("notifEmail", value)}
         />
       </div>
-      <p className="text-xs text-foreground/60">{t("settings.notif.cronHint")}</p>
+      <p className="text-xs text-foreground/60">
+        {t("settings.notif.cronHint")}
+      </p>
     </div>
   );
 }
@@ -193,7 +195,7 @@ export function SettingsSection({
     value ? t(`profile.${value}`) : undefined;
 
   return (
-    <Card title={t("settings.title")} className="mt-6!">
+    <Card title={t("settings.title")}>
       <Tabs
         activeKey={tab}
         onChange={setTab}
@@ -244,7 +246,11 @@ export function SettingsSection({
                 <Form.Item name="address" label={t("profile.address")}>
                   <Input.TextArea rows={2} />
                 </Form.Item>
-                <Button type="primary" htmlType="submit" loading={savingProfile}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={savingProfile}
+                >
                   {t("common.save")}
                 </Button>
               </Form>
@@ -286,10 +292,7 @@ export function SettingsSection({
                     }
                   }}
                 >
-                  <Button
-                    icon={<UploadOutlined />}
-                    loading={uploadingAvatar}
-                  >
+                  <Button icon={<UploadOutlined />} loading={uploadingAvatar}>
                     {t("settings.avatar.upload")}
                   </Button>
                 </Upload>

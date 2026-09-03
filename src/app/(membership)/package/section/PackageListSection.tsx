@@ -62,16 +62,15 @@ export function PackageCard({
           )}
         </span>
       }
-      extra={
-        <span
-          className="block max-w-[10rem] truncate text-xs text-foreground/50"
-          title={pkg.placeName ?? undefined}
-        >
-          {pkg.placeName ?? "-"}
-        </span>
-      }
     >
-      <div className="text-2xl font-bold text-primary">
+      {/* Lokasi tepat di bawah judul (badge popular di kanan judul). */}
+      <p
+        className="truncate text-xs text-foreground/50"
+        title={pkg.placeName ?? undefined}
+      >
+        📍 {pkg.placeName ?? "-"}
+      </p>
+      <div className="mt-2 text-2xl font-bold text-primary">
         {formatRupiah(pkg.price)}
         <span className="text-sm font-normal text-foreground/60">
           {" "}
