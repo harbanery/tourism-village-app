@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/server/db";
-import { verifyOtp } from "@/server/otp";
+import { verifyOtp, createResetToken } from "@/server/otp";
 
 /**
  * POST /api/web/auth/verify-otp — verifikasi kode OTP di halaman /otp.
@@ -8,9 +8,9 @@ import { verifyOtp } from "@/server/otp";
  * Purpose (dipilih klien):
  * - REGISTER_VERIFICATION: tandai email terverifikasi → user lanjut ke
  *   /login sendiri (flow: registrasi → otp → login, TANPA auto-login).
- * - RESET_PASSWORD: cukup memverifikasi kepemilikan akun — kode TIDAK
- *   dikonsumsi (peek) karena diverifikasi ulang + dikonsumsi final oleh
- *   route reset-password saat password baru disimpan.
+ * - RESET_PASSWORD: bukti kepemilikan akun — kode dikonsumsi final di sini
+ *   lalu diterbitkan token reset sekali pakai (halaman /reset-password
+ *   menerima token, bukan userId, agar identitas tidak bocor di URL).
  * - EMAIL_CHANGE diverifikasi terpisah di /api/web/profile/email/verify
  *   (berbasis sesi login).
  */
@@ -44,10 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Reset password peek saja (konsumsi final di reset-password).
-    const result = await verifyOtp(user.id, otpPurpose, code, {
-      consume: otpPurpose !== "RESET_PASSWORD",
-    });
+    const result = await verifyOtp(user.id, otpPurpose, code);
     if (!result.ok) {
       return NextResponse.json(
         {
@@ -62,10 +59,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (otpPurpose === "RESET_PASSWORD") {
-      // OTP reset valid → lanjut ke halaman reset password (tanpa sesi).
+      // OTP reset valid & dikonsumsi → terbitkan token reset sekali pakai
+      // (privasi: halaman reset tidak lagi menerima userId di URL).
+      const token = await createResetToken(user.id);
       return NextResponse.json({
         success: true,
-        data: { next: "reset-password" },
+        data: { next: "reset-password", token },
       });
     }
 

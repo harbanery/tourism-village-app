@@ -16,6 +16,9 @@ export default async function OtpPage({ searchParams }: PageProps<"/otp">) {
   );
   const purpose = typeof params.purpose === "string" ? params.purpose : "";
   const dev = typeof params.dev === "string" ? params.dev : undefined;
+  // Sisa cooldown kirim ulang (detik) bila OTP sudah dikirim sebelumnya.
+  const cd = Number(typeof params.cd === "string" ? params.cd : NaN);
+  const initialCountdown = Number.isInteger(cd) && cd > 0 ? cd : 300;
 
   if (!Number.isInteger(userId)) {
     redirect("/login", "replace");
@@ -29,7 +32,14 @@ export default async function OtpPage({ searchParams }: PageProps<"/otp">) {
       redirect("/login?redirect=/profile", "replace");
     }
     // OTP ganti email selalu milik user sesi (bukan userId dari query).
-    return <OtpSection userId={user.id} purpose="EMAIL_CHANGE" dev={dev} />;
+    return (
+      <OtpSection
+        userId={user.id}
+        purpose="EMAIL_CHANGE"
+        dev={dev}
+        initialCountdown={initialCountdown}
+      />
+    );
   }
 
   if (purpose === "RESET_PASSWORD") {
@@ -37,7 +47,14 @@ export default async function OtpPage({ searchParams }: PageProps<"/otp">) {
     if (user) {
       redirect("/", "replace");
     }
-    return <OtpSection userId={userId} purpose="RESET_PASSWORD" dev={dev} />;
+    return (
+      <OtpSection
+        userId={userId}
+        purpose="RESET_PASSWORD"
+        dev={dev}
+        initialCountdown={initialCountdown}
+      />
+    );
   }
 
   if (purpose !== "REGISTER") {
@@ -49,5 +66,12 @@ export default async function OtpPage({ searchParams }: PageProps<"/otp">) {
     redirect("/", "replace");
   }
 
-  return <OtpSection userId={userId} purpose="REGISTER" dev={dev} />;
+  return (
+    <OtpSection
+      userId={userId}
+      purpose="REGISTER"
+      dev={dev}
+      initialCountdown={initialCountdown}
+    />
+  );
 }

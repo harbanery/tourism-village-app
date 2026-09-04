@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/server/auth";
 import { getActivePackages } from "@/services/packageService";
 
 /**
  * GET /api/web/packages — paket wisata aktif untuk pengunjung web
- * (query dipusatkan di packageService).
+ * (query dipusatkan di packageService). Bila user login, sertakan hitungan
+ * pembelian pribadinya (untuk section "sering dibeli" per user).
  */
 export async function GET() {
   try {
-    const data = await getActivePackages();
+    const user = await getCurrentUser();
+    const data = await getActivePackages(user?.id ?? null);
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Error fetching packages:", error);

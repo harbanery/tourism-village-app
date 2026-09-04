@@ -18,8 +18,10 @@ export interface WebPackage {
   placeName: string | null;
   facilities: string[];
   price: number;
-  /** Berapa kali paket ini berhasil dibayar (PAID). */
+  /** Berapa kali paket ini berhasil dibayar semua user (tag "Populer"). */
   timesPurchased: number;
+  /** Berapa kali paket ini dibayar user ini (section sering dibeli pribadi). */
+  userTimesPurchased: number;
 }
 
 export interface CartItem {

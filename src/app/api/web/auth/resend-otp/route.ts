@@ -7,7 +7,8 @@ import { NODE_ENV } from "@/config/variables";
 
 /**
  * POST /api/web/auth/resend-otp — kirim ulang kode OTP.
- * Body: { userId, purpose }. Dijaga cooldown 60 detik oleh service OTP.
+ * Body: { userId, purpose }. Dijaga cooldown 5 menit antar kirim; setelah
+ * 5 kali kirim ulang dalam 15 menit → rate limit (tunggu sisa jendela).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -45,6 +46,16 @@ export async function POST(request: NextRequest) {
     }
 
     const otp = await createOtp(user.id, purpose as OtpPurpose);
+    if ("rateLimitSeconds" in otp) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "RATE_LIMITED",
+          seconds: otp.rateLimitSeconds,
+        },
+        { status: 429 },
+      );
+    }
     if ("cooldownSeconds" in otp) {
       return NextResponse.json(
         { success: false, error: "COOLDOWN", seconds: otp.cooldownSeconds },
@@ -69,6 +80,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       ...(devCode ? { data: { devCode } } : {}),
+      resendsLeft: otp.resendsLeft,
     });
   } catch (error) {
     console.error("Error resend otp:", error);

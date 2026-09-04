@@ -10,11 +10,13 @@ import {
   DatePicker,
   Empty,
   Form,
+  Input,
   InputNumber,
   Radio,
   Steps,
   Tabs,
 } from "antd";
+import { EditOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { readCart, clearCart } from "@/helpers/cart";
@@ -98,6 +100,14 @@ export default function CheckoutClientSection({
   );
   const [step, setStep] = useState<0 | 1>(0);
   const [submitting, setSubmitting] = useState(false);
+  /** Data pemesan lokal — bisa diedit di langkah konfirmasi. */
+  const [orderer, setOrderer] = useState({
+    name: user.name,
+    phone: user.phone ?? "",
+  });
+  /** Telepon belum ada → form edit pemesan terbuka otomatis (wajib diisi). */
+  const [editingOrderer, setEditingOrderer] = useState(!user.phone);
+  const [savingOrderer, setSavingOrderer] = useState(false);
 
   // Muat keranjang + harga paket terbaru.
   const load = useCallback(async () => {
@@ -178,10 +188,39 @@ export default function CheckoutClientSection({
     }
   };
 
+  /** Simpan perubahan data pemesan (nama/telepon) via PATCH profile.
+      Telepon wajib — bila belum ada, validasi menuntut diisi. */
+  const handleSaveOrderer = async (values: { name: string; phone?: string }) => {
+    setSavingOrderer(true);
+    try {
+      const res = await fetch("/api/web/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: values.name, phone: values.phone ?? "" }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error);
+      setOrderer({ name: json.data.name, phone: json.data.phone ?? "" });
+      setEditingOrderer(false);
+      message.success(t("notif.ordererUpdated"));
+    } catch (error) {
+      console.error("Error updating orderer:", error);
+      message.error(t("notif.ordererUpdateFailed"));
+    } finally {
+      setSavingOrderer(false);
+    }
+  };
+
   /** Kirim order (harga diverifikasi server) → arahkan ke pembayaran. */
   const handleProcess = async () => {
     if (items.length === 0) {
       message.warning(t("checkout.emptyCart"));
+      return;
+    }
+    // Telepon wajib sebelum order diproses (kontak darurat perubahan jadwal).
+    if (!orderer.phone.trim()) {
+      setEditingOrderer(true);
+      message.warning(t("checkout.phoneRequired"));
       return;
     }
     setSubmitting(true);
@@ -411,14 +450,19 @@ export default function CheckoutClientSection({
           className="mt-6! grid items-start gap-6 lg:grid-cols-[1fr_360px]"
         >
           <Card title={t("checkout.schedulePerPackage")}>
-            <Tabs
-              items={items.map((item, index) => ({
-                key: String(item.packageId),
-                label: item.name,
-                forceRender: true,
-                children: renderScheduleTab(index),
-              }))}
-            />
+            {/* Paket tunggal → tanpa tab; tiga paket atau lebih → tab per paket. */}
+            {items.length === 1 ? (
+              renderScheduleTab(0)
+            ) : (
+              <Tabs
+                items={items.map((item, index) => ({
+                  key: String(item.packageId),
+                  label: item.name,
+                  forceRender: true,
+                  children: renderScheduleTab(index),
+                }))}
+              />
+            )}
             <Button
               type="primary"
               size="large"
@@ -459,22 +503,76 @@ export default function CheckoutClientSection({
           </p>
 
           <h2 className="mt-4 font-semibold">{t("checkout.orderer")}</h2>
-          <div className="mt-2">
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
-                <p className="text-foreground/60">{t("common.name")}</p>
-                <p className="font-medium">{user.name}</p>
+          {editingOrderer ? (
+            <Form
+              layout="vertical"
+              className="mt-2 max-w-md"
+              initialValues={{ name: orderer.name, phone: orderer.phone }}
+              onFinish={(values) => void handleSaveOrderer(values)}
+            >
+              <Form.Item
+                label={t("common.name")}
+                name="name"
+                rules={[
+                  { required: true },
+                  { min: 2, max: 60, message: t("auth.register.nameMin") },
+                ]}
+              >
+                <Input placeholder={t("auth.register.namePlaceholder")} />
+              </Form.Item>
+              {/* Telepon wajib diisi (validasi) bila belum ada / diubah. */}
+              <Form.Item
+                label={t("common.phone")}
+                name="phone"
+                rules={[
+                  { required: true },
+                  {
+                    pattern: /^[+()\-\s\d]{6,20}$/,
+                    message: t("auth.register.phonePattern"),
+                  },
+                ]}
+              >
+                <Input placeholder="08..." />
+              </Form.Item>
+              <div className="flex gap-2">
+                <Button htmlType="submit" loading={savingOrderer} type="primary">
+                  {t("common.save")}
+                </Button>
+                {/* Batal hanya boleh bila telepon sudah terisi. */}
+                {orderer.phone.trim() && (
+                  <Button onClick={() => setEditingOrderer(false)}>
+                    {t("common.cancel")}
+                  </Button>
+                )}
               </div>
-              <div className="rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
-                <p className="text-foreground/60">{t("common.email")}</p>
-                <p className="font-medium break-all">{user.email}</p>
+              <p className="mt-2 text-xs text-foreground/50">
+                {t("checkout.ordererEditNote")}
+              </p>
+            </Form>
+          ) : (
+            <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="min-w-40 rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
+                  <p className="text-foreground/60">{t("common.name")}</p>
+                  <p className="font-medium">{orderer.name}</p>
+                </div>
+                <div className="min-w-52 rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
+                  <p className="text-foreground/60">{t("common.email")}</p>
+                  <p className="font-medium break-all">{user.email}</p>
+                </div>
+                <div className="min-w-40 rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
+                  <p className="text-foreground/60">{t("common.phone")}</p>
+                  <p className="font-medium">{orderer.phone || "-"}</p>
+                </div>
               </div>
-              <div className="rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
-                <p className="text-foreground/60">{t("common.phone")}</p>
-                <p className="font-medium">{user.phone || "-"}</p>
-              </div>
+              <Button
+                icon={<EditOutlined />}
+                onClick={() => setEditingOrderer(true)}
+              >
+                {t("checkout.editOrderer")}
+              </Button>
             </div>
-          </div>
+          )}
 
           <h2 className="mt-6 font-semibold">{t("checkout.orders")}</h2>
           <div className="mt-2 divide-y divide-black/5 dark:divide-white/10">

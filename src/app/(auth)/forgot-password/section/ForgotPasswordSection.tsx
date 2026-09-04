@@ -11,6 +11,13 @@ interface ForgotFormValues {
   email: string;
 }
 
+/** Detik → format m:ss (untuk pesan countdown). */
+function formatCountdown(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
 /** Form lupa password — kirim OTP reset ke email terdaftar. */
 export function ForgotPasswordSection() {
   const { t } = useT();
@@ -38,10 +45,17 @@ export function ForgotPasswordSection() {
           message.error(t("auth.forgot.emailNotFound"));
           return;
         }
-        if (result.error === "COOLDOWN") {
+        if (result.error === "RATE_LIMITED") {
+          // Terlalu banyak kirim ulang — kode terakhir masih berlaku.
+          message.warning(
+            t("auth.otp.rateLimited", {
+              time: formatCountdown(result.seconds ?? 15 * 60),
+            }),
+          );
+        } else if (result.error === "COOLDOWN") {
           // Kode lama masih aktif — lanjut ke OTP agar bisa dipakai.
           message.warning(
-            t("auth.otp.cooldown", { seconds: result.seconds ?? 60 }),
+            t("auth.otp.cooldown", { seconds: result.seconds ?? 300 }),
           );
         } else {
           message.error(t("notif.error"));
@@ -52,9 +66,14 @@ export function ForgotPasswordSection() {
       }
 
       // Flow: lupa password → OTP (verifikasi kepemilikan akun) → reset.
+      // cd = sisa cooldown kirim ulang (detik) untuk countdown di /otp.
       const dev = result.data?.devCode ? `&dev=${result.data.devCode}` : "";
+      const cd =
+        typeof result.seconds === "number" && result.seconds > 0
+          ? `&cd=${result.seconds}`
+          : "";
       router.replace(
-        `/otp?userId=${result.data.userId}&purpose=RESET_PASSWORD${dev}`,
+        `/otp?userId=${result.data.userId}&purpose=RESET_PASSWORD${cd}${dev}`,
       );
     } catch {
       message.error(t("notif.error"));

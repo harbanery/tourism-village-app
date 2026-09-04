@@ -79,6 +79,23 @@ export async function POST(request: NextRequest) {
       if (!isEmailConfigured() && NODE_ENV !== "production") {
         devCode = otp.code;
       }
+    } else if ("rateLimitSeconds" in otp) {
+      // Terlalu banyak kirim ulang → beri tahu klien sisa jendela rate limit
+      // (kode terakhir masih berlaku sampai kedaluwarsa).
+      return NextResponse.json(
+        {
+          success: false,
+          error: "RATE_LIMITED",
+          seconds: otp.rateLimitSeconds,
+        },
+        { status: 429 },
+      );
+    } else {
+      // Masih cooldown → kirim info sisa waktu (kode lama masih aktif).
+      return NextResponse.json({
+        success: true,
+        data: { cooldownSeconds: otp.cooldownSeconds },
+      });
     }
 
     return NextResponse.json({

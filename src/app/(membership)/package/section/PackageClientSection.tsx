@@ -129,12 +129,16 @@ export default function PackageClientSection() {
     }
   }, [packages, search, placeFilter, sortKey]);
 
-  /** Paket yang paling sering dibeli user (maks 2, berdasarkan order PAID). */
+  /**
+   * Paket yang paling sering dibeli USER INI sendiri (maks 2, order PAID).
+   * Section hanya tampil bila user punya riwayat pembelian — user yang
+   * belum pernah memesan tidak melihat "sering dibeli" sama sekali.
+   */
   const popularPackages = useMemo(
     () =>
       [...packages]
-        .filter((pkg) => pkg.timesPurchased > 0)
-        .sort((a, b) => b.timesPurchased - a.timesPurchased)
+        .filter((pkg) => pkg.userTimesPurchased > 0)
+        .sort((a, b) => b.userTimesPurchased - a.userTimesPurchased)
         .slice(0, 2),
     [packages],
   );

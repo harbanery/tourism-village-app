@@ -2,34 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Alert, App, Button, Card, Form, Input } from "antd";
+import { App, Button, Card, Form, Input } from "antd";
 import { LockOutlined, SafetyOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 
 interface ResetFormValues {
-  code: string;
   password: string;
   retypePassword: string;
 }
 
-/** Kunci sessionStorage: kode OTP yang barusan diverifikasi di /otp. */
-const RESET_OTP_STORAGE_KEY = "resetOtpCode";
-
 /**
- * Form reset password: OTP 6 digit (dari email) + password baru.
- * Flow: lupa password → OTP (di /otp, peek) → reset di sini → login.
- * Kode diverifikasi ULANG + dikonsumsi final oleh API reset (keamanan:
- * bukti kepemilikan akun wajib sampai ke server, bukan sekadar lewat gate).
- * `dev` = kode OTP cadangan (development tanpa SMTP).
+ * Form reset password — TANPA input OTP (OTP sudah diverifikasi di /otp;
+ * bukti kepemilikan kini berupa token reset sekali pakai di URL, bukan
+ * userId yang mudah dibaca orang lain).
+ * Flow: lupa password → OTP (auto-verifikasi) → token → reset → login.
  */
-export function ResetPasswordSection({
-  userId,
-  dev,
-}: {
-  userId: number;
-  dev?: string;
-}) {
+export function ResetPasswordSection({ token }: { token: string }) {
   const { t } = useT();
   const router = useRouter();
   const mounted = useMounted();
@@ -49,7 +38,7 @@ export function ResetPasswordSection({
       const res = await fetch("/api/web/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, code: values.code, password: values.password }),
+        body: JSON.stringify({ token, password: values.password }),
       });
       const result = await res.json();
 
@@ -59,19 +48,16 @@ export function ResetPasswordSection({
           message.error(t("auth.reset.sameAsOld"));
           return;
         }
-        if (result.remainingAttempts !== undefined) {
-          message.error(
-            t("auth.otp.invalidRemaining", {
-              count: result.remainingAttempts,
-            }),
-          );
-        } else {
-          message.error(t(`auth.otp.error.${result.error}`));
+        if (result.error === "TOKEN_INVALID") {
+          // Token sudah dipakai / kedaluwarsa → ulang dari lupa password.
+          message.error(t("auth.reset.tokenInvalid"));
+          router.replace("/forgot-password");
+          return;
         }
+        message.error(t("notif.error"));
         return;
       }
 
-      sessionStorage.removeItem(RESET_OTP_STORAGE_KEY);
       message.success(t("auth.reset.success"));
       router.push("/login");
     } catch {
@@ -92,50 +78,13 @@ export function ResetPasswordSection({
           </p>
         </div>
 
-        {dev && (
-          <Alert
-            className="mt-4!"
-            type="info"
-            showIcon
-            message={t("auth.otp.devCode")}
-            description={
-              <span className="font-mono text-lg font-bold tracking-widest">
-                {dev}
-              </span>
-            }
-          />
-        )}
-
         <Form
           form={form}
           layout="vertical"
           className="mt-6!"
           onFinish={handleReset}
           disabled={loading}
-          initialValues={{
-            // Kode barusan diverifikasi di /otp → pra-isi (tetap bisa diubah).
-            code:
-              typeof window !== "undefined"
-                ? (sessionStorage.getItem(RESET_OTP_STORAGE_KEY) ?? "")
-                : "",
-          }}
         >
-          <Form.Item
-            name="code"
-            label={t("auth.otp.codeLabel")}
-            rules={[
-              { required: true },
-              { pattern: /^\d{6}$/, message: t("auth.otp.codePattern") },
-            ]}
-          >
-            <Input
-              size="large"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="••••••"
-              className="text-center! font-mono! text-2xl! tracking-[0.5em]!"
-            />
-          </Form.Item>
           <Form.Item
             name="password"
             label={t("auth.register.password")}
@@ -151,6 +100,7 @@ export function ResetPasswordSection({
             <Input.Password
               prefix={<LockOutlined />}
               placeholder="••••••••"
+              autoComplete="new-password"
             />
           </Form.Item>
           <Form.Item
@@ -174,6 +124,7 @@ export function ResetPasswordSection({
             <Input.Password
               prefix={<LockOutlined />}
               placeholder="••••••••"
+              autoComplete="new-password"
             />
           </Form.Item>
           <Form.Item>

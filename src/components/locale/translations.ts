@@ -182,7 +182,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.title": "Checkout",
     "checkout.step.schedule": "Isi Jadwal",
     "checkout.step.confirm": "Konfirmasi",
-    "checkout.step.scheduleDesc": "Atur jadwal per paket, lalu konfirmasi pesanan",
+    "checkout.step.scheduleDesc":
+      "Atur jadwal per paket, lalu konfirmasi pesanan",
     "checkout.step.confirmDesc": "Periksa data pemesan dan detail pesanan Anda",
     "checkout.detailInfo": "Detail Informasi",
     "checkout.schedulePerPackage": "Jadwal per Paket",
@@ -196,8 +197,11 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Data pemesan bergabung dengan detail pesanan setelah konfirmasi — masih bisa diubah bila ada perubahan jadwal.",
     "checkout.ordererEditNote":
       "Ubah nama/no telepon bila ada perubahan jadwal atau kontak.",
+    "checkout.phoneRequired":
+      "Nomor telepon wajib diisi sebelum memproses order",
     "checkout.scheduleDate": "Tanggal Berangkat",
-    "checkout.minDateError": "Tanggal berangkat minimal 2 hari setelah hari ini",
+    "checkout.minDateError":
+      "Tanggal berangkat minimal 2 hari setelah hari ini",
     "checkout.returnDate": "Tanggal Pulang",
     "checkout.homestay": "Menginap",
     "checkout.homestayDays": "Jumlah Hari",
@@ -232,7 +236,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.pendingHint":
       "Pesanan menunggu pembayaran — selesaikan lewat tombol Bayar Sekarang kapan saja dari profil Anda.",
     "payment.deadline": "Batas Pembayaran",
-    "payment.expired": "Batas waktu pembayaran telah habis — pesanan dibatalkan.",
+    "payment.expired":
+      "Batas waktu pembayaran telah habis — pesanan dibatalkan.",
     "payment.checkStatus": "Periksa Status Pembayaran",
     "payment.qrisTitle": "Pindai QR untuk Membayar",
     "payment.qrisHint":
@@ -286,16 +291,19 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.forgot.backToLogin": "Kembali ke halaman masuk",
     "auth.forgot.emailNotFound": "Email tidak terdaftar",
     "auth.reset.title": "Atur Ulang Password",
-    "auth.reset.subtitle": "Kode OTP sudah diverifikasi — buat password baru Anda",
-    "auth.reset.subtitleNoEmail":
-      "Buka halaman lupa password terlebih dahulu",
+    "auth.reset.subtitle":
+      "Kode OTP sudah diverifikasi — buat password baru Anda",
+    "auth.reset.subtitleNoEmail": "Buka halaman lupa password terlebih dahulu",
     "auth.reset.button": "Simpan Password Baru",
     "auth.reset.success": "Password berhasil diganti — silakan masuk",
     "auth.reset.otpSent": "Jika email terdaftar, kode OTP telah dikirim",
     "auth.reset.resend": "Tidak menerima kode? Kirim ulang",
-    "auth.reset.sameAsOld": "Password baru tidak boleh sama dengan password lama",
+    "auth.reset.sameAsOld":
+      "Password baru tidak boleh sama dengan password lama",
     "auth.reset.missingEmail":
       "Email tidak diketahui — ulangi dari halaman lupa password",
+    "auth.reset.tokenInvalid":
+      "Tautan reset tidak valid atau kedaluwarsa — mulai ulang dari lupa password.",
 
     "auth.otp.title": "Verifikasi OTP",
     "auth.otp.subtitleRegister":
@@ -312,6 +320,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.otp.verify": "Verifikasi",
     "auth.otp.notReceived": "Tidak menerima kode?",
     "auth.otp.resend": "Kirim ulang kode",
+    "auth.otp.resendIn": "Kirim ulang dalam {time}",
+    "auth.otp.rateLimited":
+      "Batas kirim ulang tercapai — coba lagi dalam {time}",
+    "auth.otp.resendsLeft": "Sisa kesempatan kirim ulang: {count}",
     "auth.otp.resent": "Kode baru telah dikirim",
     "auth.otp.cooldown": "Tunggu {seconds} detik sebelum kirim ulang",
     "auth.otp.invalidRemaining": "Kode salah. Sisa percobaan: {count}",
@@ -335,8 +347,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.register.nameMin": "Nama harus 2–60 karakter",
     "auth.register.namePlaceholder": "Nama lengkap Anda",
     "auth.register.password": "Password",
-    "auth.register.passwordPattern": "Password harus mengandung huruf dan angka",
+    "auth.register.passwordPattern":
+      "Password harus mengandung huruf dan angka",
     "auth.register.passwordPlaceholder": "Minimal 8 karakter, huruf & angka",
+    "auth.register.phonePattern": "Nomor telepon tidak valid",
     "auth.register.retypePassword": "Ulangi Password",
     "auth.register.retypePlaceholder": "Ulangi password Anda",
     "auth.register.emailTaken": "Email sudah terdaftar — gunakan email lain",
@@ -345,8 +359,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.gender": "Jenis Kelamin",
     "profile.male": "Laki-Laki",
     "profile.female": "Perempuan",
+    "profile.genderPlaceholder": "Pilih jenis kelamin",
     "profile.birthDate": "Tanggal Lahir",
+    "profile.birthDatePlaceholder": "Pilih tanggal",
     "profile.address": "Alamat",
+    "profile.addressPlaceholder": "Alamat lengkap Anda",
     "profile.orderHistory": "Riwayat Belanja",
     "profile.noOrders": "Belum ada pesanan",
     "profile.orderDate": "Tanggal Pemesanan",
@@ -375,6 +392,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.email.wrongPassword": "Password salah",
     "settings.email.same": "Email harus berbeda dengan email aktif",
     "settings.email.sendOtp": "Kirim Kode OTP",
+    "settings.email.otpTitle": "Verifikasi Email Baru",
+    "settings.email.otpSentTo":
+      "Kode OTP dikirim ke {email} — masukkan 6 digit untuk memverifikasi.",
     "settings.email.otpSent": "Kode OTP dikirim ke email baru",
     "settings.email.hint":
       "Email baru hanya aktif setelah kode OTP diverifikasi.",
@@ -647,11 +667,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.title": "Checkout",
     "checkout.step.schedule": "Fill in Schedule",
     "checkout.step.confirm": "Confirmation",
-    "checkout.step.scheduleDesc": "Set the schedule per package, then confirm your order",
+    "checkout.step.scheduleDesc":
+      "Set the schedule per package, then confirm your order",
     "checkout.step.confirmDesc": "Review your orderer data and order details",
     "checkout.detailInfo": "Detail Information",
     "checkout.schedulePerPackage": "Schedule per Package",
-    "checkout.sameSchedule": "This package has the same schedule as the first one",
+    "checkout.sameSchedule":
+      "This package has the same schedule as the first one",
     "checkout.sameScheduleHint":
       "Tick if the schedule is the same — fields follow the first package",
     "checkout.confirm": "Confirm Order",
@@ -661,6 +683,8 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Orderer data merges with the order details after confirmation — you can still edit it if the schedule changes.",
     "checkout.ordererEditNote":
       "Update the name/phone number if the schedule or contact changes.",
+    "checkout.phoneRequired":
+      "A phone number is required before processing the order",
     "checkout.scheduleDate": "Departure Date",
     "checkout.minDateError":
       "Departure date must be at least 2 days after today",
@@ -698,7 +722,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.pendingHint":
       "This order is awaiting payment — finish it anytime with the Pay Now button from your profile.",
     "payment.deadline": "Payment Deadline",
-    "payment.expired": "The payment deadline has passed — the order was canceled.",
+    "payment.expired":
+      "The payment deadline has passed — the order was canceled.",
     "payment.checkStatus": "Check Payment Status",
     "payment.qrisTitle": "Scan the QR to Pay",
     "payment.qrisHint":
@@ -756,15 +781,17 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.reset.subtitleNoEmail": "Open the forgot password page first",
     "auth.reset.button": "Save New Password",
     "auth.reset.success": "Password changed — please log in",
-    "auth.reset.otpSent": "If the email is registered, an OTP code has been sent",
+    "auth.reset.otpSent":
+      "If the email is registered, an OTP code has been sent",
     "auth.reset.resend": "Didn't receive the code? Resend",
     "auth.reset.sameAsOld": "The new password must differ from the old one",
     "auth.reset.missingEmail":
       "Email unknown — restart from the forgot password page",
+    "auth.reset.tokenInvalid":
+      "The reset link is invalid or expired — start over from forgot password.",
 
     "auth.otp.title": "OTP Verification",
-    "auth.otp.subtitleRegister":
-      "Enter the 6-digit code sent to your email",
+    "auth.otp.subtitleRegister": "Enter the 6-digit code sent to your email",
     "auth.otp.subtitleReset":
       "Enter the 6-digit code sent to your email to reset your password",
     "auth.otp.subtitleEmailChange":
@@ -777,6 +804,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.otp.verify": "Verify",
     "auth.otp.notReceived": "Didn't receive the code?",
     "auth.otp.resend": "Resend code",
+    "auth.otp.resendIn": "Resend in {time}",
+    "auth.otp.rateLimited": "Resend limit reached — try again in {time}",
+    "auth.otp.resendsLeft": "Resends left: {count}",
     "auth.otp.resent": "A new code has been sent",
     "auth.otp.cooldown": "Wait {seconds} seconds before resending",
     "auth.otp.invalidRemaining": "Wrong code. Attempts left: {count}",
@@ -800,8 +830,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.register.nameMin": "Name must be 2–60 characters",
     "auth.register.namePlaceholder": "Your full name",
     "auth.register.password": "Password",
-    "auth.register.passwordPattern": "Password must contain letters and numbers",
+    "auth.register.passwordPattern":
+      "Password must contain letters and numbers",
     "auth.register.passwordPlaceholder": "Min 8 characters, letters & numbers",
+    "auth.register.phonePattern": "Invalid phone number",
     "auth.register.retypePassword": "Retype Password",
     "auth.register.retypePlaceholder": "Retype your password",
     "auth.register.emailTaken": "Email already registered — use another email",
@@ -810,8 +842,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.gender": "Gender",
     "profile.male": "Male",
     "profile.female": "Female",
+    "profile.genderPlaceholder": "Select gender",
     "profile.birthDate": "Birth Date",
+    "profile.birthDatePlaceholder": "Pick a date",
     "profile.address": "Address",
+    "profile.addressPlaceholder": "Your full address",
     "profile.orderHistory": "Order History",
     "profile.noOrders": "No orders yet",
     "profile.orderDate": "Order Date",
@@ -840,13 +875,15 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.email.wrongPassword": "Incorrect password",
     "settings.email.same": "Email must differ from the current one",
     "settings.email.sendOtp": "Send OTP Code",
+    "settings.email.otpTitle": "Verify New Email",
+    "settings.email.otpSentTo":
+      "An OTP code was sent to {email} — enter the 6 digits to verify.",
     "settings.email.otpSent": "OTP code sent to the new email",
     "settings.email.hint":
       "The new email only becomes active after the OTP code is verified.",
     "settings.email.changed": "Email changed successfully",
     "settings.notif.web": "Web Notifications",
-    "settings.notif.webDesc":
-      "In-app notifications (order status, reminders).",
+    "settings.notif.webDesc": "In-app notifications (order status, reminders).",
     "settings.notif.email": "Email Notifications",
     "settings.notif.emailDesc": "Transactional emails and schedule reminders.",
     "settings.notif.cronHint":

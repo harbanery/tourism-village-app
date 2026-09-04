@@ -63,18 +63,23 @@ export function ProfileInfoSection({
       </div>
 
       <div className="mt-6 min-h-0 flex-1 divide-y divide-black/5 overflow-y-auto dark:divide-white/10">
-        {[
-          [t("common.phone"), user?.phone ?? "-"],
+        {/* Jenis kelamin tidak disebutkan bila belum diisi. */}
+        {(
           [
-            t("profile.gender"),
-            user?.gender ? t(`profile.${user.gender}`) : "-",
-          ],
-          [
-            t("profile.birthDate"),
-            user?.birthDate ? formatDate(user.birthDate, locale) : "-",
-          ],
-          [t("profile.address"), user?.address ?? "-"],
-        ].map(([label, value]) => (
+            [t("common.phone"), user?.phone ?? "-"],
+            user?.gender
+              ? [
+                  t("profile.gender"),
+                  t(`profile.${user.gender}`),
+                ]
+              : null,
+            [
+              t("profile.birthDate"),
+              user?.birthDate ? formatDate(user.birthDate, locale) : "-",
+            ],
+            [t("profile.address"), user?.address ?? "-"],
+          ].filter(Boolean) as [string, string][]
+        ).map(([label, value]) => (
           <div
             key={String(label)}
             className="py-3 flex justify-between gap-4 text-sm"

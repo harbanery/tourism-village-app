@@ -56,6 +56,18 @@ function addDays(iso: string, days: number): string {
   return date.toISOString();
 }
 
+/** true bila tiap paket punya reservasi berbeda (jadwal per item beda). */
+function hasDistinctItemSchedules(order: HistoryOrder): boolean {
+  const items = order.items;
+  if (items.length < 2 || !items.every((item) => item.dateSchedule)) return false;
+  const signatures = new Set(
+    items.map(
+      (item) => `${item.dateSchedule}|${item.homestay}|${item.homestayTime}`,
+    ),
+  );
+  return signatures.size > 1;
+}
+
 export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
   const { t, locale } = useT();
   const router = useRouter();
@@ -231,40 +243,77 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                       </p>
                     ) : null}
                   </div>
-                  {/* Baris 2: tanggal reservasi full (berangkat s/d pulang bila
-                      menginap) + badge menginap. */}
-                  <p className="flex flex-wrap items-center gap-2 text-foreground/70">
-                    <CalendarOutlined className="text-foreground/40" />
-                    <span>
-                      <span className="text-foreground/50">
-                        {t("profile.reservationDate")}:
-                      </span>{" "}
-                      {formatDate(order.dateSchedule, locale)}
-                      {order.homestay === "yes" && (
-                        <>
-                          {" "}
-                          {t("common.until")}{" "}
-                          {formatDate(
-                            addDays(
-                              order.dateSchedule,
-                              order.homestayTime ?? 1,
-                            ),
-                            locale,
+                  {/* Baris 2: tanggal reservasi — per paket bila jadwalnya
+                      berbeda-beda, atau satu baris rangkuman bila sama. */}
+                  {hasDistinctItemSchedules(order) ? (
+                    <div className="flex flex-col gap-1">
+                      <p className="flex items-center gap-2 text-foreground/70">
+                        <CalendarOutlined className="text-foreground/40" />
+                        <span className="text-foreground/50">
+                          {t("profile.reservationDate")}:
+                        </span>
+                      </p>
+                      {order.items.map((item) => (
+                        <p
+                          key={item.id}
+                          className="ml-6 flex flex-wrap items-center gap-2 text-sm text-foreground/70"
+                        >
+                          <span className="font-medium">{item.packageName}:</span>
+                          {formatDate(item.dateSchedule!, locale)}
+                          {item.homestay && (
+                            <>
+                              {" "}
+                              {t("common.until")}{" "}
+                              {formatDate(
+                                addDays(item.dateSchedule!, item.homestayTime ?? 1),
+                                locale,
+                              )}
+                              <Tag
+                                color="green"
+                                icon={<HomeOutlined />}
+                                className="m-0!"
+                              >
+                                {item.homestayTime} {t("checkout.homestayDays")}
+                              </Tag>
+                            </>
                           )}
-                        </>
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="flex flex-wrap items-center gap-2 text-foreground/70">
+                      <CalendarOutlined className="text-foreground/40" />
+                      <span>
+                        <span className="text-foreground/50">
+                          {t("profile.reservationDate")}:
+                        </span>{" "}
+                        {formatDate(order.dateSchedule, locale)}
+                        {order.homestay === "yes" && (
+                          <>
+                            {" "}
+                            {t("common.until")}{" "}
+                            {formatDate(
+                              addDays(
+                                order.dateSchedule,
+                                order.homestayTime ?? 1,
+                              ),
+                              locale,
+                            )}
+                          </>
+                        )}
+                      </span>
+                      {order.homestay === "yes" && (
+                        <Tag
+                          color="green"
+                          icon={<HomeOutlined />}
+                          className="m-0!"
+                        >
+                          {t("checkout.homestay")} {order.homestayTime}{" "}
+                          {t("checkout.homestayDays")}
+                        </Tag>
                       )}
-                    </span>
-                    {order.homestay === "yes" && (
-                      <Tag
-                        color="green"
-                        icon={<HomeOutlined />}
-                        className="m-0!"
-                      >
-                        {t("checkout.homestay")} {order.homestayTime}{" "}
-                        {t("checkout.homestayDays")}
-                      </Tag>
-                    )}
-                  </p>
+                    </p>
+                  )}
                 </div>
 
                 {/* List wisata: paket, kuantitas, harga — rapi per baris. */}
@@ -279,19 +328,7 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                       key={item.id}
                       className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/5 dark:border-white/5"
                     >
-                      <span className="font-medium">
-                        {item.packageName}
-                        {/* Jadwal per paket (fallback agregat order). */}
-                        {item.dateSchedule && (
-                          <span className="block text-xs font-normal text-foreground/50">
-                            {t("profile.departureDate")}:{" "}
-                            {formatDate(item.dateSchedule, locale)}
-                            {item.homestay
-                              ? ` — ${t("checkout.homestay")} ${item.homestayTime} ${t("checkout.homestayDays")}`
-                              : ""}
-                          </span>
-                        )}
-                      </span>
+                      <span className="font-medium">{item.packageName}</span>
                       <span className="w-14 text-center">
                         × {item.quantity}
                       </span>

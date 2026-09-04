@@ -4,7 +4,8 @@ import { ResetPasswordSection } from "./section/ResetPasswordSection";
 
 /**
  * Halaman reset password — sudah login dialihkan ke beranda.
- * `userId` dipakai konsumsi OTP reset (flow: lupa password → otp → reset).
+ * Memakai token reset sekali pakai (diterbitkan saat OTP diverifikasi);
+ * tanpa userId di URL (privasi). Token invalid → ulang dari lupa password.
  */
 export default async function ResetPasswordPage({
   searchParams,
@@ -15,14 +16,11 @@ export default async function ResetPasswordPage({
   }
 
   const params = await searchParams;
-  const userId = Number(
-    typeof params.userId === "string" ? params.userId : NaN,
-  );
-  const dev = typeof params.dev === "string" ? params.dev : undefined;
+  const token = typeof params.token === "string" ? params.token : "";
 
-  if (!Number.isInteger(userId)) {
+  if (!/^[0-9a-f]{64}$/.test(token)) {
     redirect("/forgot-password");
   }
 
-  return <ResetPasswordSection userId={userId} dev={dev} />;
+  return <ResetPasswordSection token={token} />;
 }

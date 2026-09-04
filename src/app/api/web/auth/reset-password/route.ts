@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { hashPassword, verifyPassword } from "@/server/auth";
-import { verifyOtp } from "@/server/otp";
+import { verifyResetToken } from "@/server/otp";
 
 /**
- * POST /api/web/auth/reset-password — set password baru setelah OTP reset
- * terverifikasi di halaman /otp (flow: lupa password → otp → reset → login).
- * Kode OTP WAJIB diverifikasi ulang di sini (dan dikonsumsi final) —
- * bukti kepemilikan akun tidak boleh hanya "ada OTP aktif".
+ * POST /api/web/auth/reset-password — set password baru memakai token
+ * reset sekali pakai (flow: lupa password → otp → token → reset → login).
+ * Token diterbitkan saat OTP diverifikasi (verify-otp) dan langsung
+ * dikonsumsi di sini — tanpa userId/code di body (privasi: identitas
+ * tidak lewat URL/body yang mudah dibaca).
  * Password baru tidak boleh sama dengan password lama.
  * Semua sesi lama dicabut (paksa logout semua perangkat).
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, code, password } = body as Record<string, unknown>;
+    const { token, password } = body as Record<string, unknown>;
 
-    const parsedUserId = Number(userId);
     if (
-      !Number.isInteger(parsedUserId) ||
-      typeof code !== "string" ||
-      !/^\d{6}$/.test(code) ||
+      typeof token !== "string" ||
+      !/^[0-9a-f]{64}$/.test(token) ||
       typeof password !== "string" ||
       password.length < 8 ||
       !/[A-Za-z]/.test(password) ||
@@ -32,8 +31,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verifikasi + konsumsi token reset (sekali pakai, TTL 15 menit).
+    const userId = await verifyResetToken(token);
+    if (userId === null) {
+      return NextResponse.json(
+        { success: false, error: "TOKEN_INVALID" },
+        { status: 400 },
+      );
+    }
+
     const user = await prisma.authUser.findUnique({
-      where: { id: parsedUserId },
+      where: { id: userId },
     });
     if (!user || user.status !== "ACTIVE") {
       return NextResponse.json(
@@ -47,22 +55,6 @@ export async function POST(request: NextRequest) {
     if (sameAsOld) {
       return NextResponse.json(
         { success: false, error: "PASSWORD_SAME_AS_OLD" },
-        { status: 400 },
-      );
-    }
-
-    // Verifikasi + konsumsi final OTP RESET_PASSWORD (di halaman /otp kode
-    // hanya di-peek). Ini bukti kepemilikan akun yang sebenarnya.
-    const result = await verifyOtp(user.id, "RESET_PASSWORD", code);
-    if (!result.ok) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: result.reason,
-          ...(result.remainingAttempts !== undefined
-            ? { remainingAttempts: result.remainingAttempts }
-            : {}),
-        },
         { status: 400 },
       );
     }
