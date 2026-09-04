@@ -89,12 +89,6 @@ const OrderDecorator = () => {
 
   const columns = [
     {
-      title: "Id",
-      dataIndex: "id",
-      key: "id",
-      width: 60,
-    },
-    {
       title: t("common.date"),
       dataIndex: "dateOrder",
       key: "dateOrder",
@@ -112,38 +106,36 @@ const OrderDecorator = () => {
       key: "userName",
     },
     {
-      title: t("admin.orders.stay"),
-      dataIndex: "homestay",
-      key: "homestay",
-      render: (_: unknown, record: OrderRow) =>
-        record.homestay ? (
-          <Tag color="green">
-            {t("common.yes")} ({record.homestayTime})
-          </Tag>
-        ) : (
-          <Tag>{t("common.no")}</Tag>
-        ),
-    },
-    {
-      // Kolom pesanan dirapihkan: hanya nama paket + kuantitas
-      // (tanpa harga per item).
+      // Kolom pesanan merangkum jadwal + info menginap per paket
+      // (kolom "Inap" sudah di-takeout, infonya pindah ke sini).
       title: t("checkout.orders"),
       key: "items",
       render: (_: unknown, record: OrderRow) => (
         <div className="flex flex-col">
-          {record.items.map((item) => (
-            <Typography.Text key={item.id} className="text-xs!">
-              {item.package.name} × {item.quantity}
-              {item.dateSchedule && (
-                <span className="block text-[11px]! text-foreground/50">
-                  {formatDate(item.dateSchedule, locale)}
-                  {item.homestay
-                    ? ` — ${t("common.yes")} (${item.homestayTime})`
-                    : ""}
-                </span>
-              )}
-            </Typography.Text>
-          ))}
+          {record.items.map((item, index) => {
+            // Jadwal per paket; data lama (tanpa jadwal item) fallback ke
+            // agregat order — cukup ditampilkan sekali di item pertama.
+            const hasOwn = !!item.dateSchedule;
+            const showSummary = hasOwn || index === 0;
+            const date = hasOwn ? item.dateSchedule! : record.dateSchedule;
+            const stay = hasOwn ? !!item.homestay : record.homestay;
+            const stayDays = hasOwn
+              ? (item.homestayTime ?? 1)
+              : record.homestayTime;
+            return (
+              <Typography.Text key={item.id} className="text-xs!">
+                {item.package.name} × {item.quantity}
+                {showSummary && (
+                  <span className="block text-[11px]! text-foreground/50">
+                    {formatDate(date, locale)}
+                    {stay
+                      ? ` — ${t("admin.orders.stay")}: ${t("common.yes")} (${stayDays})`
+                      : ""}
+                  </span>
+                )}
+              </Typography.Text>
+            );
+          })}
         </div>
       ),
     },
