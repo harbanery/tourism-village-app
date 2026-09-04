@@ -7,7 +7,7 @@ import { SafetyOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 
-type OtpPurpose = "REGISTER" | "EMAIL_CHANGE" | "RESET_PASSWORD";
+type OtpPurpose = "REGISTER" | "RESET_PASSWORD";
 
 /** Detik → format m:ss (untuk countdown tampilan). */
 function formatCountdown(seconds: number): string {
@@ -23,8 +23,8 @@ function formatCountdown(seconds: number): string {
  *   (flow: registrasi → otp → login, TANPA auto-login).
  * - RESET_PASSWORD: POST /api/web/auth/verify-otp → /reset-password?token=…
  *   (OTP dikonsumsi + token reset sekali pakai diterbitkan server).
- * - EMAIL_CHANGE: POST /api/web/profile/email/verify → kembali ke tab
- *   ganti email di /profile.
+ * (Flow ganti email tidak ada di halaman ini — verifikasi OTP ganti email
+ * berupa modal langsung di tab Email pengaturan profil.)
  *
  * Kirim ulang: countdown 5 menit antar kirim; setelah 5 kali kirim ulang
  * kena rate limit 15 menit (dijaga server, klien hanya menampilkan).
@@ -70,31 +70,20 @@ export function OtpSection({
     return () => clearInterval(timer);
   }, [resendIn > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isRegister = purpose === "REGISTER";
   const isReset = purpose === "RESET_PASSWORD";
 
   const handleVerify = useCallback(
     async (value: string) => {
       setLoading(true);
       try {
-        // REGISTER & RESET_PASSWORD diverifikasi lewat verify-otp;
-        // EMAIL_CHANGE lewat endpoint profile (berbasis sesi login).
-        const endpoint =
-          purpose === "EMAIL_CHANGE"
-            ? "/api/web/profile/email/verify"
-            : "/api/web/auth/verify-otp";
-        const res = await fetch(endpoint, {
+        const res = await fetch("/api/web/auth/verify-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(
-            purpose === "EMAIL_CHANGE"
-              ? { code: value }
-              : {
-                  userId,
-                  code: value,
-                  ...(isReset ? { purpose: "RESET_PASSWORD" } : {}),
-                },
-          ),
+          body: JSON.stringify({
+            userId,
+            code: value,
+            ...(isReset ? { purpose: "RESET_PASSWORD" } : {}),
+          }),
         });
         const result = await res.json();
 
@@ -124,16 +113,9 @@ export function OtpSection({
           return;
         }
 
-        if (isRegister) {
-          // Flow registrasi: verifikasi email → login (tanpa auto-login).
-          message.success(t("auth.otp.verified"));
-          router.replace("/login");
-          return;
-        }
-
-        // Flow ganti email: kembali ke tab ganti email di pengaturan profil.
-        message.success(t("settings.email.changed"));
-        router.replace("/profile?view=settings&tab=email");
+        // Flow registrasi: verifikasi email → login (tanpa auto-login).
+        message.success(t("auth.otp.verified"));
+        router.replace("/login");
       } catch {
         message.error(t("notif.error"));
         setCode("");
@@ -141,7 +123,7 @@ export function OtpSection({
         setLoading(false);
       }
     },
-    [isRegister, isReset, message, purpose, router, t, userId],
+    [isReset, message, router, t, userId],
   );
 
   /** Auto-submit: begitu 6 digit terisi penuh, verifikasi langsung. */
@@ -155,12 +137,6 @@ export function OtpSection({
   const handleResend = async () => {
     setResending(true);
     try {
-      // EMAIL_CHANGE: OTP dikirim ulang lewat pengajuan ganti email di
-      // pengaturan profil (email baru tersimpan sebagai pendingEmail).
-      if (purpose === "EMAIL_CHANGE") {
-        message.info(t("auth.otp.resendEmailChange"));
-        return;
-      }
       const res = await fetch("/api/web/auth/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -214,11 +190,9 @@ export function OtpSection({
           <SafetyOutlined className="text-4xl text-primary" />
           <h1 className="mt-3 text-2xl font-bold">{t("auth.otp.title")}</h1>
           <p className="mt-1 text-foreground/60">
-            {isRegister
-              ? t("auth.otp.subtitleRegister")
-              : isReset
-                ? t("auth.otp.subtitleReset")
-                : t("auth.otp.subtitleEmailChange")}
+            {isReset
+              ? t("auth.otp.subtitleReset")
+              : t("auth.otp.subtitleRegister")}
           </p>
         </div>
 
@@ -253,18 +227,16 @@ export function OtpSection({
 
         <div className="mt-6 text-center space-y-2 text-sm">
           <p className="text-foreground/60">{t("auth.otp.notReceived")}</p>
-          {purpose !== "EMAIL_CHANGE" && (
-            <Button
-              type="link"
-              loading={resending}
-              disabled={resendIn > 0 || rateLimited}
-              onClick={handleResend}
-            >
-              {resendIn > 0
-                ? t("auth.otp.resendIn", { time: formatCountdown(resendIn) })
-                : t("auth.otp.resend")}
-            </Button>
-          )}
+          <Button
+            type="link"
+            loading={resending}
+            disabled={resendIn > 0 || rateLimited}
+            onClick={handleResend}
+          >
+            {resendIn > 0
+              ? t("auth.otp.resendIn", { time: formatCountdown(resendIn) })
+              : t("auth.otp.resend")}
+          </Button>
         </div>
       </Card>
     </div>

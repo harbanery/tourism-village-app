@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { App, Button, Card, Form, Input } from "antd";
 import { LockOutlined, SafetyOutlined } from "@ant-design/icons";
@@ -12,10 +12,15 @@ interface ResetFormValues {
   retypePassword: string;
 }
 
+/** Penanda kunjungan per token (sessionStorage) — halaman berlaku sekali. */
+const visitedKey = (token: string) => `resetVisited:${token}`;
+
 /**
  * Form reset password — TANPA input OTP (OTP sudah diverifikasi di /otp;
  * bukti kepemilikan kini berupa token reset sekali pakai di URL, bukan
  * userId yang mudah dibaca orang lain).
+ * Halaman berlaku SEKALI: kembali dari sini lalu menembus lagi (back /
+ * forward / refresh dengan token sama) → langsung ditendang ke /login.
  * Flow: lupa password → OTP (auto-verifikasi) → token → reset → login.
  */
 export function ResetPasswordSection({ token }: { token: string }) {
@@ -25,8 +30,24 @@ export function ResetPasswordSection({ token }: { token: string }) {
   const { message } = App.useApp();
   const [form] = Form.useForm<ResetFormValues>();
   const [loading, setLoading] = useState(false);
+  // Deteksi kunjungan ulang saat render pertama (client) — tanpa setState
+  // di effect. Halaman ini berlaku sekali per token.
+  const [kicked] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.sessionStorage.getItem(visitedKey(token)) !== null;
+  });
 
-  if (!mounted) return null;
+  // Kunjungan kedua dengan token sama → tendang ke /login; kunjungan
+  // pertama → catat penandanya.
+  useEffect(() => {
+    if (kicked) {
+      router.replace("/login");
+      return;
+    }
+    window.sessionStorage.setItem(visitedKey(token), "1");
+  }, [kicked, router, token]);
+
+  if (!mounted || kicked) return null;
 
   const handleReset = async (values: ResetFormValues) => {
     if (values.password !== values.retypePassword) {
@@ -59,7 +80,11 @@ export function ResetPasswordSection({ token }: { token: string }) {
       }
 
       message.success(t("auth.reset.success"));
-      router.push("/login");
+      // Bersihkan penanda kunjungan (token sudah dikonsumsi server).
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem(visitedKey(token));
+      }
+      router.replace("/login");
     } catch {
       message.error(t("notif.error"));
     } finally {
@@ -73,9 +98,7 @@ export function ResetPasswordSection({ token }: { token: string }) {
         <div className="text-center">
           <SafetyOutlined className="text-4xl text-primary" />
           <h1 className="mt-3 text-2xl font-bold">{t("auth.reset.title")}</h1>
-          <p className="mt-1 text-foreground/60">
-            {t("auth.reset.subtitle")}
-          </p>
+          <p className="mt-1 text-foreground/60">{t("auth.reset.subtitle")}</p>
         </div>
 
         <Form
@@ -133,15 +156,6 @@ export function ResetPasswordSection({ token }: { token: string }) {
             </Button>
           </Form.Item>
         </Form>
-        <p className="text-center text-sm text-foreground/60">
-          <button
-            type="button"
-            onClick={() => router.push("/forgot-password")}
-            className="cursor-pointer! text-primary! hover:underline!"
-          >
-            {t("auth.reset.resend")}
-          </button>
-        </p>
       </Card>
     </div>
   );

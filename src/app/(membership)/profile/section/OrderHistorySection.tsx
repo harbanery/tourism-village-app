@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
-import { App, Button, Card, List, Tag } from "antd";
+import { App, Button, Card, Empty, List, Tag } from "antd";
 import {
   CreditCardOutlined,
   DownloadOutlined,
@@ -202,7 +202,15 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
     <div className="flex flex-col gap-6">
       {orders.length === 0 ? (
         <Card className="mt-6!">
-          <p className="text-foreground/60">{t("profile.noOrders")}</p>
+          <Empty description={t("profile.noOrders")} className="py-8!">
+            {/* Belum punya pesanan → ajak memesan paket wisata. */}
+            <Button
+              type="primary"
+              onClick={() => router.push("/package")}
+            >
+              {t("profile.orderPackage")}
+            </Button>
+          </Empty>
         </Card>
       ) : (
         <List

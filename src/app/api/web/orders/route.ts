@@ -177,12 +177,18 @@ export async function POST(request: Request) {
         homestay: boolean;
         homestayTime: number | null;
       };
+      // Menginap → harga dikalikan jumlah hari (1 hari = tetap ×1);
+      // tanpa menginap tidak dikalikan.
+      const days = scheduleRow.homestay
+        ? Math.max(1, scheduleRow.homestayTime ?? 1)
+        : 1;
       return {
         packageId: pkg.id,
         name: pkg.name,
         price: pkg.price, // harga satuan saat transaksi
         quantity: item.quantity,
-        subtotal: pkg.price * item.quantity,
+        days,
+        subtotal: pkg.price * item.quantity * days,
         dateSchedule: scheduleRow.schedule,
         homestay: scheduleRow.homestay,
         homestayTime: scheduleRow.homestayTime,

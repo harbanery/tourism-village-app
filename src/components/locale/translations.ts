@@ -310,11 +310,8 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Masukkan kode 6 digit yang dikirim ke email Anda",
     "auth.otp.subtitleReset":
       "Masukkan kode 6 digit yang dikirim ke email Anda untuk reset password",
-    "auth.otp.subtitleEmailChange":
-      "Masukkan kode 6 digit yang dikirim ke email baru Anda",
     "auth.otp.verified": "Email terverifikasi — silakan masuk",
     "auth.otp.verifiedReset": "Kode valid — silakan buat password baru",
-    "auth.otp.backToEmailSettings": "Kembali ke pengaturan email",
     "auth.otp.codeLabel": "Kode OTP",
     "auth.otp.codePattern": "Kode harus 6 digit angka",
     "auth.otp.verify": "Verifikasi",
@@ -330,8 +327,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.otp.needVerification":
       "Email belum terverifikasi — lanjutkan verifikasi OTP",
     "auth.otp.devCode": "Kode OTP (mode dev — SMTP belum aktif):",
-    "auth.otp.resendEmailChange":
-      "Untuk kirim ulang, ajukan ulang ganti email dari pengaturan profil.",
     "auth.otp.error.NOT_FOUND": "Kode OTP salah atau tidak ditemukan",
     "auth.otp.error.EXPIRED": "Kode OTP kedaluwarsa — minta kode baru",
     "auth.otp.error.TOO_MANY_ATTEMPTS":
@@ -366,6 +361,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.addressPlaceholder": "Alamat lengkap Anda",
     "profile.orderHistory": "Riwayat Belanja",
     "profile.noOrders": "Belum ada pesanan",
+    "profile.orderPackage": "Pesan Paket Wisata",
     "profile.orderDate": "Tanggal Pemesanan",
     "profile.reservationDate": "Tanggal Reservasi",
     "profile.paidAt": "Dibayar",
@@ -794,11 +790,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.otp.subtitleRegister": "Enter the 6-digit code sent to your email",
     "auth.otp.subtitleReset":
       "Enter the 6-digit code sent to your email to reset your password",
-    "auth.otp.subtitleEmailChange":
-      "Enter the 6-digit code sent to your new email",
     "auth.otp.verified": "Email verified — please log in",
     "auth.otp.verifiedReset": "Code valid — please set a new password",
-    "auth.otp.backToEmailSettings": "Back to email settings",
     "auth.otp.codeLabel": "OTP Code",
     "auth.otp.codePattern": "Code must be 6 digits",
     "auth.otp.verify": "Verify",
@@ -813,8 +806,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.otp.needVerification":
       "Email not verified yet — continue with OTP verification",
     "auth.otp.devCode": "OTP code (dev mode — SMTP not configured):",
-    "auth.otp.resendEmailChange":
-      "To resend, request the email change again from profile settings.",
     "auth.otp.error.NOT_FOUND": "OTP code is wrong or not found",
     "auth.otp.error.EXPIRED": "OTP code expired — request a new one",
     "auth.otp.error.TOO_MANY_ATTEMPTS":
@@ -849,6 +840,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.addressPlaceholder": "Your full address",
     "profile.orderHistory": "Order History",
     "profile.noOrders": "No orders yet",
+    "profile.orderPackage": "Order a Tour Package",
     "profile.orderDate": "Order Date",
     "profile.reservationDate": "Reservation Date",
     "profile.paidAt": "Paid",

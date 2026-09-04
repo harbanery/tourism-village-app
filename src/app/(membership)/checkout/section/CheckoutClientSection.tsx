@@ -56,6 +56,15 @@ function minDepartureDate(): Dayjs {
   return dayjs().add(2, "day").startOf("day");
 }
 
+/**
+ * Pengali harga per paket: bila menginap, harga dikalikan jumlah hari
+ * (1 hari = tetap ×1). Paket tanpa menginap tidak dikalikan.
+ */
+function stayMultiplier(schedule: ScheduleValue | undefined): number {
+  if (!schedule || schedule.homestay !== "yes") return 1;
+  return Math.max(1, schedule.homestayTime ?? 1);
+}
+
 function MidtransLogo({ className }: { className?: string }) {
   return (
     <Image
@@ -100,6 +109,15 @@ export default function CheckoutClientSection({
   );
   const [step, setStep] = useState<0 | 1>(0);
   const [submitting, setSubmitting] = useState(false);
+  /**
+   * Snapshot jadwal saat tombol "Konfirmasi" ditekan. Form di-unmount saat
+   * pindah langkah, jadi getFieldsValue() tanpa argumen (hanya field yang
+   * ter-register) akan kosong — snapshot ini menjaga tampilan & payload
+   * langkah konfirmasi tetap utuh.
+   */
+  const [confirmedSchedules, setConfirmedSchedules] = useState<
+    Record<string, ScheduleValue>
+  >({});
   /** Data pemesan lokal — bisa diedit di langkah konfirmasi. */
   const [orderer, setOrderer] = useState({
     name: user.name,
@@ -156,13 +174,10 @@ export default function CheckoutClientSection({
       }[],
     [cart, packages],
   );
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-
   // Pantau seluruh nilai form (untuk menonaktifkan field + tanggal pulang).
-  const schedulesWatch = Form.useWatch("schedules", form);
+  // Fallback ke snapshot konfirmasi saat Form sudah di-unmount (langkah 2).
+  const schedulesWatch =
+    Form.useWatch("schedules", form) ?? confirmedSchedules;
 
   /** Jadwal efektif satu paket: milik sendiri, atau ikut paket pertama. */
   const effectiveSchedule = useCallback(
@@ -177,10 +192,24 @@ export default function CheckoutClientSection({
     [items, schedulesWatch],
   );
 
-  /** Validasi jadwal semua tab → lanjut ke langkah konfirmasi. */
+  /**
+   * Total dinamis mengikuti jadwal: harga × qty × hari menginap per paket.
+   * (Harga final tetap dihitung server — ini hanya ringkasan tampilan.)
+   */
+  const total = items.reduce(
+    (sum, item, index) =>
+      sum + item.price * item.quantity * stayMultiplier(effectiveSchedule(index)),
+    0,
+  );
+
+  /** Validasi jadwal semua tab → simpan snapshot → langkah konfirmasi. */
   const handleConfirm = async () => {
     try {
       await form.validateFields();
+      // Snapshot penuh (getFieldsValue(true) = seluruh store, termasuk field
+      // yang hanya punya initialValue) — dipakai setelah Form di-unmount.
+      const values = form.getFieldsValue(true) as CheckoutFormValues;
+      setConfirmedSchedules(values.schedules ?? {});
       setStep(1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -225,10 +254,15 @@ export default function CheckoutClientSection({
     }
     setSubmitting(true);
     try {
-      const values = form.getFieldsValue();
-      const first = values.schedules?.[String(items[0].packageId)];
+      // true = seluruh store form (bukan hanya field yang sedang ter-register
+      // — Form sudah di-unmount di langkah konfirmasi), + snapshot sebagai
+      // cadangan. Tanpa ini payload kehilangan dateSchedule → INVALID_SCHEDULE.
+      const values =
+        (form.getFieldsValue(true) as CheckoutFormValues).schedules ??
+        confirmedSchedules;
+      const first = values[String(items[0].packageId)];
       const payloadItems = items.map((item, index) => {
-        const own = values.schedules?.[String(item.packageId)] ?? {};
+        const own = values[String(item.packageId)] ?? {};
         // Ceklis "jadwal sama" → pakai jadwal paket pertama.
         const schedule = index > 0 && own.sameSchedule ? (first ?? own) : own;
         return {
@@ -477,17 +511,28 @@ export default function CheckoutClientSection({
           {/* Detail informasi terpisah dari form. */}
           <Card title={t("checkout.detailInfo")} className="lg:sticky lg:top-0">
             <div className="divide-y divide-black/5 dark:divide-white/10">
-              {items.map((item) => (
-                <div
-                  key={item.packageId}
-                  className="py-2 flex justify-between gap-3 text-sm"
-                >
-                  <span>
-                    {item.name} × {item.quantity}
-                  </span>
-                  <span>{formatRupiah(item.price * item.quantity)}</span>
-                </div>
-              ))}
+              {items.map((item, index) => {
+                const days = stayMultiplier(effectiveSchedule(index));
+                return (
+                  <div
+                    key={item.packageId}
+                    className="py-2 flex justify-between gap-3 text-sm"
+                  >
+                    <span>
+                      {item.name} × {item.quantity}
+                      {days > 1 && (
+                        <span className="text-foreground/50">
+                          {" "}
+                          · {days} {t("checkout.homestayDays")}
+                        </span>
+                      )}
+                    </span>
+                    <span>
+                      {formatRupiah(item.price * item.quantity * days)}
+                    </span>
+                  </div>
+                );
+              })}
               <div className="py-2 flex justify-between font-semibold">
                 <span>{t("cart.totalPrice")}</span>
                 <span className="text-primary">{formatRupiah(total)}</span>
@@ -565,12 +610,16 @@ export default function CheckoutClientSection({
                   <p className="font-medium">{orderer.phone || "-"}</p>
                 </div>
               </div>
-              <Button
-                icon={<EditOutlined />}
-                onClick={() => setEditingOrderer(true)}
-              >
-                {t("checkout.editOrderer")}
-              </Button>
+              {/* Tombol ubah hanya tampil bila data pemesan belum lengkap
+                  (telepon kosong) — data sudah terisi semua → tanpa tombol. */}
+              {!orderer.phone.trim() && (
+                <Button
+                  icon={<EditOutlined />}
+                  onClick={() => setEditingOrderer(true)}
+                >
+                  {t("checkout.editOrderer")}
+                </Button>
+              )}
             </div>
           )}
 
@@ -578,6 +627,7 @@ export default function CheckoutClientSection({
           <div className="mt-2 divide-y divide-black/5 dark:divide-white/10">
             {items.map((item, index) => {
               const schedule = effectiveSchedule(index);
+              const days = stayMultiplier(schedule);
               const returnDate =
                 schedule.homestay === "yes" && schedule.dateSchedule
                   ? schedule.dateSchedule.add(schedule.homestayTime ?? 1, "day")
@@ -587,8 +637,14 @@ export default function CheckoutClientSection({
                   <div className="flex justify-between gap-3">
                     <span>
                       {item.name} × {item.quantity}
+                      {days > 1 && (
+                        <span className="text-foreground/50">
+                          {" "}
+                          · {days} {t("checkout.homestayDays")}
+                        </span>
+                      )}
                     </span>
-                    <span>{formatRupiah(item.price * item.quantity)}</span>
+                    <span>{formatRupiah(item.price * item.quantity * days)}</span>
                   </div>
                   {schedule.dateSchedule && (
                     <p className="mt-1 text-foreground/60">

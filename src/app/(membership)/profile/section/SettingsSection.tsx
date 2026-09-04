@@ -378,9 +378,6 @@ export function SettingsSection({
     }
   };
 
-  const genderLabel = (value?: "male" | "female") =>
-    value ? t(`profile.${value}`) : undefined;
-
   return (
     <Card title={t("settings.title")}>
       <Tabs

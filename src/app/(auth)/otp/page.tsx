@@ -3,11 +3,12 @@ import { getCurrentUser } from "@/server/auth";
 import { OtpSection } from "./section/OtpSection";
 
 /**
- * Halaman OTP terpisah — dipakai tiga alur (via param purpose):
+ * Halaman OTP terpisah — dipakai dua alur (via param purpose):
  * - REGISTER (belum login): verifikasi email setelah register → login.
  * - RESET_PASSWORD (belum login): bukti kepemilikan akun → reset password.
- * - EMAIL_CHANGE (wajib login): verifikasi email baru → profil.
- * Guard menyesuaikan purpose; purpose lain kembali ke beranda.
+ * (Flow ganti email DIHAPUS dari sini — verifikasi OTP ganti email
+ * sekarang berupa modal langsung di tab Email pengaturan profil.)
+ * Guard menyesuaikan purpose; purpose lain dialihkan.
  */
 export default async function OtpPage({ searchParams }: PageProps<"/otp">) {
   const params = await searchParams;
@@ -26,20 +27,12 @@ export default async function OtpPage({ searchParams }: PageProps<"/otp">) {
 
   const user = await getCurrentUser();
 
+  // Sisa tautan lama ganti email → arahkan ke pengaturan email di profil.
   if (purpose === "EMAIL_CHANGE") {
-    // Ganti email hanya untuk user yang sedang login.
     if (!user) {
       redirect("/login?redirect=/profile", "replace");
     }
-    // OTP ganti email selalu milik user sesi (bukan userId dari query).
-    return (
-      <OtpSection
-        userId={user.id}
-        purpose="EMAIL_CHANGE"
-        dev={dev}
-        initialCountdown={initialCountdown}
-      />
-    );
+    redirect("/profile?view=settings&tab=email", "replace");
   }
 
   if (purpose === "RESET_PASSWORD") {
