@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import Editor from "@/components/custom/editor";
 import {
+  App,
   Button,
   Form,
   Input,
@@ -112,6 +113,8 @@ interface RenderFieldParams {
   uploadHint?: { hint: string; subHint: string };
   formInstance?: import("antd").FormInstance;
   uploadFolder?: string;
+  /** Dipanggil saat file ditolak sebelum upload (melebihi batas ukuran). */
+  onFileRejected?: (file: File) => void;
 }
 
 function renderField(params: RenderFieldParams): ReactNode {
@@ -127,6 +130,7 @@ function renderField(params: RenderFieldParams): ReactNode {
     uploadHint,
     formInstance,
     uploadFolder,
+    onFileRejected,
   } = params;
 
   let tpl: string | undefined;
@@ -211,16 +215,21 @@ function renderField(params: RenderFieldParams): ReactNode {
     case "upload":
       return (
         <Upload.Dragger
-          name={typeof name === "string" ? name : undefined}
+          // Field multipart HARUS "image" — itulah yang dibaca
+          // POST /api/upload (sebelumnya memakai nama field form seperti
+          // "filename"/"photo" sehingga API membalas "No file uploaded").
+          name="image"
           disabled={disabled}
           multiple={false}
           maxCount={1}
           accept={accept ?? "image/*"}
-          listType="picture"
           action="/api/upload"
           data={{ folder: uploadFolder ?? "misc" }}
           beforeUpload={(file) => {
-            if (file.size > 2 * 1024 * 1024) return false;
+            if (file.size > 2 * 1024 * 1024) {
+              onFileRejected?.(file);
+              return Upload.LIST_IGNORE;
+            }
             const prev = formInstance?.getFieldValue(name);
             const prevFile = Array.isArray(prev) ? prev[0] : null;
             if (prevFile) replacedUploadFiles.set(String(name), prevFile);
@@ -291,9 +300,19 @@ const FormAdmin = ({
   uploadFolder,
 }: FormAdminProps) => {
   const { t } = useT();
+  const { notification } = App.useApp();
   const [, setIconsReady] = useState(false);
 
   const form = Form.useFormInstance();
+
+  /** Notifikasi file ditolak karena melebihi batas ukuran upload. */
+  const notifyFileRejected = (file: File) => {
+    notification.error({
+      title: t("notif.error"),
+      description: t("upload.tooLarge", { name: file.name }),
+      placement: "bottomRight",
+    });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -370,6 +389,7 @@ const FormAdmin = ({
         },
         formInstance: (formProps as FormProps)?.form ?? form,
         uploadFolder,
+        onFileRejected: notifyFileRejected,
       })}
     </Form.Item>
   );
@@ -460,6 +480,7 @@ const FormAdmin = ({
                       },
                       formInstance: (formProps as FormProps)?.form ?? form,
                       uploadFolder,
+                      onFileRejected: notifyFileRejected,
                     })}
                   </Form.Item>
                 );

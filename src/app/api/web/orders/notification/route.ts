@@ -8,6 +8,15 @@ import {
   verifyMidtransSignature,
 } from "@/server/midtrans";
 import { isPaymentExpired } from "@/server/orderExpiry";
+import { onOrderCanceled, onOrderPaid } from "@/server/orderEvents";
+
+/** Trigger notifikasi + email sesuai status akhir transisi order. */
+function notifyStatusChange(orderId: number, status: string): void {
+  if (status === "PAID") void onOrderPaid(orderId);
+  else if (status === "FAILED" || status === "CANCELED") {
+    void onOrderCanceled(orderId);
+  }
+}
 
 /**
  * POST /api/web/orders/notification — webhook notification Midtrans
@@ -89,6 +98,7 @@ export async function POST(request: Request) {
           : {}),
       },
     });
+    notifyStatusChange(orderId, nextStatus);
   }
 
   // Midtrans mengharapkan 200 tanpa body error.
@@ -135,6 +145,7 @@ export async function GET(request: Request) {
                 : {}),
             },
           });
+          notifyStatusChange(orderId, nextStatus);
         }
       }
     }

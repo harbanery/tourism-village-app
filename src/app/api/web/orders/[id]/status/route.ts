@@ -7,6 +7,7 @@ import {
   mapMidtransStatus,
 } from "@/server/midtrans";
 import { isPaymentExpired } from "@/server/orderExpiry";
+import { onOrderCanceled, onOrderPaid } from "@/server/orderEvents";
 
 /**
  * GET /api/web/orders/[id]/status — periksa & sinkronkan status pembayaran.
@@ -55,6 +56,7 @@ export async function GET(
       where: { id: order.id },
       data: { paymentStatus: "CANCELED" },
     });
+    void onOrderCanceled(order.id);
   } else if (
     order.paymentStatus === "PENDING" &&
     // Ada kanal pembayaran nyata: QR QRIS pernah dibuat.
@@ -82,6 +84,8 @@ export async function GET(
               : {}),
           },
         });
+        if (nextStatus === "PAID") void onOrderPaid(order.id);
+        else void onOrderCanceled(order.id);
       }
     }
   }

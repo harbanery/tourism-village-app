@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/server/auth";
 import { REMOTE_TX_OPTIONS, withRetry } from "@/server/prismaRetry";
 import { expireStalePendingOrders, paymentDeadline } from "@/server/orderExpiry";
 import { customerFromUser, ensureOrderQris } from "@/server/qris";
+import { onOrderCreated } from "@/server/orderEvents";
 import {
   MAX_ORDERS_PER_DAY,
   countRecentOrders,
@@ -246,6 +247,10 @@ export async function POST(request: Request) {
     // Pola QRIS POS integration: QR dirender di halaman /payment/[id],
     // tanpa snap.js dan tanpa redirect keluar.
     const qris = await ensureOrderQris({ order, customer: customerFromUser(user) });
+
+    // Notifikasi + email konfirmasi pesanan (best-effort, tidak memblok respons).
+    void onOrderCreated(order.id);
+
     return NextResponse.json(
       {
         success: true,

@@ -16,6 +16,7 @@ import { LogoutOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
+import { NotificationBell } from "@/components/web/NotificationBell";
 import { menuAdminConfig } from "@/helpers/menu";
 import { useAdminSession } from "@/components/admin/session";
 import { ROLE_TAG_COLORS } from "@/components/admin/table";
@@ -84,6 +85,7 @@ const HeaderLayout: React.FC<{
       <Space size="middle">
         <LanguageToggle />
         <ThemeToggle />
+        <NotificationBell endpoint="/api/admin/notifications" />
         <Dropdown
           trigger={["click"]}
           menu={{

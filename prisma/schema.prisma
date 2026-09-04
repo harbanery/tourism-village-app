@@ -53,6 +53,7 @@ model AuthAdmin {
   status   Status    @default(ACTIVE)
   blogs    Blog[]
   sessions AdminSession[]
+  notifications AdminNotification[]
 
   @@map("auth_admin")
 }
@@ -79,6 +80,7 @@ model AuthUser {
   testimonials Testimonial[]
   sessions  UserSession[]
   otpCodes  OtpCode[]
+  notifications Notification[]
 
   @@map("auth_user")
 }
@@ -272,4 +274,45 @@ model OrderItem {
   package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
 
   @@map("wisata_pesan_detail")
+}
+
+// ============================================================
+// Notifications
+// ============================================================
+
+/** Notifikasi in-app untuk user web (status order, pengingat, dsb.). */
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  /** ORDER_CREATED | ORDER_PAID | ORDER_CANCELED | TRIP_REMINDER */
+  type      String
+  title     String
+  body      String
+  /** Route internal untuk dibuka saat notifikasi diklik (mis. /payment/1). */
+  link      String?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notification")
+}
+
+/** Notifikasi in-app untuk admin (order baru, pembayaran, ulasan, ringkasan). */
+model AdminNotification {
+  id        Int      @id @default(autoincrement())
+  adminId   Int      @map("admin_id")
+  /** NEW_ORDER | PAYMENT_RECEIVED | NEW_REVIEW | DAILY_SUMMARY */
+  type      String
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  admin AuthAdmin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, isRead])
+  @@map("admin_notification")
 }

@@ -39,6 +39,13 @@ export const NOTIFICATION_LOCALE: NotificationLocale =
   process.env.NOTIFICATION_LOCALE === "en" ? "en" : "id";
 
 // ---------------------------------------------------------------------------
+// Cron — secret untuk endpoint /api/cron/* (header Authorization: Bearer)
+// ---------------------------------------------------------------------------
+
+/** Secret bersama antara scheduler (Vercel Cron/eksternal) dan endpoint cron. */
+export const CRON_SECRET: string = process.env.CRON_SECRET || "";
+
+// ---------------------------------------------------------------------------
 // Midtrans (Core API — QRIS POS integration)
 // ---------------------------------------------------------------------------
 

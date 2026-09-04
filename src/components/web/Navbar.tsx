@@ -12,6 +12,7 @@ import {
 import { useT } from "@/components/locale/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
+import { NotificationBell } from "@/components/web/NotificationBell";
 
 const links = [
   { href: "/article", key: "nav.articles" },
@@ -112,6 +113,7 @@ export function Navbar() {
         <div className="flex items-center gap-1">
           <LanguageToggle />
           <ThemeToggle />
+          {user && <NotificationBell />}
           {user ? (
             <Dropdown
               menu={{

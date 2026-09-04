@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
+import { onReviewPending } from "@/server/orderEvents";
 
 /** Jeda minimal antar ulasan per user (24 jam). */
 const REVIEW_COOLDOWN_MS = 24 * 60 * 60 * 1000;
@@ -93,6 +94,9 @@ export async function POST(request: Request) {
       status: "NONACTIVE", // menunggu moderasi admin
     },
   });
+
+  // Notifikasi admin: ulasan baru menunggu moderasi (best-effort).
+  void onReviewPending(user.name, rating);
 
   return NextResponse.json(
     { success: true, data: { id: testimonial.id } },
