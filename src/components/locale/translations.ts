@@ -187,9 +187,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.step.confirmDesc": "Periksa data pemesan dan detail pesanan Anda",
     "checkout.detailInfo": "Detail Informasi",
     "checkout.schedulePerPackage": "Jadwal per Paket",
-    "checkout.sameSchedule": "Jadwal paket ini sama dengan paket pertama",
+    "checkout.sameSchedule": "Tanggal berangkat paket ini sama dengan paket pertama",
     "checkout.sameScheduleHint":
-      "Centang bila jadwalnya sama — isian mengikuti paket pertama",
+      "Centang bila tanggalnya sama — tanggal mengikuti paket pertama; menginap & jumlah hari tetap diatur per paket",
     "checkout.confirm": "Konfirmasi Pesanan",
     "checkout.editSchedule": "Ubah Jadwal",
     "checkout.editOrderer": "Ubah Data Pemesan",
@@ -238,6 +238,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.deadline": "Batas Pembayaran",
     "payment.expired":
       "Batas waktu pembayaran telah habis — pesanan dibatalkan.",
+    "payment.redirectHome":
+      "Anda akan diarahkan ke beranda dalam {seconds} detik",
     "payment.checkStatus": "Periksa Status Pembayaran",
     "payment.qrisTitle": "Pindai QR untuk Membayar",
     "payment.qrisHint":
@@ -669,9 +671,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.detailInfo": "Detail Information",
     "checkout.schedulePerPackage": "Schedule per Package",
     "checkout.sameSchedule":
-      "This package has the same schedule as the first one",
+      "This package departs on the same date as the first package",
     "checkout.sameScheduleHint":
-      "Tick if the schedule is the same — fields follow the first package",
+      "Tick if the date is the same — the date follows the first package; the stay and number of days are still set per package",
     "checkout.confirm": "Confirm Order",
     "checkout.editSchedule": "Edit Schedule",
     "checkout.editOrderer": "Edit Orderer Data",
@@ -720,6 +722,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "payment.deadline": "Payment Deadline",
     "payment.expired":
       "The payment deadline has passed — the order was canceled.",
+    "payment.redirectHome":
+      "You will be redirected to the home page in {seconds} seconds",
     "payment.checkStatus": "Check Payment Status",
     "payment.qrisTitle": "Scan the QR to Pay",
     "payment.qrisHint":

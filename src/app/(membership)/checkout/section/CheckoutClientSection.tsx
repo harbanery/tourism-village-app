@@ -20,6 +20,7 @@ import { EditOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { readCart, clearCart } from "@/helpers/cart";
+import { issuePaymentAccess } from "@/helpers/paymentAccess";
 import { formatRupiah } from "@/utils/format";
 import dayjs, { type Dayjs } from "dayjs";
 import Image from "next/image";
@@ -179,13 +180,18 @@ export default function CheckoutClientSection({
   const schedulesWatch =
     Form.useWatch("schedules", form) ?? confirmedSchedules;
 
-  /** Jadwal efektif satu paket: milik sendiri, atau ikut paket pertama. */
+  /**
+   * Jadwal efektif satu paket. Ceklis "jadwal sama" hanya menyamakan
+   * TANGGAL berangkat dengan paket pertama — menginap & jumlah hari tetap
+   * diatur per paket masing-masing.
+   */
   const effectiveSchedule = useCallback(
     (index: number): ScheduleValue => {
       const values = schedulesWatch ?? {};
       const own = values[String(items[index]?.packageId)] ?? {};
+      const first = values[String(items[0]?.packageId)] ?? {};
       if (index > 0 && own.sameSchedule) {
-        return values[String(items[0].packageId)] ?? own;
+        return { ...own, dateSchedule: first.dateSchedule ?? own.dateSchedule };
       }
       return own;
     },
@@ -260,18 +266,22 @@ export default function CheckoutClientSection({
       const values =
         (form.getFieldsValue(true) as CheckoutFormValues).schedules ??
         confirmedSchedules;
-      const first = values[String(items[0].packageId)];
       const payloadItems = items.map((item, index) => {
         const own = values[String(item.packageId)] ?? {};
-        // Ceklis "jadwal sama" → pakai jadwal paket pertama.
-        const schedule = index > 0 && own.sameSchedule ? (first ?? own) : own;
+        const firstSchedule = values[String(items[0].packageId)] ?? {};
+        // Ceklis "tanggal sama" → HANYA tanggal berangkat yang mengikuti
+        // paket pertama; menginap & jumlah hari tetap milik paket ini.
+        const sameDate = index > 0 && own.sameSchedule;
+        const date = sameDate
+          ? (firstSchedule.dateSchedule ?? own.dateSchedule)
+          : own.dateSchedule;
+        const homestay = own.homestay === "yes";
         return {
           packageId: item.packageId,
           quantity: item.quantity,
-          dateSchedule: schedule.dateSchedule?.toISOString(),
-          homestay: schedule.homestay === "yes",
-          homestayTime:
-            schedule.homestay === "yes" ? (schedule.homestayTime ?? 1) : null,
+          dateSchedule: date?.toISOString(),
+          homestay,
+          homestayTime: homestay ? (own.homestayTime ?? 1) : null,
         };
       });
 
@@ -303,6 +313,9 @@ export default function CheckoutClientSection({
       });
       clearCart();
       setCart([]);
+      // Tiket sekali masuk halaman pembayaran (dikonsumsi saat dibuka —
+      // kunjungan ulang tanpa tiket dialihkan ke profil).
+      issuePaymentAccess(json.data.orderId);
       // Arahkan ke halaman transaksi pembayaran (bukan diam di checkout).
       router.replace(`/payment/${json.data.orderId}`);
     } catch (error) {
@@ -366,7 +379,8 @@ export default function CheckoutClientSection({
         : null;
     return (
       <div className="pt-4">
-        {/* Ceklis: paket ini jadwalnya sama dengan paket pertama. */}
+        {/* Ceklis: tanggal berangkat paket ini sama dengan paket pertama
+            (menginap & jumlah hari tetap diatur per paket). */}
         {index > 0 && (
           <Form.Item
             name={["schedules", String(item.packageId), "sameSchedule"]}
@@ -379,72 +393,72 @@ export default function CheckoutClientSection({
           </Form.Item>
         )}
 
-        <div className={isSame ? "pointer-events-none opacity-50" : ""}>
-          <Form.Item
-            label={t("checkout.scheduleDate")}
-            name={["schedules", String(item.packageId), "dateSchedule"]}
-            rules={[
-              {
-                // Lewati validasi bila jadwal mengikuti paket pertama.
-                validator(_, value: Dayjs | undefined) {
-                  if (value) return Promise.resolve();
-                  if (isSame) return Promise.resolve();
+        <Form.Item
+          label={t("checkout.scheduleDate")}
+          name={["schedules", String(item.packageId), "dateSchedule"]}
+          rules={[
+            {
+              // Lewati validasi bila tanggal mengikuti paket pertama.
+              validator(_, value: Dayjs | undefined) {
+                if (value) return Promise.resolve();
+                if (isSame) return Promise.resolve();
+                return Promise.reject(
+                  new Error(
+                    t("validation.required", {
+                      field: t("checkout.scheduleDate"),
+                    }),
+                  ),
+                );
+              },
+            },
+            {
+              // Minimal H+2: hanya tanggal 2 hari ke depan ke atas yang valid.
+              validator(_, value: Dayjs | undefined) {
+                if (!value) return Promise.resolve();
+                if (value.isBefore(minDepartureDate(), "day")) {
                   return Promise.reject(
-                    new Error(
-                      t("validation.required", {
-                        field: t("checkout.scheduleDate"),
-                      }),
-                    ),
+                    new Error(t("checkout.minDateError")),
                   );
-                },
+                }
+                return Promise.resolve();
               },
-              {
-                // Minimal H+2: hanya tanggal 2 hari ke depan ke atas yang valid.
-                validator(_, value: Dayjs | undefined) {
-                  if (!value) return Promise.resolve();
-                  if (value.isBefore(minDepartureDate(), "day")) {
-                    return Promise.reject(
-                      new Error(t("checkout.minDateError")),
-                    );
-                  }
-                  return Promise.resolve();
-                },
-              },
-            ]}
-          >
-            <DatePicker
-              className="w-full!"
-              disabledDate={(current) =>
-                current.isBefore(minDepartureDate(), "day")
-              }
-            />
-          </Form.Item>
+            },
+          ]}
+        >
+          <DatePicker
+            className="w-full!"
+            // Tanggal sama → terkunci, mengikuti paket pertama.
+            disabled={isSame}
+            disabledDate={(current) =>
+              current.isBefore(minDepartureDate(), "day")
+            }
+          />
+        </Form.Item>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Form.Item
+            label={t("checkout.homestay")}
+            name={["schedules", String(item.packageId), "homestay"]}
+            initialValue="no"
+            className="mb-0!"
+          >
+            <Radio.Group>
+              <Radio.Button value="no">{t("common.no")}</Radio.Button>
+              <Radio.Button value="yes">{t("common.yes")}</Radio.Button>
+            </Radio.Group>
+          </Form.Item>
+          {/* Jumlah Hari hanya tampil bila menginap (selalu per paket). */}
+          {effective.homestay === "yes" && (
             <Form.Item
-              label={t("checkout.homestay")}
-              name={["schedules", String(item.packageId), "homestay"]}
-              initialValue="no"
+              label={t("checkout.homestayDays")}
+              name={["schedules", String(item.packageId), "homestayTime"]}
+              initialValue={1}
+              rules={[{ required: true }]}
               className="mb-0!"
             >
-              <Radio.Group>
-                <Radio.Button value="no">{t("common.no")}</Radio.Button>
-                <Radio.Button value="yes">{t("common.yes")}</Radio.Button>
-              </Radio.Group>
+              <InputNumber min={1} className="w-full!" />
             </Form.Item>
-            {/* Jumlah Hari hanya tampil bila menginap. */}
-            {effective.homestay === "yes" && (
-              <Form.Item
-                label={t("checkout.homestayDays")}
-                name={["schedules", String(item.packageId), "homestayTime"]}
-                initialValue={1}
-                rules={[{ required: true }]}
-                className="mb-0!"
-              >
-                <InputNumber min={1} className="w-full!" />
-              </Form.Item>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Keterangan tanggal pulang (berangkat + jumlah hari menginap). */}

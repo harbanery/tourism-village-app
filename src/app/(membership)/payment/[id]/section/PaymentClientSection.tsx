@@ -14,6 +14,10 @@ import {
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
+import {
+  peekPaymentAccess,
+  consumePaymentAccess,
+} from "@/helpers/paymentAccess";
 import { formatRupiah, formatDate } from "@/utils/format";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
@@ -170,6 +174,10 @@ function MidtransLogo({ className }: { className?: string }) {
 /**
  * Halaman transaksi pembayaran order (target setelah checkout).
  *
+ * Berlaku SEKALI: hanya boleh dimasuki setelah "Proses Order" (checkout)
+ * atau klik "Bayar Sekarang" (riwayat profil) — keduanya menerbitkan tiket
+ * akses sekali pakai; kunjungan ulang tanpa tiket dialihkan ke profil.
+ *
  * QRIS POS integration (Midtrans Core API): QR ditampilkan langsung di
  * halaman — pindai dengan e-wallet/m-banking; status dicek otomatis
  * berkala ke API Midtrans lewat /api/web/orders/[id]/status dan diperbarui
@@ -191,6 +199,39 @@ export default function PaymentClientSection({
   const [checking, setChecking] = useState(false);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
+  /** Detik menuju redirect otomatis (null = tidak menghitung). */
+  const [redirectIn, setRedirectIn] = useState<number | null>(null);
+
+  // Tiket sekali masuk (peek tanpa menghapus — aman untuk StrictMode):
+  // tanpa tiket → tendang ke profil; dengan tiket → konsumsi sekarang.
+  const [allowed] = useState(() => peekPaymentAccess(order.id));
+  useEffect(() => {
+    if (!allowed) {
+      router.replace("/profile");
+      return;
+    }
+    consumePaymentAccess(order.id);
+  }, [allowed, order.id, router]);
+
+  // Dibatalkan / gagal → redirect replace ke beranda setelah 5 detik.
+  // (tick pertama lewat setTimeout agar bukan setState langsung di effect)
+  useEffect(() => {
+    if (status !== "CANCELED" && status !== "FAILED") return;
+    let remaining = 5;
+    const tick = () => setRedirectIn(remaining);
+    const first = setTimeout(tick, 0);
+    const timer = setInterval(() => {
+      remaining = Math.max(0, remaining - 1);
+      tick();
+    }, 1000);
+    const redirect = setTimeout(() => router.replace("/"), 5000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(timer);
+      clearTimeout(redirect);
+    };
+  }, [status, router]);
+
   const statusRef = useRef(status);
   useEffect(() => {
     statusRef.current = status;
@@ -286,10 +327,12 @@ export default function PaymentClientSection({
     }
   }, [status, router]);
 
-  if (!mounted) return null;
+  if (!mounted || !allowed) return null;
 
   // Status final: bukan lagi halaman pembayaran.
   if (status !== "PENDING") {
+    // Dibatalkan / gagal → countdown 5 detik lalu replace ke beranda.
+    const isFinalNegative = status === "CANCELED" || status === "FAILED";
     return (
       <div className="mx-auto max-w-2xl px-4 py-16">
         <Result
@@ -304,7 +347,16 @@ export default function PaymentClientSection({
               ? t("payment.success")
               : t(`payment.status.${status}`)
           }
-          subTitle={expired ? t("payment.expired") : t("success.message")}
+          subTitle={
+            <>
+              {expired ? t("payment.expired") : t("success.message")}
+              {isFinalNegative && redirectIn !== null && (
+                <p className="mt-2 text-sm font-medium text-amber-600 dark:text-amber-400">
+                  {t("payment.redirectHome", { seconds: redirectIn })}
+                </p>
+              )}
+            </>
+          }
           extra={
             <Button type="primary" onClick={() => router.push("/profile")}>
               {t("success.goToProfile")}

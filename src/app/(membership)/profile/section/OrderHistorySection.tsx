@@ -12,6 +12,7 @@ import {
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate, formatRupiah } from "@/utils/format";
+import { issuePaymentAccess } from "@/helpers/paymentAccess";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
@@ -358,7 +359,12 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                     <Button
                       type="primary"
                       icon={<CreditCardOutlined />}
-                      onClick={() => router.push(`/payment/${order.id}`)}
+                      onClick={() => {
+                        // Tiket sekali masuk halaman pembayaran (halaman
+                        // payment berlaku sekali per tiket).
+                        issuePaymentAccess(order.id);
+                        router.push(`/payment/${order.id}`);
+                      }}
                     >
                       {t("payment.pay")}
                     </Button>
