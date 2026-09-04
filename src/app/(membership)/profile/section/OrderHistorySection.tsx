@@ -29,7 +29,16 @@ export interface HistoryOrder {
   paymentStatus: PaymentStatus;
   /** Batas waktu pembayaran (ISO) — hanya relevan untuk PENDING. */
   paymentExpiresAt?: string | null;
-  items: { id: number; packageName: string; quantity: number; price: number }[];
+  items: {
+    id: number;
+    packageName: string;
+    quantity: number;
+    price: number;
+    /** Jadwal per paket — null untuk data lama (fallback agregat order). */
+    dateSchedule?: string | null;
+    homestay?: boolean;
+    homestayTime?: number | null;
+  }[];
 }
 
 /** Warna tag status pembayaran. */
@@ -135,10 +144,29 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
         packageName: string;
         quantity: number;
         price: number;
+        dateSchedule?: string | null;
+        homestay?: boolean;
+        homestayTime?: number | null;
       }[]) {
         doc.text(String(item.packageName), 16, y);
         doc.text(String(item.quantity), 130, y, { align: "center" });
         doc.text(formatRupiah(item.price), 194, y, { align: "right" });
+        y += 5;
+        // Jadwal per paket (fallback agregat order untuk data lama).
+        const scheduleIso = item.dateSchedule ?? data.dateSchedule;
+        doc.setFontSize(8);
+        doc.setTextColor(110);
+        doc.text(
+          `${t("profile.departureDate")}: ${formatDate(scheduleIso, locale)}${
+            item.homestay
+              ? ` | ${t("checkout.homestay")}: ${item.homestayTime} ${t("checkout.homestayDays")}`
+              : ""
+          }`,
+          16,
+          y,
+        );
+        doc.setFontSize(9);
+        doc.setTextColor(30);
         y += 6;
       }
       doc.setDrawColor(13, 122, 95);
@@ -251,7 +279,19 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                       key={item.id}
                       className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/5 dark:border-white/5"
                     >
-                      <span className="font-medium">{item.packageName}</span>
+                      <span className="font-medium">
+                        {item.packageName}
+                        {/* Jadwal per paket (fallback agregat order). */}
+                        {item.dateSchedule && (
+                          <span className="block text-xs font-normal text-foreground/50">
+                            {t("profile.departureDate")}:{" "}
+                            {formatDate(item.dateSchedule, locale)}
+                            {item.homestay
+                              ? ` — ${t("checkout.homestay")} ${item.homestayTime} ${t("checkout.homestayDays")}`
+                              : ""}
+                          </span>
+                        )}
+                      </span>
                       <span className="w-14 text-center">
                         × {item.quantity}
                       </span>

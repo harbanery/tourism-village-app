@@ -53,7 +53,7 @@ export function ForgotPasswordSection() {
 
       // Flow: lupa password → OTP (verifikasi kepemilikan akun) → reset.
       const dev = result.data?.devCode ? `&dev=${result.data.devCode}` : "";
-      router.push(
+      router.replace(
         `/otp?userId=${result.data.userId}&purpose=RESET_PASSWORD${dev}`,
       );
     } catch {

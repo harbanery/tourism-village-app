@@ -61,7 +61,7 @@ export function RegisterFormSection() {
       // Akun dibuat → verifikasi email via halaman OTP.
       message.success(t("auth.register.successOtp"));
       const dev = result.data?.devCode ? `&dev=${result.data.devCode}` : "";
-      router.push(`/otp?userId=${result.data.id}&purpose=REGISTER${dev}`);
+      router.replace(`/otp?userId=${result.data.id}&purpose=REGISTER${dev}`);
     } catch {
       message.error(t("notif.error"));
     } finally {

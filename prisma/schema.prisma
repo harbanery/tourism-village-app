@@ -237,7 +237,9 @@ model Order {
   id            Int           @id @default(autoincrement())
   userId        Int           @map("user_id")
   dateOrder     DateTime      @default(now()) @map("date_order")
+  /** Agregat jadwal (tanggal paling awal) — detail per paket ada di OrderItem. */
   dateSchedule  DateTime      @map("date_schedule") @db.Date
+  /** true bila ada item yang menginap (detail per paket di OrderItem). */
   homestay      Boolean       @default(false)
   homestayTime  Int?          @map("homestay_time")
   totalPrice    Int           @map("total_harga")
@@ -262,6 +264,10 @@ model OrderItem {
   packageId Int     @map("paket_id")
   quantity  Int
   price     Int // subtotal
+  /** Jadwal per paket — setiap paket bisa punya tanggal/menginap berbeda. */
+  dateSchedule DateTime? @map("date_schedule") @db.Date
+  homestay     Boolean   @default(false)
+  homestayTime Int?      @map("homestay_time")
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
 

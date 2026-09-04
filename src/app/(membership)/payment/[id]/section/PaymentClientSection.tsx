@@ -25,7 +25,16 @@ interface PaymentOrder {
   homestayTime: number | null;
   totalPrice: number;
   paymentStatus: PaymentStatus;
-  items: { id: number; packageName: string; quantity: number; price: number }[];
+  items: {
+    id: number;
+    packageName: string;
+    quantity: number;
+    price: number;
+    /** Jadwal per paket — null untuk data lama (fallback agregat order). */
+    dateSchedule: string | null;
+    homestay: boolean;
+    homestayTime: number | null;
+  }[];
 }
 
 interface QrisInfo {
@@ -84,7 +93,7 @@ function PaymentCountdown({
   const ss =
     totalSeconds === null ? "--" : String(totalSeconds % 60).padStart(2, "0");
   const timeText = `${hh}:${mm}:${ss}`;
-  const isUrgent = totalSeconds !== null && totalSeconds <= 60 * 60; // ≤ 1 jam
+  const isUrgent = totalSeconds !== null && totalSeconds <= 60; // ≤ 1 menit
 
   return (
     <div
@@ -327,21 +336,24 @@ export default function PaymentClientSection({
 
         <div className="mt-4 divide-y divide-black/5 dark:divide-white/10">
           {order.items.map((item) => (
-            <div key={item.id} className="py-2 flex justify-between text-sm">
-              <span>
-                {item.packageName} × {item.quantity}
-              </span>
-              <span>{formatRupiah(item.price)}</span>
+            <div key={item.id} className="py-2 text-sm">
+              <div className="flex justify-between">
+                <span>
+                  {item.packageName} × {item.quantity}
+                </span>
+                <span>{formatRupiah(item.price)}</span>
+              </div>
+              {/* Jadwal per paket (fallback agregat order untuk data lama). */}
+              <p className="mt-1 text-foreground/60">
+                {t("profile.departureDate")}:{" "}
+                {formatDate(item.dateSchedule ?? order.dateSchedule, locale)}
+                {item.homestay
+                  ? ` — ${t("checkout.homestay")}: ${t("common.yes")} (${item.homestayTime} ${t("checkout.homestayDays")})`
+                  : ""}
+              </p>
             </div>
           ))}
         </div>
-
-        <p className="mt-2 text-sm text-foreground/70">
-          {t("profile.departureDate")}: {formatDate(order.dateSchedule, locale)}
-          {order.homestay
-            ? ` — ${t("checkout.homestay")}: ${t("common.yes")} (${order.homestayTime} ${t("checkout.homestayDays")})`
-            : ""}
-        </p>
 
         <div className="mt-4 flex items-center justify-between">
           <span className="font-medium">{t("cart.totalPrice")}</span>

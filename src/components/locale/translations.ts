@@ -180,6 +180,22 @@ export const translations: Record<Locale, Record<string, string>> = {
     "cart.decrease": "Kurangi jumlah",
 
     "checkout.title": "Checkout",
+    "checkout.step.schedule": "Isi Jadwal",
+    "checkout.step.confirm": "Konfirmasi",
+    "checkout.step.scheduleDesc": "Atur jadwal per paket, lalu konfirmasi pesanan",
+    "checkout.step.confirmDesc": "Periksa data pemesan dan detail pesanan Anda",
+    "checkout.detailInfo": "Detail Informasi",
+    "checkout.schedulePerPackage": "Jadwal per Paket",
+    "checkout.sameSchedule": "Jadwal paket ini sama dengan paket pertama",
+    "checkout.sameScheduleHint":
+      "Centang bila jadwalnya sama — isian mengikuti paket pertama",
+    "checkout.confirm": "Konfirmasi Pesanan",
+    "checkout.editSchedule": "Ubah Jadwal",
+    "checkout.editOrderer": "Ubah Data Pemesan",
+    "checkout.ordererNote":
+      "Data pemesan bergabung dengan detail pesanan setelah konfirmasi — masih bisa diubah bila ada perubahan jadwal.",
+    "checkout.ordererEditNote":
+      "Ubah nama/no telepon bila ada perubahan jadwal atau kontak.",
     "checkout.scheduleDate": "Tanggal Berangkat",
     "checkout.minDateError": "Tanggal berangkat minimal 2 hari setelah hari ini",
     "checkout.returnDate": "Tanggal Pulang",
@@ -190,6 +206,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.orders": "Pesanan",
     "checkout.emptyCart":
       "Keranjang kosong — silakan pilih paket wisata terlebih dahulu.",
+    "notif.ordererUpdated": "Data pemesan diperbarui",
+    "notif.ordererUpdateFailed": "Gagal memperbarui data pemesan",
 
     "package.searchPlaceholder": "Cari paket, tempat, atau fasilitas...",
     "package.filterPlace": "Semua Tempat",
@@ -627,6 +645,22 @@ export const translations: Record<Locale, Record<string, string>> = {
     "cart.decrease": "Decrease quantity",
 
     "checkout.title": "Checkout",
+    "checkout.step.schedule": "Fill in Schedule",
+    "checkout.step.confirm": "Confirmation",
+    "checkout.step.scheduleDesc": "Set the schedule per package, then confirm your order",
+    "checkout.step.confirmDesc": "Review your orderer data and order details",
+    "checkout.detailInfo": "Detail Information",
+    "checkout.schedulePerPackage": "Schedule per Package",
+    "checkout.sameSchedule": "This package has the same schedule as the first one",
+    "checkout.sameScheduleHint":
+      "Tick if the schedule is the same — fields follow the first package",
+    "checkout.confirm": "Confirm Order",
+    "checkout.editSchedule": "Edit Schedule",
+    "checkout.editOrderer": "Edit Orderer Data",
+    "checkout.ordererNote":
+      "Orderer data merges with the order details after confirmation — you can still edit it if the schedule changes.",
+    "checkout.ordererEditNote":
+      "Update the name/phone number if the schedule or contact changes.",
     "checkout.scheduleDate": "Departure Date",
     "checkout.minDateError":
       "Departure date must be at least 2 days after today",
@@ -638,6 +672,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.orders": "Orders",
     "checkout.emptyCart":
       "Your cart is empty — please pick a tour package first.",
+    "notif.ordererUpdated": "Orderer data updated",
+    "notif.ordererUpdateFailed": "Failed to update orderer data",
 
     "package.searchPlaceholder": "Search packages, places, or facilities...",
     "package.filterPlace": "All Places",

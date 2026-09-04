@@ -72,6 +72,9 @@ export async function GET(
         packageName: item.package.name,
         quantity: item.quantity,
         price: item.price,
+        dateSchedule: item.dateSchedule?.toISOString() ?? null,
+        homestay: item.homestay,
+        homestayTime: item.homestayTime,
       })),
       midtrans: midtrans
         ? {

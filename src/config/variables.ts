@@ -53,13 +53,14 @@ export const MIDTRANS_IS_PRODUCTION: boolean =
 export const MIDTRANS_IS_CONFIGURED: boolean = MIDTRANS_SERVER_KEY !== "";
 
 /**
- * Batas waktu pembayaran order (jam). PENDING yang melewati batas ini
+ * Batas waktu pembayaran order (menit). PENDING yang melewati batas ini
  * di-expire menjadi CANCELED (dikirim juga sebagai custom_expiry ke
  * charge QRIS agar QR ikut kedaluwarsa di sisi Midtrans).
+ * Default 5 menit — jangka pendek agar slot jadwal tidak terkunci lama.
  */
-export const PAYMENT_EXPIRY_HOURS: number = Math.max(
+export const PAYMENT_EXPIRY_MINUTES: number = Math.max(
   1,
-  Number(process.env.PAYMENT_EXPIRY_HOURS || "24"),
+  Number(process.env.PAYMENT_EXPIRY_MINUTES || "5"),
 );
 
 /** Base URL Core API v2 Midtrans (charge + status transaksi). */

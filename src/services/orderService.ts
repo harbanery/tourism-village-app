@@ -22,7 +22,16 @@ export interface UserOrder {
   totalPrice: number;
   paymentStatus: "PENDING" | "PAID" | "FAILED" | "CANCELED";
   paymentExpiresAt: string | null;
-  items: { id: number; packageName: string; quantity: number; price: number }[];
+  items: {
+    id: number;
+    packageName: string;
+    quantity: number;
+    price: number;
+    /** Jadwal per paket — null untuk data lama (fallback ke agregat order). */
+    dateSchedule: string | null;
+    homestay: boolean;
+    homestayTime: number | null;
+  }[];
 }
 
 /**
@@ -76,6 +85,9 @@ export async function getUserOrders(user: AuthUser): Promise<UserOrder[]> {
       packageName: item.package.name,
       quantity: item.quantity,
       price: item.price,
+      dateSchedule: item.dateSchedule?.toISOString() ?? null,
+      homestay: item.homestay,
+      homestayTime: item.homestayTime,
     })),
   }));
 }
@@ -117,6 +129,9 @@ export async function getOrderForUser(
       packageName: item.package.name,
       quantity: item.quantity,
       price: item.price,
+      dateSchedule: item.dateSchedule?.toISOString() ?? null,
+      homestay: item.homestay,
+      homestayTime: item.homestayTime,
     })),
   };
 }

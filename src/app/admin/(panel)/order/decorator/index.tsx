@@ -33,6 +33,10 @@ interface OrderRow {
     id: number;
     quantity: number;
     price: number;
+    /** Jadwal per paket (null untuk data lama — fallback agregat order). */
+    dateSchedule?: string | null;
+    homestay?: boolean;
+    homestayTime?: number | null;
     package: { name: string };
   }[];
 }
@@ -130,6 +134,14 @@ const OrderDecorator = () => {
           {record.items.map((item) => (
             <Typography.Text key={item.id} className="text-xs!">
               {item.package.name} × {item.quantity}
+              {item.dateSchedule && (
+                <span className="block text-[11px]! text-foreground/50">
+                  {formatDate(item.dateSchedule, locale)}
+                  {item.homestay
+                    ? ` — ${t("common.yes")} (${item.homestayTime})`
+                    : ""}
+                </span>
+              )}
             </Typography.Text>
           ))}
         </div>

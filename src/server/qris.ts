@@ -1,5 +1,5 @@
 import prisma from "@/server/db";
-import { PAYMENT_EXPIRY_HOURS } from "@/config/variables";
+import { PAYMENT_EXPIRY_MINUTES } from "@/config/variables";
 import { createQrisCharge, type QrisChargeResult } from "@/server/midtrans";
 import type { AuthUser, Order, OrderItem, Package } from "@prisma/client";
 
@@ -51,7 +51,7 @@ export async function ensureOrderQris(
     grossAmount: order.totalPrice,
     items,
     customer,
-    expiryMinutes: PAYMENT_EXPIRY_HOURS * 60,
+    expiryMinutes: PAYMENT_EXPIRY_MINUTES,
   });
   if (!charge) return null;
 

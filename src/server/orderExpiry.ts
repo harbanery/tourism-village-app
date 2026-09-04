@@ -1,10 +1,10 @@
 import prisma from "@/server/db";
-import { PAYMENT_EXPIRY_HOURS } from "@/config/variables";
+import { PAYMENT_EXPIRY_MINUTES } from "@/config/variables";
 
 /**
  * Batas waktu pembayaran order.
  *
- * - Order baru mendapat deadline `PAYMENT_EXPIRY_HOURS` jam (dikirim juga
+ * - Order baru mendapat deadline `PAYMENT_EXPIRY_MINUTES` menit (dikirim juga
  *   sebagai custom_expiry ke charge QRIS sehingga QR-nya ikut kedaluwarsa).
  * - PENDING yang melewati deadline di-expire menjadi CANCELED secara lazy
  *   oleh expireStalePendingOrders() (dipanggil di endpoint order web/profil).
@@ -12,7 +12,7 @@ import { PAYMENT_EXPIRY_HOURS } from "@/config/variables";
 
 /** Deadline pembayaran dihitung dari waktu acuan (default: sekarang). */
 export function paymentDeadline(from: Date = new Date()): Date {
-  return new Date(from.getTime() + PAYMENT_EXPIRY_HOURS * 60 * 60 * 1000);
+  return new Date(from.getTime() + PAYMENT_EXPIRY_MINUTES * 60 * 1000);
 }
 
 interface ExpirableOrder {

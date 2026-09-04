@@ -49,16 +49,25 @@ export async function GET() {
         packageName: item.package.name,
         quantity: item.quantity,
         price: item.price,
+        dateSchedule: item.dateSchedule?.toISOString() ?? null,
+        homestay: item.homestay,
+        homestayTime: item.homestayTime,
       })),
     })),
   });
 }
 
-interface CreateOrderBody {
-  items?: { packageId: number; quantity: number }[];
+interface CreateOrderItemInput {
+  packageId: number;
+  quantity: number;
+  /** Jadwal per paket (ISO date) — setiap paket bisa berbeda jadwalnya. */
   dateSchedule?: string;
   homestay?: boolean;
   homestayTime?: number | null;
+}
+
+interface CreateOrderBody {
+  items?: CreateOrderItemInput[];
 }
 
 /**
@@ -67,6 +76,10 @@ interface CreateOrderBody {
  * Harga TIDAK dipercaya dari klien: server mengambil harga terbaru dari
  * DB (paket ACTIVE), menghitung subtotal + total, lalu membuat charge QRIS
  * (Core API) untuk pembayaran di halaman /payment/[id].
+ *
+ * Jadwal (tanggal berangkat, menginap, jumlah hari) dikirim per item —
+ * setiap paket bisa punya jadwal berbeda. Field level order disimpan
+ * sebagai agregat (tanggal paling awal, ringkasan menginap).
  */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -98,22 +111,32 @@ export async function POST(request: Request) {
     );
   }
 
-  const schedule = body.dateSchedule ? new Date(body.dateSchedule) : null;
-  if (!schedule || Number.isNaN(schedule.getTime())) {
-    return NextResponse.json(
-      { success: false, error: "INVALID_SCHEDULE" },
-      { status: 400 },
-    );
-  }
-  schedule.setHours(12, 0, 0, 0); // netralkan zona waktu (@db.Date)
-
   // Tanggal berangkat minimal H+2 (2 hari setelah hari ini).
   const minSchedule = new Date();
   minSchedule.setHours(0, 0, 0, 0);
   minSchedule.setDate(minSchedule.getDate() + 2);
-  if (schedule.getTime() < minSchedule.getTime()) {
+
+  // Parse jadwal per item; netralkan zona waktu (@db.Date).
+  const itemSchedules = cartItems.map((item) => {
+    const schedule = item.dateSchedule ? new Date(item.dateSchedule) : null;
+    if (!schedule || Number.isNaN(schedule.getTime())) {
+      return { error: "INVALID_SCHEDULE" as const };
+    }
+    schedule.setHours(12, 0, 0, 0);
+    if (schedule.getTime() < minSchedule.getTime()) {
+      return { error: "SCHEDULE_TOO_SOON" as const };
+    }
+    const homestay = item.homestay === true;
+    return {
+      schedule,
+      homestay,
+      homestayTime: homestay ? Math.max(1, Number(item.homestayTime) || 1) : null,
+    };
+  });
+  const invalid = itemSchedules.find((row) => "error" in row);
+  if (invalid) {
     return NextResponse.json(
-      { success: false, error: "SCHEDULE_TOO_SOON" },
+      { success: false, error: invalid.error },
       { status: 400 },
     );
   }
@@ -126,9 +149,6 @@ export async function POST(request: Request) {
       { status: 429 },
     );
   }
-
-  const homestay = body.homestay === true;
-  const homestayTime = homestay ? Math.max(1, Number(body.homestayTime) || 1) : null;
 
   try {
     // --- Ambil harga dari DB (server-trusted) ---
@@ -150,17 +170,36 @@ export async function POST(request: Request) {
 
     const priceById = new Map(activePackages.map((pkg) => [pkg.id, pkg]));
 
-    const orderItems = cartItems.map((item) => {
+    const orderItems = cartItems.map((item, index) => {
       const pkg = priceById.get(item.packageId)!;
+      const scheduleRow = itemSchedules[index] as {
+        schedule: Date;
+        homestay: boolean;
+        homestayTime: number | null;
+      };
       return {
         packageId: pkg.id,
         name: pkg.name,
         price: pkg.price, // harga satuan saat transaksi
         quantity: item.quantity,
         subtotal: pkg.price * item.quantity,
+        dateSchedule: scheduleRow.schedule,
+        homestay: scheduleRow.homestay,
+        homestayTime: scheduleRow.homestayTime,
       };
     });
     const totalPrice = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+
+    // Agregat level order: tanggal paling awal + ringkasan menginap.
+    const earliestSchedule = orderItems
+      .map((item) => item.dateSchedule)
+      .reduce((a, b) => (a.getTime() < b.getTime() ? a : b));
+    const anyHomestay = orderItems.some((item) => item.homestay);
+    const maxHomestayTime = anyHomestay
+      ? Math.max(
+          ...orderItems.map((item) => item.homestayTime ?? 1),
+        )
+      : null;
 
     // --- Simpan order + item (transaksi atomik) ---
     // REMOTE_TX_OPTIONS: DB remote (Railway) berlatensi tinggi dari lokal,
@@ -171,9 +210,9 @@ export async function POST(request: Request) {
           const created = await tx.order.create({
             data: {
               userId: user.id,
-              dateSchedule: schedule,
-              homestay,
-              homestayTime,
+              dateSchedule: earliestSchedule,
+              homestay: anyHomestay,
+              homestayTime: maxHomestayTime,
               totalPrice,
               paymentStatus: "PENDING",
               // Batas waktu pembayaran (custom_expiry charge QRIS mengikuti ini).
@@ -183,6 +222,9 @@ export async function POST(request: Request) {
                   packageId: item.packageId,
                   quantity: item.quantity,
                   price: item.subtotal,
+                  dateSchedule: item.dateSchedule,
+                  homestay: item.homestay,
+                  homestayTime: item.homestayTime,
                 })),
               },
             },
@@ -216,6 +258,9 @@ export async function POST(request: Request) {
             price: item.price,
             quantity: item.quantity,
             subtotal: item.subtotal,
+            dateSchedule: item.dateSchedule.toISOString(),
+            homestay: item.homestay,
+            homestayTime: item.homestayTime,
           })),
           payment: {
             /** null = QR belum tersedia (Midtrans tidak dikonfigurasi / gagal). */
