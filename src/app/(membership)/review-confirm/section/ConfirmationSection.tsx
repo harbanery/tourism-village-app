@@ -1,17 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
+import { peekReviewAccess, consumeReviewAccess } from "@/helpers/reviewAccess";
 
-/** Konfirmasi pesanan sukses — link profil mengikuti sesi login. */
+/**
+ * Konfirmasi pesanan sukses — halaman berlaku SEKALI: hanya bisa diakses
+ * dengan tiket dari pembayaran berhasil (link profil mengikuti sesi login).
+ * Kunjungan ulang tanpa tiket (back/refresh/URL langsung) → beranda.
+ */
 export function ConfirmationSection() {
   const { t } = useT();
   const router = useRouter();
   const mounted = useMounted();
-  if (!mounted) return null;
+  // Peek tanpa menghapus (aman StrictMode); konsumsi di effect.
+  const [allowed] = useState(() => peekReviewAccess());
+  useEffect(() => {
+    if (!allowed) {
+      router.replace("/");
+      return;
+    }
+    consumeReviewAccess();
+  }, [allowed, router]);
+  if (!mounted || !allowed) return null;
 
   return (
     <div className="text-center">

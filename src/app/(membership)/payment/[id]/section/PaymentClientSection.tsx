@@ -18,6 +18,9 @@ import {
   peekPaymentAccess,
   consumePaymentAccess,
 } from "@/helpers/paymentAccess";
+import {
+  issueReviewAccess,
+} from "@/helpers/reviewAccess";
 import { formatRupiah, formatDate } from "@/utils/format";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
@@ -320,9 +323,11 @@ export default function PaymentClientSection({
     return () => clearInterval(timer);
   }, [option, handleCheck]);
 
-  // Pembayaran berhasil → langsung diarahkan ke halaman review-confirm.
+  // Pembayaran berhasil → terbitkan tiket sekali masuk halaman review
+  // (review-confirm hanya bisa diakses setelah payment sukses), lalu arahkan.
   useEffect(() => {
     if (status === "PAID") {
+      issueReviewAccess();
       router.replace("/review-confirm");
     }
   }, [status, router]);

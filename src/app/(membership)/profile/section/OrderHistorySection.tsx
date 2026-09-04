@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
 import { App, Button, Card, Empty, List, Tag } from "antd";
@@ -18,7 +19,8 @@ type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
 export interface HistoryOrder {
   id: number;
-  userId: number;
+  /** Opsional — respons /api/web/orders tidak menyertakan userId. */
+  userId?: number;
   userName?: string;
   userEmail?: string;
   userPhone?: string | null;
@@ -69,11 +71,67 @@ function hasDistinctItemSchedules(order: HistoryOrder): boolean {
   return signatures.size > 1;
 }
 
+/** Bentuk order dari GET /api/web/orders (homestay boolean). */
+interface ApiOrder {
+  id: number;
+  dateOrder: string;
+  dateSchedule: string;
+  homestay: boolean;
+  homestayTime: number | null;
+  totalPrice: number;
+  paymentStatus: PaymentStatus;
+  paymentExpiresAt: string | null;
+  items: {
+    id: number;
+    packageName: string;
+    quantity: number;
+    price: number;
+    dateSchedule: string | null;
+    homestay: boolean;
+    homestayTime: number | null;
+  }[];
+}
+
+/** Map respons API → HistoryOrder (homestay "yes"|"no"). */
+function toHistoryOrder(o: ApiOrder): HistoryOrder {
+  return {
+    ...o,
+    homestay: o.homestay ? "yes" : "no",
+    items: o.items,
+  };
+}
+
 export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
   const { t, locale } = useT();
   const router = useRouter();
   const mounted = useMounted();
   const { message } = App.useApp();
+
+  // Salinan lokal — bisa disegarkan tanpa menunggu render server ulang.
+  const [list, setList] = useState<HistoryOrder[]>(orders);
+
+  // Segarkan riwayat saat halaman profil dibuka kembali (router cache bisa
+  // menyajikan data lama saat back-navigation) dan saat tab kembali aktif.
+  useEffect(() => {
+    let active = true;
+    const refresh = async () => {
+      try {
+        const res = await fetch("/api/web/orders");
+        const json = await res.json();
+        if (!active || !json.success) return;
+        setList((json.data as ApiOrder[]).map(toHistoryOrder));
+      } catch {
+        // Gagal refresh senyap — data lama tetap tampil.
+      }
+    };
+    void refresh();
+    const onFocus = () => void refresh();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
   if (!mounted) return null;
 
   /** Unduh bukti pembayaran (invoice Midtrans + data order) sebagai PDF. */
@@ -201,7 +259,7 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      {orders.length === 0 ? (
+      {list.length === 0 ? (
         <Card className="mt-6!">
           <Empty description={t("profile.noOrders")} className="py-8!">
             {/* Belum punya pesanan → ajak memesan paket wisata. */}
@@ -217,7 +275,7 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
         <List
           className="mt-6"
           grid={{ gutter: 24, xs: 1, sm: 1, md: 1, lg: 1, xl: 1 }}
-          dataSource={orders}
+          dataSource={list}
           renderItem={(order) => (
             <List.Item>
               <Card

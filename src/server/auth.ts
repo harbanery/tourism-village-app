@@ -122,11 +122,12 @@ export async function clearFailedAttempts(
   ipAddress: string,
   scope: RateLimitScope,
 ): Promise<void> {
-  await prisma.loginAttempt.update({
-    where: attemptKey(ipAddress, scope),
+  // updateMany (bukan update): tidak melempar P2025 saat belum ada row
+  // untuk IP+scope ini — bersih kalau ada, no-op kalau tidak. Where-nya
+  // filter datar (bukan composite unique key).
+  await prisma.loginAttempt.updateMany({
+    where: { ipAddress, scope },
     data: { attemptCount: 0, blockedUntil: null, lastAttemptAt: new Date() },
-  }).catch(() => {
-    // Belum ada row untuk IP+scope ini — tidak perlu dibersihkan.
   });
 }
 
