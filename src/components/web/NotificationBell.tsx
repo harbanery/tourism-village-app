@@ -17,7 +17,10 @@ interface NotificationItem {
 }
 
 /** Waktu relatif sederhana (baru saja / menit / jam / hari). */
-function relativeTime(iso: string, t: (key: string, params?: Record<string, string | number>) => string): string {
+function relativeTime(
+  iso: string,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const minutes = Math.floor(diffMs / 60000);
   if (minutes < 1) return t("notifBell.justNow");
@@ -146,7 +149,11 @@ export function NotificationBell({
                   {!item.isRead && (
                     <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                   )}
-                  <span className={item.isRead ? "text-sm" : "text-sm font-semibold"}>
+                  <span
+                    className={
+                      item.isRead ? "text-sm" : "text-sm font-semibold"
+                    }
+                  >
                     {item.title}
                   </span>
                 </span>
@@ -177,7 +184,7 @@ export function NotificationBell({
       placement="bottomRight"
       arrow={false}
     >
-      <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+      <Badge count={unreadCount} size="small" offset={[-9, 9]}>
         <Button
           type="text"
           aria-label={t("notifBell.title")}

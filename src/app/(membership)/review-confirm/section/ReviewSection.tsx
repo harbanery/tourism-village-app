@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { App, Button, Input, Rate, Spin } from "antd";
-import { CheckCircleFilled } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 
 /** Durasi idle di halaman sebelum dialihkan ke beranda (1 menit). */
@@ -117,7 +116,9 @@ export function ReviewSection() {
             placement: "bottomRight",
           });
           setReviewState("cooldown");
-          setCooldownEnd(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
+          setCooldownEnd(
+            new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          );
           return;
         }
         throw new Error(json.error);
@@ -153,8 +154,9 @@ export function ReviewSection() {
   if (reviewState === "submitted") {
     return (
       <div className="mt-10 border-t border-black/5 pt-6 text-center dark:border-white/10">
-        <CheckCircleFilled className="text-4xl text-primary" />
-        <h2 className="mt-3 font-semibold">{t("success.review.thanks.title")}</h2>
+        <h2 className="mt-3 font-semibold">
+          {t("success.review.thanks.title")}
+        </h2>
         <p className="mt-1 text-sm text-foreground/60">
           {t("success.review.thanks.message")}
         </p>

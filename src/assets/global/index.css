@@ -84,3 +84,16 @@ body {
     overflow: hidden;
   }
 }
+
+/*
+ * Segmented profil member (riwayat belanja / pengaturan):
+ * - Track diberi warna lembut yang mengikuti light/dark mode.
+ * - Tiap opsi diberi margin agar tidak menempel satu sama lain
+ *   (jarak antar opsi); thumb item terpilih tetap dihitung antd.
+ */
+.profile-segmented.ant-segmented {
+  background: transparent;
+}
+.profile-segmented .ant-segmented-item {
+  margin: 0 0.5rem 0 0;
+}

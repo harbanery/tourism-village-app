@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-import { Card, Col, Row, Segmented, Spin, Statistic, Tag } from "antd";
+import { Card, Col, Row, Segmented, Statistic } from "antd";
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
@@ -10,56 +9,20 @@ import {
   CommentOutlined,
   DollarOutlined,
   FileTextOutlined,
-  MinusOutlined,
   RiseOutlined,
   ShoppingOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import { useThemeMode } from "@/components/theme/ThemeProvider";
 import { useMounted } from "@/helpers/useMounted";
 import LoaderPage from "@/components/admin/loader";
-import { AdminTable } from "@/components/admin/table";
-import { formatDate, formatRupiah } from "@/utils/format";
-
-/** Grafik @ant-design/plots dimuat dinamis (canvas, client-only). */
-const loadingChart = () => (
-  <div className="flex h-72 items-center justify-center">
-    <Spin />
-  </div>
-);
-const AreaChart = dynamic(() => import("@ant-design/plots").then((m) => m.Area), {
-  ssr: false,
-  loading: loadingChart,
-});
-const ColumnChart = dynamic(
-  () => import("@ant-design/plots").then((m) => m.Column),
-  { ssr: false, loading: loadingChart },
-);
-const PieChart = dynamic(() => import("@ant-design/plots").then((m) => m.Pie), {
-  ssr: false,
-  loading: loadingChart,
-});
-const BarChart = dynamic(() => import("@ant-design/plots").then((m) => m.Bar), {
-  ssr: false,
-  loading: loadingChart,
-});
+import RevenueTrendChart from "@/components/admin/chart/RevenueTrendChart";
+import OrdersStatusChart from "@/components/admin/chart/OrdersStatusChart";
+import StatusDoughnutChart from "@/components/admin/chart/StatusDoughnutChart";
+import TopPackagesChart from "@/components/admin/chart/TopPackagesChart";
+import RatioDoughnutChart from "@/components/admin/chart/RatioDoughnutChart";
+import { formatRupiah } from "@/utils/format";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
-
-/** Warna konsisten per status pembayaran di semua grafik. */
-const STATUS_COLORS: Record<PaymentStatus, string> = {
-  PAID: "#0d7a5f",
-  PENDING: "#faad14",
-  FAILED: "#ff4d4f",
-  CANCELED: "#8c8c8c",
-};
-
-const STATUS_TAG_COLORS: Record<PaymentStatus, string> = {
-  PAID: "green",
-  PENDING: "gold",
-  FAILED: "red",
-  CANCELED: "default",
-};
 
 interface Analytics {
   period: number;
@@ -91,22 +54,13 @@ interface DashboardData {
   totalPackages: number;
   totalOrders: number;
   totalTestimonials: number;
-  recentOrders: {
-    id: number;
-    userName: string;
-    dateOrder: string;
-    dateSchedule: string;
-    totalPrice: number;
-    paymentStatus: PaymentStatus;
-  }[];
   analytics: Analytics;
 }
 
 /** Panah persentase perubahan bulan ini vs bulan lalu. */
 function Delta({ pct }: { pct: number | null }) {
   const { t } = useT();
-  if (pct === null)
-    return <MinusOutlined className="text-xs! text-foreground/50!" />;
+  if (pct === null) return null;
   const up = pct > 0;
   const flat = pct === 0;
   return (
@@ -135,17 +89,11 @@ function Delta({ pct }: { pct: number | null }) {
 }
 
 export default function DashboardPage() {
-  const { t, locale } = useT();
-  const { mode } = useThemeMode();
+  const { t } = useT();
   const mounted = useMounted();
   const [period, setPeriod] = useState<number>(30);
   const [fetching, setFetching] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
-
-  // Grafik canvas tidak mengikuti tema antd — tema G2 'dark' diteruskan
-  // manual agar label/legend/tooltip ikut terang saat dark mode.
-  const isDark = mode === "dark";
-  const chartTheme = isDark ? ({ type: "dark" } as const) : undefined;
 
   const fetchDashboard = useCallback(async (days: number) => {
     try {
@@ -168,43 +116,12 @@ export default function DashboardPage() {
   const analytics = data?.analytics;
   const kpi = analytics?.kpi;
 
-  const statusLabel = (status: PaymentStatus) => t(`payment.status.${status}`);
-  const statusPalette =
-    analytics?.statusTotals.map((row) => statusLabel(row.status)) ?? [];
-  const statusColorRange =
-    analytics?.statusTotals.map((row) => STATUS_COLORS[row.status]) ?? [];
-
-  const columns = [
-    {
-      title: t("common.date"),
-      dataIndex: "dateOrder",
-      key: "dateOrder",
-      render: (v: string) => formatDate(v, locale, true),
-    },
-    { title: t("common.name"), dataIndex: "userName", key: "userName" },
-    {
-      title: t("admin.orders.departureDate"),
-      dataIndex: "dateSchedule",
-      key: "dateSchedule",
-      render: (v: string) => formatDate(v, locale),
-    },
-    {
-      title: t("admin.orders.totalPrice"),
-      dataIndex: "totalPrice",
-      key: "totalPrice",
-      render: (v: number) => (
-        <span className="font-medium">{formatRupiah(v)}</span>
-      ),
-    },
-    {
-      title: t("common.status"),
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      render: (v: PaymentStatus) => (
-        <Tag color={STATUS_TAG_COLORS[v]}>{statusLabel(v)}</Tag>
-      ),
-    },
-  ];
+  const statusLabels: Record<string, string> = {
+    PAID: t("payment.status.PAID"),
+    PENDING: t("payment.status.PENDING"),
+    FAILED: t("payment.status.FAILED"),
+    CANCELED: t("payment.status.CANCELED"),
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -317,85 +234,32 @@ export default function DashboardPage() {
 
       {/* Tren pendapatan (uang diterima per hari) */}
       <Card title={t("admin.dashboard.revenueTrend")}>
-        <div className="h-72">
-          <AreaChart
-            theme={chartTheme}
-            data={analytics?.timeseries ?? []}
-            xField="day"
-            yField="revenue"
-          />
-        </div>
+        <RevenueTrendChart data={analytics?.timeseries ?? []} />
       </Card>
 
       {/* Order per hari dipecah per status (kesehatan funnel dari waktu ke waktu) */}
       <Card title={t("admin.dashboard.ordersTrend")}>
-        <div className="h-72">
-          <ColumnChart
-            theme={chartTheme}
-            data={(analytics?.statusSeries ?? []).map((row) => ({
-              ...row,
-              status: statusLabel(row.status),
-            }))}
-            xField="day"
-            yField="count"
-            colorField="status"
-            stack
-            scale={{
-              color: {
-                domain: statusPalette,
-                range: statusColorRange,
-              },
-            }}
-            legend={{
-              color: {
-                position: "top",
-                layout: {
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                },
-              },
-            }}
-          />
-        </div>
+        <OrdersStatusChart
+          data={analytics?.statusSeries ?? []}
+          statusLabels={statusLabels}
+        />
       </Card>
 
       <Row gutter={[16, 16]}>
         {/* Komposisi status pembayaran periode */}
         <Col xs={24} lg={8}>
           <Card title={t("admin.dashboard.statusComposition")}>
-            <div className="h-64">
-              <PieChart
-                theme={chartTheme}
-                data={(analytics?.statusTotals ?? []).map((row) => ({
-                  ...row,
-                  status: statusLabel(row.status),
-                }))}
-                angleField="count"
-                colorField="status"
-                innerRadius={0.6}
-                scale={{
-                  color: {
-                    domain: statusPalette,
-                    range: statusColorRange,
-                  },
-                }}
-              />
-            </div>
+            <StatusDoughnutChart
+              data={analytics?.statusTotals ?? []}
+              statusLabels={statusLabels}
+            />
           </Card>
         </Col>
 
         {/* Paket terlaris (PAID) — dasar keputusan promo */}
         <Col xs={24} lg={16}>
           <Card title={t("admin.dashboard.topPackages")}>
-            <div className="h-64">
-              <BarChart
-                theme={chartTheme}
-                data={[...(analytics?.topPackages ?? [])].reverse()}
-                xField="revenue"
-                yField="name"
-              />
-            </div>
+            <TopPackagesChart data={analytics?.topPackages ?? []} />
           </Card>
         </Col>
       </Row>
@@ -404,55 +268,35 @@ export default function DashboardPage() {
         {/* Rasio item menginap vs tidak (PAID) */}
         <Col xs={24} lg={12}>
           <Card title={t("admin.dashboard.homestayRatio")}>
-            <div className="h-64">
-              <PieChart
-                theme={chartTheme}
-                data={(analytics?.homestay ?? []).map((row) => ({
-                  type: t(
-                    row.type === "stay"
-                      ? "admin.dashboard.stayItem"
-                      : "admin.dashboard.dayItem",
-                  ),
-                  value: row.value,
-                }))}
-                angleField="value"
-                colorField="type"
-                innerRadius={0.6}
-              />
-            </div>
+            <RatioDoughnutChart
+              segments={(analytics?.homestay ?? []).map((row) => ({
+                label: t(
+                  row.type === "stay"
+                    ? "admin.dashboard.stayItem"
+                    : "admin.dashboard.dayItem",
+                ),
+                value: row.value,
+              }))}
+            />
           </Card>
         </Col>
 
         {/* Pembeli baru vs kembali — indikator kepuasan */}
         <Col xs={24} lg={12}>
           <Card title={t("admin.dashboard.buyers")}>
-            <div className="h-64">
-              <PieChart
-                theme={chartTheme}
-                data={(analytics?.buyers ?? []).map((row) => ({
-                  type: t(
-                    row.type === "new"
-                      ? "admin.dashboard.newBuyer"
-                      : "admin.dashboard.returningBuyer",
-                  ),
-                  value: row.value,
-                }))}
-                angleField="value"
-                colorField="type"
-                innerRadius={0.6}
-              />
-            </div>
+            <RatioDoughnutChart
+              segments={(analytics?.buyers ?? []).map((row) => ({
+                label: t(
+                  row.type === "new"
+                    ? "admin.dashboard.newBuyer"
+                    : "admin.dashboard.returningBuyer",
+                ),
+                value: row.value,
+              }))}
+            />
           </Card>
         </Col>
       </Row>
-
-      <Card title={t("admin.dashboard.recentOrders")}>
-        <AdminTable
-          dataSource={data?.recentOrders ?? []}
-          columns={columns}
-          pagination={false}
-        />
-      </Card>
     </div>
   );
 }

@@ -9,7 +9,10 @@ import {
   type OrderEmailData,
 } from "@/server/emailTemplates";
 import { NOTIFICATION_LOCALE } from "@/config/variables";
-import { createUserNotification, notifyAdmins } from "@/services/notificationService";
+import {
+  createUserNotification,
+  notifyAdmins,
+} from "@/services/notificationService";
 
 /**
  * Event order → notifikasi in-app + email transaksional (pola progress-self).
@@ -75,9 +78,11 @@ function sendUserEmail(
 }
 
 /** Kirim email ke semua admin MASTER (notif operasional). */
-async function sendMasterAdminsEmail(
-  content: { subject: string; text: string; html: string },
-): Promise<void> {
+async function sendMasterAdminsEmail(content: {
+  subject: string;
+  text: string;
+  html: string;
+}): Promise<void> {
   const admins = await prisma.authAdmin.findMany({
     where: { status: "ACTIVE", role: "MASTER" },
     select: { email: true },
@@ -123,7 +128,7 @@ export async function onOrderCreated(orderId: number): Promise<void> {
       body: isId
         ? `${order.user.name} membuat pesanan senilai ${rupiah(order.totalPrice)}.`
         : `${order.user.name} placed an order worth ${rupiah(order.totalPrice)}.`,
-      link: "/order",
+      link: "/admin/order",
     });
     await sendMasterAdminsEmail(orderConfirmationEmail(emailData));
   } catch (error) {
@@ -159,7 +164,7 @@ export async function onOrderPaid(orderId: number): Promise<void> {
       body: isId
         ? `${order.user.name} membayar ${rupiah(order.totalPrice)}.`
         : `${order.user.name} paid ${rupiah(order.totalPrice)}.`,
-      link: "/order",
+      link: "/admin/order",
     });
     await sendMasterAdminsEmail(orderPaidEmail(emailData));
   } catch (error) {
@@ -197,7 +202,9 @@ export async function onReviewPending(
   try {
     await notifyAdmins({
       type: "NEW_REVIEW",
-      title: isId ? "Ulasan baru menunggu moderasi" : "New review awaiting moderation",
+      title: isId
+        ? "Ulasan baru menunggu moderasi"
+        : "New review awaiting moderation",
       body: isId
         ? `${userName} memberi rating ${rating}/5.`
         : `${userName} left a ${rating}/5 rating.`,
@@ -311,7 +318,10 @@ export async function buildDailySummary(date = new Date()) {
         where: { paymentStatus: "PENDING", dateOrder: { gte: start, lt: end } },
       }),
       prisma.order.count({
-        where: { paymentStatus: "CANCELED", dateOrder: { gte: start, lt: end } },
+        where: {
+          paymentStatus: "CANCELED",
+          dateOrder: { gte: start, lt: end },
+        },
       }),
       prisma.order.aggregate({
         _sum: { totalPrice: true },

@@ -47,8 +47,10 @@ export default function ProfileClientSection({
       </div>
 
       <div className="flex min-w-0 flex-col gap-4">
-        {/* Segmented view switcher — layout serupa period di dashboard admin. */}
+        {/* Segmented view switcher — layout serupa period di dashboard admin;
+            bg + jarak antar opsi diatur via .profile-segmented (global css). */}
         <Segmented
+          className="profile-segmented"
           value={view}
           onChange={(value) => setView(value as ProfileView)}
           options={[

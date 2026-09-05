@@ -62,7 +62,8 @@ function addDays(iso: string, days: number): string {
 /** true bila tiap paket punya reservasi berbeda (jadwal per item beda). */
 function hasDistinctItemSchedules(order: HistoryOrder): boolean {
   const items = order.items;
-  if (items.length < 2 || !items.every((item) => item.dateSchedule)) return false;
+  if (items.length < 2 || !items.every((item) => item.dateSchedule))
+    return false;
   const signatures = new Set(
     items.map(
       (item) => `${item.dateSchedule}|${item.homestay}|${item.homestayTime}`,
@@ -260,179 +261,177 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
   return (
     <div className="flex flex-col gap-6">
       {list.length === 0 ? (
-        <Card className="mt-6!">
+        <Card>
           <Empty description={t("profile.noOrders")} className="py-8!">
             {/* Belum punya pesanan → ajak memesan paket wisata. */}
-            <Button
-              type="primary"
-              onClick={() => router.push("/package")}
-            >
+            <Button type="primary" onClick={() => router.push("/package")}>
               {t("profile.orderPackage")}
             </Button>
           </Empty>
         </Card>
       ) : (
-        <div className="mt-6! flex flex-col gap-6!">
+        <div className="flex flex-col gap-6!">
           {list.map((order) => (
             <Card
               key={order.id}
-                title={`${t("common.total")}: ${formatRupiah(order.totalPrice)}`}
-                extra={
-                  <Tag color={PAYMENT_TAG_COLORS[order.paymentStatus]}>
-                    {t(`payment.status.${order.paymentStatus}`)}
-                  </Tag>
-                }
-              >
-                {/* Ringkasan tanggal-tanggal penting pesanan. */}
-                <div className="flex flex-col gap-2 text-sm">
-                  {/* Baris 1: tanggal pemesanan (kiri) + batas pembayaran (kanan). */}
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="flex items-center gap-2 text-foreground/70">
-                      <CalendarOutlined className="text-foreground/40!" />
+              title={`${t("common.total")}: ${formatRupiah(order.totalPrice)}`}
+              extra={
+                <Tag color={PAYMENT_TAG_COLORS[order.paymentStatus]}>
+                  {t(`payment.status.${order.paymentStatus}`)}
+                </Tag>
+              }
+            >
+              {/* Ringkasan tanggal-tanggal penting pesanan. */}
+              <div className="flex flex-col gap-2 text-sm">
+                {/* Baris 1: tanggal pemesanan (kiri) + batas pembayaran (kanan). */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="flex items-center gap-2 text-foreground/70">
+                    <CalendarOutlined className="text-foreground/40!" />
+                    <span>
+                      <span className="text-foreground/50">
+                        {t("profile.orderDate")}:
+                      </span>{" "}
+                      {formatDate(order.dateOrder, locale, true)}
+                    </span>
+                  </p>
+                  {order.paymentStatus === "PENDING" &&
+                  order.paymentExpiresAt ? (
+                    <p className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                      <FieldTimeOutlined />
                       <span>
-                        <span className="text-foreground/50">
-                          {t("profile.orderDate")}:
-                        </span>{" "}
-                        {formatDate(order.dateOrder, locale, true)}
+                        {t("payment.deadline")}:{" "}
+                        {formatDate(order.paymentExpiresAt, locale, true)}
                       </span>
                     </p>
-                    {order.paymentStatus === "PENDING" &&
-                    order.paymentExpiresAt ? (
-                      <p className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                        <FieldTimeOutlined />
-                        <span>
-                          {t("payment.deadline")}:{" "}
-                          {formatDate(order.paymentExpiresAt, locale, true)}
-                        </span>
-                      </p>
-                    ) : null}
-                  </div>
-                  {/* Baris 2: tanggal reservasi — per paket bila jadwalnya
+                  ) : null}
+                </div>
+                {/* Baris 2: tanggal reservasi — per paket bila jadwalnya
                       berbeda-beda, atau satu baris rangkuman bila sama. */}
-                  {hasDistinctItemSchedules(order) ? (
-                    <div className="flex flex-col gap-1">
-                      <p className="flex items-center gap-2 text-foreground/70">
-                        <CalendarOutlined className="text-foreground/40!" />
-                        <span className="text-foreground/50">
-                          {t("profile.reservationDate")}:
-                        </span>
-                      </p>
-                      {order.items.map((item) => (
-                        <p
-                          key={item.id}
-                          className="ml-6 flex flex-wrap items-center gap-2 text-sm text-foreground/70"
-                        >
-                          <span className="font-medium">{item.packageName}:</span>
-                          {formatDate(item.dateSchedule!, locale)}
-                          {item.homestay && (
-                            <>
-                              {" "}
-                              {t("common.until")}{" "}
-                              {formatDate(
-                                addDays(item.dateSchedule!, item.homestayTime ?? 1),
-                                locale,
-                              )}
-                              <Tag
-                                color="green"
-                                icon={<HomeOutlined />}
-                                className="m-0!"
-                              >
-                                {item.homestayTime} {t("checkout.homestayDays")}
-                              </Tag>
-                            </>
-                          )}
-                        </p>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="flex flex-wrap items-center gap-2 text-foreground/70">
+                {hasDistinctItemSchedules(order) ? (
+                  <div className="flex flex-col gap-1">
+                    <p className="flex items-center gap-2 text-foreground/70">
                       <CalendarOutlined className="text-foreground/40!" />
-                      <span>
-                        <span className="text-foreground/50">
-                          {t("profile.reservationDate")}:
-                        </span>{" "}
-                        {formatDate(order.dateSchedule, locale)}
-                        {order.homestay === "yes" && (
+                      <span className="text-foreground/50">
+                        {t("profile.reservationDate")}:
+                      </span>
+                    </p>
+                    {order.items.map((item) => (
+                      <p
+                        key={item.id}
+                        className="ml-6 flex flex-wrap items-center gap-2 text-sm text-foreground/70"
+                      >
+                        <span className="font-medium">{item.packageName}:</span>
+                        {formatDate(item.dateSchedule!, locale)}
+                        {item.homestay && (
                           <>
                             {" "}
                             {t("common.until")}{" "}
                             {formatDate(
                               addDays(
-                                order.dateSchedule,
-                                order.homestayTime ?? 1,
+                                item.dateSchedule!,
+                                item.homestayTime ?? 1,
                               ),
                               locale,
                             )}
+                            <Tag
+                              color="green"
+                              icon={<HomeOutlined />}
+                              className="m-0!"
+                            >
+                              {item.homestayTime} {t("checkout.homestayDays")}
+                            </Tag>
                           </>
                         )}
-                      </span>
-                      {order.homestay === "yes" && (
-                        <Tag
-                          color="green"
-                          icon={<HomeOutlined />}
-                          className="m-0!"
-                        >
-                          {t("checkout.homestay")} {order.homestayTime}{" "}
-                          {t("checkout.homestayDays")}
-                        </Tag>
-                      )}
-                    </p>
-                  )}
-                </div>
-
-                {/* List wisata: paket, kuantitas, harga — rapi per baris. */}
-                <div className="mt-4 rounded-lg border border-black/10 dark:border-white/10 overflow-hidden">
-                  <div className="grid grid-cols-[1fr_auto_auto] gap-3 bg-black/[0.03] dark:bg-white/[0.04] px-4 py-2 text-xs font-semibold text-foreground/60">
-                    <span>{t("cart.package")}</span>
-                    <span className="w-14 text-center">{t("cart.qty")}</span>
-                    <span className="w-24 text-right">{t("cart.price")}</span>
+                      </p>
+                    ))}
                   </div>
-                  {order.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/5 dark:border-white/5"
-                    >
-                      <span className="font-medium">{item.packageName}</span>
-                      <span className="w-14 text-center">
-                        × {item.quantity}
-                      </span>
-                      <span className="w-24 text-right">
-                        {formatRupiah(item.price)}
-                      </span>
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-[1fr_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/10 dark:border-white/10 font-semibold">
-                    <span>{t("cart.totalPrice")}</span>
-                    <span className="text-primary">
-                      {formatRupiah(order.totalPrice)}
+                ) : (
+                  <p className="flex flex-wrap items-center gap-2 text-foreground/70">
+                    <CalendarOutlined className="text-foreground/40!" />
+                    <span>
+                      <span className="text-foreground/50">
+                        {t("profile.reservationDate")}:
+                      </span>{" "}
+                      {formatDate(order.dateSchedule, locale)}
+                      {order.homestay === "yes" && (
+                        <>
+                          {" "}
+                          {t("common.until")}{" "}
+                          {formatDate(
+                            addDays(
+                              order.dateSchedule,
+                              order.homestayTime ?? 1,
+                            ),
+                            locale,
+                          )}
+                        </>
+                      )}
+                    </span>
+                    {order.homestay === "yes" && (
+                      <Tag
+                        color="green"
+                        icon={<HomeOutlined />}
+                        className="m-0!"
+                      >
+                        {t("checkout.homestay")} {order.homestayTime}{" "}
+                        {t("checkout.homestayDays")}
+                      </Tag>
+                    )}
+                  </p>
+                )}
+              </div>
+
+              {/* List wisata: paket, kuantitas, harga — rapi per baris. */}
+              <div className="mt-4 rounded-lg border border-black/10 dark:border-white/10 overflow-hidden">
+                <div className="grid grid-cols-[1fr_auto_auto] gap-3 bg-black/[0.03] dark:bg-white/[0.04] px-4 py-2 text-xs font-semibold text-foreground/60">
+                  <span>{t("cart.package")}</span>
+                  <span className="w-14 text-center">{t("cart.qty")}</span>
+                  <span className="w-24 text-right">{t("cart.price")}</span>
+                </div>
+                {order.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/5 dark:border-white/5"
+                  >
+                    <span className="font-medium">{item.packageName}</span>
+                    <span className="w-14 text-center">× {item.quantity}</span>
+                    <span className="w-24 text-right">
+                      {formatRupiah(item.price)}
                     </span>
                   </div>
+                ))}
+                <div className="grid grid-cols-[1fr_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/10 dark:border-white/10 font-semibold">
+                  <span>{t("cart.totalPrice")}</span>
+                  <span className="text-primary">
+                    {formatRupiah(order.totalPrice)}
+                  </span>
                 </div>
+              </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {order.paymentStatus === "PENDING" ? (
-                    <Button
-                      type="primary"
-                      icon={<CreditCardOutlined />}
-                      onClick={() => {
-                        // Tiket sekali masuk halaman pembayaran (halaman
-                        // payment berlaku sekali per tiket).
-                        issuePaymentAccess(order.id);
-                        router.push(`/payment/${order.id}`);
-                      }}
-                    >
-                      {t("payment.pay")}
-                    </Button>
-                  ) : order.paymentStatus === "PAID" ? (
-                    <Button
-                      icon={<DownloadOutlined />}
-                      onClick={() => handleDownloadInvoice(order.id)}
-                    >
-                      {t("profile.downloadReceipt")}
-                    </Button>
-                  ) : null}
-                </div>
-              </Card>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {order.paymentStatus === "PENDING" ? (
+                  <Button
+                    type="primary"
+                    icon={<CreditCardOutlined />}
+                    onClick={() => {
+                      // Tiket sekali masuk halaman pembayaran (halaman
+                      // payment berlaku sekali per tiket).
+                      issuePaymentAccess(order.id);
+                      router.push(`/payment/${order.id}`);
+                    }}
+                  >
+                    {t("payment.pay")}
+                  </Button>
+                ) : order.paymentStatus === "PAID" ? (
+                  <Button
+                    icon={<DownloadOutlined />}
+                    onClick={() => handleDownloadInvoice(order.id)}
+                  >
+                    {t("profile.downloadReceipt")}
+                  </Button>
+                ) : null}
+              </div>
+            </Card>
           ))}
         </div>
       )}

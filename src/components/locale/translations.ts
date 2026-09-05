@@ -422,7 +422,6 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "admin.title": "Panel Admin",
     "admin.dashboard": "Dashboard",
-    "admin.dashboard.recentOrders": "Pesanan Terbaru",
     "admin.dashboard.revenueMonth": "Pendapatan bulan ini",
     "admin.dashboard.ordersMonth": "Order bulan ini",
     "admin.dashboard.aov": "Nilai rata-rata order",
@@ -931,7 +930,6 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "admin.title": "Admin Panel",
     "admin.dashboard": "Dashboard",
-    "admin.dashboard.recentOrders": "Recent Orders",
     "admin.dashboard.revenueMonth": "Revenue this month",
     "admin.dashboard.ordersMonth": "Orders this month",
     "admin.dashboard.aov": "Average order value",
