@@ -2,12 +2,10 @@
 
 import { Dropdown } from "antd";
 import { GlobalOutlined } from "@ant-design/icons";
-import { useTheme, setLocale } from "@/components/theme/ThemeProvider";
-import { useT } from "@/components/locale/LocaleProvider";
+import { useLocale } from "@/components/locale/LocaleProvider";
 
 export function LanguageToggle() {
-  const { locale } = useTheme();
-  const { t } = useT();
+  const { locale, t, setLocale } = useLocale();
   return (
     <Dropdown
       menu={{

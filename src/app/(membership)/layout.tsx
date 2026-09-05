@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/web/Navbar";
+import { Navbar } from "@/components/web/navbar";
 
 /**
  * Layout halaman membership (profile, package, checkout, payment,

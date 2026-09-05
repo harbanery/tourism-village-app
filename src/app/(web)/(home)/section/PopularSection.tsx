@@ -37,7 +37,7 @@ function PlaceCard({ place }: { place: WebPlace }) {
       }
     >
       <Card.Meta
-        avatar={<EnvironmentOutlined className="text-xl text-primary" />}
+        avatar={<EnvironmentOutlined className="text-xl! text-primary!" />}
         title={place.name}
         description="Indonesia"
       />

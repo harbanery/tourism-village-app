@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs } from "antd";
+import { Segmented } from "antd";
 import { HistoryOutlined, SettingOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
@@ -15,8 +15,8 @@ export type ProfileView = "history" | "settings";
 
 /**
  * Konten halaman profil: kartu identitas kiri (sticky, tinggi maksimal
- * viewport dikurangi navbar) + kolom kanan ber-Tab: Riwayat Belanja dan
- * Pengaturan (bukan modal — menggantikan section riwayat).
+ * viewport dikurangi navbar) + kolom kanan dengan Segmented (pola period
+ * di dashboard admin, icon dipertahankan): Riwayat Belanja dan Pengaturan.
  * `initialView`/`initialSettingsTab` dipakai saat kembali dari verifikasi
  * OTP ganti email agar langsung terbuka di tab ganti email.
  */
@@ -46,30 +46,35 @@ export default function ProfileClientSection({
         <ProfileInfoSection user={user} settings={settings} />
       </div>
 
-      <Tabs
-        activeKey={view}
-        onChange={(key) => setView(key as ProfileView)}
-        items={[
-          {
-            key: "history",
-            icon: <HistoryOutlined />,
-            label: t("profile.orderHistory"),
-            children: <OrderHistorySection orders={orders} />,
-          },
-          {
-            key: "settings",
-            icon: <SettingOutlined />,
-            label: t("settings.title"),
-            children: (
-              <SettingsSection
-                user={user}
-                settings={settings}
-                initialTab={initialSettingsTab}
-              />
-            ),
-          },
-        ]}
-      />
+      <div className="flex min-w-0 flex-col gap-4">
+        {/* Segmented view switcher — layout serupa period di dashboard admin. */}
+        <Segmented
+          value={view}
+          onChange={(value) => setView(value as ProfileView)}
+          options={[
+            {
+              value: "history",
+              icon: <HistoryOutlined />,
+              label: t("profile.orderHistory"),
+            },
+            {
+              value: "settings",
+              icon: <SettingOutlined />,
+              label: t("settings.title"),
+            },
+          ]}
+        />
+
+        {view === "history" ? (
+          <OrderHistorySection orders={orders} />
+        ) : (
+          <SettingsSection
+            user={user}
+            settings={settings}
+            initialTab={initialSettingsTab}
+          />
+        )}
+      </div>
     </div>
   );
 }

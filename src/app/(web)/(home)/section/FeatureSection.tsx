@@ -14,22 +14,22 @@ export function FeatureSection() {
 
   const features = [
     {
-      icon: <HomeOutlined className="text-2xl text-primary" />,
+      icon: <HomeOutlined className="text-2xl! text-primary!" />,
       title: t("home.why.facility.title"),
       desc: t("home.why.facility.desc"),
     },
     {
-      icon: <CustomerServiceOutlined className="text-2xl text-primary" />,
+      icon: <CustomerServiceOutlined className="text-2xl! text-primary!" />,
       title: t("home.why.service.title"),
       desc: t("home.why.service.desc"),
     },
     {
-      icon: <WalletOutlined className="text-2xl text-primary" />,
+      icon: <WalletOutlined className="text-2xl! text-primary!" />,
       title: t("home.why.cheap.title"),
       desc: t("home.why.cheap.desc"),
     },
     {
-      icon: <StarOutlined className="text-2xl text-primary" />,
+      icon: <StarOutlined className="text-2xl! text-primary!" />,
       title: t("home.why.local.title"),
       desc: t("home.why.local.desc"),
     },

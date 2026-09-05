@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { LocaleProvider } from "@/components/locale/LocaleProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Analytics } from "@/components/vercel";
 import { geistSans, geistMono } from "@/utils/fonts/next-google";
@@ -30,7 +31,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AntdRegistry>
-          <ThemeProvider>{children}</ThemeProvider>
+          <LocaleProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </LocaleProvider>
         </AntdRegistry>
         <Analytics />
       </body>

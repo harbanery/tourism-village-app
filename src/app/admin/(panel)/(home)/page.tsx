@@ -15,6 +15,7 @@ import {
   ShoppingOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
+import { useThemeMode } from "@/components/theme/ThemeProvider";
 import { useMounted } from "@/helpers/useMounted";
 import LoaderPage from "@/components/admin/loader";
 import { AdminTable } from "@/components/admin/table";
@@ -105,7 +106,7 @@ interface DashboardData {
 function Delta({ pct }: { pct: number | null }) {
   const { t } = useT();
   if (pct === null)
-    return <MinusOutlined className="text-xs text-foreground/50" />;
+    return <MinusOutlined className="text-xs! text-foreground/50!" />;
   const up = pct > 0;
   const flat = pct === 0;
   return (
@@ -135,10 +136,16 @@ function Delta({ pct }: { pct: number | null }) {
 
 export default function DashboardPage() {
   const { t, locale } = useT();
+  const { mode } = useThemeMode();
   const mounted = useMounted();
   const [period, setPeriod] = useState<number>(30);
   const [fetching, setFetching] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
+
+  // Grafik canvas tidak mengikuti tema antd — tema G2 'dark' diteruskan
+  // manual agar label/legend/tooltip ikut terang saat dark mode.
+  const isDark = mode === "dark";
+  const chartTheme = isDark ? ({ type: "dark" } as const) : undefined;
 
   const fetchDashboard = useCallback(async (days: number) => {
     try {
@@ -214,6 +221,47 @@ export default function DashboardPage() {
         />
       </div>
 
+      {/* Ringkasan konten di paling atas: tempat wisata, paket, pemesanan, ulasan */}
+      <Row gutter={[16, 16]}>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic
+              title={t("admin.tourism.places")}
+              value={data?.activePlaces ?? 0}
+              prefix={<BankOutlined className="text-primary!" />}
+              suffix={`/ ${data?.totalPlaces ?? 0}`}
+            />
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic
+              title={t("admin.tourism.packages")}
+              value={data?.totalPackages ?? 0}
+              prefix={<FileTextOutlined className="text-primary!" />}
+            />
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic
+              title={t("admin.orders.title")}
+              value={data?.totalOrders ?? 0}
+              prefix={<ShoppingOutlined className="text-primary!" />}
+            />
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic
+              title={t("admin.reviews.title")}
+              value={data?.totalTestimonials ?? 0}
+              prefix={<CommentOutlined className="text-primary!" />}
+            />
+          </Card>
+        </Col>
+      </Row>
+
       {/* KPI transaksi: fokus pemesanan (pendapatan, order, AOV, sukses bayar) */}
       <Row gutter={[16, 16]}>
         <Col xs={12} lg={6}>
@@ -222,7 +270,7 @@ export default function DashboardPage() {
               title={t("admin.dashboard.revenueMonth")}
               value={kpi?.revenueThisMonth ?? 0}
               formatter={(value) => formatRupiah(Number(value))}
-              prefix={<DollarOutlined className="text-primary" />}
+              prefix={<DollarOutlined className="text-primary!" />}
             />
             <Delta pct={kpi?.revenueDeltaPct ?? null} />
           </Card>
@@ -232,7 +280,7 @@ export default function DashboardPage() {
             <Statistic
               title={t("admin.dashboard.ordersMonth")}
               value={kpi?.ordersThisMonth ?? 0}
-              prefix={<ShoppingOutlined className="text-primary" />}
+              prefix={<ShoppingOutlined className="text-primary!" />}
             />
             <Delta pct={kpi?.ordersDeltaPct ?? null} />
           </Card>
@@ -243,7 +291,7 @@ export default function DashboardPage() {
               title={t("admin.dashboard.aov")}
               value={kpi?.aov ?? 0}
               formatter={(value) => formatRupiah(Number(value))}
-              prefix={<RiseOutlined className="text-primary" />}
+              prefix={<RiseOutlined className="text-primary!" />}
             />
             <div className="mt-1 text-xs text-foreground/50">
               {t("admin.dashboard.paidTotal", { n: kpi?.paidTotal ?? 0 })}
@@ -256,7 +304,7 @@ export default function DashboardPage() {
               title={t("admin.dashboard.successRate")}
               value={kpi?.successRate ?? 0}
               suffix="%"
-              prefix={<ArrowUpOutlined className="text-primary" />}
+              prefix={<ArrowUpOutlined className="text-primary!" />}
             />
             <div className="mt-1 text-xs text-foreground/50">
               {t("admin.dashboard.pendingActive", {
@@ -271,6 +319,7 @@ export default function DashboardPage() {
       <Card title={t("admin.dashboard.revenueTrend")}>
         <div className="h-72">
           <AreaChart
+            theme={chartTheme}
             data={analytics?.timeseries ?? []}
             xField="day"
             yField="revenue"
@@ -282,6 +331,7 @@ export default function DashboardPage() {
       <Card title={t("admin.dashboard.ordersTrend")}>
         <div className="h-72">
           <ColumnChart
+            theme={chartTheme}
             data={(analytics?.statusSeries ?? []).map((row) => ({
               ...row,
               status: statusLabel(row.status),
@@ -296,6 +346,16 @@ export default function DashboardPage() {
                 range: statusColorRange,
               },
             }}
+            legend={{
+              color: {
+                position: "top",
+                layout: {
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                },
+              },
+            }}
           />
         </div>
       </Card>
@@ -306,6 +366,7 @@ export default function DashboardPage() {
           <Card title={t("admin.dashboard.statusComposition")}>
             <div className="h-64">
               <PieChart
+                theme={chartTheme}
                 data={(analytics?.statusTotals ?? []).map((row) => ({
                   ...row,
                   status: statusLabel(row.status),
@@ -329,6 +390,7 @@ export default function DashboardPage() {
           <Card title={t("admin.dashboard.topPackages")}>
             <div className="h-64">
               <BarChart
+                theme={chartTheme}
                 data={[...(analytics?.topPackages ?? [])].reverse()}
                 xField="revenue"
                 yField="name"
@@ -344,6 +406,7 @@ export default function DashboardPage() {
           <Card title={t("admin.dashboard.homestayRatio")}>
             <div className="h-64">
               <PieChart
+                theme={chartTheme}
                 data={(analytics?.homestay ?? []).map((row) => ({
                   type: t(
                     row.type === "stay"
@@ -365,6 +428,7 @@ export default function DashboardPage() {
           <Card title={t("admin.dashboard.buyers")}>
             <div className="h-64">
               <PieChart
+                theme={chartTheme}
                 data={(analytics?.buyers ?? []).map((row) => ({
                   type: t(
                     row.type === "new"
@@ -378,47 +442,6 @@ export default function DashboardPage() {
                 innerRadius={0.6}
               />
             </div>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Ringkasan konten + order terbaru */}
-      <Row gutter={[16, 16]}>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title={t("admin.tourism.places")}
-              value={data?.activePlaces ?? 0}
-              prefix={<BankOutlined className="text-primary" />}
-              suffix={`/ ${data?.totalPlaces ?? 0}`}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title={t("admin.tourism.packages")}
-              value={data?.totalPackages ?? 0}
-              prefix={<FileTextOutlined className="text-primary" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title={t("admin.orders.title")}
-              value={data?.totalOrders ?? 0}
-              prefix={<ShoppingOutlined className="text-primary" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title={t("admin.reviews.title")}
-              value={data?.totalTestimonials ?? 0}
-              prefix={<CommentOutlined className="text-primary" />}
-            />
           </Card>
         </Col>
       </Row>

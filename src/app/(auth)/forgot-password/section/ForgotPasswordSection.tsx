@@ -114,7 +114,7 @@ export function ForgotPasswordSection() {
         <Alert
           type="info"
           showIcon
-          message={t("auth.forgot.info")}
+          title={t("auth.forgot.info")}
           className="mt-2!"
         />
         <p className="mt-4 text-center text-sm text-foreground/60">

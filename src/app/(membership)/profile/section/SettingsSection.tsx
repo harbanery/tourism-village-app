@@ -584,12 +584,12 @@ export function SettingsSection({
       <Modal
         open={otpOpen}
         closable={false}
-        maskClosable={false}
+        mask={{ closable: false }}
         keyboard={false}
         footer={null}
         title={
           <span className="inline-flex items-center gap-2">
-            <SafetyOutlined className="text-primary" />
+            <SafetyOutlined className="text-primary!" />
             {t("settings.email.otpTitle")}
           </span>
         }
@@ -602,7 +602,7 @@ export function SettingsSection({
             className="mt-3!"
             type="info"
             showIcon
-            message={t("auth.otp.devCode")}
+            title={t("auth.otp.devCode")}
             description={
               <span className="font-mono text-lg font-bold tracking-widest">
                 {otpDevCode}

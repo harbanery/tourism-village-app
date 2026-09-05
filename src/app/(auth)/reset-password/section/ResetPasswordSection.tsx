@@ -96,7 +96,7 @@ export function ResetPasswordSection({ token }: { token: string }) {
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       <Card>
         <div className="text-center">
-          <SafetyOutlined className="text-4xl text-primary" />
+          <SafetyOutlined className="text-4xl! text-primary!" />
           <h1 className="mt-3 text-2xl font-bold">{t("auth.reset.title")}</h1>
           <p className="mt-1 text-foreground/60">{t("auth.reset.subtitle")}</p>
         </div>

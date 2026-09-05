@@ -112,7 +112,7 @@ export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
           type="info"
           showIcon
           icon={<InfoCircleOutlined />}
-          message={t("auth.login.credentialsTitle")}
+          title={t("auth.login.credentialsTitle")}
           description={
             <Typography.Text className="text-xs!">
               raihan@example.com / User#1234

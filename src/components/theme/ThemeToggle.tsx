@@ -2,19 +2,19 @@
 
 import { Button, Tooltip } from "antd";
 import { MoonOutlined, SunOutlined } from "@ant-design/icons";
-import { useTheme, toggleTheme } from "./ThemeProvider";
+import { useThemeMode } from "./ThemeProvider";
 import { useT } from "@/components/locale/LocaleProvider";
 
 export function ThemeToggle() {
-  const { theme } = useTheme();
+  const { mode, toggle } = useThemeMode();
   const { t } = useT();
   return (
     <Tooltip title={t("nav.theme.toggle")}>
       <Button
         type="text"
         aria-label={t("nav.theme.toggle")}
-        icon={theme === "light" ? <MoonOutlined /> : <SunOutlined />}
-        onClick={toggleTheme}
+        icon={mode === "light" ? <MoonOutlined /> : <SunOutlined />}
+        onClick={toggle}
       />
     </Tooltip>
   );

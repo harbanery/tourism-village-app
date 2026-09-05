@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Badge, Button, Empty, List, Popover, Spin } from "antd";
+import { Badge, Button, Empty, Popover, Spin } from "antd";
 import { BellOutlined, CheckOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 
@@ -130,11 +130,10 @@ export function NotificationBell({
             className="py-6!"
           />
         ) : (
-          <List
-            className="max-h-80 overflow-y-auto"
-            dataSource={items}
-            renderItem={(item) => (
+          <div className="max-h-80! overflow-y-auto!">
+            {items.map((item) => (
               <button
+                key={item.id}
                 type="button"
                 onClick={() => void handleItemClick(item)}
                 className={[
@@ -156,8 +155,8 @@ export function NotificationBell({
                   {relativeTime(item.createdAt, t)}
                 </span>
               </button>
-            )}
-          />
+            ))}
+          </div>
         )}
       </Spin>
     </div>

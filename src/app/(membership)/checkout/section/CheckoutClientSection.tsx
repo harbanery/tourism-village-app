@@ -523,7 +523,7 @@ export default function CheckoutClientSection({
           </Card>
 
           {/* Detail informasi terpisah dari form. */}
-          <Card title={t("checkout.detailInfo")} className="lg:sticky lg:top-0">
+          <Card title={t("checkout.detailInfo")} className="lg:sticky! lg:top-0!">
             <div className="divide-y divide-black/5 dark:divide-white/10">
               {items.map((item, index) => {
                 const days = stayMultiplier(effectiveSchedule(index));
@@ -565,7 +565,7 @@ export default function CheckoutClientSection({
           {editingOrderer ? (
             <Form
               layout="vertical"
-              className="mt-2 max-w-md"
+              className="mt-2! max-w-md!"
               initialValues={{ name: orderer.name, phone: orderer.phone }}
               onFinish={(values) => void handleSaveOrderer(values)}
             >
@@ -692,7 +692,7 @@ export default function CheckoutClientSection({
               size="large"
               loading={submitting}
               onClick={handleProcess}
-              className="flex-1"
+              className="flex-1!"
             >
               {t("checkout.process")}
             </Button>

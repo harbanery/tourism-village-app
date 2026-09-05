@@ -46,7 +46,10 @@ export default function AdminLoginPage() {
       }
 
       message.success(t("auth.login.success"));
+      // replace + refresh agar client router cache di-reset dan panel
+      // dirender ulang dengan cookie sesi yang baru saja diset.
       router.replace("/admin");
+      router.refresh();
     } catch {
       message.error(t("notif.error"));
     } finally {
@@ -101,7 +104,7 @@ export default function AdminLoginPage() {
           type="info"
           showIcon
           icon={<InfoCircleOutlined />}
-          message={t("admin.login.credentials.title")}
+          title={t("admin.login.credentials.title")}
           description={
             <div className="flex flex-col gap-0.5">
               <Typography.Text className="text-xs!">

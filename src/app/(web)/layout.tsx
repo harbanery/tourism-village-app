@@ -1,5 +1,5 @@
-import { Navbar } from "@/components/web/Navbar";
-import { Footer } from "@/components/web/Footer";
+import { Navbar } from "@/components/web/navbar";
+import { Footer } from "@/components/web/footer";
 
 export default function WebLayout({ children }: LayoutProps<"/">) {
   return (

@@ -204,7 +204,7 @@ export default function PackageClientSection() {
       <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
         <Input
           allowClear
-          prefix={<SearchOutlined className="text-foreground/40" />}
+          prefix={<SearchOutlined className="text-foreground/40!" />}
           placeholder={t("package.searchPlaceholder")}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
@@ -241,7 +241,7 @@ export default function PackageClientSection() {
             {showPopular && (
               <section className="mb-8!">
                 <h2 className="mb-3 inline-flex items-center gap-2 text-lg font-semibold">
-                  <FireOutlined className="text-orange-500" />
+                  <FireOutlined className="text-orange-500!" />
                   {t("package.frequentlyBought")}
                 </h2>
                 <Row gutter={[16, 16]}>

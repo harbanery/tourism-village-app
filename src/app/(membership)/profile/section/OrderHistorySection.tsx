@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
-import { App, Button, Card, Empty, List, Tag } from "antd";
+import { App, Button, Card, Empty, Tag } from "antd";
 import {
   CreditCardOutlined,
   DownloadOutlined,
@@ -272,13 +272,10 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
           </Empty>
         </Card>
       ) : (
-        <List
-          className="mt-6"
-          grid={{ gutter: 24, xs: 1, sm: 1, md: 1, lg: 1, xl: 1 }}
-          dataSource={list}
-          renderItem={(order) => (
-            <List.Item>
-              <Card
+        <div className="mt-6! flex flex-col gap-6!">
+          {list.map((order) => (
+            <Card
+              key={order.id}
                 title={`${t("common.total")}: ${formatRupiah(order.totalPrice)}`}
                 extra={
                   <Tag color={PAYMENT_TAG_COLORS[order.paymentStatus]}>
@@ -291,7 +288,7 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                   {/* Baris 1: tanggal pemesanan (kiri) + batas pembayaran (kanan). */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="flex items-center gap-2 text-foreground/70">
-                      <CalendarOutlined className="text-foreground/40" />
+                      <CalendarOutlined className="text-foreground/40!" />
                       <span>
                         <span className="text-foreground/50">
                           {t("profile.orderDate")}:
@@ -315,7 +312,7 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                   {hasDistinctItemSchedules(order) ? (
                     <div className="flex flex-col gap-1">
                       <p className="flex items-center gap-2 text-foreground/70">
-                        <CalendarOutlined className="text-foreground/40" />
+                        <CalendarOutlined className="text-foreground/40!" />
                         <span className="text-foreground/50">
                           {t("profile.reservationDate")}:
                         </span>
@@ -349,7 +346,7 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                     </div>
                   ) : (
                     <p className="flex flex-wrap items-center gap-2 text-foreground/70">
-                      <CalendarOutlined className="text-foreground/40" />
+                      <CalendarOutlined className="text-foreground/40!" />
                       <span>
                         <span className="text-foreground/50">
                           {t("profile.reservationDate")}:
@@ -436,9 +433,8 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                   ) : null}
                 </div>
               </Card>
-            </List.Item>
-          )}
-        />
+          ))}
+        </div>
       )}
     </div>
   );

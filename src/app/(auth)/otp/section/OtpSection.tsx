@@ -187,7 +187,7 @@ export function OtpSection({
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       <Card>
         <div className="text-center">
-          <SafetyOutlined className="text-4xl text-primary" />
+          <SafetyOutlined className="text-4xl! text-primary!" />
           <h1 className="mt-3 text-2xl font-bold">{t("auth.otp.title")}</h1>
           <p className="mt-1 text-foreground/60">
             {isReset
@@ -201,7 +201,7 @@ export function OtpSection({
             className="mt-4!"
             type="info"
             showIcon
-            message={t("auth.otp.devCode")}
+            title={t("auth.otp.devCode")}
             description={
               <span className="font-mono text-lg font-bold tracking-widest">
                 {dev}

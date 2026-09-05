@@ -111,7 +111,7 @@ function PaymentCountdown({
       }}
     >
       <div className="flex min-w-0 items-center gap-3">
-        <CalendarOutlined className="shrink-0 text-xl opacity-90" />
+        <CalendarOutlined className="shrink-0! text-xl! opacity-90!" />
         <div className="min-w-0">
           <p className="text-xs uppercase tracking-wide opacity-80">
             {t("payment.countdown.deadline")}
@@ -122,7 +122,7 @@ function PaymentCountdown({
         </div>
       </div>
       <div className="flex flex-row-reverse shrink-0 items-center gap-3">
-        <ClockCircleOutlined className="text-xl opacity-90" />
+        <ClockCircleOutlined className="text-xl! opacity-90!" />
         <div className="text-right">
           <p className="text-xs uppercase tracking-wide opacity-80">
             {t("payment.countdown.timeout")}
@@ -463,7 +463,7 @@ export default function PaymentClientSection({
             className="mt-6!"
             type="error"
             showIcon
-            message={t("payment.unavailable")}
+            title={t("payment.unavailable")}
           />
         )}
 

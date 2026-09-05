@@ -29,7 +29,7 @@ export function GalleryGridSection() {
                     key={photo.id}
                     src={photo.filename}
                     alt={photo.title}
-                    className="h-48 w-full rounded-xl object-cover"
+                    className="h-48! w-full! rounded-xl! object-cover!"
                     loading="lazy"
                   />
                 ) : (
