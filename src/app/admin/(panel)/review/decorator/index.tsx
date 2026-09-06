@@ -142,9 +142,12 @@ const ReviewDecorator = () => {
       key: "userName",
     },
     {
+      // Lebar tetap supaya kolom lain (rating, utama, status, opsi) tidak
+      // terdorong — teks panjang terpotong dengan ellipsis.
       title: t("admin.reviews.comment"),
       dataIndex: "comment",
       key: "comment",
+      width: 360,
       ellipsis: true,
     },
     {

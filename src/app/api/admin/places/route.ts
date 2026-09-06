@@ -2,7 +2,7 @@ import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
 import { NextResponse } from "next/server";
 
-/** GET /api/admin/places — semua tempat wisata. */
+/** GET /api/admin/places — semua tempat wisata + agregat paketnya. */
 export async function GET() {
   const admin = await requireAdmin();
   if (!admin) {
@@ -12,10 +12,48 @@ export async function GET() {
     );
   }
   try {
-    const places = await prisma.place.findMany({
-      orderBy: { id: "asc" },
+    const [places, packagesByPlace, purchaseCounts] = await Promise.all([
+      prisma.place.findMany({ orderBy: { id: "asc" } }),
+      prisma.package.groupBy({
+        by: ["placeId"],
+        _count: { _all: true },
+      }),
+      // Paket populer = pernah dibayar (order item PAID) — sama seperti
+      // definisi tag "Populer" di web.
+      prisma.orderItem.groupBy({
+        by: ["packageId"],
+        where: { order: { paymentStatus: "PAID" } },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const countByPlace = new Map(
+      packagesByPlace
+        .filter((row) => row.placeId !== null)
+        .map((row) => [row.placeId as number, row._count._all]),
+    );
+    const popularPackageIds = new Set(purchaseCounts.map((row) => row.packageId));
+    const popularIdsByPlace = await prisma.package.findMany({
+      where: { id: { in: [...popularPackageIds] } },
+      select: { placeId: true },
     });
-    return NextResponse.json({ success: true, data: places });
+    const popularCountByPlace = new Map<number, number>();
+    for (const pkg of popularIdsByPlace) {
+      if (pkg.placeId === null) continue;
+      popularCountByPlace.set(
+        pkg.placeId,
+        (popularCountByPlace.get(pkg.placeId) ?? 0) + 1,
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: places.map((place) => ({
+        ...place,
+        packageCount: countByPlace.get(place.id) ?? 0,
+        popularPackageCount: popularCountByPlace.get(place.id) ?? 0,
+      })),
+    });
   } catch (error) {
     console.error("Error fetching places:", error);
     return NextResponse.json(

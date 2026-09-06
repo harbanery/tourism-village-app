@@ -35,9 +35,10 @@ export default async function ProfilePage({
       ? params.tab
       : "profile";
 
-  // Halaman pertama riwayat (2 order teratas: PENDING dulu, lalu PAID,
-  // terbaru duluan) — sisanya dimuat via infinite scroll dari klien.
-  const ordersPage = await getUserOrdersPage(user, { take: 2, skip: 0 });
+  // Halaman pertama riwayat (3 order teratas: PENDING dulu, lalu PAID,
+  // terbaru duluan, tie-break reservasi paling awal) — sisanya dimuat
+  // via infinite scroll dari klien.
+  const ordersPage = await getUserOrdersPage(user, { take: 3, skip: 0 });
 
   const profile: User = {
     id: user.id,

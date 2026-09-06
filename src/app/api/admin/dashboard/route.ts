@@ -33,16 +33,25 @@ export async function GET(request: Request) {
     const [
       activePlaces,
       totalPlaces,
+      placesWithPackages,
       totalPackages,
       totalOrders,
+      ratingAgg,
       totalTestimonials,
       recentOrders,
       analytics,
     ] = await Promise.all([
       prisma.place.count({ where: { status: "ACTIVE" } }),
       prisma.place.count(),
+      // Tempat wisata yang sudah punya minimal satu paket.
+      prisma.place.count({ where: { packages: { some: {} } } }),
       prisma.package.count(),
       prisma.order.count(),
+      // Rata-rata rating ulasan aktif (yang tampil di web).
+      prisma.testimonial.aggregate({
+        _avg: { rating: true },
+        where: { status: "ACTIVE" },
+      }),
       prisma.testimonial.count({ where: { status: "ACTIVE" } }),
       prisma.order.findMany({
         orderBy: { dateOrder: "desc" },
@@ -59,8 +68,11 @@ export async function GET(request: Request) {
       data: {
         activePlaces,
         totalPlaces,
+        placesWithPackages,
         totalPackages,
         totalOrders,
+        /** Rata-rata rating ulasan aktif (null bila belum ada ulasan). */
+        ratingAvg: ratingAgg._avg.rating,
         totalTestimonials,
         recentOrders: recentOrders.map((order) => ({
           id: order.id,

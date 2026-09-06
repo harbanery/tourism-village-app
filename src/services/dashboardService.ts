@@ -35,6 +35,8 @@ export interface DashboardAnalytics {
     /** PENDING yang masih dalam batas waktu (aktif menunggu bayar). */
     pendingActive: number;
     canceledTotal: number;
+    /** User berbeda yang pernah menyelesaikan order PAID (semua waktu). */
+    paidBuyersTotal: number;
   };
   /** Tren harian periode: pendapatan (PAID per hari bayar) + jumlah order. */
   timeseries: { day: string; revenue: number; orders: number }[];
@@ -270,6 +272,7 @@ export async function getDashboardAnalytics(
           : 0,
       pendingActive,
       canceledTotal,
+      paidBuyersTotal: firstPaid.size,
     },
     timeseries: dayKeys.map((day) => ({
       day,

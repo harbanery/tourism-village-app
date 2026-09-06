@@ -14,8 +14,8 @@ import {
 /**
  * GET /api/web/orders?take=&skip= — satu halaman riwayat pesanan milik
  * user login untuk infinite scroll. Urutan: PENDING paling atas, disusul
- * PAID, lalu sisanya — masing-masing terbaru duluan. Respons:
- * { items, total, hasMore }.
+ * PAID, lalu sisanya — dalam tiap grup terbaru duluan, tie-break tanggal
+ * reservasi paling awal. Respons: { items, total, hasMore }.
  */
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const take = Number(url.searchParams.get("take")) || 2;
+  const take = Number(url.searchParams.get("take")) || 3;
   const skip = Number(url.searchParams.get("skip")) || 0;
 
   const page = await getUserOrdersPage(user, { take, skip });

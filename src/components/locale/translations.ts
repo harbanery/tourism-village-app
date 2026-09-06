@@ -426,7 +426,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.title": "Panel Admin",
     "admin.dashboard": "Dashboard",
     "admin.dashboard.revenueMonth": "Pendapatan bulan ini",
-    "admin.dashboard.ordersMonth": "Order bulan ini",
+    "admin.dashboard.ordersMonth": "Pesanan bulan ini",
     "admin.dashboard.aov": "Nilai rata-rata order",
     "admin.dashboard.successRate": "Tingkat sukses pembayaran",
     "admin.dashboard.vsLastMonth": "vs bulan lalu",
@@ -445,6 +445,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.dashboard.buyers": "Pembeli periode ini",
     "admin.dashboard.newBuyer": "Pembeli baru",
     "admin.dashboard.returningBuyer": "Pembeli kembali",
+    "admin.dashboard.revenueTotal": "Pendapatan total",
+    "admin.dashboard.buyersTotal": "Total pembeli",
+    "admin.dashboard.ratingSummary": "Rating",
+    "admin.dashboard.ratingReviews": "{n} ulasan",
+    "admin.dashboard.placesWithPackages": "tempat wisata yang sudah paket",
     "admin.role.MASTER": "Master",
     "admin.role.VIEWER": "Viewer",
     "admin.role.AUTHOR": "Author",
@@ -466,6 +471,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.tourism.place": "Tempat Wisata",
     "admin.tourism.facilities": "Fasilitas",
     "admin.tourism.photo": "Foto",
+    "admin.tourism.packageCount": "Jumlah Paket",
+    "admin.tourism.popular": "Populer",
+    "admin.tourism.popularWarning":
+      "Paket ini populer di kalangan pengunjung — menonaktifkannya menyembunyikan paket dari web.",
+    "admin.tourism.placeCascadeWarning":
+      "Semua paket yang terhubung ikut nonaktif. Paket tidak otomatis aktif kembali saat tempat wisata diaktifkan.",
+    "admin.tourism.placePopularWarning":
+      "Ada paket populer yang terhubung dengan tempat ini — menonaktifkannya menyembunyikan paket tersebut dari web.",
+    "admin.tourism.placeInactiveError":
+      "Tempat wisata paket ini masih nonaktif — aktifkan tempat wisatanya terlebih dahulu.",
     "admin.gallery.title": "Galeri",
     "admin.gallery.photo": "Foto",
     "admin.vlog.title": "Vlog",
@@ -955,6 +970,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.dashboard.buyers": "Buyers this period",
     "admin.dashboard.newBuyer": "New buyers",
     "admin.dashboard.returningBuyer": "Returning buyers",
+    "admin.dashboard.revenueTotal": "Total revenue",
+    "admin.dashboard.buyersTotal": "Total buyers",
+    "admin.dashboard.ratingSummary": "Rating",
+    "admin.dashboard.ratingReviews": "{n} reviews",
+    "admin.dashboard.placesWithPackages": "places with packages",
     "admin.role.MASTER": "Master",
     "admin.role.VIEWER": "Viewer",
     "admin.role.AUTHOR": "Author",
@@ -976,6 +996,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.tourism.place": "Tourism Place",
     "admin.tourism.facilities": "Facilities",
     "admin.tourism.photo": "Photo",
+    "admin.tourism.packageCount": "Packages",
+    "admin.tourism.popular": "Popular",
+    "admin.tourism.popularWarning":
+      "This package is popular with visitors — deactivating it hides the package from the website.",
+    "admin.tourism.placeCascadeWarning":
+      "All linked packages become inactive too. Packages do not reactivate automatically when the place is activated again.",
+    "admin.tourism.placePopularWarning":
+      "Popular packages are linked to this place — deactivating it hides those packages from the website.",
+    "admin.tourism.placeInactiveError":
+      "The place of this package is still inactive — activate the tourism place first.",
     "admin.gallery.title": "Gallery",
     "admin.gallery.photo": "Photo",
     "admin.vlog.title": "Vlog",

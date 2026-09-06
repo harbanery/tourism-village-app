@@ -696,23 +696,24 @@ export default function CheckoutClientSection({
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse">
+          {/* Ubah jadwal di atas proses order — akses konten paling luar. */}
+          <div className="mt-6 flex flex-col gap-2">
+            <Button
+              size="large"
+              disabled={submitting}
+              onClick={() => setStep(0)}
+              className="w-full!"
+            >
+              {t("checkout.editSchedule")}
+            </Button>
             <Button
               type="primary"
               size="large"
               loading={submitting}
               onClick={handleProcess}
-              className="flex-1!"
+              className="w-full!"
             >
               {t("checkout.process")}
-            </Button>
-            <Button
-              size="large"
-              disabled={submitting}
-              onClick={() => setStep(0)}
-              className="flex-1"
-            >
-              {t("checkout.editSchedule")}
             </Button>
           </div>
           <div className="mt-6 flex items-center justify-center gap-2 border-t border-black/5 pt-4 text-xs text-foreground/50 dark:border-white/10">

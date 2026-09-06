@@ -411,7 +411,25 @@ const BlogDecorator = () => {
           </Space>
         }
       >
-        <AdminTable dataSource={filtered} columns={columns} />
+        {/* Expanded row: paragraf blog (HTML dari form teks kaya). */}
+        <AdminTable
+          dataSource={filtered}
+          columns={columns}
+          expandable={{
+            expandedRowRender: (record: BlogRow) => (
+              <div className="text-sm leading-relaxed text-foreground/80">
+                <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">
+                  {t("admin.blog.para")}
+                </p>
+                <div
+                  className="mt-2 space-y-3"
+                  dangerouslySetInnerHTML={{ __html: record.para || "-" }}
+                />
+              </div>
+            ),
+            rowExpandable: (record: BlogRow) => Boolean(record.para),
+          }}
+        />
       </Card>
 
       {/* Preview foto blog langsung (lightbox, tanpa modal) */}
@@ -441,7 +459,7 @@ const BlogDecorator = () => {
           setEditing(null);
           setIsModalOpen(false);
         }}
-        width={900}
+        size={900}
         footer={
           <div className="flex justify-end gap-2">
             <Button

@@ -55,10 +55,10 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
 
 /**
  * Ukuran halaman riwayat pesanan (infinite scroll): data awal yang muncul
- * adalah 2 pesanan teratas; halaman berikutnya dimuat saat mendekati dasar
+ * adalah 3 pesanan teratas; halaman berikutnya dimuat saat mendekati dasar
  * daftar.
  */
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 3;
 
 /** Tambah n hari ke tanggal ISO (untuk tanggal pulang menginap). */
 function addDays(iso: string, days: number): string {
@@ -78,6 +78,33 @@ function hasDistinctItemSchedules(order: HistoryOrder): boolean {
     ),
   );
   return signatures.size > 1;
+}
+
+/**
+ * Akhir masa reservasi pesanan ( tanggal pulang untuk menginap) dalam
+ * waktu lokal: item terakhir dipakai bila jadwal per paket berbeda,
+ * fallback ke agregat order. Selesai hari itu dianggap lewat.
+ */
+function reservationEndTime(order: HistoryOrder): number {
+  const ends = order.items
+    .filter((item) => item.dateSchedule)
+    .map((item) =>
+      item.homestay
+        ? addDays(item.dateSchedule!, item.homestayTime ?? 1)
+        : item.dateSchedule!,
+    );
+  const base = ends.length > 0 ? ends : [order.dateSchedule];
+  const latest = base.reduce((a, b) =>
+    new Date(a).getTime() >= new Date(b).getTime() ? a : b,
+  );
+  const end = new Date(latest);
+  end.setHours(23, 59, 59, 999);
+  return end.getTime();
+}
+
+/** true bila tanggal reservasi pesanan sudah terlewat (hari pulang lewat). */
+function isReservationPassed(order: HistoryOrder): boolean {
+  return Date.now() > reservationEndTime(order);
 }
 
 /** Bentuk order dari GET /api/web/orders (homestay boolean). */
@@ -535,7 +562,10 @@ export function OrderHistorySection({
                   >
                     {t("payment.pay")}
                   </Button>
-                ) : order.paymentStatus === "PAID" ? (
+                ) : order.paymentStatus === "PAID" &&
+                  !isReservationPassed(order) ? (
+                  // Bukti pembayaran hanya tersedia selama reservasi belum
+                  // dilewati — setelah hari pulang, unduhan disembunyikan.
                   <Button
                     icon={<DownloadOutlined />}
                     onClick={() => handleDownloadInvoice(order.id)}

@@ -1,16 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  App,
-  Avatar,
-  Button,
-  Card,
-  Drawer,
-  Form,
-  Input,
-  Space,
-} from "antd";
+import { App, Avatar, Button, Card, Drawer, Form, Input, Space } from "antd";
 import {
   CheckOutlined,
   DeleteOutlined,
@@ -98,7 +89,13 @@ const SponsorDecorator = () => {
         name: record.name,
         description: record.description ?? undefined,
         filename: record.filename
-          ? [{ url: record.filename, thumbUrl: record.filename, status: "done" }]
+          ? [
+              {
+                url: record.filename,
+                thumbUrl: record.filename,
+                status: "done",
+              },
+            ]
           : undefined,
       });
     } else {
@@ -357,7 +354,7 @@ const SponsorDecorator = () => {
           setEditing(null);
           setIsModalOpen(false);
         }}
-        width={560}
+        size={560}
         footer={
           <div className="flex justify-end gap-2">
             <Button

@@ -35,7 +35,12 @@ export async function PUT(request: Request, { params }: Params) {
   }
 }
 
-/** PATCH /api/admin/packages/[id] — toggle status (MASTER). */
+/**
+ * PATCH /api/admin/packages/[id] — toggle status (MASTER).
+ *
+ * Mengaktifkan paket yang tempat wisatanya nonaktif gagal validasi
+ * (PLACE_INACTIVE) — aktifkan tempat wisatanya terlebih dahulu.
+ */
 export async function PATCH(request: Request, { params }: Params) {
   const admin = await requireAdmin();
   if (!admin || !adminCanWrite(admin)) {
@@ -47,9 +52,25 @@ export async function PATCH(request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const body = await request.json();
+    const nextStatus =
+      body.status === "ACTIVE" ? "ACTIVE" : "NONACTIVE";
+
+    if (nextStatus === "ACTIVE") {
+      const pkg = await prisma.package.findUnique({
+        where: { id: Number(id) },
+        include: { place: { select: { status: true } } },
+      });
+      if (pkg?.place && pkg.place.status !== "ACTIVE") {
+        return NextResponse.json(
+          { success: false, error: "PLACE_INACTIVE" },
+          { status: 400 },
+        );
+      }
+    }
+
     const pkg = await prisma.package.update({
       where: { id: Number(id) },
-      data: { status: body.status },
+      data: { status: nextStatus },
     });
     return NextResponse.json({ success: true, data: pkg });
   } catch (error) {

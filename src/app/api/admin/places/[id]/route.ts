@@ -45,7 +45,13 @@ export async function PUT(request: Request, { params }: Params) {
   }
 }
 
-/** PATCH /api/admin/places/[id] — toggle status aktif/nonaktif (MASTER). */
+/**
+ * PATCH /api/admin/places/[id] — toggle status aktif/nonaktif (MASTER).
+ *
+ * Menonaktifkan tempat wisata otomatis menonaktifkan semua paket yang
+ * terhubung (transaksi atomik). Mengaktifkan kembali tempat TIDAK
+ * mengaktifkan paketnya — setiap paket diaktifkan manual di menu paket.
+ */
 export async function PATCH(request: Request, { params }: Params) {
   const admin = await requireAdmin();
   if (!admin || !adminCanWrite(admin)) {
@@ -57,10 +63,22 @@ export async function PATCH(request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const body = await request.json();
+    const nextStatus =
+      body.status === "ACTIVE" ? "ACTIVE" : "NONACTIVE";
+
     const place = await prisma.place.update({
       where: { id: Number(id) },
-      data: { status: body.status },
+      data: { status: nextStatus },
     });
+
+    // Cascade: tempat nonaktif → paket yang terhubung ikut nonaktif.
+    if (nextStatus === "NONACTIVE") {
+      await prisma.package.updateMany({
+        where: { placeId: place.id, status: "ACTIVE" },
+        data: { status: "NONACTIVE" },
+      });
+    }
+
     return NextResponse.json({ success: true, data: place });
   } catch (error) {
     console.error("Error toggling place status:", error);

@@ -1,16 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Card, Col, Row, Segmented, Statistic } from "antd";
+import { Card, Col, Rate, Row, Segmented, Statistic } from "antd";
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
   BankOutlined,
-  CommentOutlined,
   DollarOutlined,
-  FileTextOutlined,
   RiseOutlined,
+  ShopOutlined,
   ShoppingOutlined,
+  StarOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
@@ -39,6 +40,7 @@ interface Analytics {
     successRate: number;
     pendingActive: number;
     canceledTotal: number;
+    paidBuyersTotal: number;
   };
   timeseries: { day: string; revenue: number; orders: number }[];
   statusSeries: { day: string; status: PaymentStatus; count: number }[];
@@ -51,8 +53,12 @@ interface Analytics {
 interface DashboardData {
   activePlaces: number;
   totalPlaces: number;
+  /** Tempat wisata yang sudah punya minimal satu paket. */
+  placesWithPackages: number;
   totalPackages: number;
   totalOrders: number;
+  /** Rata-rata rating ulasan aktif (null bila belum ada ulasan). */
+  ratingAvg: number | null;
   totalTestimonials: number;
   analytics: Analytics;
 }
@@ -138,43 +144,62 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Ringkasan konten di paling atas: tempat wisata, paket, pemesanan, ulasan */}
+      {/* Ringkasan konten di paling atas: tempat wisata berpaket,
+          pendapatan total, total pembeli, dan rating ulasan. */}
       <Row gutter={[16, 16]}>
         <Col xs={12} md={6}>
           <Card>
             <Statistic
               title={t("admin.tourism.places")}
-              value={data?.activePlaces ?? 0}
-              prefix={<BankOutlined className="text-primary!" />}
+              value={data?.placesWithPackages ?? 0}
+              prefix={<ShopOutlined className="text-primary!" />}
               suffix={`/ ${data?.totalPlaces ?? 0}`}
             />
+            <div className="mt-1 text-xs text-foreground/50">
+              {t("admin.dashboard.placesWithPackages")}
+            </div>
           </Card>
         </Col>
         <Col xs={12} md={6}>
           <Card>
             <Statistic
-              title={t("admin.tourism.packages")}
-              value={data?.totalPackages ?? 0}
-              prefix={<FileTextOutlined className="text-primary!" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title={t("admin.orders.title")}
-              value={data?.totalOrders ?? 0}
+              title={t("admin.dashboard.ordersMonth")}
+              value={kpi?.ordersThisMonth ?? 0}
               prefix={<ShoppingOutlined className="text-primary!" />}
             />
+            <Delta pct={kpi?.ordersDeltaPct ?? null} />
           </Card>
         </Col>
         <Col xs={12} md={6}>
           <Card>
             <Statistic
-              title={t("admin.reviews.title")}
-              value={data?.totalTestimonials ?? 0}
-              prefix={<CommentOutlined className="text-primary!" />}
+              title={t("admin.dashboard.buyersTotal")}
+              value={kpi?.paidBuyersTotal ?? 0}
+              prefix={<TeamOutlined className="text-primary!" />}
             />
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic
+              title={t("admin.dashboard.ratingSummary")}
+              value={data?.ratingAvg ?? 0}
+              suffix="/ 5"
+              prefix={<StarOutlined className="text-primary!" />}
+            />
+            <div className="mt-1 flex items-center gap-2">
+              <Rate
+                disabled
+                allowHalf
+                value={data?.ratingAvg ?? 0}
+                className="text-sm!"
+              />
+              <span className="text-xs text-foreground/50">
+                {t("admin.dashboard.ratingReviews", {
+                  n: data?.totalTestimonials ?? 0,
+                })}
+              </span>
+            </div>
           </Card>
         </Col>
       </Row>
@@ -195,11 +220,11 @@ export default function DashboardPage() {
         <Col xs={12} lg={6}>
           <Card>
             <Statistic
-              title={t("admin.dashboard.ordersMonth")}
-              value={kpi?.ordersThisMonth ?? 0}
-              prefix={<ShoppingOutlined className="text-primary!" />}
+              title={t("admin.dashboard.revenueTotal")}
+              value={kpi?.revenueTotal ?? 0}
+              formatter={(value) => formatRupiah(Number(value))}
+              prefix={<BankOutlined className="text-primary!" />}
             />
-            <Delta pct={kpi?.ordersDeltaPct ?? null} />
           </Card>
         </Col>
         <Col xs={12} lg={6}>

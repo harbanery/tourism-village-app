@@ -10,12 +10,14 @@ import {
   Image,
   Input,
   Space,
+  Tag,
 } from "antd";
 import {
   CheckOutlined,
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
+  FireOutlined,
   PlusOutlined,
   SearchOutlined,
   StopOutlined,
@@ -42,16 +44,22 @@ interface PlaceRow {
   name: string;
   status: "ACTIVE" | "NONACTIVE";
   photo: string | null;
+  /** Jumlah paket yang terhubung dengan tempat ini. */
+  packageCount: number;
+  /** Paket populer terhubung — dasar tag & warning nonaktif. */
+  popularPackageCount: number;
 }
 
 interface PackageRow {
   id: number;
   name: string;
   placeId: number | null;
-  place: { id: number; name: string } | null;
+  place: { id: number; name: string; status: "ACTIVE" | "NONACTIVE" } | null;
   facilities: string[];
   price: number;
   status: "ACTIVE" | "NONACTIVE";
+  /** Total kuantitas terjual lunas — dasar tag "Populer" (sama seperti web). */
+  timesPurchased: number;
 }
 
 interface PlaceFormValues {
@@ -356,8 +364,11 @@ const TourismDecorator = () => {
       notification.error({
         title: t("notif.error"),
         description:
-          err.message ||
-          t("notif.toggleFailed", { entity: t("admin.tourism.packages") }),
+          // Validasi tempat nonaktif — arahkan aktifkan tempat dulu.
+          err.message === "PLACE_INACTIVE"
+            ? t("admin.tourism.placeInactiveError")
+            : err.message ||
+              t("notif.toggleFailed", { entity: t("admin.tourism.packages") }),
         placement: "bottomRight",
       });
     }
@@ -394,13 +405,37 @@ const TourismDecorator = () => {
   // Columns
   // ------------------------------------------------------------------
 
+  /** Tag "Populer" — dipakai di tabel tempat wisata & paket. */
+  const popularTag = (
+    <Tag color="orange" icon={<FireOutlined />} className="m-0!">
+      {t("admin.tourism.popular")}
+    </Tag>
+  );
+
+  /** true bila tempat wisata paket ini nonaktif (paket tak bisa diaktifkan). */
+  const placeInactive = (record: PackageRow) =>
+    Boolean(record.place && record.place.status !== "ACTIVE");
+
   const placeColumns = [
     placeCols.id,
     {
       title: t("admin.tourism.places"),
       dataIndex: "name",
       key: "name",
-      render: (name: string) => <span className="font-medium">{name}</span>,
+      render: (name: string, record: PlaceRow) => (
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="font-medium">{name}</span>
+          {/* Tag populer: punya paket populer yang terhubung. */}
+          {record.popularPackageCount > 0 && popularTag}
+        </span>
+      ),
+    },
+    {
+      title: t("admin.tourism.packageCount"),
+      dataIndex: "packageCount",
+      key: "packageCount",
+      align: "center" as const,
+      render: (count: number) => count,
     },
     // Kolom status & opsi: fixed kanan, width statis (global).
     placeCols.status,
@@ -437,6 +472,14 @@ const TourismDecorator = () => {
                             ? t("common.deactivate")
                             : t("common.activate"),
                         entity: t("admin.tourism.places"),
+                      }),
+                      // Peringatan cascade: paket terhubung ikut nonaktif —
+                      // tekankan bila ada paket populer yang terdampak.
+                      ...(record.status === "ACTIVE" && {
+                        content:
+                          record.popularPackageCount > 0
+                            ? t("admin.tourism.placePopularWarning")
+                            : t("admin.tourism.placeCascadeWarning"),
                       }),
                       okText: t("common.yes"),
                       cancelText: t("common.no"),
@@ -477,7 +520,18 @@ const TourismDecorator = () => {
 
   const packageColumns = [
     packageCols.id,
-    { title: t("admin.tourism.packages"), dataIndex: "name", key: "name" },
+    {
+      title: t("admin.tourism.packages"),
+      dataIndex: "name",
+      key: "name",
+      render: (name: string, record: PackageRow) => (
+        <span className="flex flex-wrap items-center gap-2">
+          <span>{name}</span>
+          {/* Tag populer: paket pernah dibayar (order PAID). */}
+          {record.timesPurchased > 0 && popularTag}
+        </span>
+      ),
+    },
     {
       title: t("admin.tourism.place"),
       dataIndex: ["place", "name"],
@@ -515,32 +569,44 @@ const TourismDecorator = () => {
                   label: t("common.edit"),
                   onClick: () => showPackageForm(record),
                 },
-                {
-                  key: "toggle",
-                  icon:
-                    record.status === "ACTIVE" ? (
-                      <StopOutlined />
-                    ) : (
-                      <CheckOutlined />
-                    ),
-                  label:
-                    record.status === "ACTIVE"
-                      ? t("common.deactivate")
-                      : t("common.activate"),
-                  onClick: () =>
-                    modal.confirm({
-                      title: t("notif.confirmToggle", {
-                        action:
+                // Opsi aktifkan disembunyikan bila tempat wisatanya
+                // nonaktif — validasi server akan menolak (PLACE_INACTIVE);
+                // aktifkan tempat wisatanya dulu.
+                ...(record.status === "ACTIVE" || !placeInactive(record)
+                  ? [
+                      {
+                        key: "toggle",
+                        icon:
+                          record.status === "ACTIVE" ? (
+                            <StopOutlined />
+                          ) : (
+                            <CheckOutlined />
+                          ),
+                        label:
                           record.status === "ACTIVE"
                             ? t("common.deactivate")
                             : t("common.activate"),
-                        entity: t("admin.tourism.packages"),
-                      }),
-                      okText: t("common.yes"),
-                      cancelText: t("common.no"),
-                      onOk: () => handleTogglePackageStatus(record),
-                    }),
-                },
+                        onClick: () =>
+                          modal.confirm({
+                            title: t("notif.confirmToggle", {
+                              action:
+                                record.status === "ACTIVE"
+                                  ? t("common.deactivate")
+                                  : t("common.activate"),
+                              entity: t("admin.tourism.packages"),
+                            }),
+                            // Peringatan bila menonaktifkan paket populer.
+                            ...(record.status === "ACTIVE" &&
+                              record.timesPurchased > 0 && {
+                                content: t("admin.tourism.popularWarning"),
+                              }),
+                            okText: t("common.yes"),
+                            cancelText: t("common.no"),
+                            onOk: () => handleTogglePackageStatus(record),
+                          }),
+                      },
+                    ]
+                  : []),
                 ...(record.status !== "ACTIVE"
                   ? [
                       {
@@ -663,7 +729,7 @@ const TourismDecorator = () => {
           setEditingPlace(null);
           setIsPlaceModalOpen(false);
         }}
-        width={560}
+        size={560}
         footer={
           <div className="flex justify-end gap-2">
             <Button
@@ -702,7 +768,7 @@ const TourismDecorator = () => {
           setEditingPackage(null);
           setIsPackageModalOpen(false);
         }}
-        width={560}
+        size={560}
         footer={
           <div className="flex justify-end gap-2">
             <Button

@@ -55,8 +55,8 @@ export class OrderLimitError extends Error {}
 
 /**
  * Prioritas urutan riwayat pesanan: Menunggu Pembayaran (PENDING) paling
- * atas, disusul Lunas (PAID), baru sisa status — masing-masing terbaru
- * duluan.
+ * atas, disusul Lunas (PAID), baru sisa status. Dalam tiap grup: order
+ * terbaru duluan, lalu tie-break tanggal reservasi paling awal duluan.
  */
 const STATUS_SORT_PRIORITY: Record<string, number> = {
   PENDING: 0,
@@ -66,14 +66,16 @@ const STATUS_SORT_PRIORITY: Record<string, number> = {
 };
 
 function compareOrders(
-  a: { paymentStatus: string; dateOrder: Date },
-  b: { paymentStatus: string; dateOrder: Date },
+  a: { paymentStatus: string; dateOrder: Date; dateSchedule: Date },
+  b: { paymentStatus: string; dateOrder: Date; dateSchedule: Date },
 ): number {
   const prio =
     (STATUS_SORT_PRIORITY[a.paymentStatus] ?? 9) -
     (STATUS_SORT_PRIORITY[b.paymentStatus] ?? 9);
   if (prio !== 0) return prio;
-  return b.dateOrder.getTime() - a.dateOrder.getTime();
+  const byDate = b.dateOrder.getTime() - a.dateOrder.getTime();
+  if (byDate !== 0) return byDate;
+  return a.dateSchedule.getTime() - b.dateSchedule.getTime();
 }
 
 /** Hasil halaman riwayat order (infinite scroll). */
@@ -91,16 +93,17 @@ export interface UserOrdersPageOptions {
 
 /**
  * Satu halaman riwayat order milik user (pola infinite scroll): urut
- * PENDING → PAID → sisanya, masing-masing terbaru duluan. Query ringan
- * (id + status + tanggal) dipakai untuk sorting/pagination, lalu baris
- * penuh + item hanya diambil untuk halaman aktif.
+ * PENDING → PAID → sisanya; dalam tiap grup order terbaru duluan, lalu
+ * tanggal reservasi paling awal duluan. Query ringan (id + status +
+ * tanggal) dipakai untuk sorting/pagination, lalu baris penuh + item
+ * hanya diambil untuk halaman aktif.
  *
  * PENDING yang melewati batas waktu pembayaran di-expire menjadi CANCELED
  * dulu supaya status yang tampil selalu segar.
  */
 export async function getUserOrdersPage(
   user: AuthUser,
-  { take = 2, skip = 0 }: UserOrdersPageOptions = {},
+  { take = 3, skip = 0 }: UserOrdersPageOptions = {},
 ): Promise<UserOrdersPage> {
   await expireStalePendingOrders();
 
@@ -109,7 +112,12 @@ export async function getUserOrdersPage(
 
   const lightRows = await prisma.order.findMany({
     where: { userId: user.id },
-    select: { id: true, paymentStatus: true, dateOrder: true },
+    select: {
+      id: true,
+      paymentStatus: true,
+      dateOrder: true,
+      dateSchedule: true,
+    },
   });
   lightRows.sort(compareOrders);
 
@@ -188,9 +196,10 @@ function toUserOrder(
 }
 
 /**
- * Riwayat order milik user (terbaru dululu). PENDING yang melewati batas
- * waktu pembayaran di-expire menjadi CANCELED dulu supaya status yang
- * tampil selalu segar.
+ * Riwayat order milik user (PENDING → PAID → sisanya; terbaru duluan,
+ * tie-break reservasi paling awal). PENDING yang melewati batas waktu
+ * pembayaran di-expire menjadi CANCELED dulu supaya status yang tampil
+ * selalu segar.
  */
 export async function getUserOrders(user: AuthUser): Promise<UserOrder[]> {
   await expireStalePendingOrders();

@@ -501,7 +501,7 @@ const AccountDecorator = () => {
           form.resetFields();
           setIsAddOpen(false);
         }}
-        width={560}
+        size={560}
         footer={
           <div className="flex justify-end gap-2">
             <Button
@@ -539,7 +539,7 @@ const AccountDecorator = () => {
           roleForm.resetFields();
           setEditingRole(null);
         }}
-        width={480}
+        size={480}
         footer={
           <div className="flex justify-end gap-2">
             <Button

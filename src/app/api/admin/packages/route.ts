@@ -2,7 +2,7 @@ import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
 import { NextResponse } from "next/server";
 
-/** GET /api/admin/packages — semua paket wisata + nama tempat. */
+/** GET /api/admin/packages — semua paket wisata + tempat + hitungan beli. */
 export async function GET() {
   const admin = await requireAdmin();
   if (!admin) {
@@ -12,11 +12,33 @@ export async function GET() {
     );
   }
   try {
-    const packages = await prisma.package.findMany({
-      orderBy: { id: "asc" },
-      include: { place: { select: { id: true, name: true } } },
+    const [packages, purchaseCounts] = await Promise.all([
+      prisma.package.findMany({
+        orderBy: { id: "asc" },
+        include: {
+          place: { select: { id: true, name: true, status: true } },
+        },
+      }),
+      // Paket populer = pernah dibayar (order item PAID) — sama seperti
+      // definisi tag "Populer" di web.
+      prisma.orderItem.groupBy({
+        by: ["packageId"],
+        where: { order: { paymentStatus: "PAID" } },
+        _sum: { quantity: true },
+      }),
+    ]);
+
+    const countByPackage = new Map(
+      purchaseCounts.map((row) => [row.packageId, row._sum.quantity ?? 0]),
+    );
+
+    return NextResponse.json({
+      success: true,
+      data: packages.map((pkg) => ({
+        ...pkg,
+        timesPurchased: countByPackage.get(pkg.id) ?? 0,
+      })),
     });
-    return NextResponse.json({ success: true, data: packages });
   } catch (error) {
     console.error("Error fetching packages:", error);
     return NextResponse.json(
