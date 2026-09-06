@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       userId: user.id,
       rating,
       comment,
-      status: "NONACTIVE", // menunggu moderasi admin
+      status: "ACTIVE",
     },
   });
 

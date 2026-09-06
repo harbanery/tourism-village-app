@@ -224,7 +224,13 @@ const SponsorDecorator = () => {
       key: "name",
       render: (_: unknown, record: SponsorRow) => (
         <div className="flex items-center gap-2">
-          <Avatar src={record.filename} icon={<TrophyOutlined />} />
+          {/* object-fit contain agar logo sponsor terlihat utuh
+              (cover memotong sebagian logo yang tidak persegi). */}
+          <Avatar
+            src={record.filename}
+            icon={<TrophyOutlined />}
+            className="sponsor-avatar bg-black/4! dark:bg-white/8!"
+          />
           <span className="font-medium">{record.name}</span>
         </div>
       ),

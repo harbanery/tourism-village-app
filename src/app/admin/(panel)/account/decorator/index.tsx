@@ -36,7 +36,6 @@ import { drawerBodyProps } from "@/helpers/drawer";
 import { asAppError } from "@/helpers/error";
 import { adminRoleOptions } from "@/helpers/menu";
 import { adminFormLayout, adminRoleFormLayout } from "../config";
-import { formatDate } from "@/utils/format";
 
 interface AdminRow {
   id: number;
@@ -299,26 +298,6 @@ const AccountDecorator = () => {
       ),
     },
     { title: t("common.email"), dataIndex: "email", key: "email" },
-    {
-      title: t("admin.accounts.gender"),
-      dataIndex: "gender",
-      key: "gender",
-      render: (gender: UserRow["gender"]) =>
-        gender ? (
-          <Tag>
-            {gender === "MALE" ? t("profile.male") : t("profile.female")}
-          </Tag>
-        ) : (
-          "-"
-        ),
-    },
-    {
-      title: t("admin.accounts.birthDate"),
-      dataIndex: "birthDate",
-      key: "birthDate",
-      render: (value: UserRow["birthDate"]) =>
-        value ? formatDate(value) : "-",
-    },
     {
       title: t("common.phone"),
       dataIndex: "phone",

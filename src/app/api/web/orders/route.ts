@@ -9,13 +9,28 @@ import {
   MAX_ORDERS_PER_DAY,
   countRecentOrders,
   getUserOrdersPage,
+  type OrdersSortMode,
+  type PaymentStatus,
 } from "@/services/orderService";
 
+/** Status pembayaran yang bisa difilter di riwayat. */
+const STATUS_FILTERS: PaymentStatus[] = [
+  "PENDING",
+  "PAID",
+  "FAILED",
+  "CANCELED",
+];
+
+/** Mode sorting riwayat yang dikenali. */
+const SORT_MODES: OrdersSortMode[] = ["default", "newest", "schedule"];
+
 /**
- * GET /api/web/orders?take=&skip= — satu halaman riwayat pesanan milik
- * user login untuk infinite scroll. Urutan: PENDING paling atas, disusul
- * PAID, lalu sisanya — dalam tiap grup terbaru duluan, tie-break tanggal
- * reservasi paling awal. Respons: { items, total, hasMore }.
+ * GET /api/web/orders?take=&skip=&status=&sort= — satu halaman riwayat
+ * pesanan milik user login untuk infinite scroll. Urutan default: PENDING
+ * paling atas, disusul PAID, lalu sisanya — dalam tiap grup terbaru
+ * duluan, tie-break tanggal reservasi paling awal. `status` memfilter
+ * status pembayaran; `sort` mengganti mode urutan (newest = terbaru,
+ * schedule = reservasi terdekat). Respons: { items, total, hasMore }.
  */
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -30,7 +45,17 @@ export async function GET(request: Request) {
   const take = Number(url.searchParams.get("take")) || 3;
   const skip = Number(url.searchParams.get("skip")) || 0;
 
-  const page = await getUserOrdersPage(user, { take, skip });
+  const rawStatus = url.searchParams.get("status") ?? "";
+  const status = STATUS_FILTERS.includes(rawStatus as PaymentStatus)
+    ? (rawStatus as PaymentStatus)
+    : undefined;
+
+  const rawSort = url.searchParams.get("sort") ?? "";
+  const sort = SORT_MODES.includes(rawSort as OrdersSortMode)
+    ? (rawSort as OrdersSortMode)
+    : undefined;
+
+  const page = await getUserOrdersPage(user, { take, skip, status, sort });
 
   return NextResponse.json({
     success: true,

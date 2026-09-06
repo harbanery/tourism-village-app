@@ -8,6 +8,9 @@ import type { AuthUser } from "@prisma/client";
  * component / route handler).
  */
 
+/** Status pembayaran order (enum Prisma PaymentStatus). */
+export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
+
 /** DTO order + item untuk riwayat & pembayaran. */
 export interface UserOrder {
   id: number;
@@ -20,7 +23,7 @@ export interface UserOrder {
   homestay: "yes" | "no";
   homestayTime: number | null;
   totalPrice: number;
-  paymentStatus: "PENDING" | "PAID" | "FAILED" | "CANCELED";
+  paymentStatus: PaymentStatus;
   paymentExpiresAt: string | null;
   items: {
     id: number;
@@ -78,6 +81,25 @@ function compareOrders(
   return a.dateSchedule.getTime() - b.dateSchedule.getTime();
 }
 
+/** Mode sorting riwayat (default = prioritas status, lihat compareOrders). */
+export type OrdersSortMode = "default" | "newest" | "schedule";
+
+function makeOrderComparator(sort: OrdersSortMode) {
+  if (sort === "newest") {
+    return (a: { dateOrder: Date }, b: { dateOrder: Date }) =>
+      b.dateOrder.getTime() - a.dateOrder.getTime();
+  }
+  if (sort === "schedule") {
+    return (
+      a: { dateOrder: Date; dateSchedule: Date },
+      b: { dateOrder: Date; dateSchedule: Date },
+    ) =>
+      a.dateSchedule.getTime() - b.dateSchedule.getTime() ||
+      b.dateOrder.getTime() - a.dateOrder.getTime();
+  }
+  return compareOrders;
+}
+
 /** Hasil halaman riwayat order (infinite scroll). */
 export interface UserOrdersPage {
   items: UserOrder[];
@@ -89,12 +111,18 @@ export interface UserOrdersPage {
 export interface UserOrdersPageOptions {
   take?: number;
   skip?: number;
+  /** Filter status pembayaran (tanpa filter bila undefined). */
+  status?: PaymentStatus;
+  /** Mode sorting (default: PENDING → PAID → sisanya, terbaru duluan). */
+  sort?: OrdersSortMode;
 }
 
 /**
  * Satu halaman riwayat order milik user (pola infinite scroll): urut
  * PENDING → PAID → sisanya; dalam tiap grup order terbaru duluan, lalu
- * tanggal reservasi paling awal duluan. Query ringan (id + status +
+ * tanggal reservasi paling awal duluan. Mode sorting lain (terbaru /
+ * reservasi terdekat) serta filter status pembayaran dipakai untuk kontrol
+ * sorting & filter di riwayat belanja. Query ringan (id + status +
  * tanggal) dipakai untuk sorting/pagination, lalu baris penuh + item
  * hanya diambil untuk halaman aktif.
  *
@@ -103,7 +131,7 @@ export interface UserOrdersPageOptions {
  */
 export async function getUserOrdersPage(
   user: AuthUser,
-  { take = 3, skip = 0 }: UserOrdersPageOptions = {},
+  { take = 3, skip = 0, status, sort = "default" }: UserOrdersPageOptions = {},
 ): Promise<UserOrdersPage> {
   await expireStalePendingOrders();
 
@@ -111,7 +139,10 @@ export async function getUserOrdersPage(
   const safeSkip = Math.max(0, Math.floor(skip));
 
   const lightRows = await prisma.order.findMany({
-    where: { userId: user.id },
+    where: {
+      userId: user.id,
+      ...(status ? { paymentStatus: status } : {}),
+    },
     select: {
       id: true,
       paymentStatus: true,
@@ -119,7 +150,7 @@ export async function getUserOrdersPage(
       dateSchedule: true,
     },
   });
-  lightRows.sort(compareOrders);
+  lightRows.sort(makeOrderComparator(sort));
 
   const total = lightRows.length;
   const pageIds = lightRows
@@ -156,7 +187,7 @@ function toUserOrder(
     homestay: boolean;
     homestayTime: number | null;
     totalPrice: number;
-    paymentStatus: "PENDING" | "PAID" | "FAILED" | "CANCELED";
+    paymentStatus: PaymentStatus;
     paymentExpiresAt: Date | null;
     items: {
       id: number;

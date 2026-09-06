@@ -97,3 +97,12 @@ body {
 .profile-segmented .ant-segmented-item {
   margin: 0 0.5rem 0 0;
 }
+
+/*
+ * Avatar logo sponsor (tabel admin sponsor): antd default memakai
+ * object-fit cover yang memotong logo tidak persegi — contain agar
+ * seluruh logo terlihat di dalam lingkaran avatar.
+ */
+.sponsor-avatar img {
+  object-fit: contain !important;
+}

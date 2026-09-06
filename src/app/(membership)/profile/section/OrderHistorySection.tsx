@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
-import { App, Button, Card, Collapse, Empty, Spin, Tag } from "antd";
+import {
+  App,
+  Button,
+  Card,
+  Collapse,
+  Empty,
+  Select,
+  Spin,
+  Tag,
+} from "antd";
 import {
   CreditCardOutlined,
   DownOutlined,
@@ -52,6 +61,28 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
   FAILED: "red",
   CANCELED: "default",
 };
+
+/** Opsi filter status pembayaran riwayat ("ALL" = tanpa filter). */
+type StatusFilter = "ALL" | PaymentStatus;
+
+/** Mode sorting riwayat (default = PENDING dulu, lalu PAID, terbaru duluan). */
+type SortMode = "default" | "newest" | "schedule";
+
+/** Opsi dropdown filter status pembayaran. */
+const STATUS_FILTER_OPTIONS: { value: StatusFilter; labelKey: string }[] = [
+  { value: "ALL", labelKey: "profile.filterAll" },
+  { value: "PENDING", labelKey: "payment.status.PENDING" },
+  { value: "PAID", labelKey: "payment.status.PAID" },
+  { value: "FAILED", labelKey: "payment.status.FAILED" },
+  { value: "CANCELED", labelKey: "payment.status.CANCELED" },
+];
+
+/** Opsi dropdown mode sorting. */
+const SORT_MODE_OPTIONS: { value: SortMode; labelKey: string }[] = [
+  { value: "default", labelKey: "profile.sortDefault" },
+  { value: "newest", labelKey: "profile.sortNewest" },
+  { value: "schedule", labelKey: "profile.sortSchedule" },
+];
 
 /**
  * Ukuran halaman riwayat pesanan (infinite scroll): data awal yang muncul
@@ -159,32 +190,58 @@ export function OrderHistorySection({
   const [totalOrders, setTotalOrders] = useState<number>(initialTotal);
   const [loadingMore, setLoadingMore] = useState(false);
 
+  // Kontrol sorting & filter status pembayaran (default = urutan bawaan).
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [sortMode, setSortMode] = useState<SortMode>("default");
+
   // Jumlah baris yang sudah dimuat — dipakai refresh tanpa re-subscribe
   // (nilai terkini dibaca via ref, bukan dependency effect).
   const loadedCountRef = useRef(orders.length);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  // Setelah gagal memuat halaman, tahan retry sampai sentinel benar-benar
+  // keluar dari viewport — mencegah loop pesan gagal saat API sedang down
+  // (observer tetap menembak selama sentinel terlihat).
+  const retryArmedRef = useRef(false);
+
   /** Ambil satu halaman riwayat dari API (pola infinite scroll). */
-  const fetchPage = useCallback(async (take: number, skip: number) => {
-    const res = await fetch(`/api/web/orders?take=${take}&skip=${skip}`);
-    const json = await res.json();
-    if (!json.success) throw new Error("fetch failed");
-    return {
-      items: (json.data.items as ApiOrder[]).map(toHistoryOrder),
-      total: json.data.total as number,
-      hasMore: json.data.hasMore as boolean,
-    };
-  }, []);
+  const fetchPage = useCallback(
+    async (take: number, skip: number) => {
+      const params = new URLSearchParams({
+        take: String(take),
+        skip: String(skip),
+      });
+      if (statusFilter !== "ALL") params.set("status", statusFilter);
+      if (sortMode !== "default") params.set("sort", sortMode);
+      const res = await fetch(`/api/web/orders?${params.toString()}`);
+      const json = await res.json();
+      if (!json.success) throw new Error("fetch failed");
+      return {
+        items: (json.data.items as ApiOrder[]).map(toHistoryOrder),
+        total: json.data.total as number,
+        hasMore: json.data.hasMore as boolean,
+      };
+    },
+    [statusFilter, sortMode],
+  );
+
+  // fetchPage terbaru dibaca via ref agar effect refresh (mount + focus)
+  // tidak pernah re-subscribe saat filter/sorting berubah.
+  const fetchPageRef = useRef(fetchPage);
+  useEffect(() => {
+    fetchPageRef.current = fetchPage;
+  }, [fetchPage]);
 
   // Segarkan jendela data yang sudah dimuat saat halaman profil dibuka
   // kembali (router cache bisa menyajikan data lama saat back-navigation)
   // dan saat tab kembali aktif — tidak menambah jumlah, hanya menyegarkan.
+  // Gagal refresh senyap — data lama tetap tampil.
   useEffect(() => {
     let active = true;
     const refresh = async () => {
       try {
         const take = Math.max(loadedCountRef.current, PAGE_SIZE);
-        const page = await fetchPage(take, 0);
+        const page = await fetchPageRef.current(take, 0);
         if (!active) return;
         setList(page.items);
         setHasMore(page.hasMore);
@@ -201,7 +258,37 @@ export function OrderHistorySection({
       active = false;
       window.removeEventListener("focus", onFocus);
     };
-  }, [fetchPage]);
+  }, []);
+
+  // Perubahan filter/sorting (bukan render pertama): reset daftar lalu
+  // ambil halaman pertama dengan parameter baru. Gagal → tampilkan pesan.
+  const isFirstRenderRef = useRef(true);
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+    let active = true;
+    const reload = async () => {
+      setLoadingMore(true);
+      try {
+        const page = await fetchPage(PAGE_SIZE, 0);
+        if (!active) return;
+        setList(page.items);
+        setHasMore(page.hasMore);
+        setTotalOrders(page.total);
+        loadedCountRef.current = page.items.length;
+      } catch {
+        if (active) message.error(t("notif.fetchFailed"));
+      } finally {
+        if (active) setLoadingMore(false);
+      }
+    };
+    void reload();
+    return () => {
+      active = false;
+    };
+  }, [fetchPage, message, t]);
 
   // Infinite scroll: saat sentinel terlihat (mendekati dasar daftar) dan
   // masih ada data, muat halaman berikutnya (dedupe by id).
@@ -222,22 +309,31 @@ export function OrderHistorySection({
       setHasMore(page.hasMore);
       setTotalOrders(page.total);
     } catch {
-      // Gagal memuat halaman — biarkan user mencoba scroll lagi.
+      // Gagal memuat halaman — beri tahu user dan tahan retry sampai
+      // sentinel keluar viewport (lihat retryArmedRef).
+      retryArmedRef.current = true;
+      message.error(t("notif.fetchFailed"));
     } finally {
       setLoadingMore(false);
     }
-  }, [fetchPage, hasMore, loadingMore]);
+  }, [fetchPage, hasMore, loadingMore, message, t]);
 
   useEffect(() => {
     const node = sentinelRef.current;
     if (!node || !hasMore) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          void loadMore();
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            // Pre-load sebelum sentinel benar-benar terlihat di layar;
+            // dilewati bila retry sedang ditahan setelah kegagalan.
+            if (!retryArmedRef.current) void loadMore();
+          } else {
+            // Sentinel keluar viewport — boleh mencoba lagi nanti.
+            retryArmedRef.current = false;
+          }
         }
       },
-      // Pre-load sebelum sentinel benar-benar terlihat di layar.
       { rootMargin: "400px 0px" },
     );
     observer.observe(node);
@@ -371,13 +467,53 @@ export function OrderHistorySection({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Kontrol sorting & filter status pembayaran — default mengikuti
+          urutan bawaan (PENDING dulu, lalu PAID, terbaru duluan).
+          Gating memakai total dari server (tanpa filter) agar kontrol
+          tetap tampil saat filter aktif menghasilkan nol pesanan. */}
+      {initialTotal > 0 && (
+        <div className="flex flex-wrap gap-3">
+          <label className="flex w-full flex-col gap-1 text-xs font-medium text-foreground/60 sm:w-48">
+            {t("profile.filterStatus")}
+            <Select<StatusFilter>
+              value={statusFilter}
+              onChange={(value) => setStatusFilter(value)}
+              options={STATUS_FILTER_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: t(opt.labelKey),
+              }))}
+            />
+          </label>
+          <label className="flex w-full flex-col gap-1 text-xs font-medium text-foreground/60 sm:w-48">
+            {t("profile.sortBy")}
+            <Select<SortMode>
+              value={sortMode}
+              onChange={(value) => setSortMode(value)}
+              options={SORT_MODE_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: t(opt.labelKey),
+              }))}
+            />
+          </label>
+        </div>
+      )}
       {list.length === 0 ? (
         <Card>
-          <Empty description={t("profile.noOrders")} className="py-8!">
-            {/* Belum punya pesanan → ajak memesan paket wisata. */}
-            <Button type="primary" onClick={() => router.push("/package")}>
-              {t("profile.orderPackage")}
-            </Button>
+          <Empty
+            description={
+              statusFilter === "ALL"
+                ? t("profile.noOrders")
+                : t("profile.noOrdersForFilter")
+            }
+            className="py-8!"
+          >
+            {/* Belum punya pesanan → ajak memesan paket wisata
+                (hanya saat tidak sedang memfilter status). */}
+            {statusFilter === "ALL" && (
+              <Button type="primary" onClick={() => router.push("/package")}>
+                {t("profile.orderPackage")}
+              </Button>
+            )}
           </Empty>
         </Card>
       ) : (
