@@ -9,7 +9,7 @@ const MAX_PLACES = 3;
 
 /** Tempat wisata live dari /api/web/places (kelola admin). */
 interface WebPlace {
-  id: number;
+  id: string;
   name: string;
   photo: string | null;
 }

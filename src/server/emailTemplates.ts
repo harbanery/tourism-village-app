@@ -9,9 +9,14 @@ import { BASE_URL, NOTIFICATION_LOCALE } from "@/config/variables";
 const BRAND = "Desaku Wisataku";
 const BRAND_PRIMARY = "#0d7a5f";
 
+/** Label singkat order (id legacy apa adanya, UUID dipendekkan 8 karakter). */
+function orderRef(orderId: string): string {
+  return orderId.includes("-") ? orderId.slice(0, 8) : orderId;
+}
+
 /** Data order yang dipakai semua template email order. */
 export interface OrderEmailData {
-  orderId: number;
+  orderId: string;
   userName: string;
   totalPrice: number;
   /** Format ISO — batas waktu pembayaran (email konfirmasi). */
@@ -116,7 +121,7 @@ function itemsTable(order: OrderEmailData): string {
   </table>`;
 }
 
-function orderLink(orderId: number): { url: string; label: string } {
+function orderLink(orderId: string): { url: string; label: string } {
   return {
     url: `${BASE_URL}/payment/${orderId}`,
     label:
@@ -146,12 +151,12 @@ export function orderConfirmationEmail(order: OrderEmailData): EmailContent {
 
   const bodyHtml = `
     <p style="margin:0 0 12px;">${greeting}</p>
-    <p style="margin:0 0 12px;color:#6b7280;">#${order.orderId}</p>
+    <p style="margin:0 0 12px;color:#6b7280;">#${orderRef(order.orderId)}</p>
     ${itemsTable(order)}
     <p style="margin:16px 0 4px;">${deadline}</p>
     ${button(link.url, link.label)}`;
 
-  const text = `${greeting} (#${order.orderId})
+  const text = `${greeting} (#${orderRef(order.orderId)})
 ${order.items
   .map(
     (item) =>
@@ -164,8 +169,8 @@ ${link.url}`;
 
   return {
     subject: isId
-      ? `[${BRAND}] Pesanan #${order.orderId} menunggu pembayaran`
-      : `[${BRAND}] Order #${order.orderId} awaiting payment`,
+      ? `[${BRAND}] Pesanan #${orderRef(order.orderId)} menunggu pembayaran`
+      : `[${BRAND}] Order #${orderRef(order.orderId)} awaiting payment`,
     text,
     html: emailLayout(title, bodyHtml),
   };
@@ -177,8 +182,8 @@ export function orderPaidEmail(order: OrderEmailData): EmailContent {
   const link = orderLink(order.orderId);
   const title = isId ? "Pembayaran Berhasil" : "Payment Successful";
   const greeting = isId
-    ? `Halo ${order.userName}, pembayaran pesanan #${order.orderId} telah kami terima.`
-    : `Hello ${order.userName}, we received your payment for order #${order.orderId}.`;
+    ? `Halo ${order.userName}, pembayaran pesanan #${orderRef(order.orderId)} telah kami terima.`
+    : `Hello ${order.userName}, we received your payment for order #${orderRef(order.orderId)}.`;
   const paid = isId
     ? `Dibayar pada <b>${formatDateTime(order.paidAt ?? new Date())}</b>. Simpan email ini sebagai bukti pemesanan.`
     : `Paid on <b>${formatDateTime(order.paidAt ?? new Date())}</b>. Keep this email as your booking proof.`;
@@ -202,8 +207,8 @@ ${link.url}`;
 
   return {
     subject: isId
-      ? `[${BRAND}] Pembayaran pesanan #${order.orderId} berhasil`
-      : `[${BRAND}] Payment for order #${order.orderId} received`,
+      ? `[${BRAND}] Pembayaran pesanan #${orderRef(order.orderId)} berhasil`
+      : `[${BRAND}] Payment for order #${orderRef(order.orderId)} received`,
     text,
     html: emailLayout(title, bodyHtml),
   };
@@ -214,8 +219,8 @@ export function orderCanceledEmail(order: OrderEmailData): EmailContent {
   const isId = NOTIFICATION_LOCALE === "id";
   const title = isId ? "Pesanan Dibatalkan" : "Order Canceled";
   const greeting = isId
-    ? `Halo ${order.userName}, pesanan #${order.orderId} dibatalkan karena melewati batas waktu pembayaran.`
-    : `Hello ${order.userName}, order #${order.orderId} was canceled because the payment deadline passed.`;
+    ? `Halo ${order.userName}, pesanan #${orderRef(order.orderId)} dibatalkan karena melewati batas waktu pembayaran.`
+    : `Hello ${order.userName}, order #${orderRef(order.orderId)} was canceled because the payment deadline passed.`;
   const cta = isId
     ? `Ingin mencoba lagi? Silakan buat pesanan baru kapan saja.`
     : `Want to try again? You can create a new order anytime.`;
@@ -234,8 +239,8 @@ ${cta}`;
 
   return {
     subject: isId
-      ? `[${BRAND}] Pesanan #${order.orderId} dibatalkan`
-      : `[${BRAND}] Order #${order.orderId} canceled`,
+      ? `[${BRAND}] Pesanan #${orderRef(order.orderId)} dibatalkan`
+      : `[${BRAND}] Order #${orderRef(order.orderId)} canceled`,
     text,
     html: emailLayout(title, bodyHtml),
   };
@@ -243,7 +248,7 @@ ${cta}`;
 
 /** Data pengingat jadwal (H-1 sebelum keberangkatan). */
 export interface TripReminderData {
-  orderId: number;
+  orderId: string;
   userName: string;
   /** Item yang berangkat besok (bisa sebagian dari order). */
   items: OrderEmailData["items"];
@@ -275,8 +280,8 @@ export function tripReminderEmail(data: TripReminderData): EmailContent {
 
   return {
     subject: isId
-      ? `[${BRAND}] Jadwal wisata Anda besok (pesanan #${data.orderId})`
-      : `[${BRAND}] Your trip is tomorrow (order #${data.orderId})`,
+      ? `[${BRAND}] Jadwal wisata Anda besok (pesanan #${orderRef(data.orderId)})`
+      : `[${BRAND}] Your trip is tomorrow (order #${orderRef(data.orderId)})`,
     text: `${greeting}
 ${data.items
   .map(

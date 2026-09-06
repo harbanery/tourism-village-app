@@ -36,8 +36,9 @@ export interface VideoItem {
 }
 
 export interface BlogPost {
-  id: number;
-  adminId: number;
+  id: string;
+  slug: string;
+  adminId: string;
   adminName?: string;
   datetime: string;
   datetimeAfter: string | null;
@@ -68,7 +69,7 @@ export interface Testimonial {
 }
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
   phone: string | null;
   name: string;
@@ -230,8 +231,9 @@ export const dummyVideos: VideoItem[] = [
 
 export const dummyBlogs: BlogPost[] = [
   {
-    id: 201,
-    adminId: 1,
+    id: "201",
+    slug: "serunya-pemandangan",
+    adminId: "1",
     adminName: "Admin Sementara",
     datetime: "2020-10-25 14:27:51",
     datetimeAfter: null,
@@ -243,8 +245,9 @@ export const dummyBlogs: BlogPost[] = [
       "<p>Selain terkenal dengan Goa Pindul dan body rafting Sungai Oya, kami juga memiliki paket wisata berupa menyusuri goa cantik di bawah tanah menggunakan ban karet. Berada dalam satu kawasan dengan Goa Pindul, objek wisata ini dikenal dengan nama Goa Tanding.</p>",
   },
   {
-    id: 202,
-    adminId: 1,
+    id: "202",
+    slug: "curug-leuwi-lieuk-destinasi-wisata-eksotis-tak-jauh-dari-ibu-kota",
+    adminId: "1",
     adminName: "Admin Sementara",
     datetime: "2021-10-27 10:24:31",
     datetimeAfter: null,
@@ -256,8 +259,9 @@ export const dummyBlogs: BlogPost[] = [
       "<p>Curug Leuwi Lieuk cocok dijadikan destinasi wisata saat penat dengan rutinitas ibu kota. Curug ini berada di wilayah yang sama dengan Curug Leuwi Hejo yang berlokasi di Cibadak, Bogor.</p><p>Meski ada di satu wilayah yang sama, Curug Leuwi Lieuk lebih jauh sekitar 300 meter ke arah timur dan jalan yang dituju lebih terjal.</p><p>Jalan yang lebih terjal dan jarak yang sedikit lebih jauh ini membuat Curug Leuwi Lieuk tak seramai Curug Leuwi Hejo.</p>",
   },
   {
-    id: 203,
-    adminId: 3,
+    id: "203",
+    slug: "menyambangi-bekas-kasepuhan-sunda-di-kampung-budaya-sindang-barang",
+    adminId: "3",
     adminName: "Tania Anggra",
     datetime: "2021-12-05 08:50:54",
     datetimeAfter: "2021-12-05 08:53:10",
@@ -375,7 +379,7 @@ export const dummyTestimonials: Testimonial[] = [
 
 export const dummyUsers: User[] = [
   {
-    id: 1,
+    id: "1",
     email: "raihany@gmail.com",
     phone: "0896-0556-7347",
     name: "Raihan Yusuf",
@@ -385,7 +389,7 @@ export const dummyUsers: User[] = [
     avatar: "https://picsum.photos/seed/user1/200/200",
   },
   {
-    id: 4,
+    id: "4",
     email: "111201912121@mhs.dinus.ac.id",
     phone: null,
     name: "Alatas Ali",

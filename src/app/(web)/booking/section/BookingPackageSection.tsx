@@ -6,7 +6,7 @@ import { useT } from "@/components/locale/LocaleProvider";
 
 /** Paket live dari /api/web/packages (kelola admin). */
 interface WebPackage {
-  id: number;
+  id: string;
   name: string;
   placeName: string | null;
   facilities: string[];

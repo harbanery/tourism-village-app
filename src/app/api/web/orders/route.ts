@@ -3,6 +3,7 @@ import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
 import { REMOTE_TX_OPTIONS, withRetry } from "@/server/prismaRetry";
 import { paymentDeadline } from "@/server/orderExpiry";
+import { buildOrderCode } from "@/server/midtrans";
 import { customerFromUser, ensureOrderQris } from "@/server/qris";
 import { onOrderCreated } from "@/server/orderEvents";
 import {
@@ -80,7 +81,7 @@ export async function GET(request: Request) {
 }
 
 interface CreateOrderItemInput {
-  packageId: number;
+  packageId: string;
   quantity: number;
   /** Jadwal per paket (ISO date) — setiap paket bisa berbeda jadwalnya. */
   dateSchedule?: string;
@@ -124,7 +125,10 @@ export async function POST(request: Request) {
 
   // --- Validasi input ---
   const cartItems = (body.items ?? []).filter(
-    (item) => Number.isInteger(item.packageId) && item.quantity >= 1,
+    (item) =>
+      typeof item.packageId === "string" &&
+      item.packageId.length > 0 &&
+      item.quantity >= 1,
   );
   if (cartItems.length === 0) {
     return NextResponse.json(
@@ -238,6 +242,9 @@ export async function POST(request: Request) {
           const created = await tx.order.create({
             data: {
               userId: user.id,
+              // order_id Midtrans (TOURISM-{uuid}{YYYYMMDD}) dibuat sekali
+              // di sini dan dipakai charge QRIS + webhook/status.
+              orderId: buildOrderCode(),
               dateSchedule: earliestSchedule,
               homestay: anyHomestay,
               homestayTime: maxHomestayTime,

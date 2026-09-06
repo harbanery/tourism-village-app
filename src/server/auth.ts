@@ -153,7 +153,7 @@ export function safeEqual(a: string, b: string): boolean {
 /** Buat sesi baru; mengembalikan token cookie + kedaluwarsa. */
 export async function createSession(
   scope: SessionScope,
-  userId: number,
+  userId: string,
 ): Promise<{ token: string; expiresAt: Date }> {
   const token = newSessionId();
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
@@ -181,7 +181,7 @@ export async function createSession(
 export async function validateSession(
   scope: SessionScope,
   token: string | undefined | null,
-): Promise<{ id: string; userId: number; expiresAt: Date } | null> {
+): Promise<{ id: string; userId: string; expiresAt: Date } | null> {
   if (!token) return null;
   const hashed = hashSessionId(token);
 

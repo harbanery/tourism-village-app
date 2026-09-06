@@ -19,7 +19,7 @@ export async function PUT(request: Request, { params }: Params) {
     const body = await request.json();
 
     const existing = await prisma.place.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
 
     // Nilai foto berikutnya: tetap yang lama bila payload tidak menyertakan
@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: Params) {
       body.photo !== undefined ? body.photo || null : existing?.photo ?? null;
 
     const place = await prisma.place.update({
-      where: { id: Number(id) },
+      where: { id },
       data: {
         name: body.name,
         ...(body.photo !== undefined && { photo: nextPhoto }),
@@ -72,7 +72,7 @@ export async function PATCH(request: Request, { params }: Params) {
       body.status === "ACTIVE" ? "ACTIVE" : "NONACTIVE";
 
     const place = await prisma.place.update({
-      where: { id: Number(id) },
+      where: { id },
       data: { status: nextStatus },
     });
 
@@ -106,9 +106,9 @@ export async function DELETE(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const place = await prisma.place.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
-    await prisma.place.delete({ where: { id: Number(id) } });
+    await prisma.place.delete({ where: { id } });
     if (place?.photo) {
       await deleteCloudinaryUrls([place.photo]);
     }

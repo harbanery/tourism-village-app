@@ -13,8 +13,8 @@ export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
 /** DTO order + item untuk riwayat & pembayaran. */
 export interface UserOrder {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   userName: string;
   userEmail: string;
   userPhone: string | null;
@@ -26,7 +26,7 @@ export interface UserOrder {
   paymentStatus: PaymentStatus;
   paymentExpiresAt: string | null;
   items: {
-    id: number;
+    id: string;
     packageName: string;
     quantity: number;
     price: number;
@@ -44,7 +44,7 @@ export interface UserOrder {
  */
 export const MAX_ORDERS_PER_DAY = 5;
 
-export async function countRecentOrders(userId: number): Promise<number> {
+export async function countRecentOrders(userId: string): Promise<number> {
   return prisma.order.count({
     where: {
       userId,
@@ -180,8 +180,8 @@ export async function getUserOrdersPage(
 /** Map baris Prisma → DTO UserOrder. */
 function toUserOrder(
   order: {
-    id: number;
-    userId: number;
+    id: string;
+    userId: string;
     dateOrder: Date;
     dateSchedule: Date;
     homestay: boolean;
@@ -190,7 +190,7 @@ function toUserOrder(
     paymentStatus: PaymentStatus;
     paymentExpiresAt: Date | null;
     items: {
-      id: number;
+      id: string;
       quantity: number;
       price: number;
       dateSchedule: Date | null;
@@ -249,8 +249,8 @@ export async function getUserOrders(user: AuthUser): Promise<UserOrder[]> {
  * ada / bukan milik user sesi.
  */
 export async function getOrderForUser(
-  orderId: number,
-  userId: number,
+  orderId: string,
+  userId: string,
 ): Promise<UserOrder | null> {
   const order = await prisma.order.findFirst({
     where: { id: orderId, userId },

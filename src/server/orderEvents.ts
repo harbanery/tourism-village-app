@@ -29,8 +29,16 @@ function rupiah(value: number): string {
   return `Rp ${value.toLocaleString("id-ID")}`;
 }
 
+/**
+ * Label singkat order untuk teks notifikasi/email: id legacy ("25") apa
+ * adanya, id UUID dipendekkan ke 8 karakter pertamanya.
+ */
+function orderLabel(order: { id: string }): string {
+  return order.id.includes("-") ? order.id.slice(0, 8) : order.id;
+}
+
 /** Order + item + user untuk keperluan email/notifikasi. */
-async function loadOrder(orderId: number) {
+async function loadOrder(orderId: string) {
   return prisma.order.findUnique({
     where: { id: orderId },
     include: {
@@ -95,7 +103,7 @@ async function sendMasterAdminsEmail(content: {
 /* --------------------------- Event lifecycle --------------------------- */
 
 /** Event: pesanan baru dibuat (checkout sukses, status PENDING). */
-export async function onOrderCreated(orderId: number): Promise<void> {
+export async function onOrderCreated(orderId: string): Promise<void> {
   try {
     const order = await loadOrder(orderId);
     if (!order) return;
@@ -112,8 +120,8 @@ export async function onOrderCreated(orderId: number): Promise<void> {
     await createUserNotification(order.user.id, {
       type: "ORDER_CREATED",
       title: isId
-        ? `Pesanan #${order.id} dibuat`
-        : `Order #${order.id} created`,
+        ? `Pesanan #${orderLabel(order)} dibuat`
+        : `Order #${orderLabel(order)} created`,
       body: isId
         ? `Total ${rupiah(order.totalPrice)}. Selesaikan pembayaran sebelum ${deadline}.`
         : `Total ${rupiah(order.totalPrice)}. Complete payment before ${deadline}.`,
@@ -124,7 +132,7 @@ export async function onOrderCreated(orderId: number): Promise<void> {
     // Notifikasi + email ke admin (operasional).
     await notifyAdmins({
       type: "NEW_ORDER",
-      title: isId ? `Pesanan baru #${order.id}` : `New order #${order.id}`,
+      title: isId ? `Pesanan baru #${orderLabel(order)}` : `New order #${orderLabel(order)}`,
       body: isId
         ? `${order.user.name} membuat pesanan senilai ${rupiah(order.totalPrice)}.`
         : `${order.user.name} placed an order worth ${rupiah(order.totalPrice)}.`,
@@ -137,7 +145,7 @@ export async function onOrderCreated(orderId: number): Promise<void> {
 }
 
 /** Event: pembayaran diterima (status → PAID). */
-export async function onOrderPaid(orderId: number): Promise<void> {
+export async function onOrderPaid(orderId: string): Promise<void> {
   try {
     const order = await loadOrder(orderId);
     if (!order) return;
@@ -147,8 +155,8 @@ export async function onOrderPaid(orderId: number): Promise<void> {
     await createUserNotification(order.user.id, {
       type: "ORDER_PAID",
       title: isId
-        ? `Pembayaran pesanan #${order.id} berhasil`
-        : `Payment for order #${order.id} received`,
+        ? `Pembayaran pesanan #${orderLabel(order)} berhasil`
+        : `Payment for order #${orderLabel(order)} received`,
       body: isId
         ? `Terima kasih! Pesanan Anda telah dibayar (${rupiah(order.totalPrice)}).`
         : `Thank you! Your order is paid (${rupiah(order.totalPrice)}).`,
@@ -159,8 +167,8 @@ export async function onOrderPaid(orderId: number): Promise<void> {
     await notifyAdmins({
       type: "PAYMENT_RECEIVED",
       title: isId
-        ? `Pembayaran diterima #${order.id}`
-        : `Payment received #${order.id}`,
+        ? `Pembayaran diterima #${orderLabel(order)}`
+        : `Payment received #${orderLabel(order)}`,
       body: isId
         ? `${order.user.name} membayar ${rupiah(order.totalPrice)}.`
         : `${order.user.name} paid ${rupiah(order.totalPrice)}.`,
@@ -173,7 +181,7 @@ export async function onOrderPaid(orderId: number): Promise<void> {
 }
 
 /** Event: pesanan dibatalkan (kedaluwarsa / gagal pembayaran). */
-export async function onOrderCanceled(orderId: number): Promise<void> {
+export async function onOrderCanceled(orderId: string): Promise<void> {
   try {
     const order = await loadOrder(orderId);
     if (!order) return;
@@ -181,8 +189,8 @@ export async function onOrderCanceled(orderId: number): Promise<void> {
     await createUserNotification(order.user.id, {
       type: "ORDER_CANCELED",
       title: isId
-        ? `Pesanan #${order.id} dibatalkan`
-        : `Order #${order.id} canceled`,
+        ? `Pesanan #${orderLabel(order)} dibatalkan`
+        : `Order #${orderLabel(order)} canceled`,
       body: isId
         ? "Pesanan dibatalkan karena melewati batas waktu pembayaran."
         : "The order was canceled because the payment deadline passed.",
@@ -255,7 +263,7 @@ export async function sendTripReminders(): Promise<number> {
     });
 
     // Kelompokkan per order agar user menerima satu pengingat gabungan.
-    const byOrder = new Map<number, typeof items>();
+    const byOrder = new Map<string, typeof items>();
     for (const item of items) {
       const list = byOrder.get(item.orderId) ?? [];
       list.push(item);

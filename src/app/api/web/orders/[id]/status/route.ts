@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
-import {
-  buildMidtransOrderId,
-  fetchMidtransStatus,
-  mapMidtransStatus,
-} from "@/server/midtrans";
+import { fetchMidtransStatus, mapMidtransStatus } from "@/server/midtrans";
 import { isPaymentExpired } from "@/server/orderExpiry";
-import { onOrderCanceled, onOrderPaid } from "@/server/orderEvents";
+import { applyPaymentTransition } from "@/server/orderStatus";
 
 /**
  * GET /api/web/orders/[id]/status — periksa & sinkronkan status pembayaran.
@@ -30,8 +26,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const orderId = Number(id);
-  if (!Number.isInteger(orderId)) {
+  if (!id) {
     return NextResponse.json(
       { success: false, error: "Invalid order id" },
       { status: 400 },
@@ -39,7 +34,7 @@ export async function GET(
   }
 
   const order = await prisma.order.findFirst({
-    where: { id: orderId, userId: user.id },
+    where: { id, userId: user.id },
   });
   if (!order) {
     return NextResponse.json(
@@ -52,40 +47,43 @@ export async function GET(
 
   // PENDING + kedaluwarsa → CANCELED.
   if (isPaymentExpired(order)) {
-    current = await prisma.order.update({
-      where: { id: order.id },
-      data: { paymentStatus: "CANCELED" },
+    const changed = await applyPaymentTransition({
+      orderId: order.id,
+      from: "PENDING",
+      to: "CANCELED",
     });
-    void onOrderCanceled(order.id);
+    if (changed) current = { ...current, paymentStatus: "CANCELED" };
   } else if (
     order.paymentStatus === "PENDING" &&
     // Ada kanal pembayaran nyata: QR QRIS pernah dibuat.
     order.qrisString
   ) {
-    // Konfirmasi status ke Midtrans (otoritatif, server-to-server).
-    const status = await fetchMidtransStatus(
-      buildMidtransOrderId(order.id),
-    );
+    // Konfirmasi status ke Midtrans (otoritatif, server-to-server)
+    // memakai order_id (TOURISM-{uuid}{YYYYMMDD}) yang tersimpan.
+    const status = await fetchMidtransStatus(order.orderId);
     if (status) {
       const nextStatus = mapMidtransStatus(
         status.transactionStatus,
         status.fraudStatus,
       );
       if (nextStatus !== "PENDING") {
-        current = await prisma.order.update({
-          where: { id: order.id },
+        const changed = await applyPaymentTransition({
+          orderId: order.id,
+          from: "PENDING",
+          to: nextStatus,
           data: {
-            paymentStatus: nextStatus,
-            ...(nextStatus === "PAID"
-              ? {
-                  paymentMethod: status.paymentType ?? "midtrans",
-                  paidAt: new Date(),
-                }
-              : {}),
+            paymentMethod: status.paymentType ?? "midtrans",
+            transactionId: status.transactionId,
           },
         });
-        if (nextStatus === "PAID") void onOrderPaid(order.id);
-        else void onOrderCanceled(order.id);
+        if (changed) {
+          current = {
+            ...current,
+            paymentStatus: nextStatus,
+            paymentMethod: status.paymentType ?? "midtrans",
+            transactionId: status.transactionId,
+          };
+        }
       }
     }
   }

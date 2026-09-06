@@ -4,7 +4,7 @@
 const CART_KEY = "tourism-village:cart";
 
 export interface StoredCartItem {
-  packageId: number;
+  packageId: string;
   quantity: number;
 }
 
@@ -17,7 +17,10 @@ export function readCart(): StoredCartItem[] {
     const parsed = JSON.parse(raw) as StoredCartItem[];
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(
-      (item) => Number.isInteger(item.packageId) && item.quantity >= 1,
+      (item) =>
+        typeof item.packageId === "string" &&
+        item.packageId.length > 0 &&
+        item.quantity >= 1,
     );
   } catch {
     return [];

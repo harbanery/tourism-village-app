@@ -27,9 +27,9 @@ import Image from "next/image";
 
 /** Paket aktif dari /api/web/packages (sesuai data admin). */
 interface WebPackage {
-  id: number;
+  id: string;
   name: string;
-  placeId: number | null;
+  placeId: string | null;
   placeName: string | null;
   price: number;
 }
@@ -46,7 +46,7 @@ interface ScheduleValue {
 type CheckoutFormValues = { schedules?: Record<string, ScheduleValue> };
 
 interface CheckoutUser {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string | null;
@@ -105,7 +105,7 @@ export default function CheckoutClientSection({
 
   const [fetching, setFetching] = useState(true);
   const [packages, setPackages] = useState<WebPackage[]>([]);
-  const [cart, setCart] = useState<{ packageId: number; quantity: number }[]>(
+  const [cart, setCart] = useState<{ packageId: string; quantity: number }[]>(
     [],
   );
   const [step, setStep] = useState<0 | 1>(0);
@@ -168,7 +168,7 @@ export default function CheckoutClientSection({
             : null;
         })
         .filter(Boolean) as {
-        packageId: number;
+        packageId: string;
         name: string;
         price: number;
         quantity: number;

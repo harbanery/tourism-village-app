@@ -7,7 +7,7 @@ import { BellOutlined, CheckOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 
 interface NotificationItem {
-  id: number;
+  id: string;
   type: string;
   title: string;
   body: string;

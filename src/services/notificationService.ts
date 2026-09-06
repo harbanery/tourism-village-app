@@ -27,7 +27,7 @@ export interface NotificationPayload {
 }
 
 export interface NotificationDto {
-  id: number;
+  id: string;
   type: string;
   title: string;
   body: string;
@@ -37,7 +37,7 @@ export interface NotificationDto {
 }
 
 function toDto(row: {
-  id: number;
+  id: string;
   type: string;
   title: string;
   body: string;
@@ -60,7 +60,7 @@ function toDto(row: {
 
 /** Buat notifikasi untuk satu user (menghormati preferensi notifWeb). */
 export async function createUserNotification(
-  userId: number,
+  userId: string,
   payload: NotificationPayload,
 ): Promise<void> {
   const user = await prisma.authUser.findUnique({
@@ -82,7 +82,7 @@ export async function createUserNotification(
 
 /** Daftar notifikasi user (terbaru duluan). */
 export async function getUserNotifications(
-  userId: number,
+  userId: string,
   take = 20,
 ): Promise<NotificationDto[]> {
   const rows = await prisma.notification.findMany({
@@ -95,7 +95,7 @@ export async function getUserNotifications(
 
 /** Jumlah notifikasi belum dibaca milik user. */
 export async function countUnreadUserNotifications(
-  userId: number,
+  userId: string,
 ): Promise<number> {
   return prisma.notification.count({ where: { userId, isRead: false } });
 }
@@ -105,8 +105,8 @@ export async function countUnreadUserNotifications(
  * id tidak dikirim.
  */
 export async function markUserNotificationsRead(
-  userId: number,
-  id?: number,
+  userId: string,
+  id?: string,
 ): Promise<void> {
   await prisma.notification.updateMany({
     where: id ? { userId, id } : { userId, isRead: false },
@@ -146,7 +146,7 @@ export async function notifyAdmins(
 
 /** Daftar notifikasi admin (terbaru duluan). */
 export async function getAdminNotifications(
-  adminId: number,
+  adminId: string,
   take = 20,
 ): Promise<NotificationDto[]> {
   const rows = await prisma.adminNotification.findMany({
@@ -159,15 +159,15 @@ export async function getAdminNotifications(
 
 /** Jumlah notifikasi belum dibaca milik admin. */
 export async function countUnreadAdminNotifications(
-  adminId: number,
+  adminId: string,
 ): Promise<number> {
   return prisma.adminNotification.count({ where: { adminId, isRead: false } });
 }
 
 /** Tandai notifikasi admin sebagai dibaca (satu id atau semua). */
 export async function markAdminNotificationsRead(
-  adminId: number,
-  id?: number,
+  adminId: string,
+  id?: string,
 ): Promise<void> {
   await prisma.adminNotification.updateMany({
     where: id ? { adminId, id } : { adminId, isRead: false },

@@ -61,7 +61,7 @@ export type CreateOtpResult =
  * kirim ulang dalam jendela OTP_RATE_LIMIT_MINUTES.
  */
 export async function createOtp(
-  userId: number,
+  userId: string,
   purpose: OtpPurpose,
 ): Promise<CreateOtpResult> {
   // Hitung kirim dalam jendela rate limit (termasuk kirim pertama).
@@ -112,7 +112,7 @@ export async function createOtp(
  * Token plaintext dikirim ke klien; di DB hanya hash-nya. Token lama
  * dikonsumsi agar hanya satu yang berlaku.
  */
-export async function createResetToken(userId: number): Promise<string> {
+export async function createResetToken(userId: string): Promise<string> {
   const token = randomBytes(32).toString("hex");
   await prisma.otpCode.updateMany({
     where: { userId, purpose: RESET_TOKEN_PURPOSE, consumedAt: null },
@@ -135,7 +135,7 @@ export async function createResetToken(userId: number): Promise<string> {
  */
 export async function verifyResetToken(
   token: string,
-): Promise<number | null> {
+): Promise<string | null> {
   const row = await prisma.otpCode.findFirst({
     where: { purpose: RESET_TOKEN_PURPOSE, codeHash: hashOtp(token), consumedAt: null },
     orderBy: { createdAt: "desc" },
@@ -166,7 +166,7 @@ export type OtpVerifyResult =
  * karena konsumsi final terjadi di route reset-password.
  */
 export async function verifyOtp(
-  userId: number,
+  userId: string,
   purpose: OtpPurpose,
   code: string,
   options: { consume?: boolean } = {},

@@ -30,14 +30,14 @@ export async function GET() {
     const countByPlace = new Map(
       packagesByPlace
         .filter((row) => row.placeId !== null)
-        .map((row) => [row.placeId as number, row._count._all]),
+        .map((row) => [row.placeId as string, row._count._all]),
     );
     const popularPackageIds = new Set(purchaseCounts.map((row) => row.packageId));
     const popularIdsByPlace = await prisma.package.findMany({
       where: { id: { in: [...popularPackageIds] } },
       select: { placeId: true },
     });
-    const popularCountByPlace = new Map<number, number>();
+    const popularCountByPlace = new Map<string, number>();
     for (const pkg of popularIdsByPlace) {
       if (pkg.placeId === null) continue;
       popularCountByPlace.set(

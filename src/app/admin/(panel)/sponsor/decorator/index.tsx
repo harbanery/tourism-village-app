@@ -27,7 +27,7 @@ import { getImageString, uploadFileFromUrl } from "@/helpers/image";
 import { sponsorFormLayout } from "../config";
 
 interface SponsorRow {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   filename: string;
@@ -49,7 +49,7 @@ const SponsorDecorator = () => {
   // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
 
-  // Kolom global (id, status, opsi) untuk tabel sponsor.
+  // Kolom global (status, opsi) untuk tabel sponsor.
   const cols = useAdminColumns<SponsorRow>();
 
   const [form] = Form.useForm<SponsorFormValues>();
@@ -183,7 +183,7 @@ const SponsorDecorator = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/sponsors/${id}`, {
         method: "DELETE",
@@ -211,7 +211,6 @@ const SponsorDecorator = () => {
   };
 
   const columns = [
-    cols.id,
     {
       // Foto logo sponsor berada di kolom nama (seperti akun admin/user).
       title: t("admin.sponsors.name"),

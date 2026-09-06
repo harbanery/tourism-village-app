@@ -40,7 +40,7 @@ import { formatRupiah } from "@/utils/format";
 import { placeFormLayout, packageFormLayout } from "../config";
 
 interface PlaceRow {
-  id: number;
+  id: string;
   name: string;
   status: "ACTIVE" | "NONACTIVE";
   photo: string | null;
@@ -51,10 +51,10 @@ interface PlaceRow {
 }
 
 interface PackageRow {
-  id: number;
+  id: string;
   name: string;
-  placeId: number | null;
-  place: { id: number; name: string; status: "ACTIVE" | "NONACTIVE" } | null;
+  placeId: string | null;
+  place: { id: string; name: string; status: "ACTIVE" | "NONACTIVE" } | null;
   facilities: string[];
   price: number;
   status: "ACTIVE" | "NONACTIVE";
@@ -69,7 +69,7 @@ interface PlaceFormValues {
 
 interface PackageFormValues {
   name: string;
-  placeId?: number;
+  placeId?: string;
   facilities?: string[];
   price?: number;
 }
@@ -83,7 +83,7 @@ const TourismDecorator = () => {
   // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
 
-  // Kolom global (id, status, opsi) untuk kedua tabel.
+  // Kolom global (status, opsi) untuk kedua tabel.
   const placeCols = useAdminColumns<PlaceRow>();
   const packageCols = useAdminColumns<PackageRow>();
 
@@ -241,7 +241,7 @@ const TourismDecorator = () => {
     }
   };
 
-  const handleDeletePlace = async (id: number) => {
+  const handleDeletePlace = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/places/${id}`, { method: "DELETE" });
       const result = await res.json();
@@ -373,7 +373,7 @@ const TourismDecorator = () => {
     }
   };
 
-  const handleDeletePackage = async (id: number) => {
+  const handleDeletePackage = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/packages/${id}`, {
         method: "DELETE",
@@ -416,7 +416,6 @@ const TourismDecorator = () => {
     Boolean(record.place && record.place.status !== "ACTIVE");
 
   const placeColumns = [
-    placeCols.id,
     {
       title: t("admin.tourism.places"),
       dataIndex: "name",
@@ -518,7 +517,6 @@ const TourismDecorator = () => {
   ];
 
   const packageColumns = [
-    packageCols.id,
     {
       title: t("admin.tourism.packages"),
       dataIndex: "name",

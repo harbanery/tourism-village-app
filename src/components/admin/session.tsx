@@ -10,7 +10,7 @@ import {
 import type { AdminRole } from "@prisma/client";
 
 export interface AdminSessionInfo {
-  id: number;
+  id: string;
   email: string;
   username: string;
   name: string | null;

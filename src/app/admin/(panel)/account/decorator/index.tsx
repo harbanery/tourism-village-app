@@ -38,7 +38,7 @@ import { adminRoleOptions } from "@/helpers/menu";
 import { adminFormLayout, adminRoleFormLayout } from "../config";
 
 interface AdminRow {
-  id: number;
+  id: string;
   email: string;
   username: string;
   name: string | null;
@@ -48,7 +48,7 @@ interface AdminRow {
 }
 
 interface UserRow {
-  id: number;
+  id: string;
   email: string;
   phone: string | null;
   name: string;
@@ -69,7 +69,7 @@ const AccountDecorator = () => {
   // Aturan role: MASTER bisa akses opsi + tambah; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
 
-  // Kolom global (id, status, opsi) untuk kedua tabel.
+  // Kolom global (status, opsi) untuk kedua tabel.
   const userCols = useAdminColumns<UserRow>();
   const adminCols = useAdminColumns<AdminRow>();
 
@@ -285,7 +285,6 @@ const AccountDecorator = () => {
   );
 
   const userColumns = [
-    userCols.id,
     {
       title: t("common.name"),
       dataIndex: "name",
@@ -346,7 +345,6 @@ const AccountDecorator = () => {
   ];
 
   const adminColumns = [
-    adminCols.id,
     {
       title: t("admin.accounts.username"),
       dataIndex: "username",

@@ -12,9 +12,9 @@ import { formatRupiah } from "@/utils/format";
 
 /** Paket aktif dari DB (/api/web/packages, kelola di panel admin). */
 export interface WebPackage {
-  id: number;
+  id: string;
   name: string;
-  placeId: number | null;
+  placeId: string | null;
   placeName: string | null;
   facilities: string[];
   price: number;
@@ -25,7 +25,7 @@ export interface WebPackage {
 }
 
 export interface CartItem {
-  packageId: number;
+  packageId: string;
   name: string;
   price: number;
   quantity: number;

@@ -17,7 +17,7 @@ export function CartSection({
   cart: CartItem[];
   total: number;
   /** Set kuantitas item; 0 atau kurang → item dihapus dari keranjang. */
-  onChangeQuantity: (packageId: number, quantity: number) => void;
+  onChangeQuantity: (packageId: string, quantity: number) => void;
   onClear: () => void;
   onCheckout: () => void;
 }) {

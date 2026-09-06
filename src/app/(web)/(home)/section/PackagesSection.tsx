@@ -9,7 +9,7 @@ import { formatRupiah } from "@/utils/format";
 
 /** Paket live dari /api/web/packages (kelola admin). */
 interface WebPackage {
-  id: number;
+  id: string;
   name: string;
   placeName: string | null;
   facilities: string[];

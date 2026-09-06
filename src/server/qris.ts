@@ -7,9 +7,10 @@ import type { AuthUser, Order, OrderItem, Package } from "@prisma/client";
  * QRIS POS integration — memastikan order punya QR aktif.
  *
  * Membuat charge QRIS sekali (Core API /charge, payment_type qris) lalu
- * menyimpan payload + URL gambar QR ke order; kunjungan berikutnya memakai
- * QR tersimpan. order_id Midtrans deterministik (TOURISM-{id}) sehingga
- * endpoint status/notifikasi bisa menemukan transaksinya.
+ * menyimpan payload + URL gambar QR + transaction_id ke order; kunjungan
+ * berikutnya memakai QR tersimpan. order_id Midtrans (TOURISM-{uuid}
+ * {YYYYMMDD}) sudah dibuat saat order dibuat dan tersimpan di kolom
+ * order_id sehingga endpoint status/notifikasi bisa menemukan transaksinya.
  */
 
 type OrderWithItems = Order & {
@@ -28,7 +29,11 @@ export async function ensureOrderQris(
   const { order, customer } = input;
   if (order.paymentStatus !== "PENDING") return null;
   if (order.qrisString) {
-    return { qrString: order.qrisString, qrImageUrl: order.qrisImageUrl };
+    return {
+      qrString: order.qrisString,
+      qrImageUrl: order.qrisImageUrl,
+      transactionId: order.transactionId,
+    };
   }
 
   // item.price menyimpan SUBTOTAL; harga satuan = subtotal/qty.
@@ -47,7 +52,7 @@ export async function ensureOrderQris(
   }
 
   const charge = await createQrisCharge({
-    midtransOrderId: `TOURISM-${order.id}`,
+    midtransOrderId: order.orderId,
     grossAmount: order.totalPrice,
     items,
     customer,
@@ -57,7 +62,12 @@ export async function ensureOrderQris(
 
   await prisma.order.update({
     where: { id: order.id },
-    data: { qrisString: charge.qrString, qrisImageUrl: charge.qrImageUrl },
+    data: {
+      qrisString: charge.qrString,
+      qrisImageUrl: charge.qrImageUrl,
+      // transaction_id Midtrans untuk audit (rekomendasi 2.3).
+      ...(charge.transactionId ? { transactionId: charge.transactionId } : {}),
+    },
   });
   return charge;
 }

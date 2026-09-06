@@ -23,14 +23,14 @@ import { asAppError } from "@/helpers/error";
 import { formatDate } from "@/utils/format";
 
 interface TestimonialRow {
-  id: number;
+  id: string;
   date: string;
   comment: string;
   rating: number;
   status: "ACTIVE" | "NONACTIVE";
   featured: boolean;
   note: string | null;
-  user: { id: number; name: string; email: string };
+  user: { id: string; name: string; email: string };
 }
 
 const ReviewDecorator = () => {
@@ -42,7 +42,7 @@ const ReviewDecorator = () => {
   // Aturan role: MASTER bisa akses opsi; VIEWER hidden.
   const isMaster = session?.role === "MASTER";
 
-  // Kolom global (id, status, opsi) untuk tabel ulasan.
+  // Kolom global (status, opsi) untuk tabel ulasan.
   const cols = useAdminColumns<TestimonialRow>();
 
   const [fetching, setFetching] = useState(true);

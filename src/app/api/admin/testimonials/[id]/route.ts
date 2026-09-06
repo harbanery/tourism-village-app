@@ -27,7 +27,7 @@ export async function PATCH(request: Request, { params }: Params) {
         where: { featured: true },
       });
       const current = await prisma.testimonial.findUnique({
-        where: { id: Number(id) },
+        where: { id },
       });
       if (!current?.featured && count >= MAX_FEATURED_TESTIMONIALS) {
         return NextResponse.json(
@@ -41,7 +41,7 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     const testimonial = await prisma.testimonial.update({
-      where: { id: Number(id) },
+      where: { id },
       data: {
         ...(body.status !== undefined && { status: body.status }),
         ...(body.featured !== undefined && { featured: body.featured }),
@@ -70,7 +70,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   }
   try {
     const { id } = await params;
-    await prisma.testimonial.delete({ where: { id: Number(id) } });
+    await prisma.testimonial.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting testimonial:", error);

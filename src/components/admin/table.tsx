@@ -19,14 +19,13 @@ export const ROLE_TAG_COLORS: Record<string, string> = {
   VIEWER: "magenta",
 };
 
-/** Lebar statis kolom id + kolom fixed kanan (status & opsi). */
+/** Lebar statis kolom fixed kanan (status & opsi). */
 export const FIXED_COLUMN_WIDTH = {
-  id: 60,
   status: 100,
   actions: 80,
 } as const;
 
-type AdminRow = { id: number };
+type AdminRow = { id: string };
 type StatusValue = "ACTIVE" | "NONACTIVE";
 
 /**
@@ -47,16 +46,9 @@ export function RowActions({ items }: { items: MenuProps["items"] }) {
   );
 }
 
-/** Hook kolom global (id, status, opsi) untuk tabel admin. */
+/** Hook kolom global (status, opsi) untuk tabel admin. */
 export function useAdminColumns<T extends AdminRow>() {
   const { t } = useT();
-
-  const id: ColumnType<T> = {
-    title: "Id",
-    dataIndex: "id",
-    key: "id",
-    width: FIXED_COLUMN_WIDTH.id,
-  };
 
   const status: ColumnType<T> = {
     title: t("common.status"),
@@ -82,7 +74,7 @@ export function useAdminColumns<T extends AdminRow>() {
     render: (_: unknown, record: T) => render(record),
   });
 
-  return { id, status, actions };
+  return { status, actions };
 }
 
 /** Tabel global admin — konfigurasi standar (rowKey, pagination, scroll). */

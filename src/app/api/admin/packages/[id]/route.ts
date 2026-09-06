@@ -17,7 +17,7 @@ export async function PUT(request: Request, { params }: Params) {
     const { id } = await params;
     const body = await request.json();
     const pkg = await prisma.package.update({
-      where: { id: Number(id) },
+      where: { id },
       data: {
         name: body.name,
         placeId: body.placeId ?? null,
@@ -57,7 +57,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
     if (nextStatus === "ACTIVE") {
       const pkg = await prisma.package.findUnique({
-        where: { id: Number(id) },
+        where: { id },
         include: { place: { select: { status: true } } },
       });
       if (pkg?.place && pkg.place.status !== "ACTIVE") {
@@ -69,7 +69,7 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     const pkg = await prisma.package.update({
-      where: { id: Number(id) },
+      where: { id },
       data: { status: nextStatus },
     });
     return NextResponse.json({ success: true, data: pkg });
@@ -93,7 +93,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   }
   try {
     const { id } = await params;
-    await prisma.package.delete({ where: { id: Number(id) } });
+    await prisma.package.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting package:", error);

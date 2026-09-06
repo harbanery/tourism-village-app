@@ -19,7 +19,7 @@ export async function PATCH(request: Request, { params }: Params) {
   }
   try {
     const { id } = await params;
-    const targetId = Number(id);
+    const targetId = id;
     const body = await request.json();
 
     if (targetId === admin.id) {
@@ -84,7 +84,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   }
   try {
     const { id } = await params;
-    const targetId = Number(id);
+    const targetId = id;
     if (targetId === admin.id) {
       return NextResponse.json(
         { success: false, error: "Tidak bisa menghapus akun sendiri." },

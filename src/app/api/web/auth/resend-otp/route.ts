@@ -15,9 +15,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, purpose } = body as Record<string, unknown>;
 
-    const parsedUserId = Number(userId);
+    const parsedUserId = typeof userId === "string" ? userId : "";
     if (
-      !Number.isInteger(parsedUserId) ||
+      !parsedUserId ||
       typeof purpose !== "string" ||
       !OTP_PURPOSES.includes(purpose as OtpPurpose)
     ) {

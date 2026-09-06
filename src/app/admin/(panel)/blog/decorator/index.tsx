@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   App,
   Button,
@@ -23,6 +23,7 @@ import {
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { useAdminSession } from "@/components/admin/session";
+import { slugify } from "@/helpers/slug";
 import LoaderPage from "@/components/admin/loader";
 import FormAdmin from "@/components/admin/form";
 import {
@@ -37,27 +38,29 @@ import { formatDate } from "@/utils/format";
 import { blogFormLayout } from "../config";
 
 interface BlogRow {
-  id: number;
-  adminId: number;
-  placeId: number | null;
+  id: string;
+  adminId: string;
+  placeId: string | null;
+  slug: string;
   datetime: string;
   datetimeAfter: string | null;
   title: string;
   filename: string;
   para: string;
   status: "ACTIVE" | "NONACTIVE";
-  admin: { id: number; username: string; name: string | null };
-  place: { id: number; name: string } | null;
+  admin: { id: string; username: string; name: string | null };
+  place: { id: string; name: string } | null;
 }
 
 interface PlaceOption {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface BlogFormValues {
   title: string;
-  placeId?: number | null;
+  slug?: string;
+  placeId?: string | null;
   filename?: unknown;
   para?: string;
 }
@@ -75,7 +78,7 @@ const BlogDecorator = () => {
   const isMaster = session?.role === "MASTER";
   const canWriteBlog = isMaster || session?.role === "AUTHOR";
 
-  // Kolom global (id, status, opsi) untuk tabel blog.
+  // Kolom global (status, opsi) untuk tabel blog.
   const cols = useAdminColumns<BlogRow>();
 
   const [fetching, setFetching] = useState(true);
@@ -90,6 +93,27 @@ const BlogDecorator = () => {
     name: string;
   } | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // ---- Slug: auto-generate kebab-case dari judul, bisa ditimpa manual ----
+  const watchedTitle = Form.useWatch("title", form);
+  const watchedSlug = Form.useWatch("slug", form);
+  /** true setelah user mengedit slug sendiri — auto-generate berhenti. */
+  const slugManualRef = useRef(false);
+  /** Slug terakhir hasil auto-generate (untuk deteksi edit manual). */
+  const lastAutoSlugRef = useRef("");
+
+  useEffect(() => {
+    const auto = slugify(watchedTitle ?? "");
+    const current = watchedSlug ?? "";
+    // Nilai berbeda dari hasil auto (awal maupun terakhir) = edit manual.
+    if (current && current !== auto && current !== lastAutoSlugRef.current) {
+      slugManualRef.current = true;
+    }
+    if (!slugManualRef.current && auto !== lastAutoSlugRef.current) {
+      lastAutoSlugRef.current = auto;
+      form.setFieldsValue({ slug: auto });
+    }
+  }, [watchedTitle, watchedSlug, form]);
 
   /** Buka foto langsung di image preview. */
   const openPhoto = (src: string | null, name: string) => {
@@ -136,6 +160,8 @@ const BlogDecorator = () => {
     const filename = await getImageString(values.filename);
     return {
       title: values.title,
+      // Kosong → server generate dari judul; isi → divalidasi unik server.
+      slug: values.slug?.trim() || "",
       placeId: values.placeId ?? null,
       filename,
       para: values.para ?? "",
@@ -144,9 +170,14 @@ const BlogDecorator = () => {
 
   const showForm = (record?: BlogRow) => {
     setEditing(record ?? null);
+    // Reset deteksi slug manual; slug existing yang beda dari kebab(judul)
+    // otomatis dianggap manual sehingga tidak tertimpa auto-generate.
+    slugManualRef.current = false;
+    lastAutoSlugRef.current = record ? slugify(record.title) : "";
     if (record) {
       form.setFieldsValue({
         title: record.title,
+        slug: record.slug,
         placeId: record.placeId ?? undefined,
         // File existing ditampilkan utuh di form upload (nama + preview).
         filename: record.filename
@@ -239,7 +270,7 @@ const BlogDecorator = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/blogs/${id}`, { method: "DELETE" });
       const result = await res.json();
@@ -265,7 +296,6 @@ const BlogDecorator = () => {
   };
 
   const columns = [
-    cols.id,
     {
       title: t("admin.blog.judul"),
       dataIndex: "title",
@@ -273,10 +303,13 @@ const BlogDecorator = () => {
       width: 320,
     },
     {
-      title: t("admin.blog.author"),
-      dataIndex: ["admin", "name"],
-      key: "adminName",
-      render: (v: string | null, record: BlogRow) => v ?? record.admin.username,
+      // Slug URL (/blog/[slug]) — pengganti id untuk akses detail.
+      title: t("form.slug"),
+      dataIndex: "slug",
+      key: "slug",
+      width: 240,
+      ellipsis: true,
+      render: (v: string) => <span className="font-mono text-xs">{v}</span>,
     },
     {
       // Tanggal gabungan: tampilkan tanggal setelah diubah,
@@ -285,13 +318,6 @@ const BlogDecorator = () => {
       key: "date",
       render: (_: unknown, record: BlogRow) =>
         formatDate(record.datetimeAfter ?? record.datetime, locale, true),
-    },
-    {
-      // Tempat wisata yang terkait (optional).
-      title: t("admin.blog.relatedPlace"),
-      dataIndex: ["place", "name"],
-      key: "placeName",
-      render: (v: string | null) => v ?? "-",
     },
     // Kolom status & opsi: fixed kanan, width statis (global).
     cols.status,
@@ -377,7 +403,7 @@ const BlogDecorator = () => {
   ];
 
   const filtered = blogs.filter((post) =>
-    [post.title, post.admin?.name, post.place?.name]
+    [post.title, post.slug, post.admin?.name, post.place?.name]
       .filter(Boolean)
       .join(" ")
       .toLowerCase()
@@ -412,23 +438,43 @@ const BlogDecorator = () => {
           </Space>
         }
       >
-        {/* Expanded row: paragraf blog (HTML dari form teks kaya). */}
+        {/* Expanded row: penulis + tempat terkait (bila ada) + paragraf. */}
         <AdminTable
           dataSource={filtered}
           columns={columns}
           expandable={{
             expandedRowRender: (record: BlogRow) => (
-              <div className="text-sm leading-relaxed text-foreground/80">
-                <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">
-                  {t("admin.blog.para")}
-                </p>
-                <div
-                  className="mt-2 space-y-3"
-                  dangerouslySetInnerHTML={{ __html: record.para || "-" }}
-                />
+              <div className="grid gap-4 text-sm leading-relaxed text-foreground/80 md:grid-cols-[200px_1fr]">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">
+                      {t("admin.blog.author")}
+                    </p>
+                    <p className="m-0! mt-1">
+                      {record.admin.name ?? record.admin.username}
+                    </p>
+                  </div>
+                  {/* Tempat wisata terkait hanya ditampilkan bila ada. */}
+                  {record.place && (
+                    <div>
+                      <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">
+                        {t("admin.blog.relatedPlace")}
+                      </p>
+                      <p className="m-0! mt-1">{record.place.name}</p>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">
+                    {t("admin.blog.para")}
+                  </p>
+                  <div
+                    className="mt-2 space-y-3"
+                    dangerouslySetInnerHTML={{ __html: record.para || "-" }}
+                  />
+                </div>
               </div>
             ),
-            rowExpandable: (record: BlogRow) => Boolean(record.para),
           }}
         />
       </Card>

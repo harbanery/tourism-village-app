@@ -1,6 +1,6 @@
 import prisma from "@/server/db";
 import { PAYMENT_EXPIRY_MINUTES } from "@/config/variables";
-import { onOrderCanceled } from "@/server/orderEvents";
+import { applyPaymentTransition } from "@/server/orderStatus";
 
 /**
  * Batas waktu pembayaran order.
@@ -34,9 +34,10 @@ export function isPaymentExpired(order: ExpirableOrder): boolean {
 
 /**
  * Sweep lazy: tandai semua PENDING kedaluwarsa sebagai CANCELED.
- * Murah (SELECT id + satu UPDATE ... WHERE) dan idempoten; dipanggil sebelum
- * membaca daftar order / opsi pembayaran agar status selalu segar tanpa cron.
- * Order yang baru saja di-expire mendapat notifikasi + email (fire-and-forget).
+ * Murah (SELECT id + transisi ter-guard per order) dan idempoten; dipanggil
+ * sebelum membaca daftar order / opsi pembayaran agar status selalu segar
+ * tanpa cron. Order yang baru di-expire mendapat audit log (OrderLog) +
+ * notifikasi + email (best-effort).
  */
 export async function expireStalePendingOrders(): Promise<number> {
   const expired = await prisma.order.findMany({
@@ -48,13 +49,14 @@ export async function expireStalePendingOrders(): Promise<number> {
   });
   if (expired.length === 0) return 0;
 
-  const { count } = await prisma.order.updateMany({
-    where: { id: { in: expired.map((row) => row.id) } },
-    data: { paymentStatus: "CANCELED" },
-  });
-
+  let count = 0;
   for (const row of expired) {
-    void onOrderCanceled(row.id);
+    const changed = await applyPaymentTransition({
+      orderId: row.id,
+      from: "PENDING",
+      to: "CANCELED",
+    });
+    if (changed) count += 1;
   }
   return count;
 }

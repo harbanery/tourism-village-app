@@ -40,7 +40,7 @@ function navLinkClass(active: boolean, stacked = false) {
 }
 
 interface SessionUser {
-  id: number;
+  id: string;
   name: string;
   email: string;
 }

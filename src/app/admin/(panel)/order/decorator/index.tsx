@@ -20,7 +20,11 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
 };
 
 interface OrderRow {
-  id: number;
+  id: string;
+  /** order_id Midtrans (TOURISM-{uuid}{YYYYMMDD}) — identitas order. */
+  orderId: string;
+  /** transaction_id Midtrans (audit, rekomendasi 2.3). */
+  transactionId: string | null;
   dateOrder: string;
   dateSchedule: string;
   homestay: boolean;
@@ -28,9 +32,9 @@ interface OrderRow {
   totalPrice: number;
   paymentStatus: PaymentStatus;
   status: "ACTIVE" | "NONACTIVE";
-  user: { id: number; name: string; email: string; phone: string | null };
+  user: { id: string; name: string; email: string; phone: string | null };
   items: {
-    id: number;
+    id: string;
     quantity: number;
     price: number;
     /** Jadwal per paket (null untuk data lama — fallback agregat order). */
@@ -71,12 +75,12 @@ const OrderDecorator = () => {
     void Promise.resolve().then(fetchOrders);
   }, [fetchOrders]);
 
-  // Pencarian tetap menyertakan email/no. telepon meskipun kolomnya
-  // tidak ditampilkan (takeout kolom, bukan takeout fitur cari).
+  // Pencarian tetap menyertakan email/no. telepon & kode order meskipun
+  // kolomnya tidak ditampilkan semua (takeout kolom, bukan fitur cari).
   const filtered = useMemo(
     () =>
       orders.filter((order) =>
-        [order.user?.name, order.user?.email, order.user?.phone]
+        [order.user?.name, order.user?.email, order.user?.phone, order.orderId]
           .filter(Boolean)
           .join(" ")
           .toLowerCase()
@@ -88,6 +92,18 @@ const OrderDecorator = () => {
   if (!mounted || fetching) return <LoaderPage />;
 
   const columns = [
+    {
+      // Order ID Midtrans (TOURISM-{uuid}{YYYYMMDD}) — identitas pesanan
+      // menggantikan id internal (rekomendasi 2.3: pakai orderId).
+      title: t("admin.orders.orderId"),
+      dataIndex: "orderId",
+      key: "orderId",
+      render: (v: string) => (
+        <Typography.Text copyable className="font-mono text-xs!">
+          {v}
+        </Typography.Text>
+      ),
+    },
     {
       title: t("common.date"),
       dataIndex: "dateOrder",

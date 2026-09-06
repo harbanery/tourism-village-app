@@ -18,12 +18,11 @@ export default async function PaymentPage({
     redirect(`/login?redirect=/payment/${id}`);
   }
 
-  const orderId = Number(id);
-  if (!Number.isInteger(orderId)) {
+  if (!id) {
     notFound();
   }
 
-  const order = await getOrderForUser(orderId, user.id);
+  const order = await getOrderForUser(id, user.id);
   if (!order) {
     notFound();
   }

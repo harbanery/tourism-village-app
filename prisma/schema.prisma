@@ -43,7 +43,7 @@ enum Gender {
 // ============================================================
 
 model AuthAdmin {
-  id       Int       @id @default(autoincrement())
+  id       String    @id @default(uuid())
   email    String    @unique
   username String    @unique
   password String
@@ -59,7 +59,7 @@ model AuthAdmin {
 }
 
 model AuthUser {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   email     String   @unique
   phone     String?  @map("no_tlp")
   password  String
@@ -87,7 +87,7 @@ model AuthUser {
 
 model AdminSession {
   id        String   @id
-  adminId   Int      @map("admin_id")
+  adminId   String   @map("admin_id")
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -99,7 +99,7 @@ model AdminSession {
 
 model UserSession {
   id        String   @id
-  userId    Int      @map("user_id")
+  userId    String   @map("user_id")
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -123,8 +123,8 @@ model LoginAttempt {
 
 /** Kode OTP sekali pakai (verifikasi register, reset password, ganti email). */
 model OtpCode {
-  id         Int       @id @default(autoincrement())
-  userId     Int       @map("user_id")
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
   purpose    String // REGISTER_VERIFICATION | RESET_PASSWORD | EMAIL_CHANGE
   codeHash   String    @map("code_hash")
   expiresAt  DateTime  @map("expires_at")
@@ -143,7 +143,7 @@ model OtpCode {
 // ============================================================
 
 model Place {
-  id       Int      @id @default(autoincrement())
+  id       String   @id @default(uuid())
   name     String   @map("tempat_name")
   status   Status   @default(ACTIVE)
   photo    String?  @map("photo_tempat")
@@ -156,9 +156,9 @@ model Place {
 }
 
 model Package {
-  id         Int      @id @default(autoincrement())
-  name       String   @map("paket_name")
-  placeId    Int?     @map("tempat_id")
+  id         String    @id @default(uuid())
+  name       String    @map("paket_name")
+  placeId    String?   @map("tempat_id")
   facilities String[] @default([])
   price      Int      @map("harga")
   status     Status   @default(ACTIVE)
@@ -169,9 +169,9 @@ model Package {
 }
 
 model Gallery {
-  id          Int     @id @default(autoincrement())
+  id          String  @id @default(uuid())
   title       String  @map("gambar_name")
-  placeId     Int     @map("tempat_id")
+  placeId     String  @map("tempat_id")
   filename    String
   status      Status @default(ACTIVE)
   locked      String  @default("no") // yes | no (yes = dipakai sebagai cover tempat)
@@ -181,9 +181,9 @@ model Gallery {
 }
 
 model Video {
-  id        Int     @id @default(autoincrement())
+  id        String  @id @default(uuid())
   name      String  @map("video_name")
-  placeId   Int     @map("tempat_id")
+  placeId   String  @map("tempat_id")
   linkCode  String  @map("link_code") // YouTube video id
   status    Status @default(ACTIVE)
   place     Place   @relation(fields: [placeId], references: [id], onDelete: Cascade)
@@ -192,9 +192,11 @@ model Video {
 }
 
 model Blog {
-  id            Int        @id @default(autoincrement())
-  adminId       Int        @map("admin_id")
-  placeId       Int?       @map("tempat_id")
+  id            String     @id @default(uuid())
+  adminId       String     @map("admin_id")
+  placeId       String?    @map("tempat_id")
+  /** Slug URL (kebab-case dari judul, bisa diisi manual) — dipakai /blog/[slug]. */
+  slug          String     @unique
   datetime      DateTime   @default(now())
   datetimeAfter DateTime?  @map("datetime_after")
   title         String
@@ -208,8 +210,8 @@ model Blog {
 }
 
 model Sponsor {
-  id          Int    @id @default(autoincrement())
-  name        String @map("sponsor_name")
+  id          String  @id @default(uuid())
+  name        String  @map("sponsor_name")
   description String? @map("deskripsi")
   filename    String // logo image (Cloudinary URL)
   status      Status @default(ACTIVE)
@@ -218,8 +220,8 @@ model Sponsor {
 }
 
 model Testimonial {
-  id       Int      @id @default(autoincrement())
-  userId   Int      @map("user_id")
+  id       String   @id @default(uuid())
+  userId   String   @map("user_id")
   date     DateTime @default(now()) @map("date_kom")
   comment  String   @map("komentar")
   rating   Int // 1..5
@@ -236,8 +238,12 @@ model Testimonial {
 // ============================================================
 
 model Order {
-  id            Int           @id @default(autoincrement())
-  userId        Int           @map("user_id")
+  id            String       @id @default(uuid())
+  /** order_id Midtrans: TOURISM-{uuid}{YYYYMMDD} — unik, dibuat saat order dibuat. */
+  orderId       String       @unique @map("order_id")
+  /** transaction_id Midtrans (audit — disimpan saat charge/settlement). */
+  transactionId String?      @map("transaction_id")
+  userId        String       @map("user_id")
   dateOrder     DateTime      @default(now()) @map("date_order")
   /** Agregat jadwal (tanggal paling awal) — detail per paket ada di OrderItem. */
   dateSchedule  DateTime      @map("date_schedule") @db.Date
@@ -256,14 +262,29 @@ model Order {
   paymentExpiresAt DateTime?  @map("payment_expires_at")
   user          AuthUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
   items         OrderItem[]
+  logs          OrderLog[]
 
   @@map("wisata_pesan")
 }
 
+/** Audit trail transisi status pembayaran per order (rekomendasi 2.3). */
+model OrderLog {
+  id         String        @id @default(uuid())
+  orderId    String        @map("pesan_id")
+  fromStatus PaymentStatus @map("from_status")
+  toStatus   PaymentStatus @map("to_status")
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("wisata_pesan_log")
+}
+
 model OrderItem {
-  id        Int     @id @default(autoincrement())
-  orderId   Int     @map("pesan_id")
-  packageId Int     @map("paket_id")
+  id        String  @id @default(uuid())
+  orderId   String  @map("pesan_id")
+  packageId String  @map("paket_id")
   quantity  Int
   price     Int // subtotal
   /** Jadwal per paket — setiap paket bisa punya tanggal/menginap berbeda. */
@@ -282,8 +303,8 @@ model OrderItem {
 
 /** Notifikasi in-app untuk user web (status order, pengingat, dsb.). */
 model Notification {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
   /** ORDER_CREATED | ORDER_PAID | ORDER_CANCELED | TRIP_REMINDER */
   type      String
   title     String
@@ -301,8 +322,8 @@ model Notification {
 
 /** Notifikasi in-app untuk admin (order baru, pembayaran, ulasan, ringkasan). */
 model AdminNotification {
-  id        Int      @id @default(autoincrement())
-  adminId   Int      @map("admin_id")
+  id        String   @id @default(uuid())
+  adminId   String   @map("admin_id")
   /** NEW_ORDER | PAYMENT_RECEIVED | NEW_REVIEW | DAILY_SUMMARY */
   type      String
   title     String

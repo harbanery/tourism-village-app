@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
   MIDTRANS_IS_CONFIGURED,
   MIDTRANS_SERVER_KEY,
@@ -32,18 +32,28 @@ export function isMidtransConfigured(): boolean {
 }
 
 /**
- * order_id Midtrans yang deterministik per order: `TOURISM-{orderId}`.
- * Deterministik agar status transaksi bisa di-query ulang dari API Midtrans
- * (GET /v2/{order_id}/status) tanpa menyimpan id acak tambahan.
+ * order_id Midtrans per order: `TOURISM-{uuid}{YYYYMMDD}` (uuid tanpa dash).
+ * Disimpan di kolom `order_id` saat order dibuat — webhook/status cukup
+ * mencari order berdasarkan kode ini (tidak perlu parsing).
  */
-export function buildMidtransOrderId(orderId: number): string {
-  return `TOURISM-${orderId}`;
+export function buildOrderCode(): string {
+  const date = new Date();
+  const ymd = [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, "0"),
+    String(date.getUTCDate()).padStart(2, "0"),
+  ].join("");
+  return `TOURISM-${randomUUID().replace(/-/g, "")}${ymd}`;
 }
 
-/** Ambil id order asli dari order_id Midtrans (TOURISM-{id}[-suffix]). */
-export function parseMidtransOrderId(raw: string): number | null {
-  const match = /^TOURISM-(\d+)/.exec(raw);
-  return match ? Number(match[1]) : null;
+/**
+ * Ambil id order asli dari order_id Midtrans lama (`TOURISM-{int}`) —
+ * data historis sebelum format uuid. Format baru tidak di-parse karena
+ * kodenya tersimpan di kolom order_id.
+ */
+export function parseLegacyMidtransOrderId(raw: string): string | null {
+  const match = /^TOURISM-(\d+)$/.exec(raw.trim());
+  return match ? match[1] : null;
 }
 
 /** Header Authorization Basic server-key Midtrans. */
@@ -60,6 +70,8 @@ export interface QrisChargeResult {
   qrString: string;
   /** URL gambar QR siap tampil (action generate-qr-code Midtrans). */
   qrImageUrl: string | null;
+  /** transaction_id Midtrans (audit, rekomendasi 2.3) — null bila tidak ada. */
+  transactionId: string | null;
 }
 
 /**
@@ -124,12 +136,17 @@ export async function createQrisCharge(params: {
     const json = (await response.json()) as {
       status_code?: string;
       qr_string?: string;
+      transaction_id?: string;
       actions?: { name?: string; url?: string }[];
     };
     if (!json.qr_string) return null;
     const qrImageUrl =
       json.actions?.find((a) => a.name === "generate-qr-code")?.url ?? null;
-    return { qrString: json.qr_string, qrImageUrl };
+    return {
+      qrString: json.qr_string,
+      qrImageUrl,
+      transactionId: json.transaction_id ?? null,
+    };
   } catch (error) {
     console.error("Midtrans QRIS charge request failed:", error);
     return null;
@@ -178,12 +195,14 @@ export function mapMidtransStatus(
 }
 
 export interface MidtransTransactionStatus {
-  /** order_id Midtrans (TOURISM-{id}). */
+  /** order_id Midtrans (TOURISM-{uuid}{YYYYMMDD}). */
   orderId: string;
   transactionStatus: string;
   fraudStatus?: string;
   paymentType?: string;
   statusCode: string;
+  /** transaction_id Midtrans (audit, rekomendasi 2.3). */
+  transactionId: string | null;
 }
 
 /**
@@ -224,6 +243,7 @@ export async function fetchMidtransStatus(
       fraud_status?: string;
       payment_type?: string;
       status_code?: string;
+      transaction_id?: string;
     };
     if (!json.order_id || !json.transaction_status) return null;
     return {
@@ -232,6 +252,7 @@ export async function fetchMidtransStatus(
       fraudStatus: json.fraud_status,
       paymentType: json.payment_type,
       statusCode: json.status_code ?? "200",
+      transactionId: json.transaction_id ?? null,
     };
   } catch (error) {
     console.error("Midtrans status request failed:", error);

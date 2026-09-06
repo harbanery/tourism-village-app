@@ -8,9 +8,9 @@ import prisma from "@/server/db";
 
 /** DTO paket aktif untuk halaman web. */
 export interface ActivePackage {
-  id: number;
+  id: string;
   name: string;
-  placeId: number | null;
+  placeId: string | null;
   placeName: string | null;
   facilities: string[];
   price: number;
@@ -30,7 +30,7 @@ export interface ActivePackage {
  * personal (user tanpa riwayat → section tidak tampil).
  */
 export async function getActivePackages(
-  userId?: number | null,
+  userId?: string | null,
 ): Promise<ActivePackage[]> {
   const [packages, purchaseCounts, userPurchaseCounts] = await Promise.all([
     prisma.package.findMany({

@@ -19,9 +19,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, code, purpose } = body as Record<string, unknown>;
 
-    const parsedUserId = Number(userId);
+    const parsedUserId = typeof userId === "string" ? userId : "";
     if (
-      !Number.isInteger(parsedUserId) ||
+      !parsedUserId ||
       typeof code !== "string" ||
       !/^\d{6}$/.test(code)
     ) {

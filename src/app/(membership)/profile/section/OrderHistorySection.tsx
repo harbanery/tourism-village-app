@@ -3,16 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
-import {
-  App,
-  Button,
-  Card,
-  Collapse,
-  Empty,
-  Select,
-  Spin,
-  Tag,
-} from "antd";
+import { App, Button, Card, Collapse, Empty, Select, Spin, Tag } from "antd";
 import {
   CreditCardOutlined,
   DownOutlined,
@@ -28,9 +19,9 @@ import { issuePaymentAccess } from "@/helpers/paymentAccess";
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
 export interface HistoryOrder {
-  id: number;
+  id: string;
   /** Opsional — respons /api/web/orders tidak menyertakan userId. */
-  userId?: number;
+  userId?: string;
   userName?: string;
   userEmail?: string;
   userPhone?: string | null;
@@ -43,7 +34,7 @@ export interface HistoryOrder {
   /** Batas waktu pembayaran (ISO) — hanya relevan untuk PENDING. */
   paymentExpiresAt?: string | null;
   items: {
-    id: number;
+    id: string;
     packageName: string;
     quantity: number;
     price: number;
@@ -140,7 +131,7 @@ function isReservationPassed(order: HistoryOrder): boolean {
 
 /** Bentuk order dari GET /api/web/orders (homestay boolean). */
 interface ApiOrder {
-  id: number;
+  id: string;
   dateOrder: string;
   dateSchedule: string;
   homestay: boolean;
@@ -149,7 +140,7 @@ interface ApiOrder {
   paymentStatus: PaymentStatus;
   paymentExpiresAt: string | null;
   items: {
-    id: number;
+    id: string;
     packageName: string;
     quantity: number;
     price: number;
@@ -343,7 +334,7 @@ export function OrderHistorySection({
   if (!mounted) return null;
 
   /** Unduh bukti pembayaran (invoice Midtrans + data order) sebagai PDF. */
-  const handleDownloadInvoice = async (orderId: number) => {
+  const handleDownloadInvoice = async (orderId: string) => {
     try {
       const res = await fetch(`/api/web/orders/${orderId}/invoice`);
       const result = await res.json();
@@ -419,7 +410,7 @@ export function OrderHistorySection({
       doc.text(t("cart.price"), 194, y + 1.5, { align: "right" });
       y += 10;
       for (const item of data.items as {
-        id: number;
+        id: string;
         packageName: string;
         quantity: number;
         price: number;
@@ -521,7 +512,7 @@ export function OrderHistorySection({
           {list.map((order) => (
             <Card
               key={order.id}
-              title={`${t("common.total")}: ${formatRupiah(order.totalPrice)}`}
+              title={`${formatRupiah(order.totalPrice)}`}
               extra={
                 <Tag color={PAYMENT_TAG_COLORS[order.paymentStatus]}>
                   {t(`payment.status.${order.paymentStatus}`)}

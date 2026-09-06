@@ -19,7 +19,7 @@ export async function PUT(request: Request, { params }: Params) {
     const body = await request.json();
 
     const existing = await prisma.sponsor.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
 
     // Nilai logo berikutnya: tetap yang lama bila payload tidak menyertakan
@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: Params) {
       body.filename !== undefined ? body.filename || "" : existing?.filename ?? "";
 
     const sponsor = await prisma.sponsor.update({
-      where: { id: Number(id) },
+      where: { id },
       data: {
         name: body.name,
         description: body.description || null,
@@ -64,7 +64,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const { id } = await params;
     const body = await request.json();
     const sponsor = await prisma.sponsor.update({
-      where: { id: Number(id) },
+      where: { id },
       data: { status: body.status },
     });
     return NextResponse.json({ success: true, data: sponsor });
@@ -89,9 +89,9 @@ export async function DELETE(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const sponsor = await prisma.sponsor.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
-    await prisma.sponsor.delete({ where: { id: Number(id) } });
+    await prisma.sponsor.delete({ where: { id } });
     if (sponsor?.filename) {
       await deleteCloudinaryUrls([sponsor.filename]);
     }

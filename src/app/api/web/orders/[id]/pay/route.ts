@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
 import { isPaymentExpired, paymentDeadline } from "@/server/orderExpiry";
+import { applyPaymentTransition } from "@/server/orderStatus";
 import { customerFromUser, ensureOrderQris } from "@/server/qris";
 
 /**
@@ -24,8 +25,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const orderId = Number(id);
-  if (!Number.isInteger(orderId)) {
+  if (!id) {
     return NextResponse.json(
       { success: false, error: "Invalid order id" },
       { status: 400 },
@@ -33,7 +33,7 @@ export async function GET(
   }
 
   const order = await prisma.order.findFirst({
-    where: { id: orderId, userId: user.id },
+    where: { id, userId: user.id },
     include: { items: { include: { package: true } } },
   });
   if (!order) {
@@ -45,15 +45,16 @@ export async function GET(
 
   // Kedaluwarsa? Expire menjadi CANCELED — tidak ada opsi pembayaran lagi.
   if (isPaymentExpired(order)) {
-    const expired = await prisma.order.update({
-      where: { id: order.id },
-      data: { paymentStatus: "CANCELED" },
+    await applyPaymentTransition({
+      orderId: order.id,
+      from: "PENDING",
+      to: "CANCELED",
     });
     return NextResponse.json({
       success: true,
       data: {
         orderId: order.id,
-        paymentStatus: expired.paymentStatus,
+        paymentStatus: "CANCELED" as const,
         expired: true,
         payment: null,
       },

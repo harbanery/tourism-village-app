@@ -106,3 +106,27 @@ body {
 .sponsor-avatar img {
   object-fit: contain !important;
 }
+
+/*
+ * Tombol expand baris tabel admin (sebelah kiri tiap baris): default antd
+ * memakai warna teks biasa (biru keabu-abuan) — diganti primary (hijau)
+ * agar konsisten dengan aksi utama. Ikon +/− memakai currentColor.
+ */
+.ant-table-row-expand-icon {
+  color: var(--color-primary) !important;
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent) !important;
+}
+.ant-table-row-expand-icon:hover,
+.ant-table-row-expand-icon:focus {
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+.ant-table-row-expand-icon-expanded::before,
+.ant-table-row-expand-icon-expanded::after,
+.ant-table-row-expand-icon-collapsed::before,
+.ant-table-row-expand-icon-collapsed::after,
+.ant-table-row-expand-icon-spaced::before,
+.ant-table-row-expand-icon-spaced::after {
+  /* Garis +/− ikut warna tombol (currentColor). */
+  background: currentColor !important;
+}

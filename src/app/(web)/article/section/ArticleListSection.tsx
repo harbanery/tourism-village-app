@@ -39,7 +39,7 @@ export function ArticleListSection({ children }: { children?: React.ReactNode })
               <Button
                 type="link"
                 className="mt-4! px-0!"
-                onClick={() => router.push(`/blog/${post.id}`)}
+                onClick={() => router.push(`/blog/${post.slug}`)}
               >
                 {t("common.readMore")}
               </Button>

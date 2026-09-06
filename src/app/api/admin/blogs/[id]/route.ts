@@ -1,6 +1,7 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWriteBlog } from "@/server/auth";
 import { deleteCloudinaryUrls } from "@/server/cloudinary";
+import { blogSlugBase, uniqueBlogSlug } from "@/server/blogSlug";
 import { NextResponse } from "next/server";
 
 type Params = { params: Promise<{ id: string }> };
@@ -22,7 +23,7 @@ export async function PUT(request: Request, { params }: Params) {
     const body = await request.json();
 
     const existing = await prisma.blog.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
     if (!existing) {
       return NextResponse.json(
@@ -42,10 +43,19 @@ export async function PUT(request: Request, { params }: Params) {
     const nextFilename =
       body.filename !== undefined ? body.filename || "" : existing.filename;
 
+    // Slug: dari form (bisa diisi sendiri); kosong → generate dari judul.
+    // Di-sanitize kebab-case dan dipastikan unik (kecuali blog ini sendiri).
+    const slugBase = blogSlugBase(body.slug, body.title ?? existing.title);
+    const nextSlug =
+      slugBase === existing.slug
+        ? existing.slug // tidak berubah — skip cek unik
+        : await uniqueBlogSlug(slugBase, existing.id);
+
     const blog = await prisma.blog.update({
-      where: { id: Number(id) },
+      where: { id },
       data: {
         title: body.title,
+        slug: nextSlug,
         ...(body.placeId !== undefined && { placeId: body.placeId ?? null }),
         ...(body.filename !== undefined && { filename: nextFilename }),
         para: body.para,
@@ -87,7 +97,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
     if (admin.role === "AUTHOR") {
       const existing = await prisma.blog.findUnique({
-        where: { id: Number(id) },
+        where: { id },
       });
       if (!existing || existing.adminId !== admin.id) {
         return NextResponse.json(
@@ -98,7 +108,7 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     const blog = await prisma.blog.update({
-      where: { id: Number(id) },
+      where: { id },
       data: { status: body.status },
     });
     return NextResponse.json({ success: true, data: blog });
@@ -123,7 +133,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const blog = await prisma.blog.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
     if (!blog) {
       return NextResponse.json(
@@ -138,7 +148,7 @@ export async function DELETE(_request: Request, { params }: Params) {
       );
     }
 
-    await prisma.blog.delete({ where: { id: Number(id) } });
+    await prisma.blog.delete({ where: { id } });
     if (blog.filename) {
       await deleteCloudinaryUrls([blog.filename]);
     }

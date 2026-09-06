@@ -26,14 +26,14 @@ import { formatRupiah, formatDate } from "@/utils/format";
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
 interface PaymentOrder {
-  id: number;
+  id: string;
   dateSchedule: string;
   homestay: boolean;
   homestayTime: number | null;
   totalPrice: number;
   paymentStatus: PaymentStatus;
   items: {
-    id: number;
+    id: string;
     packageName: string;
     quantity: number;
     price: number;

@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
-import {
-  buildMidtransOrderId,
-  fetchMidtransStatus,
-  isMidtransConfigured,
-} from "@/server/midtrans";
+import { fetchMidtransStatus, isMidtransConfigured } from "@/server/midtrans";
 
 /**
  * GET /api/web/orders/[id]/invoice — data bukti pembayaran (invoice)
@@ -26,8 +22,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const orderId = Number(id);
-  if (!Number.isInteger(orderId)) {
+  if (!id) {
     return NextResponse.json(
       { success: false, error: "Invalid order id" },
       { status: 400 },
@@ -35,7 +30,7 @@ export async function GET(
   }
 
   const order = await prisma.order.findFirst({
-    where: { id: orderId, userId: user.id },
+    where: { id, userId: user.id },
     include: { items: { include: { package: true } } },
   });
   if (!order) {
@@ -47,14 +42,15 @@ export async function GET(
 
   // Status transaksi Midtrans (otoritatif) — null bila tak dikonfigurasi.
   const midtrans = isMidtransConfigured()
-    ? await fetchMidtransStatus(buildMidtransOrderId(order.id))
+    ? await fetchMidtransStatus(order.orderId)
     : null;
 
   return NextResponse.json({
     success: true,
     data: {
       orderId: order.id,
-      midtransOrderId: buildMidtransOrderId(order.id),
+      midtransOrderId: order.orderId,
+      transactionId: order.transactionId,
       paymentStatus: order.paymentStatus,
       dateOrder: order.dateOrder.toISOString(),
       dateSchedule: order.dateSchedule.toISOString(),

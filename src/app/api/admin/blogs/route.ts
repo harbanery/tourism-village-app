@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWriteBlog } from "@/server/auth";
+import { blogSlugBase, uniqueBlogSlug } from "@/server/blogSlug";
 import { NextResponse } from "next/server";
 
 /** GET /api/admin/blogs — semua blog + penulis. */
@@ -43,10 +44,14 @@ export async function POST(request: Request) {
   }
   try {
     const body = await request.json();
+    // Slug: dari form (bisa diisi sendiri); kosong → generate dari judul.
+    // Selalu di-sanitize kebab-case dan dipastikan unik.
+    const slugBase = blogSlugBase(body.slug, body.title);
     const blog = await prisma.blog.create({
       data: {
         adminId: admin.id,
         placeId: body.placeId ?? null,
+        slug: await uniqueBlogSlug(slugBase),
         title: body.title,
         filename: body.filename || "",
         para: body.para || "",

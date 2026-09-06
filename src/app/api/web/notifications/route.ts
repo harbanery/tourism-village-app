@@ -29,7 +29,7 @@ export async function GET() {
 
 /**
  * PATCH /api/web/notifications — tandai dibaca.
- * Body: { id?: number } — id tertentu, atau semua bila kosong.
+ * Body: { id?: string } — id tertentu, atau semua bila kosong.
  */
 export async function PATCH(request: Request) {
   const user = await getCurrentUser();
@@ -40,11 +40,11 @@ export async function PATCH(request: Request) {
     );
   }
 
-  let id: number | undefined;
+  let id: string | undefined;
   try {
-    const body = (await request.json()) as { id?: number };
+    const body = (await request.json()) as { id?: string };
     if (body.id !== undefined) {
-      if (!Number.isInteger(body.id)) {
+      if (typeof body.id !== "string" || body.id.length === 0) {
         return NextResponse.json(
           { success: false, error: "Invalid id" },
           { status: 400 },
