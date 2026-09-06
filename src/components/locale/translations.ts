@@ -56,7 +56,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "upload.hint": "Klik atau seret file ke area ini",
     "upload.subHint":
       "Mendukung gambar (maks 2MB). Foto disimpan di Cloudinary.",
-    "upload.tooLarge": "Ukuran \"{name}\" melebihi batas 2MB",
+    "upload.tooLarge": 'Ukuran "{name}" melebihi batas 2MB',
 
     "notifBell.title": "Notifikasi",
     "notifBell.empty": "Belum ada notifikasi",
@@ -196,7 +196,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.step.confirmDesc": "Periksa data pemesan dan detail pesanan Anda",
     "checkout.detailInfo": "Detail Informasi",
     "checkout.schedulePerPackage": "Jadwal per Paket",
-    "checkout.sameSchedule": "Tanggal berangkat paket ini sama dengan paket pertama",
+    "checkout.sameSchedule":
+      "Tanggal berangkat paket ini sama dengan paket pertama",
     "checkout.sameScheduleHint":
       "Centang bila tanggalnya sama — tanggal mengikuti paket pertama; menginap & jumlah hari tetap diatur per paket",
     "checkout.confirm": "Konfirmasi Pesanan",
@@ -372,6 +373,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.addressPlaceholder": "Alamat lengkap Anda",
     "profile.orderHistory": "Riwayat Belanja",
     "profile.noOrders": "Belum ada pesanan",
+    "profile.orderDetailCount": "Detail Pesanan",
+    "profile.allLoaded": "Semua pesanan telah dimuat ({n})",
     "profile.orderPackage": "Pesan Paket Wisata",
     "profile.orderDate": "Tanggal Pemesanan",
     "profile.reservationDate": "Tanggal Reservasi",
@@ -569,7 +572,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "upload.hint": "Click or drag file to this area to upload",
     "upload.subHint":
       "Supports images (max 2MB). Photos are stored in Cloudinary.",
-    "upload.tooLarge": "\"{name}\" exceeds the 2MB limit",
+    "upload.tooLarge": '"{name}" exceeds the 2MB limit',
 
     "notifBell.title": "Notifications",
     "notifBell.empty": "No notifications yet",
@@ -881,6 +884,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.addressPlaceholder": "Your full address",
     "profile.orderHistory": "Order History",
     "profile.noOrders": "No orders yet",
+    "profile.orderDetailCount": "Order Details",
+    "profile.allLoaded": "All orders loaded ({n})",
     "profile.orderPackage": "Order a Tour Package",
     "profile.orderDate": "Order Date",
     "profile.reservationDate": "Reservation Date",

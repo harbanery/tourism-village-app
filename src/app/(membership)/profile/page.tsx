@@ -1,6 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/server/auth";
-import { getUserOrders } from "@/services/orderService";
+import { getUserOrdersPage } from "@/services/orderService";
 import ProfileClientSection from "./section/ProfileClientSection";
 import type { User } from "@/models";
 
@@ -35,7 +35,9 @@ export default async function ProfilePage({
       ? params.tab
       : "profile";
 
-  const orders = await getUserOrders(user);
+  // Halaman pertama riwayat (2 order teratas: PENDING dulu, lalu PAID,
+  // terbaru duluan) — sisanya dimuat via infinite scroll dari klien.
+  const ordersPage = await getUserOrdersPage(user, { take: 2, skip: 0 });
 
   const profile: User = {
     id: user.id,
@@ -64,7 +66,9 @@ export default async function ProfilePage({
     <ProfileClientSection
       user={profile}
       settings={settings}
-      orders={orders}
+      orders={ordersPage.items}
+      hasMoreOrders={ordersPage.hasMore}
+      totalOrders={ordersPage.total}
       initialView={view}
       initialSettingsTab={settingsTab}
     />

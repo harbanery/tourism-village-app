@@ -54,20 +54,115 @@ export async function countRecentOrders(userId: number): Promise<number> {
 export class OrderLimitError extends Error {}
 
 /**
- * Riwayat order milik user (terbaru dululu). PENDING yang melewati batas
- * waktu pembayaran di-expire menjadi CANCELED dulu supaya status yang
- * tampil selalu segar.
+ * Prioritas urutan riwayat pesanan: Menunggu Pembayaran (PENDING) paling
+ * atas, disusul Lunas (PAID), baru sisa status — masing-masing terbaru
+ * duluan.
  */
-export async function getUserOrders(user: AuthUser): Promise<UserOrder[]> {
+const STATUS_SORT_PRIORITY: Record<string, number> = {
+  PENDING: 0,
+  PAID: 1,
+  FAILED: 2,
+  CANCELED: 3,
+};
+
+function compareOrders(
+  a: { paymentStatus: string; dateOrder: Date },
+  b: { paymentStatus: string; dateOrder: Date },
+): number {
+  const prio =
+    (STATUS_SORT_PRIORITY[a.paymentStatus] ?? 9) -
+    (STATUS_SORT_PRIORITY[b.paymentStatus] ?? 9);
+  if (prio !== 0) return prio;
+  return b.dateOrder.getTime() - a.dateOrder.getTime();
+}
+
+/** Hasil halaman riwayat order (infinite scroll). */
+export interface UserOrdersPage {
+  items: UserOrder[];
+  total: number;
+  hasMore: boolean;
+}
+
+/** Opsi halaman riwayat order. */
+export interface UserOrdersPageOptions {
+  take?: number;
+  skip?: number;
+}
+
+/**
+ * Satu halaman riwayat order milik user (pola infinite scroll): urut
+ * PENDING → PAID → sisanya, masing-masing terbaru duluan. Query ringan
+ * (id + status + tanggal) dipakai untuk sorting/pagination, lalu baris
+ * penuh + item hanya diambil untuk halaman aktif.
+ *
+ * PENDING yang melewati batas waktu pembayaran di-expire menjadi CANCELED
+ * dulu supaya status yang tampil selalu segar.
+ */
+export async function getUserOrdersPage(
+  user: AuthUser,
+  { take = 2, skip = 0 }: UserOrdersPageOptions = {},
+): Promise<UserOrdersPage> {
   await expireStalePendingOrders();
 
-  const orderRows = await prisma.order.findMany({
+  const safeTake = Math.min(Math.max(1, Math.floor(take)), 20);
+  const safeSkip = Math.max(0, Math.floor(skip));
+
+  const lightRows = await prisma.order.findMany({
     where: { userId: user.id },
-    orderBy: { dateOrder: "desc" },
+    select: { id: true, paymentStatus: true, dateOrder: true },
+  });
+  lightRows.sort(compareOrders);
+
+  const total = lightRows.length;
+  const pageIds = lightRows
+    .slice(safeSkip, safeSkip + safeTake)
+    .map((row) => row.id);
+
+  if (pageIds.length === 0) {
+    return { items: [], total, hasMore: safeSkip + safeTake < total };
+  }
+
+  const fullRows = await prisma.order.findMany({
+    where: { id: { in: pageIds } },
     include: { items: { include: { package: true } } },
   });
+  const byId = new Map(fullRows.map((row) => [row.id, row]));
 
-  return orderRows.map((order) => ({
+  return {
+    items: pageIds
+      .map((id) => byId.get(id))
+      .filter((row): row is NonNullable<typeof row> => Boolean(row))
+      .map((order) => toUserOrder(order, user)),
+    total,
+    hasMore: safeSkip + safeTake < total,
+  };
+}
+
+/** Map baris Prisma → DTO UserOrder. */
+function toUserOrder(
+  order: {
+    id: number;
+    userId: number;
+    dateOrder: Date;
+    dateSchedule: Date;
+    homestay: boolean;
+    homestayTime: number | null;
+    totalPrice: number;
+    paymentStatus: "PENDING" | "PAID" | "FAILED" | "CANCELED";
+    paymentExpiresAt: Date | null;
+    items: {
+      id: number;
+      quantity: number;
+      price: number;
+      dateSchedule: Date | null;
+      homestay: boolean;
+      homestayTime: number | null;
+      package: { name: string };
+    }[];
+  },
+  user: Pick<AuthUser, "name" | "email" | "phone">,
+): UserOrder {
+  return {
     id: order.id,
     userId: order.userId,
     userName: user.name,
@@ -89,7 +184,24 @@ export async function getUserOrders(user: AuthUser): Promise<UserOrder[]> {
       homestay: item.homestay,
       homestayTime: item.homestayTime,
     })),
-  }));
+  };
+}
+
+/**
+ * Riwayat order milik user (terbaru dululu). PENDING yang melewati batas
+ * waktu pembayaran di-expire menjadi CANCELED dulu supaya status yang
+ * tampil selalu segar.
+ */
+export async function getUserOrders(user: AuthUser): Promise<UserOrder[]> {
+  await expireStalePendingOrders();
+
+  const orderRows = await prisma.order.findMany({
+    where: { userId: user.id },
+    include: { items: { include: { package: true } } },
+  });
+  orderRows.sort(compareOrders);
+
+  return orderRows.map((order) => toUserOrder(order, user));
 }
 
 /**

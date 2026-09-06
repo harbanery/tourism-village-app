@@ -24,12 +24,18 @@ export default function ProfileClientSection({
   user,
   settings,
   orders,
+  hasMoreOrders = false,
+  totalOrders = 0,
   initialView = "history",
   initialSettingsTab = "profile",
 }: {
   user: User;
   settings: ProfileSettings;
   orders: HistoryOrder[];
+  /** Masih ada pesanan berikutnya (infinite scroll). */
+  hasMoreOrders?: boolean;
+  /** Total seluruh pesanan user. */
+  totalOrders?: number;
   initialView?: ProfileView;
   initialSettingsTab?: "profile" | "avatar" | "email" | "notifications";
 }) {
@@ -68,7 +74,11 @@ export default function ProfileClientSection({
         />
 
         {view === "history" ? (
-          <OrderHistorySection orders={orders} />
+          <OrderHistorySection
+            orders={orders}
+            hasMore={hasMoreOrders}
+            total={totalOrders}
+          />
         ) : (
           <SettingsSection
             user={user}

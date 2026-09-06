@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
-import { App, Button, Card, Empty, Tag } from "antd";
+import { App, Button, Card, Collapse, Empty, Spin, Tag } from "antd";
 import {
   CreditCardOutlined,
+  DownOutlined,
   DownloadOutlined,
   FieldTimeOutlined,
   HomeOutlined,
@@ -51,6 +52,13 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
   FAILED: "red",
   CANCELED: "default",
 };
+
+/**
+ * Ukuran halaman riwayat pesanan (infinite scroll): data awal yang muncul
+ * adalah 2 pesanan teratas; halaman berikutnya dimuat saat mendekati dasar
+ * daftar.
+ */
+const PAGE_SIZE = 2;
 
 /** Tambah n hari ke tanggal ISO (untuk tanggal pulang menginap). */
 function addDays(iso: string, days: number): string {
@@ -102,7 +110,17 @@ function toHistoryOrder(o: ApiOrder): HistoryOrder {
   };
 }
 
-export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
+export function OrderHistorySection({
+  orders,
+  hasMore: initialHasMore = false,
+  total: initialTotal = 0,
+}: {
+  orders: HistoryOrder[];
+  /** Masih ada pesanan berikutnya (dimuat saat scroll). */
+  hasMore?: boolean;
+  /** Total seluruh pesanan user. */
+  total?: number;
+}) {
   const { t, locale } = useT();
   const router = useRouter();
   const mounted = useMounted();
@@ -110,17 +128,41 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
 
   // Salinan lokal — bisa disegarkan tanpa menunggu render server ulang.
   const [list, setList] = useState<HistoryOrder[]>(orders);
+  const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
+  const [totalOrders, setTotalOrders] = useState<number>(initialTotal);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  // Segarkan riwayat saat halaman profil dibuka kembali (router cache bisa
-  // menyajikan data lama saat back-navigation) dan saat tab kembali aktif.
+  // Jumlah baris yang sudah dimuat — dipakai refresh tanpa re-subscribe
+  // (nilai terkini dibaca via ref, bukan dependency effect).
+  const loadedCountRef = useRef(orders.length);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  /** Ambil satu halaman riwayat dari API (pola infinite scroll). */
+  const fetchPage = useCallback(async (take: number, skip: number) => {
+    const res = await fetch(`/api/web/orders?take=${take}&skip=${skip}`);
+    const json = await res.json();
+    if (!json.success) throw new Error("fetch failed");
+    return {
+      items: (json.data.items as ApiOrder[]).map(toHistoryOrder),
+      total: json.data.total as number,
+      hasMore: json.data.hasMore as boolean,
+    };
+  }, []);
+
+  // Segarkan jendela data yang sudah dimuat saat halaman profil dibuka
+  // kembali (router cache bisa menyajikan data lama saat back-navigation)
+  // dan saat tab kembali aktif — tidak menambah jumlah, hanya menyegarkan.
   useEffect(() => {
     let active = true;
     const refresh = async () => {
       try {
-        const res = await fetch("/api/web/orders");
-        const json = await res.json();
-        if (!active || !json.success) return;
-        setList((json.data as ApiOrder[]).map(toHistoryOrder));
+        const take = Math.max(loadedCountRef.current, PAGE_SIZE);
+        const page = await fetchPage(take, 0);
+        if (!active) return;
+        setList(page.items);
+        setHasMore(page.hasMore);
+        setTotalOrders(page.total);
+        loadedCountRef.current = page.items.length;
       } catch {
         // Gagal refresh senyap — data lama tetap tampil.
       }
@@ -132,7 +174,49 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
       active = false;
       window.removeEventListener("focus", onFocus);
     };
-  }, []);
+  }, [fetchPage]);
+
+  // Infinite scroll: saat sentinel terlihat (mendekati dasar daftar) dan
+  // masih ada data, muat halaman berikutnya (dedupe by id).
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await fetchPage(PAGE_SIZE, loadedCountRef.current);
+      setList((prev) => {
+        const seen = new Set(prev.map((row) => row.id));
+        const next = [...prev];
+        for (const row of page.items) {
+          if (!seen.has(row.id)) next.push(row);
+        }
+        loadedCountRef.current = next.length;
+        return next;
+      });
+      setHasMore(page.hasMore);
+      setTotalOrders(page.total);
+    } catch {
+      // Gagal memuat halaman — biarkan user mencoba scroll lagi.
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [fetchPage, hasMore, loadingMore]);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          void loadMore();
+        }
+      },
+      // Pre-load sebelum sentinel benar-benar terlihat di layar.
+      { rootMargin: "400px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
+
   if (!mounted) return null;
 
   /** Unduh bukti pembayaran (invoice Midtrans + data order) sebagai PDF. */
@@ -381,32 +465,61 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
                 )}
               </div>
 
-              {/* List wisata: paket, kuantitas, harga — rapi per baris. */}
-              <div className="mt-4 rounded-lg border border-black/10 dark:border-white/10 overflow-hidden">
-                <div className="grid grid-cols-[1fr_auto_auto] gap-3 bg-black/[0.03] dark:bg-white/[0.04] px-4 py-2 text-xs font-semibold text-foreground/60">
-                  <span>{t("cart.package")}</span>
-                  <span className="w-14 text-center">{t("cart.qty")}</span>
-                  <span className="w-24 text-right">{t("cart.price")}</span>
-                </div>
-                {order.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/5 dark:border-white/5"
-                  >
-                    <span className="font-medium">{item.packageName}</span>
-                    <span className="w-14 text-center">× {item.quantity}</span>
-                    <span className="w-24 text-right">
-                      {formatRupiah(item.price)}
-                    </span>
-                  </div>
-                ))}
-                <div className="grid grid-cols-[1fr_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/10 dark:border-white/10 font-semibold">
-                  <span>{t("cart.totalPrice")}</span>
-                  <span className="text-primary">
-                    {formatRupiah(order.totalPrice)}
-                  </span>
-                </div>
-              </div>
+              {/* Detail item pesanan di-collapse (default tertutup) —
+                  ringkasan jadwal tetap terlihat di atas. */}
+              <Collapse
+                ghost
+                size="small"
+                className="mt-2! -mx-2!"
+                expandIcon={({ isActive }) => (
+                  <DownOutlined rotate={isActive ? 180 : 0} />
+                )}
+                items={[
+                  {
+                    key: "detail",
+                    label: (
+                      <span className="text-sm! font-medium!">
+                        {t("profile.orderDetailCount")}
+                      </span>
+                    ),
+                    children: (
+                      <div className="rounded-lg border border-black/10 dark:border-white/10 overflow-hidden">
+                        <div className="grid grid-cols-[1fr_auto_auto] gap-3 bg-black/[0.03] dark:bg-white/[0.04] px-4 py-2 text-xs font-semibold text-foreground/60">
+                          <span>{t("cart.package")}</span>
+                          <span className="w-14 text-center">
+                            {t("cart.qty")}
+                          </span>
+                          <span className="w-24 text-right">
+                            {t("cart.price")}
+                          </span>
+                        </div>
+                        {order.items.map((item) => (
+                          <div
+                            key={item.id}
+                            className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/5 dark:border-white/5"
+                          >
+                            <span className="font-medium">
+                              {item.packageName}
+                            </span>
+                            <span className="w-14 text-center">
+                              × {item.quantity}
+                            </span>
+                            <span className="w-24 text-right">
+                              {formatRupiah(item.price)}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="grid grid-cols-[1fr_auto] gap-3 px-4 py-2.5 text-sm border-t border-black/10 dark:border-white/10 font-semibold">
+                          <span>{t("cart.totalPrice")}</span>
+                          <span className="text-primary">
+                            {formatRupiah(order.totalPrice)}
+                          </span>
+                        </div>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {order.paymentStatus === "PENDING" ? (
@@ -433,6 +546,19 @@ export function OrderHistorySection({ orders }: { orders: HistoryOrder[] }) {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Sentinel infinite scroll + status pemuatan. */}
+      {list.length > 0 && (
+        <div className="flex flex-col items-center gap-2">
+          {loadingMore && <Spin size="small" />}
+          <div ref={sentinelRef} aria-hidden className="h-1 w-full" />
+          {!hasMore && (
+            <p className="text-xs text-foreground/50">
+              {t("profile.allLoaded", { n: totalOrders })}
+            </p>
+          )}
         </div>
       )}
     </div>

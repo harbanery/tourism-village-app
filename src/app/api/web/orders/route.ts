@@ -2,19 +2,22 @@ import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
 import { REMOTE_TX_OPTIONS, withRetry } from "@/server/prismaRetry";
-import { expireStalePendingOrders, paymentDeadline } from "@/server/orderExpiry";
+import { paymentDeadline } from "@/server/orderExpiry";
 import { customerFromUser, ensureOrderQris } from "@/server/qris";
 import { onOrderCreated } from "@/server/orderEvents";
 import {
   MAX_ORDERS_PER_DAY,
   countRecentOrders,
+  getUserOrdersPage,
 } from "@/services/orderService";
 
 /**
- * GET /api/web/orders — riwayat pesanan milik user login
- * (termasuk status pembayaran).
+ * GET /api/web/orders?take=&skip= — satu halaman riwayat pesanan milik
+ * user login untuk infinite scroll. Urutan: PENDING paling atas, disusul
+ * PAID, lalu sisanya — masing-masing terbaru duluan. Respons:
+ * { items, total, hasMore }.
  */
-export async function GET() {
+export async function GET(request: Request) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json(
@@ -23,38 +26,31 @@ export async function GET() {
     );
   }
 
-  // Expire PENDING yang melewati batas waktu pembayaran.
-  await expireStalePendingOrders();
+  const url = new URL(request.url);
+  const take = Number(url.searchParams.get("take")) || 2;
+  const skip = Number(url.searchParams.get("skip")) || 0;
 
-  const orders = await prisma.order.findMany({
-    where: { userId: user.id },
-    orderBy: { dateOrder: "desc" },
-    include: { items: { include: { package: true } } },
-  });
+  const page = await getUserOrdersPage(user, { take, skip });
 
   return NextResponse.json({
     success: true,
-    data: orders.map((order) => ({
-      id: order.id,
-      dateOrder: order.dateOrder.toISOString(),
-      dateSchedule: order.dateSchedule.toISOString(),
-      homestay: order.homestay,
-      homestayTime: order.homestayTime,
-      totalPrice: order.totalPrice,
-      paymentStatus: order.paymentStatus,
-      paymentMethod: order.paymentMethod,
-      paidAt: order.paidAt?.toISOString() ?? null,
-      paymentExpiresAt: order.paymentExpiresAt?.toISOString() ?? null,
-      items: order.items.map((item) => ({
-        id: item.id,
-        packageName: item.package.name,
-        quantity: item.quantity,
-        price: item.price,
-        dateSchedule: item.dateSchedule?.toISOString() ?? null,
-        homestay: item.homestay,
-        homestayTime: item.homestayTime,
+    data: {
+      items: page.items.map((order) => ({
+        id: order.id,
+        dateOrder: order.dateOrder,
+        dateSchedule: order.dateSchedule,
+        homestay: order.homestay === "yes",
+        homestayTime: order.homestayTime,
+        totalPrice: order.totalPrice,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: null,
+        paidAt: null,
+        paymentExpiresAt: order.paymentExpiresAt,
+        items: order.items,
       })),
-    })),
+      total: page.total,
+      hasMore: page.hasMore,
+    },
   });
 }
 

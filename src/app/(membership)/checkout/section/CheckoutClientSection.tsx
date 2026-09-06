@@ -177,8 +177,7 @@ export default function CheckoutClientSection({
   );
   // Pantau seluruh nilai form (untuk menonaktifkan field + tanggal pulang).
   // Fallback ke snapshot konfirmasi saat Form sudah di-unmount (langkah 2).
-  const schedulesWatch =
-    Form.useWatch("schedules", form) ?? confirmedSchedules;
+  const schedulesWatch = Form.useWatch("schedules", form) ?? confirmedSchedules;
 
   /**
    * Jadwal efektif satu paket. Ceklis "jadwal sama" hanya menyamakan
@@ -204,7 +203,8 @@ export default function CheckoutClientSection({
    */
   const total = items.reduce(
     (sum, item, index) =>
-      sum + item.price * item.quantity * stayMultiplier(effectiveSchedule(index)),
+      sum +
+      item.price * item.quantity * stayMultiplier(effectiveSchedule(index)),
     0,
   );
 
@@ -225,7 +225,10 @@ export default function CheckoutClientSection({
 
   /** Simpan perubahan data pemesan (nama/telepon) via PATCH profile.
       Telepon wajib — bila belum ada, validasi menuntut diisi. */
-  const handleSaveOrderer = async (values: { name: string; phone?: string }) => {
+  const handleSaveOrderer = async (values: {
+    name: string;
+    phone?: string;
+  }) => {
     setSavingOrderer(true);
     try {
       const res = await fetch("/api/web/profile", {
@@ -416,9 +419,7 @@ export default function CheckoutClientSection({
               validator(_, value: Dayjs | undefined) {
                 if (!value) return Promise.resolve();
                 if (value.isBefore(minDepartureDate(), "day")) {
-                  return Promise.reject(
-                    new Error(t("checkout.minDateError")),
-                  );
+                  return Promise.reject(new Error(t("checkout.minDateError")));
                 }
                 return Promise.resolve();
               },
@@ -479,7 +480,7 @@ export default function CheckoutClientSection({
       <h1 className="text-2xl md:text-3xl font-bold">{t("checkout.title")}</h1>
 
       {/* Indikator langkah: isi jadwal → konfirmasi. */}
-      <div className="mt-4">
+      <div className="mx-auto mt-4 w-full md:w-[75%] lg:w-[60%] xl:w-[50%] max-w-2xl">
         <Steps
           size="small"
           current={step}
@@ -523,7 +524,10 @@ export default function CheckoutClientSection({
           </Card>
 
           {/* Detail informasi terpisah dari form. */}
-          <Card title={t("checkout.detailInfo")} className="lg:sticky! lg:top-0!">
+          <Card
+            title={t("checkout.detailInfo")}
+            className="lg:sticky! lg:top-0!"
+          >
             <div className="divide-y divide-black/5 dark:divide-white/10">
               {items.map((item, index) => {
                 const days = stayMultiplier(effectiveSchedule(index));
@@ -594,7 +598,11 @@ export default function CheckoutClientSection({
                 <Input placeholder="08..." />
               </Form.Item>
               <div className="flex gap-2">
-                <Button htmlType="submit" loading={savingOrderer} type="primary">
+                <Button
+                  htmlType="submit"
+                  loading={savingOrderer}
+                  type="primary"
+                >
                   {t("common.save")}
                 </Button>
                 {/* Batal hanya boleh bila telepon sudah terisi. */}
@@ -658,7 +666,9 @@ export default function CheckoutClientSection({
                         </span>
                       )}
                     </span>
-                    <span>{formatRupiah(item.price * item.quantity * days)}</span>
+                    <span>
+                      {formatRupiah(item.price * item.quantity * days)}
+                    </span>
                   </div>
                   {schedule.dateSchedule && (
                     <p className="mt-1 text-foreground/60">
