@@ -32,7 +32,7 @@ import {
 } from "@/components/admin/table";
 import { drawerBodyProps } from "@/helpers/drawer";
 import { asAppError } from "@/helpers/error";
-import { getImageString } from "@/helpers/image";
+import { getImageString, uploadFileFromUrl } from "@/helpers/image";
 import { formatDate } from "@/utils/format";
 import { blogFormLayout } from "../config";
 
@@ -148,8 +148,9 @@ const BlogDecorator = () => {
       form.setFieldsValue({
         title: record.title,
         placeId: record.placeId ?? undefined,
+        // File existing ditampilkan utuh di form upload (nama + preview).
         filename: record.filename
-          ? [{ url: record.filename, thumbUrl: record.filename, status: "done" }]
+          ? [uploadFileFromUrl(record.filename)]
           : undefined,
         para: record.para,
       });

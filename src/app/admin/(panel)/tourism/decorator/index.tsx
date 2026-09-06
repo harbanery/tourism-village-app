@@ -35,7 +35,7 @@ import {
 import { drawerBodyProps } from "@/helpers/drawer";
 import { asAppError } from "@/helpers/error";
 import { facilityOptions } from "@/helpers/menu";
-import { getImageString } from "@/helpers/image";
+import { getImageString, uploadFileFromUrl } from "@/helpers/image";
 import { formatRupiah } from "@/utils/format";
 import { placeFormLayout, packageFormLayout } from "../config";
 
@@ -153,9 +153,8 @@ const TourismDecorator = () => {
     if (record) {
       placeForm.setFieldsValue({
         name: record.name,
-        photo: record.photo
-          ? [{ url: record.photo, thumbUrl: record.photo, status: "done" }]
-          : undefined,
+        // File existing ditampilkan utuh di form upload (nama + preview).
+        photo: record.photo ? [uploadFileFromUrl(record.photo)] : undefined,
       });
     } else {
       placeForm.resetFields();

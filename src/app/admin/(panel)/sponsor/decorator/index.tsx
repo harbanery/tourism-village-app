@@ -23,7 +23,7 @@ import {
 } from "@/components/admin/table";
 import { drawerBodyProps } from "@/helpers/drawer";
 import { asAppError } from "@/helpers/error";
-import { getImageString } from "@/helpers/image";
+import { getImageString, uploadFileFromUrl } from "@/helpers/image";
 import { sponsorFormLayout } from "../config";
 
 interface SponsorRow {
@@ -88,14 +88,9 @@ const SponsorDecorator = () => {
       form.setFieldsValue({
         name: record.name,
         description: record.description ?? undefined,
+        // File existing ditampilkan utuh di form upload (nama + preview).
         filename: record.filename
-          ? [
-              {
-                url: record.filename,
-                thumbUrl: record.filename,
-                status: "done",
-              },
-            ]
+          ? [uploadFileFromUrl(record.filename)]
           : undefined,
       });
     } else {

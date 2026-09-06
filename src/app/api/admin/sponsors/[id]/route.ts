@@ -22,21 +22,22 @@ export async function PUT(request: Request, { params }: Params) {
       where: { id: Number(id) },
     });
 
+    // Nilai logo berikutnya: tetap yang lama bila payload tidak menyertakan
+    // field logo (undefined), kosong ("") bila dihapus dari form.
+    const nextFilename =
+      body.filename !== undefined ? body.filename || "" : existing?.filename ?? "";
+
     const sponsor = await prisma.sponsor.update({
       where: { id: Number(id) },
       data: {
         name: body.name,
         description: body.description || null,
-        ...(body.filename !== undefined && { filename: body.filename || "" }),
+        ...(body.filename !== undefined && { filename: nextFilename }),
       },
     });
 
-    if (
-      existing &&
-      body.filename &&
-      existing.filename &&
-      existing.filename !== body.filename
-    ) {
+    // Hapus aset Cloudinary lama bila logo diganti ATAU dikosongkan.
+    if (existing?.filename && existing.filename !== nextFilename) {
       await deleteCloudinaryUrls([existing.filename]);
     }
 

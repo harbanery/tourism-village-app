@@ -84,6 +84,10 @@ export async function destroyCloudinaryAsset(publicId: string): Promise<boolean>
 /**
  * Ekstrak public_id dari URL delivery Cloudinary milik akun ini.
  * Mengembalikan null untuk URL non-Cloudinary.
+ *
+ * Catatan: URL delivery menambahkan ekstensi format (mis. ".png") di
+ * ujung public_id — ekstensi itu BUKAN bagian public_id asli, jadi
+ * dibuang sebelum dipakai ke endpoint destroy.
  */
 export function publicIdFromUrl(rawUrl: string): string | null {
   if (!rawUrl) return null;
@@ -106,6 +110,13 @@ export function publicIdFromUrl(rawUrl: string): string | null {
   let rest = segments.slice(uploadIdx + 1);
   if (/^v\d+$/.test(rest[0] ?? "")) rest = rest.slice(1);
   if (rest.length === 0) return null;
+
+  // Buang ekstensi format delivery pada segmen terakhir (mis. "a.png.png"
+  // → public_id "a.png"; "avatar-1.png" → "avatar-1"). Titik di awal nama
+  // (file tersembunyi) tidak dianggap ekstensi.
+  const last = rest[rest.length - 1];
+  const dot = last.lastIndexOf(".");
+  if (dot > 0) rest[rest.length - 1] = last.slice(0, dot);
 
   return rest.join("/");
 }

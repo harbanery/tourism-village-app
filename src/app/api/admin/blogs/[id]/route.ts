@@ -37,12 +37,17 @@ export async function PUT(request: Request, { params }: Params) {
       );
     }
 
+    // Nilai foto berikutnya: tetap yang lama bila payload tidak menyertakan
+    // field foto (undefined), kosong ("") bila dihapus dari form.
+    const nextFilename =
+      body.filename !== undefined ? body.filename || "" : existing.filename;
+
     const blog = await prisma.blog.update({
       where: { id: Number(id) },
       data: {
         title: body.title,
         ...(body.placeId !== undefined && { placeId: body.placeId ?? null }),
-        ...(body.filename !== undefined && { filename: body.filename || "" }),
+        ...(body.filename !== undefined && { filename: nextFilename }),
         para: body.para,
         datetimeAfter: new Date(),
       },
@@ -52,12 +57,8 @@ export async function PUT(request: Request, { params }: Params) {
       },
     });
 
-    if (
-      existing &&
-      body.filename &&
-      existing.filename &&
-      existing.filename !== body.filename
-    ) {
+    // Hapus aset Cloudinary lama bila foto diganti ATAU dikosongkan.
+    if (existing.filename && existing.filename !== nextFilename) {
       await deleteCloudinaryUrls([existing.filename]);
     }
 

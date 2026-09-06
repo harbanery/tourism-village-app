@@ -16,6 +16,25 @@ export interface UploadFileLike {
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
 
+/**
+ * Bangun entri fileList antd dari URL gambar existing (mis. saat membuka
+ * form edit) — nama file diambil dari segmen terakhir URL supaya file
+ * yang sudah ada tetap terlihat namanya di form upload.
+ */
+export function uploadFileFromUrl(
+  url: string,
+  uid: string = `existing-${url}`,
+): UploadFileLike {
+  let name = url;
+  try {
+    const path = new URL(url).pathname;
+    name = decodeURIComponent(path.split("/").filter(Boolean).pop() ?? url);
+  } catch {
+    // URL tidak valid — pakai string apa adanya sebagai nama.
+  }
+  return { uid, name, status: "done", url, thumbUrl: url };
+}
+
 /** Konversi fileList antd Upload menjadi string URL (Cloudinary atau base64). */
 export async function getImageString(imageValue: unknown): Promise<string> {
   if (!imageValue) return "";

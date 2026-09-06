@@ -22,16 +22,21 @@ export async function PUT(request: Request, { params }: Params) {
       where: { id: Number(id) },
     });
 
+    // Nilai foto berikutnya: tetap yang lama bila payload tidak menyertakan
+    // field foto (undefined), kosong (null/"") bila dihapus dari form.
+    const nextPhoto =
+      body.photo !== undefined ? body.photo || null : existing?.photo ?? null;
+
     const place = await prisma.place.update({
       where: { id: Number(id) },
       data: {
         name: body.name,
-        ...(body.photo !== undefined && { photo: body.photo || null }),
+        ...(body.photo !== undefined && { photo: nextPhoto }),
       },
     });
 
-    // Hapus aset Cloudinary lama bila foto diganti.
-    if (existing && body.photo && existing.photo && existing.photo !== body.photo) {
+    // Hapus aset Cloudinary lama bila foto diganti ATAU dikosongkan.
+    if (existing?.photo && existing.photo !== nextPhoto) {
       await deleteCloudinaryUrls([existing.photo]);
     }
 

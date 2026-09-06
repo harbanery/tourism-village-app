@@ -90,6 +90,20 @@ async function deleteUploadAsset(file: unknown): Promise<void> {
 }
 
 /**
+ * true bila file berasal dari upload sesi form ini (punya metadata
+ * respons upload) — file seperti ini belum dirujuk DB mana pun, jadi
+ * aman (dan perlu) dihapus langsung dari Cloudinary saat diganti/dihapus
+ * dari form. File yang dimuat dari data existing hanya dihapus server
+ * saat form disimpan (PUT menghapus aset lama bila diganti/dikosongkan),
+ * sehingga membatalkan form tidak merusak gambar yang masih dipakai.
+ */
+function isNewSessionUpload(file: unknown): boolean {
+  if (!file || typeof file !== "object") return false;
+  const f = file as UploadFileLike;
+  return getStoragePath(file) !== null || !!f.response;
+}
+
+/**
  * Stash file lama per field, diisi saat beforeUpload (sebelum nilai form
  * berganti) dan dipakai saat upload baru selesai untuk menghapus aset
  * lama yang diganti (upload maxCount=1 tidak memicu onRemove).
@@ -241,7 +255,11 @@ function renderField(params: RenderFieldParams): ReactNode {
               const storagePath = info.file.response.data.storagePath;
               const replaced = replacedUploadFiles.get(String(name));
               replacedUploadFiles.delete(String(name));
-              if (replaced) void deleteUploadAsset(replaced);
+              // Hanya upload sesi ini yang dihapus langsung — aset lama
+              // dari DB dihapus server saat form disimpan.
+              if (replaced && isNewSessionUpload(replaced)) {
+                void deleteUploadAsset(replaced);
+              }
               formInstance?.setFieldValue(name, [
                 {
                   uid: info.file.uid,
@@ -254,7 +272,11 @@ function renderField(params: RenderFieldParams): ReactNode {
             }
           }}
           onRemove={async (file) => {
-            await deleteUploadAsset(file);
+            // Aset existing (tersimpan di DB) dibiarkan sampai form
+            // disimpan; upload sesi ini dihapus langsung agar tidak bocor.
+            if (isNewSessionUpload(file)) {
+              await deleteUploadAsset(file);
+            }
           }}
         >
           <p className="ant-upload-drag-icon">

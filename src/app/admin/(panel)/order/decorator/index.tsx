@@ -95,12 +95,6 @@ const OrderDecorator = () => {
       render: (v: string) => formatDate(v, locale, true),
     },
     {
-      title: t("admin.orders.departureDate"),
-      dataIndex: "dateSchedule",
-      key: "dateSchedule",
-      render: (v: string) => formatDate(v, locale),
-    },
-    {
       title: t("common.name"),
       dataIndex: ["user", "name"],
       key: "userName",
@@ -148,7 +142,8 @@ const OrderDecorator = () => {
       ),
     },
     {
-      title: t("admin.orders.payment"),
+      // Judul kolom cukup "Status" (menutupi status pembayaran order).
+      title: t("common.status"),
       dataIndex: "paymentStatus",
       key: "paymentStatus",
       render: (v: PaymentStatus) => (

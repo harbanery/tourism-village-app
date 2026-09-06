@@ -8,7 +8,14 @@ import {
 } from "@/server/cloudinary";
 
 /** Folder Cloudinary yang diizinkan per sumber upload. */
-const ALLOWED_FOLDERS = ["places", "packages", "blogs", "sponsors", "misc"];
+const ALLOWED_FOLDERS = [
+  "places",
+  "packages",
+  "blogs",
+  "sponsors",
+  "admins",
+  "misc",
+];
 
 export async function POST(request: NextRequest) {
   const admin = await requireAdmin();
