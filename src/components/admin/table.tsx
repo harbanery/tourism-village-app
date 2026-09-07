@@ -26,7 +26,37 @@ export const FIXED_COLUMN_WIDTH = {
 } as const;
 
 type AdminRow = { id: string };
+/** Baris dengan kolom status — dipakai sorter kolom status global. */
+type StatusRow = AdminRow & { status?: string };
 type StatusValue = "ACTIVE" | "NONACTIVE";
+
+/** Sorter teks case-insensitive (nilai kosong dipaling bawah). */
+export function textSorter<T>(
+  get: (row: T) => string | null | undefined,
+): (a: T, b: T) => number {
+  return (a, b) =>
+    (get(a) ?? "").localeCompare(get(b) ?? "", undefined, {
+      sensitivity: "base",
+    });
+}
+
+/** Sorter angka (ascending; arah descent diatur antd saat header diklik). */
+export function numberSorter<T>(
+  get: (row: T) => number,
+): (a: T, b: T) => number {
+  return (a, b) => get(a) - get(b);
+}
+
+/** Sorter tanggal (string ISO maupun Date; kosong dipaling bawah). */
+export function dateSorter<T>(
+  get: (row: T) => string | Date | null | undefined,
+): (a: T, b: T) => number {
+  return (a, b) => {
+    const va = get(a) ? new Date(get(a) as string | Date).getTime() : 0;
+    const vb = get(b) ? new Date(get(b) as string | Date).getTime() : 0;
+    return va - vb;
+  };
+}
 
 /**
  * Dropdown tiga-titik untuk kolom opsi — menggabungkan beberapa button
@@ -47,7 +77,7 @@ export function RowActions({ items }: { items: MenuProps["items"] }) {
 }
 
 /** Hook kolom global (status, opsi) untuk tabel admin. */
-export function useAdminColumns<T extends AdminRow>() {
+export function useAdminColumns<T extends StatusRow>() {
   const { t } = useT();
 
   const status: ColumnType<T> = {
@@ -57,6 +87,8 @@ export function useAdminColumns<T extends AdminRow>() {
     width: FIXED_COLUMN_WIDTH.status,
     align: "center",
     fixed: "right",
+    sorter: (a, b) =>
+      String(a.status ?? "").localeCompare(String(b.status ?? "")),
     render: (status: StatusValue) => (
       <Tag color={STATUS_TAG_COLORS[status] ?? "default"}>
         {status === "ACTIVE" ? t("common.active") : t("common.inactive")}

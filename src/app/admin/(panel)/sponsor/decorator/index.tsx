@@ -19,6 +19,7 @@ import FormAdmin from "@/components/admin/form";
 import {
   AdminTable,
   RowActions,
+  textSorter,
   useAdminColumns,
 } from "@/components/admin/table";
 import { drawerBodyProps } from "@/helpers/drawer";
@@ -216,6 +217,7 @@ const SponsorDecorator = () => {
       title: t("admin.sponsors.name"),
       dataIndex: "name",
       key: "name",
+      sorter: textSorter<SponsorRow>((row) => row.name),
       render: (_: unknown, record: SponsorRow) => (
         <div className="flex items-center gap-2">
           {/* object-fit contain agar logo sponsor terlihat utuh
@@ -233,6 +235,7 @@ const SponsorDecorator = () => {
       title: t("admin.sponsors.desc"),
       dataIndex: "description",
       key: "description",
+      sorter: textSorter<SponsorRow>((row) => row.description),
       render: (v: string | null) => v ?? "-",
     },
     // Kolom status & opsi: fixed kanan, width statis (global).

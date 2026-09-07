@@ -30,6 +30,7 @@ import {
   AdminTable,
   ROLE_TAG_COLORS,
   RowActions,
+  textSorter,
   useAdminColumns,
 } from "@/components/admin/table";
 import { drawerBodyProps } from "@/helpers/drawer";
@@ -289,6 +290,7 @@ const AccountDecorator = () => {
       title: t("common.name"),
       dataIndex: "name",
       key: "name",
+      sorter: textSorter<UserRow>((row) => row.name),
       render: (_: unknown, record: UserRow) => (
         <div className="flex items-center gap-2">
           <Avatar src={record.avatar} icon={<UserOutlined />} />
@@ -296,11 +298,17 @@ const AccountDecorator = () => {
         </div>
       ),
     },
-    { title: t("common.email"), dataIndex: "email", key: "email" },
+    {
+      title: t("common.email"),
+      dataIndex: "email",
+      key: "email",
+      sorter: textSorter<UserRow>((row) => row.email),
+    },
     {
       title: t("common.phone"),
       dataIndex: "phone",
       key: "phone",
+      sorter: textSorter<UserRow>((row) => row.phone),
       render: (v: string | null) => v ?? "-",
     },
     // Kolom status & opsi: fixed kanan, width statis (global).
@@ -349,6 +357,7 @@ const AccountDecorator = () => {
       title: t("admin.accounts.username"),
       dataIndex: "username",
       key: "username",
+      sorter: textSorter<AdminRow>((row) => row.username),
       render: (_: unknown, record: AdminRow) => (
         <div className="flex items-center gap-2">
           <Avatar src={record.avatar} icon={<UserOutlined />} />
@@ -360,15 +369,28 @@ const AccountDecorator = () => {
       title: t("common.name"),
       dataIndex: "name",
       key: "name",
+      sorter: textSorter<AdminRow>((row) => row.name),
       render: (v: string | null) => v ?? "-",
     },
-    { title: t("common.email"), dataIndex: "email", key: "email" },
+    {
+      title: t("common.email"),
+      dataIndex: "email",
+      key: "email",
+      sorter: textSorter<AdminRow>((row) => row.email),
+    },
     {
       // Tag role (align tengah) dibedakan dari tag status (MASTER tidak hijau).
       title: t("admin.accounts.role"),
       dataIndex: "role",
       key: "role",
       align: "center" as const,
+      sorter: textSorter<AdminRow>((row) => row.role),
+      filters: adminRoleOptions.map((r) => ({
+        text: t(`admin.role.${r.value}`),
+        value: r.value,
+      })),
+      onFilter: (value: string | number | bigint | symbol | boolean, record: AdminRow) =>
+        record.role === value,
       render: (role: AdminRow["role"]) => (
         <Tag color={ROLE_TAG_COLORS[role] ?? "default"}>
           {t(`admin.role.${role}`)}

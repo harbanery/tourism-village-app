@@ -1,9 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { App, Card, Input, Space, Tag, Typography } from "antd";
+import {
+  App,
+  Card,
+  Input,
+  Space,
+  Switch,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { AdminTable } from "@/components/admin/table";
+import {
+  AdminTable,
+  dateSorter,
+  numberSorter,
+  textSorter,
+} from "@/components/admin/table";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import LoaderPage from "@/components/admin/loader";
@@ -11,6 +25,22 @@ import { formatDate, formatRupiah } from "@/utils/format";
 import OrderDetailDrawer from "./OrderDetailDrawer";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
+
+/** Interval auto refresh data order (ms). */
+const AUTO_REFRESH_MS = 5 * 60 * 1000;
+
+/** Kunci bulan (YYYY-MM) dari tanggal ISO. */
+function monthKey(iso: string): string {
+  return iso.slice(0, 7);
+}
+
+/** Label bulan-tahun sesuai locale ("September 2026"). */
+function monthLabel(key: string, locale: "id" | "en"): string {
+  return new Date(`${key}-01T00:00:00`).toLocaleDateString(
+    locale === "id" ? "id-ID" : "en-US",
+    { month: "long", year: "numeric" },
+  );
+}
 
 /** Warna tag status pembayaran. */
 const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
@@ -66,6 +96,8 @@ const OrderDecorator = () => {
   const [query, setQuery] = useState("");
   /** Row yang drawer detailnya sedang terbuka (null = tertutup). */
   const [active, setActive] = useState<OrderRow | null>(null);
+  /** Auto refresh data order tiap 5 menit saat diaktifkan. */
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -88,6 +120,15 @@ const OrderDecorator = () => {
     void Promise.resolve().then(fetchOrders);
   }, [fetchOrders]);
 
+  // Auto refresh: selama aktif, data order dimuat ulang tiap 5 menit.
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const timer = setInterval(() => {
+      void fetchOrders();
+    }, AUTO_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [autoRefresh, fetchOrders]);
+
   // Pencarian tetap menyertakan email/no. telepon & kode order meskipun
   // kolomnya tidak ditampilkan semua (takeout kolom, bukan fitur cari).
   const filtered = useMemo(
@@ -104,6 +145,12 @@ const OrderDecorator = () => {
 
   if (!mounted || fetching) return <LoaderPage />;
 
+  // Opsi filter bulan-tahun dari data yang ada (terbaru dulu).
+  const monthOptions = [...new Set(orders.map((o) => monthKey(o.dateOrder)))]
+    .sort()
+    .reverse()
+    .map((key) => ({ text: monthLabel(key, locale), value: key }));
+
   const columns = [
     {
       // Order ID Midtrans (TOURISM-{uuid}{YYYYMMDD}) — identitas pesanan
@@ -111,6 +158,7 @@ const OrderDecorator = () => {
       title: t("admin.orders.orderId"),
       dataIndex: "orderId",
       key: "orderId",
+      sorter: textSorter<OrderRow>((row) => row.orderId),
       render: (v: string) => (
         <Typography.Text copyable className="font-mono!">
           {v}
@@ -121,12 +169,21 @@ const OrderDecorator = () => {
       title: t("common.date"),
       dataIndex: "dateOrder",
       key: "dateOrder",
+      sorter: dateSorter<OrderRow>((row) => row.dateOrder),
+      // Filter berdasarkan bulan + tahun pemesanan.
+      filters: monthOptions,
+      onFilter: (
+        value: string | number | bigint | symbol | boolean,
+        record: OrderRow,
+      ) => monthKey(record.dateOrder) === value,
+      filterSearch: true,
       render: (v: string) => formatDate(v, locale, true),
     },
     {
       title: t("admin.orders.totalPrice"),
       dataIndex: "totalPrice",
       key: "totalPrice",
+      sorter: numberSorter<OrderRow>((row) => row.totalPrice),
       render: (v: number) => (
         <span className="font-medium">{formatRupiah(v)}</span>
       ),
@@ -136,6 +193,17 @@ const OrderDecorator = () => {
       title: t("common.status"),
       dataIndex: "paymentStatus",
       key: "paymentStatus",
+      sorter: textSorter<OrderRow>((row) => row.paymentStatus),
+      filters: (
+        ["PENDING", "PAID", "FAILED", "CANCELED"] as PaymentStatus[]
+      ).map((status) => ({
+        text: t(`payment.status.${status}`),
+        value: status,
+      })),
+      onFilter: (
+        value: string | number | bigint | symbol | boolean,
+        record: OrderRow,
+      ) => record.paymentStatus === value,
       render: (v: PaymentStatus) => (
         <Tag color={PAYMENT_TAG_COLORS[v] ?? "default"}>
           {t(`payment.status.${v}`)}
@@ -150,6 +218,18 @@ const OrderDecorator = () => {
       <Card
         extra={
           <Space wrap>
+            {/* Auto refresh: data order dimuat ulang tiap 5 menit. */}
+            <Tooltip title={t("admin.orders.autoRefreshHint")}>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                {t("admin.orders.autoRefresh")}
+                <Switch
+                  size="small"
+                  checked={autoRefresh}
+                  onChange={setAutoRefresh}
+                />
+              </label>
+            </Tooltip>
+
             <Input
               allowClear
               prefix={<SearchOutlined />}

@@ -269,7 +269,11 @@ export default function OrderDetailDrawer({
                       items={order.logs.map((log) => ({
                         color: LOG_DOT_COLORS[log.toStatus] ?? "gray",
                         content: (
-                          <div key={log.id} className="flex flex-col">
+                          // Tags di kiri, tanggal transisi di kanannya.
+                          <div
+                            key={log.id}
+                            className="flex flex-wrap items-center justify-between gap-2"
+                          >
                             <span className="flex flex-wrap items-center gap-1.5">
                               {statusTag(log.fromStatus)}
                               <span className="text-xs text-foreground/50">

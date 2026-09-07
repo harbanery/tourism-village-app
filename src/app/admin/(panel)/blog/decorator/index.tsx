@@ -10,12 +10,14 @@ import {
   Image,
   Input,
   Space,
+  Tooltip,
 } from "antd";
 import {
   CheckOutlined,
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
+  LinkOutlined,
   PlusOutlined,
   SearchOutlined,
   StopOutlined,
@@ -29,6 +31,8 @@ import FormAdmin from "@/components/admin/form";
 import {
   AdminTable,
   RowActions,
+  dateSorter,
+  textSorter,
   useAdminColumns,
 } from "@/components/admin/table";
 import { drawerBodyProps } from "@/helpers/drawer";
@@ -301,21 +305,48 @@ const BlogDecorator = () => {
       dataIndex: "title",
       key: "title",
       width: 320,
+      sorter: textSorter<BlogRow>((row) => row.title),
+      render: (title: string, record: BlogRow) => (
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate font-medium">{title}</span>
+          {/* Slug URL (/blog/[slug]) sebagai tooltip icon di kanan judul. */}
+          <Tooltip title={<span className="font-mono">{record.slug}</span>}>
+            <LinkOutlined className="shrink-0 cursor-help text-xs! text-foreground/40!" />
+          </Tooltip>
+        </span>
+      ),
     },
     {
-      // Slug URL (/blog/[slug]) — pengganti id untuk akses detail.
-      title: t("form.slug"),
-      dataIndex: "slug",
-      key: "slug",
-      width: 240,
-      ellipsis: true,
-      render: (v: string) => <span className="font-mono text-xs">{v}</span>,
+      // Penulis blog (kolom kembali; filter + sorter).
+      title: t("admin.blog.author"),
+      dataIndex: "adminId",
+      key: "author",
+      sorter: textSorter<BlogRow>(
+        (row) => row.admin?.name ?? row.admin?.username,
+      ),
+      filters: [
+        ...new Map(
+          blogs.map((post) => [
+            post.adminId,
+            post.admin?.name ?? post.admin?.username ?? post.adminId,
+          ]),
+        ),
+      ]
+        .map(([id, label]) => ({ text: label, value: id }))
+        .sort((a, b) => a.text.localeCompare(b.text)),
+      onFilter: (value: string | number | bigint | symbol | boolean, record: BlogRow) =>
+        record.adminId === value,
+      render: (_: unknown, record: BlogRow) =>
+        record.admin?.name ?? record.admin?.username,
     },
     {
       // Tanggal gabungan: tampilkan tanggal setelah diubah,
       // jika tidak ada maka tanggal awalnya.
       title: t("common.date"),
       key: "date",
+      sorter: dateSorter<BlogRow>(
+        (row) => row.datetimeAfter ?? row.datetime,
+      ),
       render: (_: unknown, record: BlogRow) =>
         formatDate(record.datetimeAfter ?? record.datetime, locale, true),
     },
@@ -438,7 +469,8 @@ const BlogDecorator = () => {
           </Space>
         }
       >
-        {/* Expanded row: penulis + tempat terkait (bila ada) + paragraf. */}
+        {/* Expanded row: tempat terkait (bila ada) + paragraf
+            (penulis kembali jadi kolom tabel). */}
         <AdminTable
           dataSource={filtered}
           columns={columns}
@@ -446,23 +478,15 @@ const BlogDecorator = () => {
             expandedRowRender: (record: BlogRow) => (
               <div className="grid gap-4 text-sm leading-relaxed text-foreground/80 md:grid-cols-[200px_1fr]">
                 <div className="flex flex-col gap-4">
-                  <div>
-                    <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">
-                      {t("admin.blog.author")}
-                    </p>
-                    <p className="m-0! mt-1">
-                      {record.admin.name ?? record.admin.username}
-                    </p>
-                  </div>
                   {/* Tempat wisata terkait hanya ditampilkan bila ada. */}
-                  {record.place && (
+                  {record.place ? (
                     <div>
                       <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">
                         {t("admin.blog.relatedPlace")}
                       </p>
                       <p className="m-0! mt-1">{record.place.name}</p>
                     </div>
-                  )}
+                  ) : null}
                 </div>
                 <div>
                   <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">

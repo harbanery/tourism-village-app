@@ -30,6 +30,8 @@ import FormAdmin from "@/components/admin/form";
 import {
   AdminTable,
   RowActions,
+  numberSorter,
+  textSorter,
   useAdminColumns,
 } from "@/components/admin/table";
 import { drawerBodyProps } from "@/helpers/drawer";
@@ -428,6 +430,7 @@ const TourismDecorator = () => {
       title: t("admin.tourism.places"),
       dataIndex: "name",
       key: "name",
+      sorter: textSorter<PlaceRow>((row) => row.name),
       render: (name: string, record: PlaceRow) => (
         <span className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{name}</span>
@@ -531,6 +534,16 @@ const TourismDecorator = () => {
       title: t("admin.tourism.packages"),
       dataIndex: "name",
       key: "name",
+      sorter: textSorter<PackageRow>((row) => row.name),
+      // Filter popular: paket yang pernah dibayar lunas vs belum.
+      filters: [
+        { text: t("admin.tourism.popular"), value: "popular" },
+        { text: t("admin.tourism.notPopular"), value: "regular" },
+      ],
+      onFilter: (value: string | number | bigint | symbol | boolean, record: PackageRow) =>
+        value === "popular"
+          ? record.timesPurchased > 0
+          : record.timesPurchased === 0,
       render: (name: string, record: PackageRow) => (
         <span className="flex flex-wrap items-center gap-2">
           <span>{name}</span>
@@ -543,12 +556,28 @@ const TourismDecorator = () => {
       title: t("admin.tourism.place"),
       dataIndex: ["place", "name"],
       key: "placeName",
+      sorter: textSorter<PackageRow>((row) => row.place?.name),
+      filters: places
+        .map((p) => ({ text: p.name, value: p.id }))
+        .sort((a, b) => a.text.localeCompare(b.text)),
+      onFilter: (value: string | number | bigint | symbol | boolean, record: PackageRow) =>
+        record.placeId === value,
       render: (v: string | null) => v ?? "-",
     },
     {
       title: t("admin.tourism.facilities"),
       dataIndex: "facilities",
       key: "facilities",
+      sorter: textSorter<PackageRow>((row) => row.facilities.join(", ")),
+      filters: [
+        ...new Set(packages.flatMap((pkg) => pkg.facilities)),
+      ]
+        .sort((a, b) => a.localeCompare(b))
+        .map((facility) => ({ text: facility, value: facility })),
+      onFilter: (
+        value: string | number | bigint | symbol | boolean,
+        record: PackageRow,
+      ) => record.facilities.includes(String(value)),
       render: (facilities: string[]) => (
         <span>{facilities.join(", ")}</span>
       ),
@@ -557,6 +586,7 @@ const TourismDecorator = () => {
       title: t("common.price"),
       dataIndex: "price",
       key: "price",
+      sorter: numberSorter<PackageRow>((row) => row.price),
       render: (price: number) => (
         <span className="font-medium">{formatRupiah(price)}</span>
       ),

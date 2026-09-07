@@ -17,6 +17,9 @@ import LoaderPage from "@/components/admin/loader";
 import {
   AdminTable,
   RowActions,
+  dateSorter,
+  numberSorter,
+  textSorter,
   useAdminColumns,
 } from "@/components/admin/table";
 import { asAppError } from "@/helpers/error";
@@ -134,12 +137,27 @@ const ReviewDecorator = () => {
       title: t("common.date"),
       dataIndex: "date",
       key: "date",
+      sorter: dateSorter<TestimonialRow>((row) => row.date),
       render: (v: string) => formatDate(v, locale, true),
     },
     {
       title: t("common.name"),
       dataIndex: ["user", "name"],
       key: "userName",
+      sorter: textSorter<TestimonialRow>((row) => row.user?.name),
+      filters: [
+        ...new Map(
+          testimonials
+            .filter((r) => r.user)
+            .map((r) => [r.user.id, r.user.name] as const),
+        ),
+      ]
+        .map(([id, label]) => ({ text: label, value: id }))
+        .sort((a, b) => a.text.localeCompare(b.text)),
+      onFilter: (
+        value: string | number | bigint | symbol | boolean,
+        record: TestimonialRow,
+      ) => record.user?.id === value,
     },
     {
       // Lebar tetap supaya kolom lain (rating, utama, status, opsi) tidak
@@ -149,11 +167,24 @@ const ReviewDecorator = () => {
       key: "comment",
       width: 360,
       ellipsis: true,
+      sorter: textSorter<TestimonialRow>((row) => row.comment),
     },
     {
       title: t("admin.reviews.rating"),
       dataIndex: "rating",
       key: "rating",
+      sorter: numberSorter<TestimonialRow>((row) => row.rating),
+      // Filter rentang rating: terbaik (4.5–5), cukup (3–4.5), buruk (<3).
+      filters: [
+        { text: t("admin.reviews.ratingBest"), value: "best" },
+        { text: t("admin.reviews.ratingOk"), value: "ok" },
+        { text: t("admin.reviews.ratingBad"), value: "bad" },
+      ],
+      onFilter: (value: string | number | bigint | symbol | boolean, record: TestimonialRow) => {
+        if (value === "best") return record.rating >= 4.5;
+        if (value === "ok") return record.rating >= 3 && record.rating < 4.5;
+        return record.rating < 3;
+      },
       render: (rating: number) => (
         <Rate disabled allowHalf defaultValue={rating} />
       ),
@@ -165,6 +196,8 @@ const ReviewDecorator = () => {
       dataIndex: "featured",
       key: "featured",
       align: "center" as const,
+      sorter: (a: TestimonialRow, b: TestimonialRow) =>
+        Number(a.featured) - Number(b.featured),
       render: (featured: boolean) => (
         <Tooltip
           title={featured ? t("admin.reviews.main") : t("admin.reviews.nomain")}
