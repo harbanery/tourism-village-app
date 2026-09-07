@@ -387,7 +387,7 @@ export default function PaymentClientSection({
             {/* Order ID Midtrans (TOURISM-{uuid}{YYYYMMDD}) — copyable. */}
             <Typography.Text
               copyable
-              className="font-mono text-xs! font-normal! text-foreground/60!"
+              className="font-mono! text-xs! font-normal! text-foreground/60!"
             >
               {order.orderId}
             </Typography.Text>

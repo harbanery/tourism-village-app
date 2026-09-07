@@ -3,7 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
-import { App, Button, Card, Collapse, Empty, Select, Spin, Tag, Typography } from "antd";
+import {
+  App,
+  Button,
+  Card,
+  Collapse,
+  Empty,
+  Input,
+  Select,
+  Spin,
+  Tag,
+  Typography,
+} from "antd";
 import {
   CreditCardOutlined,
   DownOutlined,
@@ -11,6 +22,7 @@ import {
   FieldTimeOutlined,
   HomeOutlined,
   CalendarOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate, formatRupiah } from "@/utils/format";
@@ -190,6 +202,15 @@ export function OrderHistorySection({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [sortMode, setSortMode] = useState<SortMode>("default");
 
+  // Pencarian order id — input langsung, nilainya didebounce sebelum
+  // dipakai mem-fetch agar tidak menembak API tiap ketikan.
+  const [orderQueryInput, setOrderQueryInput] = useState("");
+  const [orderQuery, setOrderQuery] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => setOrderQuery(orderQueryInput.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [orderQueryInput]);
+
   // Jumlah baris yang sudah dimuat — dipakai refresh tanpa re-subscribe
   // (nilai terkini dibaca via ref, bukan dependency effect).
   const loadedCountRef = useRef(orders.length);
@@ -209,6 +230,7 @@ export function OrderHistorySection({
       });
       if (statusFilter !== "ALL") params.set("status", statusFilter);
       if (sortMode !== "default") params.set("sort", sortMode);
+      if (orderQuery) params.set("q", orderQuery);
       const res = await fetch(`/api/web/orders?${params.toString()}`);
       const json = await res.json();
       if (!json.success) throw new Error("fetch failed");
@@ -218,7 +240,7 @@ export function OrderHistorySection({
         hasMore: json.data.hasMore as boolean,
       };
     },
-    [statusFilter, sortMode],
+    [statusFilter, sortMode, orderQuery],
   );
 
   // fetchPage terbaru dibaca via ref agar effect refresh (mount + focus)
@@ -358,49 +380,55 @@ export function OrderHistorySection({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Kontrol sorting & filter status pembayaran — default mengikuti
-          urutan bawaan (PENDING dulu, lalu PAID, terbaru duluan).
+      {/* Kontrol riwayat: cari order id (kiri), filter status & urutan —
+          tanpa label (select berlabel sendiri lewat opsi aktif).
           Gating memakai total dari server (tanpa filter) agar kontrol
           tetap tampil saat filter aktif menghasilkan nol pesanan. */}
       {initialTotal > 0 && (
-        <div className="flex flex-wrap gap-3">
-          <label className="flex w-full flex-col gap-1 text-xs font-medium text-foreground/60 sm:w-48">
-            {t("profile.filterStatus")}
-            <Select<StatusFilter>
-              value={statusFilter}
-              onChange={(value) => setStatusFilter(value)}
-              options={STATUS_FILTER_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: t(opt.labelKey),
-              }))}
-            />
-          </label>
-          <label className="flex w-full flex-col gap-1 text-xs font-medium text-foreground/60 sm:w-48">
-            {t("profile.sortBy")}
-            <Select<SortMode>
-              value={sortMode}
-              onChange={(value) => setSortMode(value)}
-              options={SORT_MODE_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: t(opt.labelKey),
-              }))}
-            />
-          </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            className="w-full! sm:w-60!"
+            placeholder={t("profile.searchOrderId")}
+            value={orderQueryInput}
+            onChange={(e) => setOrderQueryInput(e.target.value)}
+          />
+          <Select<StatusFilter>
+            className="w-full! sm:w-44!"
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value)}
+            options={STATUS_FILTER_OPTIONS.map((opt) => ({
+              value: opt.value,
+              label: t(opt.labelKey),
+            }))}
+          />
+          <Select<SortMode>
+            className="w-full! sm:w-44!"
+            value={sortMode}
+            onChange={(value) => setSortMode(value)}
+            options={SORT_MODE_OPTIONS.map((opt) => ({
+              value: opt.value,
+              label: t(opt.labelKey),
+            }))}
+          />
         </div>
       )}
       {list.length === 0 ? (
         <Card>
           <Empty
             description={
-              statusFilter === "ALL"
-                ? t("profile.noOrders")
-                : t("profile.noOrdersForFilter")
+              orderQuery
+                ? t("profile.noOrdersForSearch", { q: orderQuery })
+                : statusFilter === "ALL"
+                  ? t("profile.noOrders")
+                  : t("profile.noOrdersForFilter")
             }
             className="py-8!"
           >
             {/* Belum punya pesanan → ajak memesan paket wisata
-                (hanya saat tidak sedang memfilter status). */}
-            {statusFilter === "ALL" && (
+                (hanya saat tidak sedang memfilter/ mencari). */}
+            {statusFilter === "ALL" && !orderQuery && (
               <Button type="primary" onClick={() => router.push("/package")}>
                 {t("profile.orderPackage")}
               </Button>
@@ -413,16 +441,14 @@ export function OrderHistorySection({
             <Card
               key={order.id}
               title={
-                <div className="flex flex-col items-start gap-0.5">
-                  <span>{formatRupiah(order.totalPrice)}</span>
-                  {/* Order ID (TOURISM-{uuid}{YYYYMMDD}) — copyable. */}
-                  <Typography.Text
-                    copyable
-                    className="font-mono text-xs! font-normal! text-foreground/50!"
-                  >
-                    {order.orderId}
-                  </Typography.Text>
-                </div>
+                /* Order ID (TOURISM-{uuid}{YYYYMMDD}) — copyable,
+                   satu-satunya identitas di title. */
+                <Typography.Text
+                  copyable
+                  className="font-mono! text-xs! font-normal! text-foreground/60!"
+                >
+                  {order.orderId}
+                </Typography.Text>
               }
               extra={
                 <Tag color={PAYMENT_TAG_COLORS[order.paymentStatus]}>

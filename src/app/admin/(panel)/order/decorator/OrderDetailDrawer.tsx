@@ -52,9 +52,10 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 /**
  * Drawer detail pemesanan — dibuka saat row tabel pemesanan diklik.
- * Judul memuat order id + tag status; isi: detail pesanan (deskripsi +
- * daftar paket & total bergaya checkout), tab informasi pemesan & log
- * pesanan (OrderLog), tombol QRIS (gambar tampil inline) + unduh invoice.
+ * Judul memuat tag status di kanan; isi: detail pesanan (order id,
+ * deskripsi + daftar paket & total bergaya checkout), tab informasi
+ * pemesan & log pesanan (OrderLog), tombol QRIS (lightbox Image antd,
+ * pola lihat foto blog) + unduh invoice.
  */
 export default function OrderDetailDrawer({
   order,
@@ -68,14 +69,8 @@ export default function OrderDetailDrawer({
   const { t, locale } = useT();
   const { notification } = App.useApp();
   const [downloading, setDownloading] = useState(false);
-  /** Tampil/sembunyi gambar QRIS (toggle tombol footer, bukan modal). */
-  const [qrisOpen, setQrisOpen] = useState(false);
-
-  /** Tutup drawer + sembunyikan gambar QRIS. */
-  const handleClose = () => {
-    setQrisOpen(false);
-    onClose();
-  };
+  /** QRIS yang sedang dipreview di lightbox (bukan ditampilkan inline). */
+  const [qrisPreview, setQrisPreview] = useState<string | null>(null);
 
   /** Unduh invoice via endpoint admin (data Midtrans otoritatif). */
   const handleDownloadInvoice = async () => {
@@ -113,34 +108,26 @@ export default function OrderDetailDrawer({
   return (
     <Drawer
       open={open}
-      onClose={handleClose}
-      size="min(92vw, 480px)"
+      onClose={onClose}
+      size="min(92vw, 600px)"
       title={
         <span className="flex min-w-0 flex-wrap items-center justify-between gap-2">
-          <span className="flex min-w-0 flex-wrap items-center gap-2">
-            <span className="font-semibold">{t("admin.orders.detail")}</span>
-            {order && (
-              <Typography.Text
-                className="truncate font-mono text-xs! font-normal! text-foreground/60!"
-              >
-                {order.orderId}
-              </Typography.Text>
-            )}
-          </span>
+          <span className="font-semibold">{t("admin.orders.detail")}</span>
           {/* Status pembayaran di sisi kanan judul. */}
           {order && statusTag(order.paymentStatus)}
         </span>
       }
       footer={
         <div className="flex justify-end gap-2">
-          {/* QRIS: toggle gambar inline di badan drawer (bukan modal). */}
+          {/* QRIS: buka gambar di lightbox Image antd (pola lihat foto
+              blog) — tidak ditampilkan di dalam drawer. */}
           <Tooltip
             title={order?.qrisImageUrl ? "" : t("admin.orders.qrisEmpty")}
           >
             <Button
               icon={<QrcodeOutlined />}
               disabled={!order?.qrisImageUrl}
-              onClick={() => setQrisOpen((prev) => !prev)}
+              onClick={() => setQrisPreview(order?.qrisImageUrl ?? null)}
             >
               {t("admin.orders.qrisTitle")}
             </Button>
@@ -158,14 +145,22 @@ export default function OrderDetailDrawer({
     >
       {order && (
         <div className="flex flex-col gap-6">
-          {/* Detail pesanan: identitas + tanggal (status & total di judul /
-              daftar paket). */}
+          {/* Detail pesanan: identitas + tanggal (status di judul, total
+              di daftar paket). */}
           <section>
             <SectionTitle>{t("admin.orders.detailOrder")}</SectionTitle>
             <Descriptions size="small" column={1} className="text-sm!">
+              <Descriptions.Item
+                label={t("admin.orders.orderId")}
+                className="text-xs!"
+              >
+                <Typography.Text className="font-mono!">
+                  {order.orderId}
+                </Typography.Text>
+              </Descriptions.Item>
               {order.transactionId && (
                 <Descriptions.Item label={t("admin.orders.transactionId")}>
-                  <Typography.Text className="font-mono text-xs!">
+                  <Typography.Text className="font-mono!">
                     {order.transactionId}
                   </Typography.Text>
                 </Descriptions.Item>
@@ -293,15 +288,22 @@ export default function OrderDetailDrawer({
               },
             ]}
           />
-
-          {/* Gambar QRIS tampil inline saat tombol footer diaktifkan. */}
-          {qrisOpen && order.qrisImageUrl && (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-black/10 p-3 dark:border-white/10">
-              <Image src={order.qrisImageUrl} alt="QRIS" width={200} />
-            </div>
-          )}
         </div>
       )}
+      {/* Preview QRIS langsung di lightbox Image antd (pola "lihat foto"
+          menu blog) — bukan modal, bukan ditampilkan di dalam drawer. */}
+      <Image
+        src={qrisPreview ?? undefined}
+        alt="QRIS"
+        style={{ display: "none" }}
+        preview={{
+          open: qrisPreview !== null,
+          src: qrisPreview ?? undefined,
+          onOpenChange: (openState) => {
+            if (!openState) setQrisPreview(null);
+          },
+        }}
+      />
     </Drawer>
   );
 }

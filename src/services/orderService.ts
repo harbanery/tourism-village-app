@@ -117,6 +117,8 @@ export interface UserOrdersPageOptions {
   status?: PaymentStatus;
   /** Mode sorting (default: PENDING → PAID → sisanya, terbaru duluan). */
   sort?: OrdersSortMode;
+  /** Cari order id (contains, case-insensitive; tanpa filter bila kosong). */
+  query?: string;
 }
 
 /**
@@ -133,17 +135,27 @@ export interface UserOrdersPageOptions {
  */
 export async function getUserOrdersPage(
   user: AuthUser,
-  { take = 3, skip = 0, status, sort = "default" }: UserOrdersPageOptions = {},
+  {
+    take = 3,
+    skip = 0,
+    status,
+    sort = "default",
+    query,
+  }: UserOrdersPageOptions = {},
 ): Promise<UserOrdersPage> {
   await expireStalePendingOrders();
 
   const safeTake = Math.min(Math.max(1, Math.floor(take)), 20);
   const safeSkip = Math.max(0, Math.floor(skip));
+  const trimmedQuery = query?.trim();
 
   const lightRows = await prisma.order.findMany({
     where: {
       userId: user.id,
       ...(status ? { paymentStatus: status } : {}),
+      ...(trimmedQuery
+        ? { orderId: { contains: trimmedQuery, mode: "insensitive" } }
+        : {}),
     },
     select: {
       id: true,

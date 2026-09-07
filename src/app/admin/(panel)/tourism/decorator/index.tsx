@@ -433,12 +433,15 @@ const TourismDecorator = () => {
           <span className="font-medium">{name}</span>
           {/* Tag populer: punya paket populer yang terhubung. */}
           {record.popularPackageCount > 0 && popularTag}
-          {/* Jumlah paket menempel di samping nama (bukan kolom sendiri). */}
-          <span className="text-xs text-foreground/50">
-            {t("admin.tourism.packageCountInline", {
-              n: record.packageCount,
-            })}
-          </span>
+          {/* Jumlah paket menempel di samping nama (bukan kolom sendiri);
+              tanpa paket (0) tidak ditampilkan. */}
+          {record.packageCount > 0 && (
+            <Tag className="m-0!">
+              {t("admin.tourism.packageCountInline", {
+                n: record.packageCount,
+              })}
+            </Tag>
+          )}
         </span>
       ),
     },

@@ -26,12 +26,13 @@ const STATUS_FILTERS: PaymentStatus[] = [
 const SORT_MODES: OrdersSortMode[] = ["default", "newest", "schedule"];
 
 /**
- * GET /api/web/orders?take=&skip=&status=&sort= — satu halaman riwayat
+ * GET /api/web/orders?take=&skip=&status=&sort=&q= — satu halaman riwayat
  * pesanan milik user login untuk infinite scroll. Urutan default: PENDING
  * paling atas, disusul PAID, lalu sisanya — dalam tiap grup terbaru
  * duluan, tie-break tanggal reservasi paling awal. `status` memfilter
  * status pembayaran; `sort` mengganti mode urutan (newest = terbaru,
- * schedule = reservasi terdekat). Respons: { items, total, hasMore }.
+ * schedule = reservasi terdekat); `q` mencari order id (contains).
+ * Respons: { items, total, hasMore }.
  */
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -56,7 +57,15 @@ export async function GET(request: Request) {
     ? (rawSort as OrdersSortMode)
     : undefined;
 
-  const page = await getUserOrdersPage(user, { take, skip, status, sort });
+  const rawQuery = url.searchParams.get("q") ?? "";
+
+  const page = await getUserOrdersPage(user, {
+    take,
+    skip,
+    status,
+    sort,
+    query: rawQuery,
+  });
 
   return NextResponse.json({
     success: true,

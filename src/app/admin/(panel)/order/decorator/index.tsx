@@ -112,7 +112,7 @@ const OrderDecorator = () => {
       dataIndex: "orderId",
       key: "orderId",
       render: (v: string) => (
-        <Typography.Text copyable className="font-mono text-xs!">
+        <Typography.Text copyable className="font-mono!">
           {v}
         </Typography.Text>
       ),
