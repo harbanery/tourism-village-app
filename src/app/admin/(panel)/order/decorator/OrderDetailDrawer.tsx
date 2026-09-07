@@ -7,11 +7,14 @@ import {
   Descriptions,
   Drawer,
   Empty,
+  Image,
+  Tabs,
   Tag,
   Timeline,
+  Tooltip,
   Typography,
 } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, QrcodeOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate, formatRupiah } from "@/utils/format";
 import { downloadInvoicePdf } from "@/helpers/invoicePdf";
@@ -49,8 +52,9 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 /**
  * Drawer detail pemesanan — dibuka saat row tabel pemesanan diklik.
- * Berisi detail order (+ item paket), detail pemesan, log transisi status
- * (OrderLog), QRIS tersimpan, dan tombol unduh invoice (PDF Midtrans).
+ * Judul memuat order id + tag status; isi: detail pesanan (deskripsi +
+ * daftar paket & total bergaya checkout), tab informasi pemesan & log
+ * pesanan (OrderLog), tombol QRIS (gambar tampil inline) + unduh invoice.
  */
 export default function OrderDetailDrawer({
   order,
@@ -64,6 +68,14 @@ export default function OrderDetailDrawer({
   const { t, locale } = useT();
   const { notification } = App.useApp();
   const [downloading, setDownloading] = useState(false);
+  /** Tampil/sembunyi gambar QRIS (toggle tombol footer, bukan modal). */
+  const [qrisOpen, setQrisOpen] = useState(false);
+
+  /** Tutup drawer + sembunyikan gambar QRIS. */
+  const handleClose = () => {
+    setQrisOpen(false);
+    onClose();
+  };
 
   /** Unduh invoice via endpoint admin (data Midtrans otoritatif). */
   const handleDownloadInvoice = async () => {
@@ -101,23 +113,38 @@ export default function OrderDetailDrawer({
   return (
     <Drawer
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       size="min(92vw, 480px)"
       title={
-        <span className="flex flex-wrap items-center gap-2">
-          {t("admin.orders.detail")}
-          {order && (
-            <Typography.Text
-              copyable
-              className="font-mono text-xs! font-normal! text-foreground/60!"
-            >
-              {order.orderId}
-            </Typography.Text>
-          )}
+        <span className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+          <span className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="font-semibold">{t("admin.orders.detail")}</span>
+            {order && (
+              <Typography.Text
+                className="truncate font-mono text-xs! font-normal! text-foreground/60!"
+              >
+                {order.orderId}
+              </Typography.Text>
+            )}
+          </span>
+          {/* Status pembayaran di sisi kanan judul. */}
+          {order && statusTag(order.paymentStatus)}
         </span>
       }
       footer={
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          {/* QRIS: toggle gambar inline di badan drawer (bukan modal). */}
+          <Tooltip
+            title={order?.qrisImageUrl ? "" : t("admin.orders.qrisEmpty")}
+          >
+            <Button
+              icon={<QrcodeOutlined />}
+              disabled={!order?.qrisImageUrl}
+              onClick={() => setQrisOpen((prev) => !prev)}
+            >
+              {t("admin.orders.qrisTitle")}
+            </Button>
+          </Tooltip>
           <Button
             type="primary"
             icon={<DownloadOutlined />}
@@ -131,15 +158,11 @@ export default function OrderDetailDrawer({
     >
       {order && (
         <div className="flex flex-col gap-6">
-          {/* Detail pesanan: identitas, tanggal, status, total. */}
+          {/* Detail pesanan: identitas + tanggal (status & total di judul /
+              daftar paket). */}
           <section>
             <SectionTitle>{t("admin.orders.detailOrder")}</SectionTitle>
             <Descriptions size="small" column={1} className="text-sm!">
-              {/* <Descriptions.Item label={t("admin.orders.orderId")}>
-                <Typography.Text copyable className="font-mono text-xs!">
-                  {order.orderId}
-                </Typography.Text>
-              </Descriptions.Item> */}
               {order.transactionId && (
                 <Descriptions.Item label={t("admin.orders.transactionId")}>
                   <Typography.Text className="font-mono text-xs!">
@@ -150,17 +173,10 @@ export default function OrderDetailDrawer({
               <Descriptions.Item label={t("common.date")}>
                 {formatDate(order.dateOrder, locale, true)}
               </Descriptions.Item>
-              <Descriptions.Item label={t("common.status")}>
-                {statusTag(order.paymentStatus)}
-              </Descriptions.Item>
-              <Descriptions.Item label={t("admin.orders.totalPrice")}>
-                <span className="font-medium">
-                  {formatRupiah(order.totalPrice)}
-                </span>
-              </Descriptions.Item>
             </Descriptions>
 
-            {/* Item paket: nama × qty + jadwal & info menginap per paket. */}
+            {/* Daftar paket + total — pola halaman checkout (garis pemisah,
+                harga per paket, total besar di bawah). */}
             <div className="mt-2 divide-y divide-black/5 dark:divide-white/10">
               {order.items.map((item, index) => {
                 // Jadwal per paket; data lama (tanpa jadwal item) fallback
@@ -171,99 +187,119 @@ export default function OrderDetailDrawer({
                 const stay = hasOwn ? !!item.homestay : order.homestay;
                 const stayDays = hasOwn
                   ? (item.homestayTime ?? 1)
-                  : order.homestayTime;
+                  : (order.homestayTime ?? 1);
                 return (
-                  <div
-                    key={item.id}
-                    className="flex justify-between gap-3 py-2 text-sm"
-                  >
-                    <span>
-                      {item.package.name} × {item.quantity}
-                      {showSummary && (
-                        <span className="block text-[11px] text-foreground/50">
+                  <div key={item.id} className="py-3 text-sm">
+                    <div className="flex justify-between gap-3">
+                      <span>
+                        {item.package.name} × {item.quantity}
+                        {stay && stayDays > 1 && (
+                          <span className="text-foreground/50">
+                            {" "}
+                            · {stayDays} {t("checkout.homestayDays")}
+                          </span>
+                        )}
+                      </span>
+                      <span className="shrink-0">
+                        {formatRupiah(item.price)}
+                      </span>
+                    </div>
+                    {showSummary && (
+                      <p className="m-0! mt-1 text-foreground/60">
+                        {t("checkout.scheduleDate")}:{" "}
+                        <span className="font-medium text-primary">
                           {formatDate(date, locale)}
-                          {stay
-                            ? ` — ${t("admin.orders.stay")}: ${t("common.yes")} (${stayDays})`
-                            : ""}
                         </span>
-                      )}
-                    </span>
-                    <span className="shrink-0">{formatRupiah(item.price)}</span>
+                        {stay && (
+                          <>
+                            {" — "}
+                            {t("checkout.homestay")}:{" "}
+                            <span className="font-medium text-primary">
+                              {t("common.yes")} ({stayDays}{" "}
+                              {t("checkout.homestayDays")})
+                            </span>
+                          </>
+                        )}
+                      </p>
+                    )}
                   </div>
                 );
               })}
+              <div className="flex items-center justify-between py-2">
+                <span className="font-medium">{t("cart.totalPrice")}</span>
+                <span className="text-lg font-bold text-primary">
+                  {formatRupiah(order.totalPrice)}
+                </span>
+              </div>
             </div>
           </section>
 
-          {/* Detail pemesan. */}
-          <section>
-            <SectionTitle>{t("admin.orders.detailCustomer")}</SectionTitle>
-            <Descriptions size="small" column={1} className="text-sm!">
-              <Descriptions.Item label={t("common.name")}>
-                {order.user.name}
-              </Descriptions.Item>
-              <Descriptions.Item label={t("common.email")}>
-                {order.user.email}
-              </Descriptions.Item>
-              <Descriptions.Item label={t("common.phone")}>
-                {order.user.phone || "—"}
-              </Descriptions.Item>
-            </Descriptions>
-          </section>
-
-          {/* Log pesanan: transisi status pembayaran (OrderLog). */}
-          <section>
-            <SectionTitle>{t("admin.orders.logTitle")}</SectionTitle>
-            {order.logs.length === 0 ? (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description={
-                  <span className="text-xs text-foreground/50">
-                    {t("admin.orders.noLogs")}
-                  </span>
-                }
-                className="my-4!"
-              />
-            ) : (
-              <Timeline
-                className="mt-3!"
-                items={order.logs.map((log) => ({
-                  color: LOG_DOT_COLORS[log.toStatus] ?? "gray",
-                  content: (
-                    <div key={log.id} className="flex flex-col">
-                      <span className="flex flex-wrap items-center gap-1.5">
-                        {statusTag(log.fromStatus)}
-                        <span className="text-xs text-foreground/50">→</span>
-                        {statusTag(log.toStatus)}
-                      </span>
-                      <span className="text-xs text-foreground/50">
-                        {formatDate(log.createdAt, locale, true)}
-                      </span>
-                    </div>
+          {/* Tab informasi pemesan & log pesanan di bawah detail pesanan. */}
+          <Tabs
+            items={[
+              {
+                key: "customer",
+                label: t("admin.orders.customerInfo"),
+                children: (
+                  <Descriptions size="small" column={1} className="text-sm!">
+                    <Descriptions.Item label={t("common.name")}>
+                      {order.user.name}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={t("common.email")}>
+                      {order.user.email}
+                    </Descriptions.Item>
+                    <Descriptions.Item label={t("common.phone")}>
+                      {order.user.phone || "—"}
+                    </Descriptions.Item>
+                  </Descriptions>
+                ),
+              },
+              {
+                key: "logs",
+                label: t("admin.orders.logTitle"),
+                children:
+                  order.logs.length === 0 ? (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={
+                        <span className="text-xs text-foreground/50">
+                          {t("admin.orders.noLogs")}
+                        </span>
+                      }
+                      className="my-4!"
+                    />
+                  ) : (
+                    <Timeline
+                      className="mt-3!"
+                      items={order.logs.map((log) => ({
+                        color: LOG_DOT_COLORS[log.toStatus] ?? "gray",
+                        content: (
+                          <div key={log.id} className="flex flex-col">
+                            <span className="flex flex-wrap items-center gap-1.5">
+                              {statusTag(log.fromStatus)}
+                              <span className="text-xs text-foreground/50">
+                                →
+                              </span>
+                              {statusTag(log.toStatus)}
+                            </span>
+                            <span className="text-xs text-foreground/50">
+                              {formatDate(log.createdAt, locale, true)}
+                            </span>
+                          </div>
+                        ),
+                      }))}
+                    />
                   ),
-                }))}
-              />
-            )}
-          </section>
+              },
+            ]}
+          />
 
-          {/* QRIS tersimpan saat order dibuat (Core API Midtrans). */}
-          <section>
-            <SectionTitle>{t("admin.orders.qrisTitle")}</SectionTitle>
-            {order.qrisImageUrl ? (
-              // Gambar QR dari host eksternal (Midtrans/CDN) — bukan aset
-              // lokal yang bisa dioptimasi next/image.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                alt="QRIS"
-                src={order.qrisImageUrl}
-                className="w-40 rounded-lg border border-black/10 dark:border-white/15"
-              />
-            ) : (
-              <div className="text-xs text-foreground/50">
-                {t("admin.orders.qrisEmpty")}
-              </div>
-            )}
-          </section>
+          {/* Gambar QRIS tampil inline saat tombol footer diaktifkan. */}
+          {qrisOpen && order.qrisImageUrl && (
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-black/10 p-3 dark:border-white/10">
+              <Image src={order.qrisImageUrl} alt="QRIS" width={200} />
+            </div>
+          )}
         </div>
       )}
     </Drawer>

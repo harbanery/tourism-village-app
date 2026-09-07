@@ -100,7 +100,7 @@ export default function CheckoutClientSection({
   const { t, locale } = useT();
   const router = useRouter();
   const mounted = useMounted();
-  const { notification, message } = App.useApp();
+  const { notification, message, modal } = App.useApp();
   const [form] = Form.useForm<CheckoutFormValues>();
 
   const [fetching, setFetching] = useState(true);
@@ -339,6 +339,30 @@ export default function CheckoutClientSection({
       .locale(locale)
       .format(locale === "id" ? "DD MMMM YYYY" : "MMMM D, YYYY");
 
+  /**
+   * Modal konfirmasi sebelum memproses order — prasyarat (keranjang &
+   * telepon pemesan) diperiksa dulu, konfirmasi akhir ada di modal.
+   */
+  const showConfirmPay = () => {
+    if (items.length === 0) {
+      message.warning(t("checkout.emptyCart"));
+      return;
+    }
+    // Telepon wajib sebelum order diproses (kontak darurat perubahan jadwal).
+    if (!orderer.phone.trim()) {
+      setEditingOrderer(true);
+      message.warning(t("checkout.phoneRequired"));
+      return;
+    }
+    modal.confirm({
+      title: t("checkout.confirmTitle"),
+      content: t("checkout.confirmPayContent", { total: formatRupiah(total) }),
+      okText: t("common.continue"),
+      cancelText: t("common.cancel"),
+      onOk: () => handleProcess(),
+    });
+  };
+
   if (!mounted) return null;
 
   if (fetching) {
@@ -551,9 +575,11 @@ export default function CheckoutClientSection({
                   </div>
                 );
               })}
-              <div className="py-2 flex justify-between font-semibold">
-                <span>{t("cart.totalPrice")}</span>
-                <span className="text-primary">{formatRupiah(total)}</span>
+              <div className="flex items-center justify-between py-2">
+                <span className="font-medium">{t("cart.totalPrice")}</span>
+                <span className="text-lg font-bold text-primary">
+                  {formatRupiah(total)}
+                </span>
               </div>
             </div>
           </Card>
@@ -690,19 +716,21 @@ export default function CheckoutClientSection({
                 </div>
               );
             })}
-            <div className="py-2 flex justify-between font-semibold">
-              <span>{t("cart.totalPrice")}</span>
-              <span className="text-primary">{formatRupiah(total)}</span>
+            <div className="flex items-center justify-between py-2">
+              <span className="font-medium">{t("cart.totalPrice")}</span>
+              <span className="text-lg font-bold text-primary">
+                {formatRupiah(total)}
+              </span>
             </div>
           </div>
 
-          {/* Ubah jadwal di atas proses order — akses konten paling luar. */}
-          <div className="mt-6 flex flex-col gap-2">
+          {/* Ubah jadwal (kiri) + lanjutkan pembayaran (kanan). */}
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <Button
               size="large"
               disabled={submitting}
               onClick={() => setStep(0)}
-              className="w-full!"
+              className="w-full! sm:flex-1"
             >
               {t("checkout.editSchedule")}
             </Button>
@@ -710,8 +738,8 @@ export default function CheckoutClientSection({
               type="primary"
               size="large"
               loading={submitting}
-              onClick={handleProcess}
-              className="w-full!"
+              onClick={showConfirmPay}
+              className="w-full! sm:flex-1"
             >
               {t("checkout.process")}
             </Button>

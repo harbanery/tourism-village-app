@@ -397,6 +397,8 @@ export default function PaymentClientSection({
           </Tag>
         </div>
 
+        {/* Daftar paket + total — pola halaman checkout (garis pemisah,
+            total besar di bawah). */}
         <div className="mt-4 divide-y divide-black/5 dark:divide-white/10">
           {order.items.map((item) => (
             <div key={item.id} className="py-2 text-sm">
@@ -416,13 +418,12 @@ export default function PaymentClientSection({
               </p>
             </div>
           ))}
-        </div>
-
-        <div className="mt-4 flex items-center justify-between">
-          <span className="font-medium">{t("cart.totalPrice")}</span>
-          <span className="text-lg font-bold text-primary">
-            {formatRupiah(order.totalPrice)}
-          </span>
+          <div className="flex items-center justify-between py-2">
+            <span className="font-medium">{t("cart.totalPrice")}</span>
+            <span className="text-lg font-bold text-primary">
+              {formatRupiah(order.totalPrice)}
+            </span>
+          </div>
         </div>
 
         {loading ? (

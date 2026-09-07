@@ -77,6 +77,7 @@ export async function POST(request: Request) {
     const place = await prisma.place.create({
       data: {
         name: body.name,
+        description: body.description || null,
         photo: body.photo || null,
         status: "NONACTIVE",
       },

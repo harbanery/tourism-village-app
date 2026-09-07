@@ -3,6 +3,7 @@ import { FormLayout } from "@/models/form";
 /**
  * Form tempat wisata:
  * - foto memakai form upload (Cloudinary)
+ * - deskripsi opsional (textarea) — tampil di expanded row tabel
  * - form status takeout (status hanya via kolom opsi)
  */
 export const placeFormLayout: FormLayout[] = [
@@ -10,6 +11,12 @@ export const placeFormLayout: FormLayout[] = [
     key: "main",
     items: [
       { name: "name", type: "input", required: true },
+      {
+        name: "description",
+        type: "textarea",
+        required: false,
+        maxLength: 500,
+      },
       { name: "photo", type: "upload", required: true },
     ],
   },

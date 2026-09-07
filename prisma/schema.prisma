@@ -143,14 +143,16 @@ model OtpCode {
 // ============================================================
 
 model Place {
-  id       String   @id @default(uuid())
-  name     String   @map("tempat_name")
-  status   Status   @default(ACTIVE)
-  photo    String?  @map("photo_tempat")
+  id          String   @id @default(uuid())
+  name        String   @map("tempat_name")
+  /** Deskripsi tempat wisata (opsional) — tampil di expanded row admin. */
+  description String?  @map("description")
+  status      Status   @default(ACTIVE)
+  photo       String?  @map("photo_tempat")
   packages Package[]
   galleries Gallery[]
   videos    Video[]
-  blogs    Blog[]
+  blogs     Blog[]
 
   @@map("wisata_tempat")
 }

@@ -14,6 +14,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.noPhoto": "Belum ada foto",
     "common.addField": "Tambah {field}",
     "common.present": "Sekarang",
+    "common.continue": "Lanjutkan",
 
     "error.title": "Terjadi kesalahan",
     "error.subtitle": "Terjadi kesalahan yang tidak terduga.",
@@ -216,7 +217,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.homestay": "Menginap",
     "checkout.homestayDays": "Jumlah Hari",
     "checkout.orderer": "Data Pemesan",
-    "checkout.process": "Proses Order",
+    "checkout.process": "Lanjutkan Pembayaran",
+    "checkout.confirmTitle": "Konfirmasi Pembayaran",
+    "checkout.confirmPayContent":
+      "Pesanan senilai {total} akan diproses dan dialihkan ke halaman pembayaran QRIS. Lanjutkan?",
     "checkout.orders": "Pesanan",
     "checkout.emptyCart":
       "Keranjang kosong — silakan pilih paket wisata terlebih dahulu.",
@@ -479,7 +483,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.tourism.place": "Tempat Wisata",
     "admin.tourism.facilities": "Fasilitas",
     "admin.tourism.photo": "Foto",
-    "admin.tourism.packageCount": "Jumlah Paket",
+    "admin.tourism.packageCountInline": "{n} paket",
+    "admin.tourism.description": "Deskripsi",
     "admin.tourism.popular": "Populer",
     "admin.tourism.popularWarning":
       "Paket ini populer di kalangan pengunjung — menonaktifkannya menyembunyikan paket dari web.",
@@ -521,7 +526,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.orders.totalPrice": "Harga Total",
     "admin.orders.detail": "Detail Pemesanan",
     "admin.orders.detailOrder": "Detail Pesanan",
-    "admin.orders.detailCustomer": "Detail Pemesan",
+    "admin.orders.customerInfo": "Informasi Pemesan",
     "admin.orders.logTitle": "Log Pesanan",
     "admin.orders.noLogs": "Belum ada log transisi status",
     "admin.orders.qrisTitle": "QRIS",
@@ -562,6 +567,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.noPhoto": "No photo yet",
     "common.addField": "Add {field}",
     "common.present": "Present",
+    "common.continue": "Continue",
 
     "error.title": "Something went wrong",
     "error.subtitle": "An unexpected error occurred.",
@@ -762,7 +768,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "checkout.homestay": "Homestay",
     "checkout.homestayDays": "Number of Days",
     "checkout.orderer": "Orderer Data",
-    "checkout.process": "Process Order",
+    "checkout.process": "Continue to Payment",
+    "checkout.confirmTitle": "Payment Confirmation",
+    "checkout.confirmPayContent":
+      "Your order of {total} will be processed and redirected to the QRIS payment page. Continue?",
     "checkout.orders": "Orders",
     "checkout.emptyCart":
       "Your cart is empty — please pick a tour package first.",
@@ -1021,7 +1030,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.tourism.place": "Tourism Place",
     "admin.tourism.facilities": "Facilities",
     "admin.tourism.photo": "Photo",
-    "admin.tourism.packageCount": "Packages",
+    "admin.tourism.packageCountInline": "{n} packages",
+    "admin.tourism.description": "Description",
     "admin.tourism.popular": "Popular",
     "admin.tourism.popularWarning":
       "This package is popular with visitors — deactivating it hides the package from the website.",
@@ -1063,7 +1073,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.orders.totalPrice": "Total Price",
     "admin.orders.detail": "Order Details",
     "admin.orders.detailOrder": "Order Details",
-    "admin.orders.detailCustomer": "Customer Details",
+    "admin.orders.customerInfo": "Customer Information",
     "admin.orders.logTitle": "Order Log",
     "admin.orders.noLogs": "No status transitions logged",
     "admin.orders.qrisTitle": "QRIS",

@@ -31,6 +31,9 @@ export async function PUT(request: Request, { params }: Params) {
       where: { id },
       data: {
         name: body.name,
+        ...(body.description !== undefined && {
+          description: body.description || null,
+        }),
         ...(body.photo !== undefined && { photo: nextPhoto }),
       },
     });

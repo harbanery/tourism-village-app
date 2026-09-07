@@ -42,6 +42,8 @@ import { placeFormLayout, packageFormLayout } from "../config";
 interface PlaceRow {
   id: string;
   name: string;
+  /** Deskripsi tempat wisata (tampil di expanded row). */
+  description: string | null;
   status: "ACTIVE" | "NONACTIVE";
   photo: string | null;
   /** Jumlah paket yang terhubung dengan tempat ini. */
@@ -64,6 +66,7 @@ interface PackageRow {
 
 interface PlaceFormValues {
   name: string;
+  description?: string;
   photo?: unknown;
 }
 
@@ -153,6 +156,7 @@ const TourismDecorator = () => {
     if (record) {
       placeForm.setFieldsValue({
         name: record.name,
+        description: record.description ?? undefined,
         // File existing ditampilkan utuh di form upload (nama + preview).
         photo: record.photo ? [uploadFileFromUrl(record.photo)] : undefined,
       });
@@ -167,7 +171,11 @@ const TourismDecorator = () => {
     try {
       const values = await placeForm.validateFields();
       const photo = await getImageString(values.photo);
-      const payload = { name: values.name, photo };
+      const payload = {
+        name: values.name,
+        description: values.description ?? "",
+        photo,
+      };
       const res = editingPlace
         ? await fetch(`/api/admin/places/${editingPlace.id}`, {
             method: "PUT",
@@ -425,15 +433,14 @@ const TourismDecorator = () => {
           <span className="font-medium">{name}</span>
           {/* Tag populer: punya paket populer yang terhubung. */}
           {record.popularPackageCount > 0 && popularTag}
+          {/* Jumlah paket menempel di samping nama (bukan kolom sendiri). */}
+          <span className="text-xs text-foreground/50">
+            {t("admin.tourism.packageCountInline", {
+              n: record.packageCount,
+            })}
+          </span>
         </span>
       ),
-    },
-    {
-      title: t("admin.tourism.packageCount"),
-      dataIndex: "packageCount",
-      key: "packageCount",
-      align: "center" as const,
-      render: (count: number) => count,
     },
     // Kolom status & opsi: fixed kanan, width statis (global).
     placeCols.status,
@@ -670,7 +677,25 @@ const TourismDecorator = () => {
           </Space>
         }
       >
-        <AdminTable dataSource={filteredPlaces} columns={placeColumns} />
+        {/* Expanded row: deskripsi tempat wisata (pola table blog). */}
+        <AdminTable
+          dataSource={filteredPlaces}
+          columns={placeColumns}
+          expandable={{
+            expandedRowRender: (record: PlaceRow) => (
+              <div>
+                <p className="m-0! text-xs font-semibold uppercase tracking-wide text-foreground/40">
+                  {t("admin.tourism.description")}
+                </p>
+                <p className="m-0! mt-1 whitespace-pre-line text-sm leading-relaxed text-foreground/80">
+                  {record.description || "-"}
+                </p>
+              </div>
+            ),
+            // Row tanpa deskripsi tidak perlu di-expand.
+            rowExpandable: (record: PlaceRow) => !!record.description,
+          }}
+        />
       </Card>
       <Card
         title={t("admin.tourism.packages")}
