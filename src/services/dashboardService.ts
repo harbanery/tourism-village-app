@@ -5,7 +5,7 @@ import { isPaymentExpired } from "@/server/orderExpiry";
  * Service statistik dashboard admin (pola services — dipanggil route
  * /api/admin/dashboard). Fokus monitoring transaksi pemesanan:
  * KPI pendapatan/order/AOV/sukses bayar, tren harian, distribusi status,
- * paket terlaris, rasio menginap, dan pembeli baru vs kembali.
+ * paket terlaris, rasio menginap, dan pengguna yang sering membeli (top 5).
  *
  * Agregasi dilakukan di JS dari row order periode (volume order situs
  * desa wisata kecil — lebih sederhana & aman daripada SQL date_trunc
@@ -48,8 +48,13 @@ export interface DashboardAnalytics {
   topPackages: { name: string; quantity: number; revenue: number }[];
   /** Rasio item menginap vs tidak (PAID, periode). */
   homestay: { type: "stay" | "day"; value: number }[];
-  /** Pembeli periode (PAID): baru vs kembali. */
-  buyers: { type: "new" | "returning"; value: number }[];
+  /** Pengguna yang sering membeli (top 5, PAID periode): jumlah order + belanja. */
+  topBuyers: {
+    name: string;
+    email: string;
+    orders: number;
+    spent: number;
+  }[];
 }
 
 function startOfDay(date: Date): Date {
@@ -129,6 +134,7 @@ export async function getDashboardAnalytics(
         paymentStatus: true,
         paidAt: true,
         paymentExpiresAt: true,
+        user: { select: { name: true, email: true } },
         items: {
           select: {
             quantity: true,
@@ -139,7 +145,7 @@ export async function getDashboardAnalytics(
         },
       },
     }),
-    // PAID pertama setiap user (untuk pembeli baru vs kembali).
+    // PAID pertama setiap user — dipakai menghitung jumlah pembeli unik.
     prisma.order.findMany({
       where: { paymentStatus: "PAID" },
       select: { userId: true, paidAt: true },
@@ -223,27 +229,28 @@ export async function getDashboardAnalytics(
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5);
 
-  // Pembeli periode: user dengan order PAID di periode, dibagi menjadi
-  // baru (PAID pertamanya ada di dalam periode) vs kembali.
-  const firstPaid = new Map<string, Date>();
-  for (const order of firstPaidByUser) {
-    const userId = String(order.userId);
-    const existing = firstPaid.get(userId);
-    if (!existing && order.paidAt) firstPaid.set(userId, order.paidAt);
-  }
-  let newBuyers = 0;
-  let returningBuyers = 0;
-  const periodPaidUsers = new Set<string>();
+  // Pengguna yang sering membeli (top 5): frekuensi order PAID periode,
+  // seri ditentukan total belanja (transaksi nyata saja).
+  const buyerAgg = new Map<
+    string,
+    { name: string; email: string; orders: number; spent: number }
+  >();
   for (const order of periodOrders) {
-    if (order.paymentStatus === "PAID") {
-      periodPaidUsers.add(String(order.userId));
-    }
+    if (order.paymentStatus !== "PAID") continue;
+    const userId = String(order.userId);
+    const row = buyerAgg.get(userId) ?? {
+      name: order.user.name,
+      email: order.user.email,
+      orders: 0,
+      spent: 0,
+    };
+    row.orders += 1;
+    row.spent += order.totalPrice;
+    buyerAgg.set(userId, row);
   }
-  for (const userId of periodPaidUsers) {
-    const first = firstPaid.get(userId);
-    if (first && first.getTime() >= periodStart.getTime()) newBuyers++;
-    else returningBuyers++;
-  }
+  const topBuyers = [...buyerAgg.values()]
+    .sort((a, b) => b.orders - a.orders || b.spent - a.spent)
+    .slice(0, 5);
 
   const pendingActive = periodOrders.filter(
     (order) =>
@@ -272,7 +279,8 @@ export async function getDashboardAnalytics(
           : 0,
       pendingActive,
       canceledTotal,
-      paidBuyersTotal: firstPaid.size,
+      paidBuyersTotal: new Set(firstPaidByUser.map((o) => String(o.userId)))
+        .size,
     },
     timeseries: dayKeys.map((day) => ({
       day,
@@ -286,9 +294,6 @@ export async function getDashboardAnalytics(
       { type: "stay", value: stayQty },
       { type: "day", value: dayQty },
     ],
-    buyers: [
-      { type: "new", value: newBuyers },
-      { type: "returning", value: returningBuyers },
-    ],
+    topBuyers,
   };
 }

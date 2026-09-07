@@ -8,6 +8,7 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import LoaderPage from "@/components/admin/loader";
 import { formatDate, formatRupiah } from "@/utils/format";
+import OrderDetailDrawer from "./OrderDetailDrawer";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
@@ -19,12 +20,14 @@ const PAYMENT_TAG_COLORS: Record<PaymentStatus, string> = {
   CANCELED: "default",
 };
 
-interface OrderRow {
+export interface OrderRow {
   id: string;
   /** order_id Midtrans (TOURISM-{uuid}{YYYYMMDD}) — identitas order. */
   orderId: string;
   /** transaction_id Midtrans (audit, rekomendasi 2.3). */
   transactionId: string | null;
+  /** URL gambar QR dari Core API (ditampilkan di drawer detail). */
+  qrisImageUrl: string | null;
   dateOrder: string;
   dateSchedule: string;
   homestay: boolean;
@@ -43,9 +46,17 @@ interface OrderRow {
     homestayTime?: number | null;
     package: { name: string };
   }[];
+  /** Log transisi status pembayaran (kronologis). */
+  logs: {
+    id: string;
+    fromStatus: PaymentStatus;
+    toStatus: PaymentStatus;
+    createdAt: string;
+  }[];
 }
 
-/** Menu pemesanan — read-only, kolom ringkas (paket × kuantitas). */
+/** Menu pemesanan — tabel ringkas; detail lengkap (pemesan, item, log,
+ * QRIS, invoice) ada di drawer yang terbuka saat row diklik. */
 const OrderDecorator = () => {
   const { t, locale } = useT();
   const mounted = useMounted();
@@ -53,6 +64,8 @@ const OrderDecorator = () => {
   const [fetching, setFetching] = useState(true);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [query, setQuery] = useState("");
+  /** Row yang drawer detailnya sedang terbuka (null = tertutup). */
+  const [active, setActive] = useState<OrderRow | null>(null);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -111,45 +124,6 @@ const OrderDecorator = () => {
       render: (v: string) => formatDate(v, locale, true),
     },
     {
-      title: t("common.name"),
-      dataIndex: ["user", "name"],
-      key: "userName",
-    },
-    {
-      // Kolom pesanan merangkum jadwal + info menginap per paket
-      // (kolom "Inap" sudah di-takeout, infonya pindah ke sini).
-      title: t("checkout.orders"),
-      key: "items",
-      render: (_: unknown, record: OrderRow) => (
-        <div className="flex flex-col">
-          {record.items.map((item, index) => {
-            // Jadwal per paket; data lama (tanpa jadwal item) fallback ke
-            // agregat order — cukup ditampilkan sekali di item pertama.
-            const hasOwn = !!item.dateSchedule;
-            const showSummary = hasOwn || index === 0;
-            const date = hasOwn ? item.dateSchedule! : record.dateSchedule;
-            const stay = hasOwn ? !!item.homestay : record.homestay;
-            const stayDays = hasOwn
-              ? (item.homestayTime ?? 1)
-              : record.homestayTime;
-            return (
-              <Typography.Text key={item.id} className="text-xs!">
-                {item.package.name} × {item.quantity}
-                {showSummary && (
-                  <span className="block text-[11px]! text-foreground/50">
-                    {formatDate(date, locale)}
-                    {stay
-                      ? ` — ${t("admin.orders.stay")}: ${t("common.yes")} (${stayDays})`
-                      : ""}
-                  </span>
-                )}
-              </Typography.Text>
-            );
-          })}
-        </div>
-      ),
-    },
-    {
       title: t("admin.orders.totalPrice"),
       dataIndex: "totalPrice",
       key: "totalPrice",
@@ -186,8 +160,23 @@ const OrderDecorator = () => {
           </Space>
         }
       >
-        <AdminTable dataSource={filtered} columns={columns} />
+        {/* Klik row mana pun membuka drawer detail pemesanan. */}
+        <AdminTable
+          dataSource={filtered}
+          columns={columns}
+          rowClassName="cursor-pointer"
+          onRow={(record) => ({
+            onClick: () => setActive(record),
+          })}
+        />
       </Card>
+
+      {/* Detail lengkap pesanan terpilih (order, pemesan, log, QRIS, invoice). */}
+      <OrderDetailDrawer
+        order={active}
+        open={!!active}
+        onClose={() => setActive(null)}
+      />
     </div>
   );
 };

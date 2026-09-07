@@ -2,7 +2,7 @@ import prisma from "@/server/db";
 import { requireAdmin } from "@/server/auth";
 import { NextResponse } from "next/server";
 
-/** GET /api/admin/orders — semua pemesanan + user + item (MASTER | VIEWER). */
+/** GET /api/admin/orders — semua pemesanan + user + item + log (MASTER | VIEWER). */
 export async function GET() {
   const admin = await requireAdmin();
   if (!admin) {
@@ -17,6 +17,7 @@ export async function GET() {
       include: {
         user: { select: { id: true, name: true, email: true, phone: true } },
         items: { include: { package: { select: { name: true } } } },
+        logs: { orderBy: { createdAt: "asc" } },
       },
     });
     return NextResponse.json({ success: true, data: orders });

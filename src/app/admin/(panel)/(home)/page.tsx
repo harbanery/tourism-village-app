@@ -47,7 +47,7 @@ interface Analytics {
   statusTotals: { status: PaymentStatus; count: number }[];
   topPackages: { name: string; quantity: number; revenue: number }[];
   homestay: { type: "stay" | "day"; value: number }[];
-  buyers: { type: "new" | "returning"; value: number }[];
+  topBuyers: { name: string; email: string; orders: number; spent: number }[];
 }
 
 interface DashboardData {
@@ -290,6 +290,51 @@ export default function DashboardPage() {
       </Row>
 
       <Row gutter={[16, 16]}>
+        {/* Pengguna yang sering membeli (top 5) — indikator loyalitas */}
+        <Col xs={24} lg={12}>
+          <Card title={t("admin.dashboard.buyers")}>
+            {(analytics?.topBuyers ?? []).length === 0 ? (
+              <div className="py-8 text-center text-sm text-foreground/50">
+                {t("admin.dashboard.noBuyers")}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {(analytics?.topBuyers ?? []).map((buyer, index) => (
+                  <div key={buyer.email} className="flex items-center gap-3">
+                    {/* Peringkat — juara 1 di-highlight emas. */}
+                    <span
+                      className={[
+                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+                        index === 0
+                          ? "bg-amber-100 text-amber-600 dark:bg-amber-400/15 dark:text-amber-400"
+                          : "bg-primary/10 text-primary",
+                      ].join(" ")}
+                    >
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">
+                        {buyer.name}
+                      </div>
+                      <div className="truncate text-xs text-foreground/50">
+                        {buyer.email}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="text-sm font-medium">
+                        {formatRupiah(buyer.spent)}
+                      </div>
+                      <div className="text-xs text-foreground/50">
+                        {t("admin.dashboard.buyerOrders", { n: buyer.orders })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </Col>
+
         {/* Rasio item menginap vs tidak (PAID) */}
         <Col xs={24} lg={12}>
           <Card title={t("admin.dashboard.homestayRatio")}>
@@ -299,22 +344,6 @@ export default function DashboardPage() {
                   row.type === "stay"
                     ? "admin.dashboard.stayItem"
                     : "admin.dashboard.dayItem",
-                ),
-                value: row.value,
-              }))}
-            />
-          </Card>
-        </Col>
-
-        {/* Pembeli baru vs kembali — indikator kepuasan */}
-        <Col xs={24} lg={12}>
-          <Card title={t("admin.dashboard.buyers")}>
-            <RatioDoughnutChart
-              segments={(analytics?.buyers ?? []).map((row) => ({
-                label: t(
-                  row.type === "new"
-                    ? "admin.dashboard.newBuyer"
-                    : "admin.dashboard.returningBuyer",
                 ),
                 value: row.value,
               }))}
