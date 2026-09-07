@@ -431,6 +431,18 @@ const TourismDecorator = () => {
       dataIndex: "name",
       key: "name",
       sorter: textSorter<PlaceRow>((row) => row.name),
+      // Filter populer: punya/tidak punya paket populer (semantik tag Populer).
+      filters: [
+        { text: t("admin.tourism.popular"), value: "popular" },
+        { text: t("admin.tourism.notPopular"), value: "notPopular" },
+      ],
+      onFilter: (
+        value: string | number | bigint | symbol | boolean,
+        record: PlaceRow,
+      ) =>
+        value === "popular"
+          ? record.popularPackageCount > 0
+          : record.popularPackageCount === 0,
       render: (name: string, record: PlaceRow) => (
         <span className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{name}</span>

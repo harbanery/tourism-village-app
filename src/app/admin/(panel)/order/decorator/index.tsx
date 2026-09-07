@@ -29,17 +29,9 @@ type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 /** Interval auto refresh data order (ms). */
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
 
-/** Kunci bulan (YYYY-MM) dari tanggal ISO. */
-function monthKey(iso: string): string {
-  return iso.slice(0, 7);
-}
-
-/** Label bulan-tahun sesuai locale ("September 2026"). */
-function monthLabel(key: string, locale: "id" | "en"): string {
-  return new Date(`${key}-01T00:00:00`).toLocaleDateString(
-    locale === "id" ? "id-ID" : "en-US",
-    { month: "long", year: "numeric" },
-  );
+/** Tahun (YYYY) dari tanggal ISO. */
+function yearKey(iso: string): string {
+  return iso.slice(0, 4);
 }
 
 /** Warna tag status pembayaran. */
@@ -145,11 +137,11 @@ const OrderDecorator = () => {
 
   if (!mounted || fetching) return <LoaderPage />;
 
-  // Opsi filter bulan-tahun dari data yang ada (terbaru dulu).
-  const monthOptions = [...new Set(orders.map((o) => monthKey(o.dateOrder)))]
+  // Opsi filter tahun pemesanan dari data yang ada (terbaru dulu).
+  const yearOptions = [...new Set(orders.map((o) => yearKey(o.dateOrder)))]
     .sort()
     .reverse()
-    .map((key) => ({ text: monthLabel(key, locale), value: key }));
+    .map((year) => ({ text: year, value: year }));
 
   const columns = [
     {
@@ -170,13 +162,12 @@ const OrderDecorator = () => {
       dataIndex: "dateOrder",
       key: "dateOrder",
       sorter: dateSorter<OrderRow>((row) => row.dateOrder),
-      // Filter berdasarkan bulan + tahun pemesanan.
-      filters: monthOptions,
+      // Filter berdasarkan tahun pemesanan saja.
+      filters: yearOptions,
       onFilter: (
         value: string | number | bigint | symbol | boolean,
         record: OrderRow,
-      ) => monthKey(record.dateOrder) === value,
-      filterSearch: true,
+      ) => yearKey(record.dateOrder) === value,
       render: (v: string) => formatDate(v, locale, true),
     },
     {
