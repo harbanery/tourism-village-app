@@ -385,17 +385,17 @@ export function OrderHistorySection({
           Gating memakai total dari server (tanpa filter) agar kontrol
           tetap tampil saat filter aktif menghasilkan nol pesanan. */}
       {initialTotal > 0 && (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
           <Input
             allowClear
             prefix={<SearchOutlined />}
-            className="w-full! sm:w-60!"
+            className="w-full!"
             placeholder={t("profile.searchOrderId")}
             value={orderQueryInput}
             onChange={(e) => setOrderQueryInput(e.target.value)}
           />
           <Select<StatusFilter>
-            className="w-full! sm:w-44!"
+            className="w-full! sm:max-w-44!"
             value={statusFilter}
             onChange={(value) => setStatusFilter(value)}
             options={STATUS_FILTER_OPTIONS.map((opt) => ({
@@ -404,7 +404,7 @@ export function OrderHistorySection({
             }))}
           />
           <Select<SortMode>
-            className="w-full! sm:w-44!"
+            className="w-full! sm:max-w-44!"
             value={sortMode}
             onChange={(value) => setSortMode(value)}
             options={SORT_MODE_OPTIONS.map((opt) => ({
