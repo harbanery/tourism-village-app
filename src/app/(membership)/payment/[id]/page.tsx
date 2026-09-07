@@ -31,6 +31,7 @@ export default async function PaymentPage({
     <PaymentClientSection
       order={{
         id: order.id,
+        orderId: order.orderId,
         dateSchedule: order.dateSchedule,
         homestay: order.homestay === "yes",
         homestayTime: order.homestayTime,

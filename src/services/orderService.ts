@@ -14,6 +14,8 @@ export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 /** DTO order + item untuk riwayat & pembayaran. */
 export interface UserOrder {
   id: string;
+  /** order_id Midtrans (TOURISM-{uuid}{YYYYMMDD}) — identitas order. */
+  orderId: string;
   userId: string;
   userName: string;
   userEmail: string;
@@ -181,6 +183,7 @@ export async function getUserOrdersPage(
 function toUserOrder(
   order: {
     id: string;
+    orderId: string;
     userId: string;
     dateOrder: Date;
     dateSchedule: Date;
@@ -203,6 +206,7 @@ function toUserOrder(
 ): UserOrder {
   return {
     id: order.id,
+    orderId: order.orderId,
     userId: order.userId,
     userName: user.name,
     userEmail: user.email,
@@ -265,6 +269,7 @@ export async function getOrderForUser(
 
   return {
     id: order.id,
+    orderId: order.orderId,
     userId: order.userId,
     userName: user?.name ?? "",
     userEmail: user?.email ?? "",

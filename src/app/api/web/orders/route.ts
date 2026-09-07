@@ -63,6 +63,7 @@ export async function GET(request: Request) {
     data: {
       items: page.items.map((order) => ({
         id: order.id,
+        orderId: order.orderId,
         dateOrder: order.dateOrder,
         dateSchedule: order.dateSchedule,
         homestay: order.homestay === "yes",

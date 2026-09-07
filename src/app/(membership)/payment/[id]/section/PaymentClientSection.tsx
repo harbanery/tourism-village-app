@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
-import { Alert, App, Button, Card, Result, Spin, Tag } from "antd";
+import { Alert, App, Button, Card, Result, Spin, Tag, Typography } from "antd";
 import {
   CalendarOutlined,
   CheckCircleFilled,
@@ -18,15 +18,15 @@ import {
   peekPaymentAccess,
   consumePaymentAccess,
 } from "@/helpers/paymentAccess";
-import {
-  issueReviewAccess,
-} from "@/helpers/reviewAccess";
+import { issueReviewAccess } from "@/helpers/reviewAccess";
 import { formatRupiah, formatDate } from "@/utils/format";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
 interface PaymentOrder {
   id: string;
+  /** order_id Midtrans (TOURISM-{uuid}{YYYYMMDD}) — identitas order. */
+  orderId: string;
   dateSchedule: string;
   homestay: boolean;
   homestayTime: number | null;
@@ -383,8 +383,14 @@ export default function PaymentClientSection({
 
       <Card className="mt-4!">
         <div className="flex items-center justify-between">
-          <span className="font-medium">
-            {t("checkout.orders")} #{order.id}
+          <span className="flex flex-wrap items-center gap-1.5 font-medium">
+            {/* Order ID Midtrans (TOURISM-{uuid}{YYYYMMDD}) — copyable. */}
+            <Typography.Text
+              copyable
+              className="font-mono text-xs! font-normal! text-foreground/60!"
+            >
+              {order.orderId}
+            </Typography.Text>
           </span>
           <Tag color={PAYMENT_TAG_COLORS[status]}>
             {t(`payment.status.${status}`)}

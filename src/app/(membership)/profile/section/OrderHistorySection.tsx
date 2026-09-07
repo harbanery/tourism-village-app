@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMounted } from "@/helpers/useMounted";
-import { App, Button, Card, Collapse, Empty, Select, Spin, Tag } from "antd";
+import { App, Button, Card, Collapse, Empty, Select, Spin, Tag, Typography } from "antd";
 import {
   CreditCardOutlined,
   DownOutlined,
@@ -20,6 +20,8 @@ type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
 export interface HistoryOrder {
   id: string;
+  /** order_id Midtrans (TOURISM-{uuid}{YYYYMMDD}) — identitas order. */
+  orderId: string;
   /** Opsional — respons /api/web/orders tidak menyertakan userId. */
   userId?: string;
   userName?: string;
@@ -132,6 +134,8 @@ function isReservationPassed(order: HistoryOrder): boolean {
 /** Bentuk order dari GET /api/web/orders (homestay boolean). */
 interface ApiOrder {
   id: string;
+  /** order_id Midtrans (TOURISM-{uuid}{YYYYMMDD}). */
+  orderId: string;
   dateOrder: string;
   dateSchedule: string;
   homestay: boolean;
@@ -512,7 +516,18 @@ export function OrderHistorySection({
           {list.map((order) => (
             <Card
               key={order.id}
-              title={`${formatRupiah(order.totalPrice)}`}
+              title={
+                <div className="flex flex-col items-start gap-0.5">
+                  <span>{formatRupiah(order.totalPrice)}</span>
+                  {/* Order ID (TOURISM-{uuid}{YYYYMMDD}) — copyable. */}
+                  <Typography.Text
+                    copyable
+                    className="font-mono text-xs! font-normal! text-foreground/50!"
+                  >
+                    {order.orderId}
+                  </Typography.Text>
+                </div>
+              }
               extra={
                 <Tag color={PAYMENT_TAG_COLORS[order.paymentStatus]}>
                   {t(`payment.status.${order.paymentStatus}`)}

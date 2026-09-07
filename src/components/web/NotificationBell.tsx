@@ -184,7 +184,16 @@ export function NotificationBell({
       placement="bottomRight"
       arrow={false}
     >
-      <Badge count={unreadCount} size="small" offset={[-9, 9]}>
+      <Badge
+        count={unreadCount}
+        style={{
+          pointerEvents: "none",
+          fontSize: 8,
+          padding: 0,
+        }}
+        size="small"
+        offset={[-9, 9]}
+      >
         <Button
           type="text"
           aria-label={t("notifBell.title")}

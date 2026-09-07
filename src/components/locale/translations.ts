@@ -235,6 +235,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "package.noResults": "Paket tidak ditemukan",
 
     "payment.title": "Pembayaran",
+    "payment.orderId": "Order ID",
     "payment.countdown.deadline": "Batas Pembayaran",
     "payment.countdown.timeout": "Batas Waktu",
     "payment.unavailable":
@@ -771,6 +772,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "package.noResults": "No packages found",
 
     "payment.title": "Payment",
+    "payment.orderId": "Order ID",
     "payment.countdown.deadline": "Payment Deadline",
     "payment.countdown.timeout": "Time Left",
     "payment.unavailable":
