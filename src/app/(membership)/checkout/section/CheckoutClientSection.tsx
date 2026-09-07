@@ -21,6 +21,10 @@ import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { readCart, clearCart } from "@/helpers/cart";
 import { issuePaymentAccess } from "@/helpers/paymentAccess";
+import {
+  peekCheckoutAccess,
+  consumeCheckoutAccess,
+} from "@/helpers/checkoutAccess";
 import { formatRupiah } from "@/utils/format";
 import dayjs, { type Dayjs } from "dayjs";
 import Image from "next/image";
@@ -127,6 +131,16 @@ export default function CheckoutClientSection({
   /** Telepon belum ada → form edit pemesan terbuka otomatis (wajib diisi). */
   const [editingOrderer, setEditingOrderer] = useState(!user.phone);
   const [savingOrderer, setSavingOrderer] = useState(false);
+  // Tiket sekali masuk (peek tanpa menghapus — aman untuk StrictMode):
+  // tanpa tiket → tendang ke halaman paket; dengan tiket → konsumsi sekarang.
+  const [allowed] = useState(() => peekCheckoutAccess());
+  useEffect(() => {
+    if (!allowed) {
+      router.replace("/package");
+      return;
+    }
+    consumeCheckoutAccess();
+  }, [allowed, router]);
 
   // Muat keranjang + harga paket terbaru.
   const load = useCallback(async () => {
@@ -556,22 +570,22 @@ export default function CheckoutClientSection({
               {items.map((item, index) => {
                 const days = stayMultiplier(effectiveSchedule(index));
                 return (
-                  <div
-                    key={item.packageId}
-                    className="py-2 flex justify-between gap-3 text-sm"
-                  >
-                    <span>
-                      {item.name} × {item.quantity}
-                      {days > 1 && (
-                        <span className="text-foreground/50">
-                          {" "}
-                          · {days} {t("checkout.homestayDays")}
-                        </span>
-                      )}
-                    </span>
-                    <span>
-                      {formatRupiah(item.price * item.quantity * days)}
-                    </span>
+                  <div key={item.packageId} className="py-2 text-sm">
+                    {/* Nama × qty di kiri, harga per paket align kanan. */}
+                    <div className="flex justify-between gap-3">
+                      <span>
+                        {item.name} × {item.quantity}
+                      </span>
+                      <span>
+                        {formatRupiah(item.price * item.quantity * days)}
+                      </span>
+                    </div>
+                    {/* Jumlah hari menginap di baris bawah sendiri. */}
+                    {days > 1 && (
+                      <p className="mt-0.5 text-xs text-foreground/50">
+                        {t("checkout.daysCount", { n: days })}
+                      </p>
+                    )}
                   </div>
                 );
               })}
@@ -682,20 +696,21 @@ export default function CheckoutClientSection({
                   : null;
               return (
                 <div key={item.packageId} className="py-3 text-sm">
+                  {/* Nama × qty di kiri, harga per paket align kanan. */}
                   <div className="flex justify-between gap-3">
                     <span>
                       {item.name} × {item.quantity}
-                      {days > 1 && (
-                        <span className="text-foreground/50">
-                          {" "}
-                          · {days} {t("checkout.homestayDays")}
-                        </span>
-                      )}
                     </span>
                     <span>
                       {formatRupiah(item.price * item.quantity * days)}
                     </span>
                   </div>
+                  {/* Jumlah hari menginap di baris bawah sendiri. */}
+                  {days > 1 && (
+                    <p className="mt-0.5 text-xs text-foreground/50">
+                      {t("checkout.daysCount", { n: days })}
+                    </p>
+                  )}
                   {schedule.dateSchedule && (
                     <p className="mt-1 text-foreground/60">
                       {t("checkout.scheduleDate")}:{" "}

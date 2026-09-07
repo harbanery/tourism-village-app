@@ -1,16 +1,26 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Card } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
-import { dummyBlogs } from "@/models";
 import { formatDate } from "@/utils/format";
+import type { WebBlog } from "./ArticleListSection";
 
-export function ArchiveSection() {
+/**
+ * Arsip bulan dari data blog — klik memfilter daftar artikel secara lokal
+ * (bulan aktif diklik lagi untuk menghapus filter).
+ */
+export function ArchiveSection({
+  posts,
+  activeMonth,
+  onSelectMonth,
+}: {
+  posts: WebBlog[];
+  activeMonth: string | null;
+  onSelectMonth: (month: string) => void;
+}) {
   const { t, locale } = useT();
-  const router = useRouter();
 
-  const archives = Array.from(new Set(dummyBlogs.map((b) => b.datetime.slice(0, 7))))
+  const archives = Array.from(new Set(posts.map((b) => b.datetime.slice(0, 7))))
     .sort()
     .reverse();
 
@@ -21,8 +31,12 @@ export function ArchiveSection() {
           <button
             key={month}
             type="button"
-            onClick={() => router.push(`/search?date=${month}`)}
-            className="cursor-pointer! bg-transparent! text-left! text-sm! text-primary! hover:underline!"
+            onClick={() => onSelectMonth(month)}
+            className={
+              activeMonth === month
+                ? "cursor-pointer! bg-transparent! text-left! text-sm! font-semibold! text-primary!"
+                : "cursor-pointer! bg-transparent! text-left! text-sm! text-primary! hover:underline!"
+            }
           >
             {formatDate(`${month}-01`, locale)}
           </button>

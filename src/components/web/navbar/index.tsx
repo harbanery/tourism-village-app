@@ -16,9 +16,8 @@ import { NotificationBell } from "@/components/web/NotificationBell";
 
 const links = [
   { href: "/article", key: "nav.articles" },
-  { href: "/booking", key: "nav.booking" },
-  { href: "/gallery", key: "nav.gallery" },
-  { href: "/vlog", key: "nav.vlog" },
+  { href: "/tourism", key: "nav.tourism" },
+  { href: "/documentation", key: "nav.documentation" },
 ];
 
 /**

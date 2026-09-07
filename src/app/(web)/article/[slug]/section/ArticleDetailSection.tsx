@@ -4,10 +4,20 @@ import { useRouter } from "next/navigation";
 import { Button, Card, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
-import type { BlogPost } from "@/models";
 import { formatDate } from "@/utils/format";
 
-export function BlogDetailSection({ post }: { post: BlogPost | null }) {
+/** Detail blog aktif (dari DB, dipetakan di server page). */
+export interface WebBlogDetail {
+  title: string;
+  filename: string;
+  /** Gabungan paragraf rich text (pembuka + isi). */
+  para: string;
+  datetime: string;
+  datetimeAfter: string | null;
+  adminName: string | null;
+}
+
+export function ArticleDetailSection({ post }: { post: WebBlogDetail | null }) {
   const { t, locale } = useT();
   const router = useRouter();
 
@@ -25,9 +35,17 @@ export function BlogDetailSection({ post }: { post: BlogPost | null }) {
           cover={
             post.filename ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img alt={post.title} src={post.filename} className="max-h-96 w-full object-cover" />
+              <img
+                alt={post.title}
+                src={post.filename}
+                className="max-h-96 w-full object-cover"
+              />
             ) : (
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} className="grid! max-h-96! min-h-48! place-items-center!" />
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={false}
+                className="grid! max-h-96! min-h-48! place-items-center!"
+              />
             )
           }
         >
@@ -38,11 +56,17 @@ export function BlogDetailSection({ post }: { post: BlogPost | null }) {
               author: post.adminName ?? "-",
             })}
             {post.datetimeAfter
-              ? ` · ${t("admin.blog.dateChanged")}: ${formatDate(post.datetimeAfter, locale, true)}`
+              ? ` · ${t("admin.blog.dateChanged")}: ${formatDate(
+                  post.datetimeAfter,
+                  locale,
+                  true,
+                )}`
               : ""}
           </p>
-          <div className="mt-6 space-y-4 leading-relaxed" dangerouslySetInnerHTML={{ __html: post.paraHeader }} />
-          <div className="mt-4 space-y-4 leading-relaxed" dangerouslySetInnerHTML={{ __html: post.paraBody }} />
+          <div
+            className="mt-6 space-y-4 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: post.para }}
+          />
         </Card>
       ) : (
         <Card>

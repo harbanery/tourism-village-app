@@ -13,7 +13,7 @@ interface WebPackage {
   price: number;
 }
 
-export function BookingPackageSection() {
+export function TourismPackageSection() {
   const { t } = useT();
   const [packages, setPackages] = useState<WebPackage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,8 +36,8 @@ export function BookingPackageSection() {
 
   return (
     <div>
-      <h1 className="text-2xl md:text-3xl font-bold">{t("booking.title")}</h1>
-      <p className="mt-1 text-foreground/60">{t("booking.subtitle")}</p>
+      <h1 className="text-2xl md:text-3xl font-bold">{t("tourism.title")}</h1>
+      <p className="mt-1 text-foreground/60">{t("tourism.subtitle")}</p>
       <div className="mt-6 space-y-6">
         {loading ? (
           [1, 2].map((key) => <Card key={key} loading />)
@@ -58,7 +58,7 @@ export function BookingPackageSection() {
                 ))}
               </ol>
               <p className="mt-4 font-semibold text-primary">
-                {t("booking.pricePerPerson", {
+                {t("tourism.pricePerPerson", {
                   price: pkg.price.toLocaleString("id-ID"),
                 })}
               </p>

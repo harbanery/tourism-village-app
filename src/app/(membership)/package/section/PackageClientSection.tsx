@@ -7,6 +7,7 @@ import { FireOutlined, SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { readCart, writeCart } from "@/helpers/cart";
+import { issueCheckoutAccess } from "@/helpers/checkoutAccess";
 import {
   PackageCard,
   PackageListSection,
@@ -189,6 +190,9 @@ export default function PackageClientSection() {
         quantity: item.quantity,
       })),
     );
+    // Tiket sekali masuk halaman checkout — halaman /checkout hanya boleh
+    // diakses lewat tombol ini (refresh/URL langsung dialihkan ke paket).
+    issueCheckoutAccess();
     router.push("/checkout");
   };
 
