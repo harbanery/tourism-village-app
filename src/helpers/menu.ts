@@ -38,7 +38,7 @@ export const menuAdminConfig: AdminMenuItem[] = [
   {
     key: "tourism",
     link: "/admin/tourism",
-    icon: "BankOutlined",
+    icon: "ShopOutlined",
     roles: ["MASTER", "VIEWER"],
   },
   {
