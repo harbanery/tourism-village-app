@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { deleteCloudinaryUrls } from "@/server/cloudinary";
 import { NextResponse } from "next/server";
 
@@ -43,6 +44,7 @@ export async function PUT(request: Request, { params }: Params) {
       await deleteCloudinaryUrls([existing.photo]);
     }
 
+    revalidatePublicCache(["places"]);
     return NextResponse.json({ success: true, data: place });
   } catch (error) {
     console.error("Error updating place:", error);
@@ -87,6 +89,7 @@ export async function PATCH(request: Request, { params }: Params) {
       });
     }
 
+    revalidatePublicCache(["places", "packages"]);
     return NextResponse.json({ success: true, data: place });
   } catch (error) {
     console.error("Error toggling place status:", error);
@@ -115,6 +118,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     if (place?.photo) {
       await deleteCloudinaryUrls([place.photo]);
     }
+    revalidatePublicCache(["places", "packages"]);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting place:", error);

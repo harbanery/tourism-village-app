@@ -11,16 +11,16 @@ export default function HomePage() {
   return (
     <div className="relative">
       {/*
-        Background parallax + crossfade hero-a/hero-b: fixed di viewport
-        sehingga "bergerak" mengikuti scroll dan tetap terlihat di belakang
-        section transparan. Section berlatar solid menutupinya.
+        Background dua lapis: hero (a/b crossfade, statis) di puncak
+        halaman; layer scroll (c/d/e crossfade, parallax) mengambil
+        alih setelah hero terlewati — terlihat di section transparan.
       */}
       <HeroBackground />
       <HeroSection />
       <PopularSection />
       <FeatureSection />
-      <PackagesSection />
       <TestimonialsSection />
+      <PackagesSection />
       <SponsorsSection />
       <DocumentationSection />
     </div>

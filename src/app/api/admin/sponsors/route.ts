@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { NextResponse } from "next/server";
 
 /** GET /api/admin/sponsors — semua sponsor. */
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
         status: "NONACTIVE",
       },
     });
+    revalidatePublicCache(["sponsors"]);
     return NextResponse.json(
       { success: true, data: sponsor },
       { status: 201 },

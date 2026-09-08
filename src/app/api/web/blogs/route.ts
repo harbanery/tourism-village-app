@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import prisma from "@/server/db";
 
 /**
- * GET /api/web/blogs — daftar blog aktif untuk halaman artikel web.
- * Hanya status ACTIVE yang tampil; urut terbaru dulu.
+ * Daftar blog aktif untuk halaman artikel web — dibungkus unstable_cache
+ * (rekomendasi 1.2: caching data public). Tag "blogs" di-invalidate dari
+ * panel admin saat blog dibuat/diubah/di-nonaktifkan.
  */
-export async function GET() {
-  try {
+const getCachedBlogs = unstable_cache(
+  async () => {
     const blogs = await prisma.blog.findMany({
       where: { status: "ACTIVE" },
       orderBy: { datetime: "desc" },
@@ -22,10 +24,19 @@ export async function GET() {
       },
     });
     // Ratakan relasi admin → adminName (bentuk data yang dipakai web).
-    const data = blogs.map(({ admin, ...blog }) => ({
+    return blogs.map(({ admin, ...blog }) => ({
       ...blog,
       adminName: admin?.name ?? null,
     }));
+  },
+  ["web-active-blogs"],
+  { tags: ["blogs"], revalidate: 60 },
+);
+
+/** GET /api/web/blogs — daftar blog aktif untuk halaman artikel web. */
+export async function GET() {
+  try {
+    const data = await getCachedBlogs();
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Error fetching blogs:", error);

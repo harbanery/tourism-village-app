@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { NextResponse } from "next/server";
 
 /** GET /api/admin/packages — semua paket wisata + tempat + hitungan beli. */
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
         status: "NONACTIVE",
       },
     });
+    revalidatePublicCache(["packages", "places"]);
     return NextResponse.json({ success: true, data: pkg }, { status: 201 });
   } catch (error) {
     console.error("Error creating package:", error);

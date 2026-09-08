@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/server/db";
 import { getCurrentUser } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { onReviewPending } from "@/server/orderEvents";
 
 /** Jeda minimal antar ulasan per user (24 jam). */
@@ -94,6 +95,8 @@ export async function POST(request: Request) {
       status: "ACTIVE",
     },
   });
+  // Ulasan langsung tampil publik (ACTIVE) → segarkan cache ulasan web.
+  revalidatePublicCache(["testimonials"]);
 
   // Notifikasi admin: ulasan baru menunggu moderasi (best-effort).
   void onReviewPending(user.name, rating);

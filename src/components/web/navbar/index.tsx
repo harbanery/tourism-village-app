@@ -1,18 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar, Button, Drawer, Dropdown } from "antd";
 import {
+  HistoryOutlined,
   LoginOutlined,
   LogoutOutlined,
   MenuOutlined,
+  SettingOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/locale/LanguageToggle";
 import { NotificationBell } from "@/components/web/NotificationBell";
+import { clearWebSession, useWebSession } from "@/components/web/session";
 
 const links = [
   { href: "/article", key: "nav.articles" },
@@ -62,7 +65,8 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<SessionUser | null>(null);
+  /** Sesi user — store bersama dengan dedup (tidak refetch per halaman). */
+  const { user } = useWebSession();
 
   /** Navbar disembunyikan oleh scroll ke bawah (pola portfolio). */
   const [shouldShow, setShouldShow] = useState(true);
@@ -73,20 +77,6 @@ export function Navbar() {
   const isHome = pathname === "/";
   /** Mode hero: hanya di paling atas home — transparan, tanpa blur, teks putih. */
   const onHero = isHome && !scrolled;
-
-  const fetchSession = useCallback(async () => {
-    try {
-      const res = await fetch("/api/web/auth/session");
-      const result = await res.json();
-      setUser(result.success ? result.data : null);
-    } catch {
-      setUser(null);
-    }
-  }, []);
-
-  useEffect(() => {
-    void Promise.resolve().then(fetchSession);
-  }, [fetchSession]);
 
   /**
    * Perilaku scroll (pola navbar portfolio + tampil saat berhenti):
@@ -133,7 +123,7 @@ export function Navbar() {
 
   const handleLogout = async () => {
     await fetch("/api/web/auth/logout", { method: "POST" });
-    setUser(null);
+    clearWebSession();
     router.push("/");
     router.refresh();
   };
@@ -207,11 +197,18 @@ export function Navbar() {
               menu={{
                 items: [
                   {
-                    key: "profile",
-                    icon: <UserOutlined />,
-                    label: t("nav.profile"),
-                    onClick: () => router.push("/profile"),
+                    key: "history",
+                    icon: <HistoryOutlined />,
+                    label: t("profile.orderHistory"),
+                    onClick: () => router.push("/profile?view=history"),
                   },
+                  {
+                    key: "settings",
+                    icon: <SettingOutlined />,
+                    label: t("settings.title"),
+                    onClick: () => router.push("/profile?view=settings"),
+                  },
+                  { type: "divider" },
                   {
                     key: "logout",
                     icon: <LogoutOutlined />,
@@ -272,10 +269,23 @@ export function Navbar() {
             <>
               <button
                 type="button"
-                onClick={() => goTo("/profile")}
-                className={navLinkClass(pathname.startsWith("/profile"), true)}
+                onClick={() => goTo("/profile?view=history")}
+                className={navLinkClass(
+                  pathname.startsWith("/profile") && !open,
+                  true,
+                )}
               >
-                {t("nav.profile")}
+                {t("profile.orderHistory")}
+              </button>
+              <button
+                type="button"
+                onClick={() => goTo("/profile?view=settings")}
+                className={navLinkClass(
+                  pathname.startsWith("/profile") && !open,
+                  true,
+                )}
+              >
+                {t("settings.title")}
               </button>
               <Button
                 className="mt-2 justify-start! px-1!"
@@ -300,10 +310,4 @@ export function Navbar() {
       </Drawer>
     </header>
   );
-}
-
-interface SessionUser {
-  id: string;
-  name: string;
-  email: string;
 }

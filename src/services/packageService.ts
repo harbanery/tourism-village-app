@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import prisma from "@/server/db";
 
 /**
@@ -21,28 +22,45 @@ export interface ActivePackage {
 }
 
 /**
+ * Bagian public (tanpa user): paket aktif + hitungan pembelian PAID
+ * global — dibungkus unstable_cache (rekomendasi 1.2). Tag "packages"
+ * di-invalidate dari panel admin; tag "orders" saat pembayaran lunas.
+ */
+const getCachedActivePackages = unstable_cache(
+  async () => {
+    const [packages, purchaseCounts] = await Promise.all([
+      prisma.package.findMany({
+        where: { status: "ACTIVE" },
+        orderBy: { id: "asc" },
+        include: { place: { select: { id: true, name: true, status: true } } },
+      }),
+      prisma.orderItem.groupBy({
+        by: ["packageId"],
+        where: { order: { paymentStatus: "PAID" } },
+        _sum: { quantity: true },
+      }),
+    ]);
+    return { packages, purchaseCounts };
+  },
+  ["web-active-packages"],
+  { tags: ["packages", "orders"], revalidate: 60 },
+);
+
+/**
  * Paket aktif untuk pengunjung web: hanya paket ACTIVE yang tempatnya
  * juga ACTIVE (atau tanpa tempat) yang ditampilkan, sehingga selalu
  * sesuai data admin. `timesPurchased` dihitung dari order item berstatus
  * PAID (transaksi nyata, bukan sekadar draft PENDING) — dipakai untuk
  * tag "Populer" global. `userTimesPurchased` (bila user login) membatasi
  * hitungan ke order milik user itu sendiri untuk section "sering dibeli"
- * personal (user tanpa riwayat → section tidak tampil).
+ * personal (user tanpa riwayat → section tidak tampil) — query kecil
+ * ini tetap dinamis (tidak di-cache) karena per-user.
  */
 export async function getActivePackages(
   userId?: string | null,
 ): Promise<ActivePackage[]> {
-  const [packages, purchaseCounts, userPurchaseCounts] = await Promise.all([
-    prisma.package.findMany({
-      where: { status: "ACTIVE" },
-      orderBy: { id: "asc" },
-      include: { place: { select: { id: true, name: true, status: true } } },
-    }),
-    prisma.orderItem.groupBy({
-      by: ["packageId"],
-      where: { order: { paymentStatus: "PAID" } },
-      _sum: { quantity: true },
-    }),
+  const [{ packages, purchaseCounts }, userPurchaseCounts] = await Promise.all([
+    getCachedActivePackages(),
     userId
       ? prisma.orderItem.groupBy({
           by: ["packageId"],
@@ -72,3 +90,4 @@ export async function getActivePackages(
       userTimesPurchased: userCountByPackage.get(pkg.id) ?? 0,
     }));
 }
+

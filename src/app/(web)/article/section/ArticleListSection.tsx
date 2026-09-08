@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Empty, Input, Select, Skeleton } from "antd";
+import { Button, Card, Empty, Input, Select, Skeleton, Spin } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate } from "@/utils/format";
@@ -23,6 +23,9 @@ export interface WebBlog {
 /** Mode urutan daftar artikel. */
 type SortKey = "newest" | "oldest";
 
+/** Ukuran halaman infinite scroll (pola riwayat belanja profile). */
+const PAGE_SIZE = 3;
+
 /**
  * Halaman artikel: daftar blog aktif dari DB + pencarian, urutan, dan
  * arsip bulan (kolom kanan) — pola toolbar riwayat belanja profile.
@@ -38,6 +41,10 @@ export function ArticleListSection() {
   const [month, setMonth] = useState<string | null>(null);
   /** Urutan daftar (default terbaru duluan). */
   const [sortKey, setSortKey] = useState<SortKey>("newest");
+  /** Jumlah artikel yang ditampilkan (infinite scroll, +3 per halaman). */
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  /** Sentinel infinite scroll — diamati IntersectionObserver. */
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -70,6 +77,37 @@ export function ArticleListSection() {
         : a.datetime.localeCompare(b.datetime),
     );
   }, [posts, keyword, month, sortKey]);
+
+  /** Filter/urutan berubah → tampilkan ulang dari halaman pertama
+   *  (penyesuaian state saat render — pola resmi React, tanpa effect). */
+  const filterKey = `${keyword.trim()}|${month ?? ""}|${sortKey}`;
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+  if (filterKey !== lastFilterKey) {
+    setLastFilterKey(filterKey);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const hasMore = filtered.length > visibleCount;
+
+  // Infinite scroll: sentinel mendekati viewport → muat halaman berikutnya.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisibleCount((count) => count + PAGE_SIZE);
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore]);
+
+  /** Artikel yang ditampilkan sesuai halaman infinite scroll saat ini. */
+  const visiblePosts = filtered.slice(0, visibleCount);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 lg:grid-cols-[1fr_300px]">
@@ -107,7 +145,7 @@ export function ArticleListSection() {
                 <Skeleton active paragraph={{ rows: 3 }} />
               </Card>
             ))
-          ) : filtered.length === 0 ? (
+          ) : visiblePosts.length === 0 ? (
             <Card>
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -116,7 +154,7 @@ export function ArticleListSection() {
               />
             </Card>
           ) : (
-            filtered.map((post) => (
+            visiblePosts.map((post) => (
               <Card
                 key={post.id}
                 cover={
@@ -158,6 +196,14 @@ export function ArticleListSection() {
             ))
           )}
         </div>
+
+        {/* Sentinel infinite scroll — diamati IntersectionObserver; hanya
+            aktif saat masih ada artikel berikutnya. */}
+        {!loading && hasMore && (
+          <div ref={sentinelRef} className="py-4 text-center">
+            <Spin />
+          </div>
+        )}
       </div>
 
       <aside className="flex flex-col gap-6">

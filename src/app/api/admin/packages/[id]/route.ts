@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { NextResponse } from "next/server";
 
 type Params = { params: Promise<{ id: string }> };
@@ -25,6 +26,7 @@ export async function PUT(request: Request, { params }: Params) {
         price: Number(body.price) || 0,
       },
     });
+    revalidatePublicCache(["packages", "places"]);
     return NextResponse.json({ success: true, data: pkg });
   } catch (error) {
     console.error("Error updating package:", error);
@@ -72,6 +74,7 @@ export async function PATCH(request: Request, { params }: Params) {
       where: { id },
       data: { status: nextStatus },
     });
+    revalidatePublicCache(["packages", "places"]);
     return NextResponse.json({ success: true, data: pkg });
   } catch (error) {
     console.error("Error toggling package status:", error);
@@ -94,6 +97,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
     await prisma.package.delete({ where: { id } });
+    revalidatePublicCache(["packages", "places"]);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting package:", error);

@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWriteBlog } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { blogSlugBase, uniqueBlogSlug } from "@/server/blogSlug";
 import { NextResponse } from "next/server";
 
@@ -62,6 +63,7 @@ export async function POST(request: Request) {
         place: { select: { id: true, name: true } },
       },
     });
+    revalidatePublicCache(["blogs"]);
     return NextResponse.json({ success: true, data: blog }, { status: 201 });
   } catch (error) {
     console.error("Error creating blog:", error);

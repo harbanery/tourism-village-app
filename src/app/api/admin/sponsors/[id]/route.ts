@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { deleteCloudinaryUrls } from "@/server/cloudinary";
 import { NextResponse } from "next/server";
 
@@ -42,6 +43,7 @@ export async function PUT(request: Request, { params }: Params) {
       await deleteCloudinaryUrls([existing.filename]);
     }
 
+    revalidatePublicCache(["sponsors"]);
     return NextResponse.json({ success: true, data: sponsor });
   } catch (error) {
     console.error("Error updating sponsor:", error);
@@ -68,6 +70,7 @@ export async function PATCH(request: Request, { params }: Params) {
       where: { id },
       data: { status: body.status },
     });
+    revalidatePublicCache(["sponsors"]);
     return NextResponse.json({ success: true, data: sponsor });
   } catch (error) {
     console.error("Error toggling sponsor status:", error);
@@ -96,6 +99,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     if (sponsor?.filename) {
       await deleteCloudinaryUrls([sponsor.filename]);
     }
+    revalidatePublicCache(["sponsors"]);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting sponsor:", error);

@@ -110,7 +110,7 @@ export function PopularSection() {
                 <PlaceCard
                   key={place.id}
                   place={place}
-                  onClick={() => router.push("/tourism")}
+                  onClick={() => router.push(`/tourism#place-${place.id}`)}
                 />
               ))}
         </div>

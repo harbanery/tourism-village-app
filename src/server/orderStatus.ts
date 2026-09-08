@@ -1,4 +1,5 @@
 import prisma from "@/server/db";
+import { revalidatePublicCache } from "@/server/cache";
 import type { PaymentStatus } from "@prisma/client";
 import { onOrderCanceled, onOrderPaid } from "@/server/orderEvents";
 
@@ -52,8 +53,12 @@ export async function applyPaymentTransition({
     console.error("Error writing order log:", error);
   }
 
-  if (to === "PAID") void onOrderPaid(orderId);
-  else if (to === "FAILED" || to === "CANCELED") {
+  if (to === "PAID") {
+    // Pembayaran lunas mengubah statistik populer (paket & tempat) —
+    // segarkan cache data public yang memuat hitungan pembelian.
+    revalidatePublicCache(["orders"]);
+    void onOrderPaid(orderId);
+  } else if (to === "FAILED" || to === "CANCELED") {
     void onOrderCanceled(orderId);
   }
   return true;

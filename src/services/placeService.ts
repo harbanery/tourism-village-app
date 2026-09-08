@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import prisma from "@/server/db";
 
 /**
@@ -26,6 +27,56 @@ export interface PlaceWithPackages {
 }
 
 /**
+ * Query tempat wisata aktif + paket aktifnya + hitungan pembelian PAID
+ * per paket — dibungkus unstable_cache (rekomendasi 1.2: caching data
+ * public). Tag "places"/"packages" di-invalidate dari panel admin saat
+ * data berubah; tag "orders" saat pembayaran lunas (populer berubah).
+ */
+const getCachedPlaces = unstable_cache(
+  async () => {
+    const [places, purchaseCounts] = await Promise.all([
+      prisma.place.findMany({
+        where: { status: "ACTIVE" },
+        orderBy: { id: "asc" },
+        include: {
+          packages: {
+            where: { status: "ACTIVE" },
+            orderBy: { id: "asc" },
+            select: { id: true, name: true, facilities: true, price: true },
+          },
+        },
+      }),
+      prisma.orderItem.groupBy({
+        by: ["packageId"],
+        where: {
+          order: { paymentStatus: "PAID" },
+          package: { status: "ACTIVE" },
+        },
+        _sum: { quantity: true },
+      }),
+    ]);
+
+    const countByPackage = new Map(
+      purchaseCounts.map((row) => [row.packageId, row._sum.quantity ?? 0]),
+    );
+
+    return places.map((place) => ({
+      id: place.id,
+      name: place.name,
+      description: place.description,
+      photo: place.photo,
+      totalPurchased: place.packages.reduce(
+        (sum, pkg) => sum + (countByPackage.get(pkg.id) ?? 0),
+        0,
+      ),
+      packages: place.packages,
+    }));
+  },
+  ["web-places-with-packages"],
+  { tags: ["places", "packages", "orders"], revalidate: 60 },
+);
+
+/**
  * Tempat wisata aktif beserta paket aktifnya (hanya paket pada tempat
  * ACTIVE yang ikut). `totalPurchased` = jumlah kuantitas terjual (order
  * PAID) dari semua paket tempat ini — dasar urutan "wisata populer" di
@@ -33,41 +84,6 @@ export interface PlaceWithPackages {
  * populer bila punya paket yang pernah dibayar).
  */
 export async function getPlacesWithPackages(): Promise<PlaceWithPackages[]> {
-  const [places, purchaseCounts] = await Promise.all([
-    prisma.place.findMany({
-      where: { status: "ACTIVE" },
-      orderBy: { id: "asc" },
-      include: {
-        packages: {
-          where: { status: "ACTIVE" },
-          orderBy: { id: "asc" },
-          select: { id: true, name: true, facilities: true, price: true },
-        },
-      },
-    }),
-    prisma.orderItem.groupBy({
-      by: ["packageId"],
-      where: {
-        order: { paymentStatus: "PAID" },
-        package: { status: "ACTIVE" },
-      },
-      _sum: { quantity: true },
-    }),
-  ]);
-
-  const countByPackage = new Map(
-    purchaseCounts.map((row) => [row.packageId, row._sum.quantity ?? 0]),
-  );
-
-  return places.map((place) => ({
-    id: place.id,
-    name: place.name,
-    description: place.description,
-    photo: place.photo,
-    totalPurchased: place.packages.reduce(
-      (sum, pkg) => sum + (countByPackage.get(pkg.id) ?? 0),
-      0,
-    ),
-    packages: place.packages,
-  }));
+  return getCachedPlaces();
 }
+

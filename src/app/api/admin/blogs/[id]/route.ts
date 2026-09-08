@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWriteBlog } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { deleteCloudinaryUrls } from "@/server/cloudinary";
 import { blogSlugBase, uniqueBlogSlug } from "@/server/blogSlug";
 import { NextResponse } from "next/server";
@@ -72,6 +73,7 @@ export async function PUT(request: Request, { params }: Params) {
       await deleteCloudinaryUrls([existing.filename]);
     }
 
+    revalidatePublicCache(["blogs"]);
     return NextResponse.json({ success: true, data: blog });
   } catch (error) {
     console.error("Error updating blog:", error);
@@ -111,6 +113,7 @@ export async function PATCH(request: Request, { params }: Params) {
       where: { id },
       data: { status: body.status },
     });
+    revalidatePublicCache(["blogs"]);
     return NextResponse.json({ success: true, data: blog });
   } catch (error) {
     console.error("Error toggling blog status:", error);
@@ -152,6 +155,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     if (blog.filename) {
       await deleteCloudinaryUrls([blog.filename]);
     }
+    revalidatePublicCache(["blogs"]);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting blog:", error);

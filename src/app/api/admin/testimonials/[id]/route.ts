@@ -1,5 +1,6 @@
 import prisma from "@/server/db";
 import { requireAdmin, adminCanWrite } from "@/server/auth";
+import { revalidatePublicCache } from "@/server/cache";
 import { MAX_FEATURED_TESTIMONIALS } from "@/config/variables";
 import { NextResponse } from "next/server";
 
@@ -49,6 +50,7 @@ export async function PATCH(request: Request, { params }: Params) {
         ...(body.status === "NONACTIVE" && { featured: false }),
       },
     });
+    revalidatePublicCache(["testimonials"]);
     return NextResponse.json({ success: true, data: testimonial });
   } catch (error) {
     console.error("Error updating testimonial:", error);
@@ -71,6 +73,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
     await prisma.testimonial.delete({ where: { id } });
+    revalidatePublicCache(["testimonials"]);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting testimonial:", error);

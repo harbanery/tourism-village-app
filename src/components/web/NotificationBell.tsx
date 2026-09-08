@@ -67,10 +67,23 @@ export function NotificationBell({
 
   useEffect(() => {
     void Promise.resolve().then(fetchNotifications);
+    // Polling hanya saat tab terlihat — tab di background tidak menjalankan
+    // request periodik (rekomendasi 1.3); kembali terlihat → langsung segar.
     const interval = setInterval(() => {
-      void Promise.resolve().then(fetchNotifications);
+      if (document.visibilityState === "visible") {
+        void Promise.resolve().then(fetchNotifications);
+      }
     }, 60_000);
-    return () => clearInterval(interval);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void Promise.resolve().then(fetchNotifications);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [fetchNotifications]);
 
   /** Tandai satu notifikasi dibaca lalu buka link-nya (bila ada). */
