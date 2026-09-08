@@ -19,13 +19,13 @@ export function DocumentationClientSection() {
       <p className="mt-1 text-foreground/60">{t("documentation.subtitle")}</p>
       <Card className="mt-6!">
         <Empty
-          image={<VideoCameraOutlined className="text-5xl! text-foreground/30!" />}
-          description={
-            <span className="font-medium">{t("documentation.comingSoon")}</span>
+          image={
+            <VideoCameraOutlined className="text-5xl! text-foreground/30!" />
           }
-          className="py-16!"
+          description={null}
+          className="py-8!"
         >
-          <p className="max-w-md text-sm text-foreground/60">
+          <p className="text-sm text-foreground/30">
             {t("documentation.comingSoonNote")}
           </p>
         </Empty>

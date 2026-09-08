@@ -56,10 +56,7 @@ export function ArticleListSection() {
       const matchMonth = !month || post.datetime.slice(0, 7) === month;
       const matchKeyword =
         !q ||
-        [post.title, post.adminName ?? ""]
-          .join(" ")
-          .toLowerCase()
-          .includes(q);
+        [post.title, post.adminName ?? ""].join(" ").toLowerCase().includes(q);
       return matchMonth && matchKeyword;
     });
   }, [posts, keyword, month]);
@@ -67,9 +64,11 @@ export function ArticleListSection() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 lg:grid-cols-[1fr_300px]">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">{t("articles.title")}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">
+          {t("articles.title")}
+        </h1>
         <p className="mt-1 text-foreground/60">{t("articles.subtitle")}</p>
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 flex flex-col gap-6">
           {loading ? (
             [1, 2].map((key) => (
               <Card key={key}>
@@ -130,7 +129,7 @@ export function ArticleListSection() {
         </div>
       </div>
 
-      <aside className="space-y-6">
+      <aside className="flex flex-col gap-6">
         <Card title={t("common.search")}>
           <Input.Search
             allowClear
