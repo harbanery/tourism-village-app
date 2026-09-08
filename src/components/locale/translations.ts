@@ -107,6 +107,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.readMore": "Baca Selengkapnya",
     "common.backToHome": "Kembali ke Beranda",
     "common.back": "Kembali",
+    "common.backToTop": "Kembali ke Atas",
     "common.dummyDataNote": "Data yang ditampilkan masih dummy (slicing)",
 
     "nav.home": "Beranda",
@@ -129,7 +130,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.hero.cta": "Lihat Paket Wisata",
     "home.popular.title": "Wisata Populer",
     "home.popular.subtitle": "Tempat wisata favorit di desa kami",
-    "home.why.title": "Mengapa DesakuWisataku?",
+    "home.why.titlePrefix": "Mengapa",
     "home.why.subtitle": "Keunggulan yang kami tawarkan untuk wisatawan",
     "home.why.facility.title": "Fasilitas No. 1",
     "home.why.facility.desc":
@@ -143,6 +144,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.packages.title": "Paket Wisata",
     "home.packages.subtitle": "Pilihan paket wisata dengan harga terjangkau",
     "home.packages.cta": "Pesan Sekarang",
+    "home.packages.viewMore": "Lihat Lainnya",
     "home.testimonials.title": "Komentar Pengunjung",
     "home.testimonials.subtitle": "Apa kata mereka tentang desa kami",
     "home.testimonials.empty": "Belum ada ulasan pengunjung",
@@ -157,6 +159,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "articles.archives": "Arsip",
     "articles.searchPlaceholder": "Cari artikel...",
     "articles.notFound": "Artikel tidak ditemukan",
+    "articles.filterAuthor": "Penulis",
+    "articles.sort.newest": "Terbaru",
+    "articles.sort.oldest": "Terlama",
 
     "documentation.title": "Dokumentasi",
     "documentation.subtitle": "Dokumentasi foto dan video wisata desa",
@@ -165,11 +170,11 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Dokumentasi foto dan video wisata desa sedang disiapkan — nantikan segera!",
 
     "tourism.title": "Wisata",
-    "tourism.subtitle": "Paket wisata desa",
+    "tourism.subtitle": "Tempat wisata dan paketnya di desa kami",
     "tourism.pricePerPerson": "Harga Rp {price}/orang",
-    "tourism.note":
-      "Reservation hanya melalui kontak di bawah. Pembayaran bisa langsung ketempat atau via PayPal.",
-    "tourism.payment": "Pembayaran",
+    "tourism.noPlaces": "Belum ada tempat wisata",
+    "tourism.noDescription": "Deskripsi tempat ini belum tersedia.",
+    "tourism.packageCountInline": "{n} paket",
 
     "cart.title": "Keranjang Paket",
     "cart.package": "Paket",
@@ -430,7 +435,61 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.hours": "Jam Buka",
     "footer.hoursValue": "Setiap Hari, 08.00 - 17.00 WIB",
     "footer.contact": "Narahubung",
+    "footer.links": "Tautan",
+    "footer.about": "Tentang Kami",
+    "footer.privacy": "Kebijakan Privasi",
+    "footer.terms": "Syarat & Ketentuan",
     "footer.copyright": "© 2026 DesakuWisataku. All rights reserved.",
+
+    "about.title": "Tentang Kami",
+    "about.subtitle": "Wisata desa oleh warga, untuk warga",
+    "about.p1":
+      "DesakuWisataku adalah platform wisata Desa Sukamaju — destinasi dengan keindahan alam dan budaya yang memukau di Kecamatan Melati, Kabupaten Sinarwangi, Jawa Barat. Kami menghadirkan cara mudah menemukan dan memesan paket wisata desa secara online.",
+    "about.p2":
+      "Semua paket disusun dan dikelola bersama warga desa: pemandu lokal yang paham medan, penginapan (homestay) milik warga, serta fasilitas yang dirawat langsung oleh masyarakat. Setiap pemesanan berdampak langsung pada perekonomian desa.",
+    "about.p3":
+      "Misi kami mengembangkan wisata berbasis masyarakat (community-based tourism) yang berkelanjutan — menjaga alam dan budaya, sekaligus membuka lapangan bagi warga.",
+    "about.values": "Nilai yang Kami Tawarkan",
+
+    "privacy.title": "Kebijakan Privasi",
+    "privacy.updated": "Terakhir diperbarui: 8 September 2026",
+    "privacy.s1.title": "Data yang Kami Kumpulkan",
+    "privacy.s1.body":
+      "Saat membuat akun, kami mengumpulkan nama, email, nomor telepon, dan data profil yang Anda isi (jenis kelamin, tanggal lahir, alamat). Saat memesan paket, kami menyimpan detail pesanan, jadwal kunjungan, dan status pembayaran. Kami juga mengumpulkan data teknis terbatas (alamat IP, jenis perangkat) untuk keamanan layanan.",
+    "privacy.s2.title": "Penggunaan Data",
+    "privacy.s2.body":
+      "Data digunakan untuk memproses pemesanan dan pembayaran, mengirim konfirmasi serta pengingat jadwal, memberikan notifikasi status pesanan, dan meningkatkan kualitas layanan. Kami tidak menjual data pribadi Anda kepada pihak ketiga.",
+    "privacy.s3.title": "Cookie & Analitik",
+    "privacy.s3.body":
+      "Kami menggunakan cookie untuk menjaga sesi login, preferensi bahasa dan tema, serta analitik kunjungan situs secara agregat. Anda dapat menonaktifkan cookie melalui pengaturan browser; beberapa fitur (mis. login) mungkin tidak berfungsi optimal tanpa cookie.",
+    "privacy.s4.title": "Berbagi Data dengan Penyedia Layanan",
+    "privacy.s4.body":
+      "Untuk operasional layanan, data dibagikan secara terbatas kepada penyedia: Midtrans (pemrosesan pembayaran QRIS), Cloudinary (penyimpanan media), dan penyedia email untuk pengiriman notifikasi transaksional. Pembagian hanya sebatas yang diperlukan dan berdasarkan perjanjian perlindungan data.",
+    "privacy.s5.title": "Keamanan & Penyimpanan Data",
+    "privacy.s5.body":
+      "Kami menerapkan langkah teknis yang wajar untuk melindungi data: kata sandi disimpan terenkripsi, sesi login dilindungi, dan akses data dibatasi. Data pesanan disimpan selama diperlukan untuk layanan dan kewajiban pencatatan.",
+    "privacy.s6.title": "Hak Anda (UU PDP)",
+    "privacy.s6.body":
+      "Sesuai Undang-Undang Perlindungan Data Pribadi, Anda berhak mengakses, memperbaiki, dan meminta penghapusan data pribadi Anda, serta menarik persetujuan pemrosesan. Hubungi halo@desakuwisataku.id untuk permintaan terkait data pribadi.",
+
+    "terms.title": "Syarat & Ketentuan",
+    "terms.intro":
+      "Dengan mengakses dan menggunakan situs DesakuWisataku, Anda menyetujui syarat dan ketentuan berikut. Mohon dibaca dengan saksama.",
+    "terms.s1.title": "Penggunaan Situs",
+    "terms.s1.body":
+      "Situs ini disediakan untuk informasi dan pemesanan paket wisata desa. Anda setuju menggunakan situs sesuai hukum yang berlaku, tidak melakukan penyalahgunaan (mis. upaya mengganggu layanan, pengambilan data secara otomatis tanpa izin), dan memberikan informasi yang benar saat menggunakan layanan.",
+    "terms.s2.title": "Akun Pengguna",
+    "terms.s2.body":
+      "Anda bertanggung jawab menjaga kerahasiaan kata sandi akun dan seluruh aktivitas yang terjadi pada akun Anda. Beri tahu kami segera bila Anda menduga ada penggunaan tanpa izin. Kami berhak menonaktifkan akun yang melanggar ketentuan.",
+    "terms.s3.title": "Pemesanan & Pembayaran",
+    "terms.s3.body":
+      "Pemesanan paket mengikuti jadwal dan ketersediaan yang ditetapkan pengelola. Pembayaran dilakukan melalui QRIS dengan batas waktu yang tertera pada halaman pembayaran; pesanan yang melewati batas waktu dibatalkan otomatis. Harga yang berlaku adalah harga pada saat pesanan dibuat.",
+    "terms.s4.title": "Pembatalan & Perubahan",
+    "terms.s4.body":
+      "Pembatalan atau perubahan jadwal dapat diajukan melalui narahubung kami. Pengelola berhak menunda atau membatalkan kegiatan wisata karena faktor keamanan atau cuaca, dengan opsi penjadwalan ulang atau pengembalian dana sesuai kebijakan desa.",
+    "terms.s5.title": "Perubahan Syarat",
+    "terms.s5.body":
+      "Kami dapat memperbarui syarat dan ketentuan ini dari waktu ke waktu. Versi terbaru selalu tersedia di halaman ini. Pertanyaan lebih lanjut dapat disampaikan ke halo@desakuwisataku.id.",
 
     "admin.title": "Panel Admin",
     "admin.dashboard": "Dashboard",
@@ -657,6 +716,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.readMore": "Read More",
     "common.backToHome": "Back to Home",
     "common.back": "Back",
+    "common.backToTop": "Back to Top",
     "common.dummyDataNote": "Displayed data is still dummy (slicing)",
 
     "nav.home": "Home",
@@ -679,7 +739,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.hero.cta": "View Tour Packages",
     "home.popular.title": "Popular Tourism",
     "home.popular.subtitle": "Favorite destinations in our village",
-    "home.why.title": "Why DesakuWisataku?",
+    "home.why.titlePrefix": "Why",
     "home.why.subtitle": "The advantages we offer to visitors",
     "home.why.facility.title": "Top Facilities",
     "home.why.facility.desc": "Complete, top facilities for your comfort.",
@@ -692,6 +752,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.packages.title": "Tour Packages",
     "home.packages.subtitle": "Affordable tour package options",
     "home.packages.cta": "Book Now",
+    "home.packages.viewMore": "View More",
     "home.testimonials.title": "Visitor Comments",
     "home.testimonials.subtitle": "What they say about our village",
     "home.testimonials.empty": "No visitor reviews yet",
@@ -706,6 +767,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "articles.archives": "Archives",
     "articles.searchPlaceholder": "Search articles...",
     "articles.notFound": "Article not found",
+    "articles.filterAuthor": "Author",
+    "articles.sort.newest": "Newest",
+    "articles.sort.oldest": "Oldest",
 
     "documentation.title": "Documentation",
     "documentation.subtitle": "Photo and video documentation of village tourism",
@@ -714,11 +778,11 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Photo and video documentation is still being prepared — stay tuned!",
 
     "tourism.title": "Tourism",
-    "tourism.subtitle": "Village tour packages",
+    "tourism.subtitle": "Tourist places and their packages in our village",
     "tourism.pricePerPerson": "Price Rp {price}/person",
-    "tourism.note":
-      "Reservation only via the contact below. Payment can be made on-site or via PayPal.",
-    "tourism.payment": "Payment",
+    "tourism.noPlaces": "No tourist places yet",
+    "tourism.noDescription": "Description for this place is not available yet.",
+    "tourism.packageCountInline": "{n} packages",
 
     "cart.title": "Package Cart",
     "cart.package": "Package",
@@ -975,7 +1039,61 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.hours": "Opening Hours",
     "footer.hoursValue": "Every Day, 08.00 - 17.00 WIB (UTC+7)",
     "footer.contact": "Contact",
+    "footer.links": "Links",
+    "footer.about": "About Us",
+    "footer.privacy": "Privacy Policy",
+    "footer.terms": "Terms & Conditions",
     "footer.copyright": "© 2026 DesakuWisataku. All rights reserved.",
+
+    "about.title": "About Us",
+    "about.subtitle": "Village tourism by the community, for the community",
+    "about.p1":
+      "DesakuWisataku is the tourism platform of Sukamaju Village — a destination with stunning nature and culture in Melati District, Sinarwangi Regency, West Java. We make it easy to discover and book village tour packages online.",
+    "about.p2":
+      "Every package is arranged and managed together with the villagers: local guides who know the terrain, community-owned homestays, and facilities maintained by the residents themselves. Each booking directly supports the village economy.",
+    "about.p3":
+      "Our mission is to grow sustainable community-based tourism — preserving nature and culture while opening opportunities for the villagers.",
+    "about.values": "What We Offer",
+
+    "privacy.title": "Privacy Policy",
+    "privacy.updated": "Last updated: September 8, 2026",
+    "privacy.s1.title": "Data We Collect",
+    "privacy.s1.body":
+      "When you create an account, we collect your name, email, phone number, and the profile details you fill in (gender, date of birth, address). When you book a package, we store order details, visit schedules, and payment status. We also collect limited technical data (IP address, device type) for service security.",
+    "privacy.s2.title": "How We Use Data",
+    "privacy.s2.body":
+      "Data is used to process bookings and payments, send confirmations and schedule reminders, provide order status notifications, and improve our services. We never sell your personal data to third parties.",
+    "privacy.s3.title": "Cookies & Analytics",
+    "privacy.s3.body":
+      "We use cookies to keep you signed in, remember your language and theme preferences, and to gather aggregated site analytics. You may disable cookies in your browser settings; some features (e.g. login) may not work properly without them.",
+    "privacy.s4.title": "Sharing Data with Service Providers",
+    "privacy.s4.body":
+      "To operate the service, data is shared on a limited basis with providers: Midtrans (QRIS payment processing), Cloudinary (media storage), and an email provider for transactional notifications. Sharing is limited to what is necessary and covered by data protection agreements.",
+    "privacy.s5.title": "Security & Data Retention",
+    "privacy.s5.body":
+      "We apply reasonable technical safeguards to protect data: passwords are stored encrypted, sessions are protected, and data access is restricted. Order data is retained as long as needed for the service and record-keeping obligations.",
+    "privacy.s6.title": "Your Rights (Indonesian PDP Law)",
+    "privacy.s6.body":
+      "Under Indonesia's Personal Data Protection Law, you have the right to access, correct, and request deletion of your personal data, as well as withdraw processing consent. Contact halo@desakuwisataku.id for any personal data requests.",
+
+    "terms.title": "Terms & Conditions",
+    "terms.intro":
+      "By accessing and using the DesakuWisataku site, you agree to the following terms and conditions. Please read them carefully.",
+    "terms.s1.title": "Use of the Site",
+    "terms.s1.body":
+      "This site is provided for information and booking of village tour packages. You agree to use the site lawfully, not to misuse it (e.g. attempts to disrupt the service or unauthorized automated data collection), and to provide accurate information when using the service.",
+    "terms.s2.title": "User Accounts",
+    "terms.s2.body":
+      "You are responsible for keeping your account password confidential and for all activity under your account. Notify us immediately if you suspect unauthorized use. We may deactivate accounts that violate these terms.",
+    "terms.s3.title": "Bookings & Payments",
+    "terms.s3.body":
+      "Package bookings follow the schedules and availability set by the managers. Payments are made via QRIS within the time limit shown on the payment page; orders past the deadline are canceled automatically. The applicable price is the price at the time the order is placed.",
+    "terms.s4.title": "Cancellations & Changes",
+    "terms.s4.body":
+      "Cancellations or schedule changes can be submitted through our contact person. Managers may postpone or cancel tour activities for safety or weather reasons, with an option to reschedule or receive a refund according to village policy.",
+    "terms.s5.title": "Changes to These Terms",
+    "terms.s5.body":
+      "We may update these terms from time to time. The latest version is always available on this page. For further questions, contact halo@desakuwisataku.id.",
 
     "admin.title": "Admin Panel",
     "admin.dashboard": "Dashboard",

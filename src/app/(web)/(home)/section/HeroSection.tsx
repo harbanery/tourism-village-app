@@ -9,6 +9,19 @@ export function HeroSection() {
   const { t } = useT();
   const router = useRouter();
 
+  /**
+   * CTA hero: gulir halus ke section paket wisata di home (bukan pindah
+   * halaman) — section PackagesSection membawa id="packages".
+   */
+  const goToPackages = () => {
+    const target = document.getElementById("packages");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      router.push("/package");
+    }
+  };
+
   return (
     <section className="relative flex min-h-[calc(100dvh-4rem)] items-center">
       <div className="relative mx-auto w-full max-w-6xl px-4 py-24 text-white">
@@ -26,8 +39,9 @@ export function HeroSection() {
           type="primary"
           size="large"
           icon={<ArrowRightOutlined />}
+          iconPosition="end"
           className="mt-8!"
-          onClick={() => router.push("/package")}
+          onClick={goToPackages}
         >
           {t("home.hero.cta")}
         </Button>

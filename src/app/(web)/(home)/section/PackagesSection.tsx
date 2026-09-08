@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button, Card, Col, Row } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
+import { readCart, writeCart } from "@/helpers/cart";
+import { issueCheckoutAccess } from "@/helpers/checkoutAccess";
 import { formatRupiah } from "@/utils/format";
 
 /** Paket live dari /api/web/packages (kelola admin). */
@@ -21,12 +23,19 @@ export function PackagesSection() {
   const router = useRouter();
   const [packages, setPackages] = useState<WebPackage[]>([]);
   const [loading, setLoading] = useState(true);
+  /** User sesi — "Pesan Sekarang" langsung ke cart bila sudah login. */
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const fetchPackages = useCallback(async () => {
     try {
-      const res = await fetch("/api/web/packages");
-      const json = await res.json();
-      if (json.success) setPackages(json.data);
+      const [packagesRes, sessionRes] = await Promise.all([
+        fetch("/api/web/packages"),
+        fetch("/api/web/auth/session"),
+      ]);
+      const packagesJson = await packagesRes.json();
+      if (packagesJson.success) setPackages(packagesJson.data);
+      const sessionJson = await sessionRes.json();
+      setLoggedIn(Boolean(sessionJson.success));
     } catch (error) {
       console.error("Error fetching packages:", error);
     } finally {
@@ -38,8 +47,36 @@ export function PackagesSection() {
     void Promise.resolve().then(fetchPackages);
   }, [fetchPackages]);
 
+  /**
+   * "Pesan Sekarang": user login → paket langsung masuk keranjang dan
+   * dibawa ke halaman checkout (tiket akses diterbitkan). Belum login →
+   * ke halaman paket (proxy mengarahkan ke login lebih dahulu).
+   */
+  const handleOrder = (pkg: WebPackage) => {
+    if (!loggedIn) {
+      router.push("/package");
+      return;
+    }
+    const cart = readCart();
+    const existing = cart.find((item) => item.packageId === pkg.id);
+    writeCart(
+      existing
+        ? cart.map((item) =>
+            item.packageId === pkg.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
+          )
+        : [...cart, { packageId: pkg.id, quantity: 1 }],
+    );
+    issueCheckoutAccess();
+    router.push("/checkout");
+  };
+
   return (
-    <section className="flex min-h-screen items-center bg-white dark:bg-[#141416]">
+    <section
+      id="packages"
+      className="flex min-h-screen scroll-mt-16 items-center bg-white dark:bg-[#141416]"
+    >
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
         <div className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold">
@@ -95,7 +132,7 @@ export function PackagesSection() {
                     type="primary"
                     block
                     className="mt-6!"
-                    onClick={() => router.push("/package")}
+                    onClick={() => handleOrder(pkg)}
                   >
                     {t("home.packages.cta")}
                   </Button>
@@ -104,6 +141,13 @@ export function PackagesSection() {
             ))
           )}
         </Row>
+
+        {/* Lihat lainnya → halaman lengkap paket (membership). */}
+        <div className="mt-8 text-center">
+          <Button size="large" onClick={() => router.push("/package")}>
+            {t("home.packages.viewMore")}
+          </Button>
+        </div>
       </div>
     </section>
   );

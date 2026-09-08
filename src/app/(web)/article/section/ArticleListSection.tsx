@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Empty, Input, Skeleton } from "antd";
+import { Button, Card, Empty, Input, Select, Skeleton } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate } from "@/utils/format";
 import { ArchiveSection } from "./ArchiveSection";
@@ -20,9 +21,13 @@ export interface WebBlog {
   adminName: string | null;
 }
 
+/** Mode urutan daftar artikel. */
+type SortKey = "newest" | "oldest";
+
 /**
- * Halaman artikel: daftar blog aktif dari DB + filter lokal (kata kunci &
- * arsip bulan) di kolom kanan — tanpa navigasi ke halaman pencarian.
+ * Halaman artikel: daftar blog aktif dari DB + pencarian, filter penulis,
+ * urutan, dan arsip bulan (kolom kanan) — pola toolbar riwayat belanja
+ * profile (search + filter + sort).
  */
 export function ArticleListSection() {
   const { t, locale } = useT();
@@ -31,8 +36,12 @@ export function ArticleListSection() {
   const [loading, setLoading] = useState(true);
   /** Kata kunci pencarian (filter lokal judul + penulis). */
   const [keyword, setKeyword] = useState("");
+  /** Penulis terpilih (null = semua). */
+  const [author, setAuthor] = useState<string | null>(null);
   /** Bulan arsip terpilih (YYYY-MM; null = semua). */
   const [month, setMonth] = useState<string | null>(null);
+  /** Urutan daftar (default terbaru duluan). */
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -50,16 +59,30 @@ export function ArticleListSection() {
     void Promise.resolve().then(fetchPosts);
   }, [fetchPosts]);
 
+  /** Opsi penulis unik (admin yang menulis artikel). */
+  const authorOptions = useMemo(() => {
+    const names = Array.from(
+      new Set(posts.map((post) => post.adminName).filter(Boolean)),
+    ) as string[];
+    return names.map((name) => ({ value: name, label: name }));
+  }, [posts]);
+
   const filtered = useMemo(() => {
     const q = keyword.trim().toLowerCase();
-    return posts.filter((post) => {
+    const list = posts.filter((post) => {
       const matchMonth = !month || post.datetime.slice(0, 7) === month;
+      const matchAuthor = !author || post.adminName === author;
       const matchKeyword =
         !q ||
         [post.title, post.adminName ?? ""].join(" ").toLowerCase().includes(q);
-      return matchMonth && matchKeyword;
+      return matchMonth && matchAuthor && matchKeyword;
     });
-  }, [posts, keyword, month]);
+    return list.sort((a, b) =>
+      sortKey === "newest"
+        ? b.datetime.localeCompare(a.datetime)
+        : a.datetime.localeCompare(b.datetime),
+    );
+  }, [posts, keyword, author, month, sortKey]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 lg:grid-cols-[1fr_300px]">
@@ -68,6 +91,37 @@ export function ArticleListSection() {
           {t("articles.title")}
         </h1>
         <p className="mt-1 text-foreground/60">{t("articles.subtitle")}</p>
+
+        {/* Pencarian, filter penulis & urutan (pola riwayat belanja). */}
+        <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+          <Input
+            allowClear
+            prefix={<SearchOutlined className="text-foreground/40!" />}
+            placeholder={t("articles.searchPlaceholder")}
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            aria-label={t("common.search")}
+          />
+          <Select
+            className="sm:w-44!"
+            placeholder={t("articles.filterAuthor")}
+            allowClear
+            showSearch
+            options={authorOptions}
+            value={author ?? undefined}
+            onChange={(value) => setAuthor(value ?? null)}
+          />
+          <Select
+            className="sm:w-36!"
+            value={sortKey}
+            onChange={setSortKey}
+            options={[
+              { value: "newest", label: t("articles.sort.newest") },
+              { value: "oldest", label: t("articles.sort.oldest") },
+            ]}
+          />
+        </div>
+
         <div className="mt-6 flex flex-col gap-6">
           {loading ? (
             [1, 2].map((key) => (
@@ -87,7 +141,6 @@ export function ArticleListSection() {
             filtered.map((post) => (
               <Card
                 key={post.id}
-                hoverable
                 cover={
                   post.filename ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -118,7 +171,7 @@ export function ArticleListSection() {
                 />
                 <Button
                   type="link"
-                  className="mt-4! px-0!"
+                  className="mt-4! px-0! text-primary! hover:text-primary/70!"
                   onClick={() => router.push(`/article/${post.slug}`)}
                 >
                   {t("common.readMore")}
@@ -130,17 +183,6 @@ export function ArticleListSection() {
       </div>
 
       <aside className="flex flex-col gap-6">
-        <Card title={t("common.search")}>
-          <Input.Search
-            allowClear
-            placeholder={t("articles.searchPlaceholder")}
-            onSearch={(value) => setKeyword(value)}
-            onChange={(e) => {
-              if (!e.target.value) setKeyword("");
-            }}
-            enterButton
-          />
-        </Card>
         <ArchiveSection
           posts={posts}
           activeMonth={month}

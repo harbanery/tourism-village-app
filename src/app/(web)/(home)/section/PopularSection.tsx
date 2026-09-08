@@ -12,6 +12,8 @@ interface WebPlace {
   id: string;
   name: string;
   photo: string | null;
+  /** Total kuantitas terjual lunas dari paket tempat ini (PAID). */
+  totalPurchased: number;
 }
 
 function PlaceCard({ place }: { place: WebPlace }) {
@@ -66,6 +68,16 @@ export function PopularSection() {
     void Promise.resolve().then(fetchPlaces);
   }, [fetchPlaces]);
 
+  /**
+   * Wisata populer: tempat dengan pembelian PAID terbanyak duluan
+   * (sesuai semantik tag Populer di admin); bila yang populer kurang
+   * dari 3, sisa slot diisi tempat dengan pembelian tertinggi berikutnya
+   * hingga maksimal 3 data tampil.
+   */
+  const popularPlaces = [...places]
+    .sort((a, b) => b.totalPurchased - a.totalPurchased)
+    .slice(0, MAX_PLACES);
+
   return (
     <section className="flex min-h-screen items-center bg-white dark:bg-[#141416]">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
@@ -85,7 +97,7 @@ export function PopularSection() {
                   <Skeleton.Image active className="w-full!" />
                 </Card>
               ))
-            : places.slice(0, MAX_PLACES).map((place) => (
+            : popularPlaces.map((place) => (
                 <PlaceCard key={place.id} place={place} />
               ))}
         </div>

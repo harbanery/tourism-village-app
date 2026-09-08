@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import prisma from "@/server/db";
+import { getPlacesWithPackages } from "@/services/placeService";
 
-/** GET /api/web/places — tempat wisata aktif (publik, sesuai data admin). */
+/**
+ * GET /api/web/places — tempat wisata aktif + paket aktifnya + total
+ * pembelian (PAID) per tempat (dasar urutan wisata populer di home).
+ */
 export async function GET() {
   try {
-    const places = await prisma.place.findMany({
-      where: { status: "ACTIVE" },
-      orderBy: { id: "asc" },
-      select: { id: true, name: true, photo: true },
-    });
+    const places = await getPlacesWithPackages();
     return NextResponse.json({ success: true, data: places });
   } catch (error) {
     console.error("Error fetching places:", error);

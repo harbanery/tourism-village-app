@@ -20,28 +20,41 @@ const links = [
   { href: "/documentation", key: "nav.documentation" },
 ];
 
+/** Threshold scroll (px) untuk menganggap halaman sudah digulir. */
+const SCROLLED_THRESHOLD = 10;
+
+/** Jeda tanpa event scroll (ms) sebelum navbar dianggap "berhenti". */
+const SCROLL_STOP_MS = 200;
+
+/** Sensitivitas arah scroll (px) — hindari flicker pada scroll kecil. */
+const DIRECTION_EPSILON = 4;
+
 /**
  * Underline animasi: muncul saat hover dan tetap tampil di route aktif.
  * Semua utility diberi important (!) agar tidak ditimpa style default
  * button/antd (navigasi memakai useRouter, bukan <Link>).
+ *
+ * `onHero` (navbar transparan di atas hero home): teks putih dengan
+ * underline putih agar tetap terbaca di atas background gambar.
  */
-function navLinkClass(active: boolean, stacked = false) {
+function navLinkClass(active: boolean, stacked = false, onHero = false) {
+  const color = onHero
+    ? "text-white/85! hover:text-white!"
+    : "text-foreground/80! hover:text-foreground!";
+  const underline = onHero ? "after:bg-white!" : "after:bg-primary!";
   return [
     "group relative! cursor-pointer! text-sm! font-medium! transition-colors!",
     "after:absolute! after:left-0! after:bottom-0! after:h-0.5! after:w-0! after:rounded-full!",
-    "after:bg-primary! after:transition-all! after:duration-300!",
+    underline,
+    "after:transition-all! after:duration-300!",
     "hover:after:w-full!",
     stacked ? "px-1! py-2.5! text-left!" : "px-1! py-2!",
     active
-      ? "text-primary! after:w-full!"
-      : "text-foreground/80! hover:text-foreground!",
+      ? onHero
+        ? "text-white! after:w-full!"
+        : "text-primary! after:w-full!"
+      : color,
   ].join(" ");
-}
-
-interface SessionUser {
-  id: string;
-  name: string;
-  email: string;
 }
 
 export function Navbar() {
@@ -50,6 +63,16 @@ export function Navbar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<SessionUser | null>(null);
+
+  /** Navbar disembunyikan oleh scroll ke bawah (pola portfolio). */
+  const [shouldShow, setShouldShow] = useState(true);
+  /** Halaman sudah digulir — di home memicu bg + blur + teks tema. */
+  const [scrolled, setScrolled] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  const isHome = pathname === "/";
+  /** Mode hero: hanya di paling atas home — transparan, tanpa blur, teks putih. */
+  const onHero = isHome && !scrolled;
 
   const fetchSession = useCallback(async () => {
     try {
@@ -65,6 +88,49 @@ export function Navbar() {
     void Promise.resolve().then(fetchSession);
   }, [fetchSession]);
 
+  /**
+   * Perilaku scroll (pola navbar portfolio + tampil saat berhenti):
+   * - scroll ke bawah → navbar slides keluar (translate) ke atas;
+   * - scroll ke atas  → navbar tampil kembali;
+   * - scroll berhenti → navbar tampil kembali.
+   * Hanya transform yang dianimasikan — animasi opacity pada elemen
+   * dengan backdrop-filter membuat blur berkedip saat transisi.
+   */
+  useEffect(() => {
+    let ticking = false;
+    let stopTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        globalThis.requestAnimationFrame(() => {
+          const y = window.scrollY;
+          setScrolled(y > SCROLLED_THRESHOLD);
+
+          if (y <= SCROLLED_THRESHOLD) {
+            setShouldShow(true);
+          } else if (y > lastScrollY + DIRECTION_EPSILON) {
+            setShouldShow(false);
+          } else if (y < lastScrollY - DIRECTION_EPSILON) {
+            setShouldShow(true);
+          }
+          setLastScrollY(y);
+          ticking = false;
+        });
+      }
+
+      // Scroll berhenti (tidak ada event baru) → tampilkan navbar lagi.
+      if (stopTimer) clearTimeout(stopTimer);
+      stopTimer = setTimeout(() => setShouldShow(true), SCROLL_STOP_MS);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (stopTimer) clearTimeout(stopTimer);
+    };
+  }, [lastScrollY]);
+
   const handleLogout = async () => {
     await fetch("/api/web/auth/logout", { method: "POST" });
     setUser(null);
@@ -78,8 +144,19 @@ export function Navbar() {
     router.push(href);
   };
 
+  /** Wrapper tombol aksi kanan: saat mode hero, paksa ikon antd putih. */
+  const actionWrap = onHero ? "[&_.ant-btn]:text-white!" : undefined;
+
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#141416]/80 border-b border-black/5 dark:border-white/10">
+    <header
+      className={[
+        "sticky top-0 z-50 border-b transition-all duration-500 ease-in-out",
+        shouldShow ? "translate-y-0" : "-translate-y-full",
+        onHero
+          ? "border-transparent bg-transparent text-white"
+          : "border-black/5 bg-white/80 text-foreground backdrop-blur-md dark:border-white/10 dark:bg-[#141416]/80",
+      ].join(" ")}
+    >
       <nav className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between gap-4">
         <button
           type="button"
@@ -87,7 +164,13 @@ export function Navbar() {
           className="group cursor-pointer bg-transparent text-lg font-bold tracking-tight"
         >
           {/* Hover di area brand → seluruh teks berubah warna bersamaan. */}
-          <span className="text-foreground transition-colors group-hover:text-foreground/60">
+          <span
+            className={`transition-colors ${
+              onHero
+                ? "text-white group-hover:text-white/60"
+                : "text-foreground group-hover:text-foreground/60"
+            }`}
+          >
             Desaku
           </span>
           <span className="text-primary transition-colors group-hover:text-primary/60">
@@ -102,7 +185,11 @@ export function Navbar() {
               key={link.href}
               type="button"
               onClick={() => router.push(link.href)}
-              className={navLinkClass(pathname.startsWith(link.href))}
+              className={navLinkClass(
+                pathname.startsWith(link.href),
+                false,
+                onHero,
+              )}
             >
               {t(link.key)}
             </button>
@@ -110,9 +197,11 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-1">
-          <LanguageToggle />
-          <ThemeToggle />
-          {user && <NotificationBell />}
+          <div className={actionWrap}>
+            <LanguageToggle />
+            <ThemeToggle />
+            {user && <NotificationBell />}
+          </div>
           {user ? (
             <Dropdown
               menu={{
@@ -149,13 +238,15 @@ export function Navbar() {
               {t("nav.login")}
             </Button>
           )}
-          <Button
-            className="lg:hidden!"
-            type="text"
-            aria-label={t("nav.menu")}
-            icon={<MenuOutlined />}
-            onClick={() => setOpen(true)}
-          />
+          <div className={actionWrap}>
+            <Button
+              className="lg:hidden!"
+              type="text"
+              aria-label={t("nav.menu")}
+              icon={<MenuOutlined />}
+              onClick={() => setOpen(true)}
+            />
+          </div>
         </div>
       </nav>
 
@@ -209,4 +300,10 @@ export function Navbar() {
       </Drawer>
     </header>
   );
+}
+
+interface SessionUser {
+  id: string;
+  name: string;
+  email: string;
 }

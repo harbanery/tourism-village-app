@@ -40,7 +40,9 @@ export function FeatureSection() {
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
         <div className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
-            {t("home.why.title")}
+            {t("home.why.titlePrefix")}{" "}
+            <span className="text-white">Desaku</span>
+            <span className="text-primary">Wisataku</span>?
           </h2>
           <p className="mt-1 text-white/80 drop-shadow">
             {t("home.why.subtitle")}

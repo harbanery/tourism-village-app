@@ -190,6 +190,7 @@ export function NotificationBell({
           pointerEvents: "none",
           fontSize: 8,
           padding: 0,
+          borderColor: "transparent",
         }}
         size="small"
         offset={[-9, 9]}
