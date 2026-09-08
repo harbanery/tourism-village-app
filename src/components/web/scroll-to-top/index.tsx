@@ -49,7 +49,7 @@ export function ScrollToTop() {
       aria-label={t("common.backToTop")}
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       className={[
-        "group fixed bottom-5 left-5 z-40 flex cursor-pointer items-center gap-2",
+        "group fixed bottom-2 left-5 z-40 flex cursor-pointer items-center gap-2",
         "rounded-full border border-black/10 bg-white/80 py-2 pl-3 pr-3 text-sm",
         "text-foreground/70 shadow-sm backdrop-blur-md transition-all duration-500",
         "hover:border-primary/40 hover:text-primary",

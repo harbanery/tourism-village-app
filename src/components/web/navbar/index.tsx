@@ -197,7 +197,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-1">
-          <div className={actionWrap}>
+          <div className={[actionWrap, "flex items-center"].join(" ")}>
             <LanguageToggle />
             <ThemeToggle />
             {user && <NotificationBell />}

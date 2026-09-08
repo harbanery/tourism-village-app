@@ -41,6 +41,7 @@ export async function POST(request: Request) {
         name: body.name,
         description: body.description || null,
         filename: body.filename || "",
+        invertDark: Boolean(body.invertDark),
         status: "NONACTIVE",
       },
     });

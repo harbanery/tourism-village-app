@@ -32,6 +32,7 @@ export async function PUT(request: Request, { params }: Params) {
       data: {
         name: body.name,
         description: body.description || null,
+        invertDark: Boolean(body.invertDark),
         ...(body.filename !== undefined && { filename: nextFilename }),
       },
     });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, Empty, Skeleton } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
@@ -16,11 +17,18 @@ interface WebPlace {
   totalPurchased: number;
 }
 
-function PlaceCard({ place }: { place: WebPlace }) {
+function PlaceCard({
+  place,
+  onClick,
+}: {
+  place: WebPlace;
+  onClick: () => void;
+}) {
   return (
     <Card
       hoverable
-      className="h-full!"
+      className="h-full! cursor-pointer!"
+      onClick={onClick}
       cover={
         place.photo ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -49,6 +57,7 @@ function PlaceCard({ place }: { place: WebPlace }) {
 
 export function PopularSection() {
   const { t } = useT();
+  const router = useRouter();
   const [places, setPlaces] = useState<WebPlace[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -98,7 +107,11 @@ export function PopularSection() {
                 </Card>
               ))
             : popularPlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} />
+                <PlaceCard
+                  key={place.id}
+                  place={place}
+                  onClick={() => router.push("/tourism")}
+                />
               ))}
         </div>
       </div>

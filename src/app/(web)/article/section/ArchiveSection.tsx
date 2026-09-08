@@ -2,7 +2,6 @@
 
 import { Card, Collapse, Empty } from "antd";
 import { useT } from "@/components/locale/LocaleProvider";
-import { formatDate } from "@/utils/format";
 import type { WebBlog } from "./ArticleListSection";
 
 /** Tombol bulan arsip — klik memfilter daftar artikel secara lokal
@@ -34,9 +33,9 @@ function MonthButton({
 }
 
 /**
- * Arsip artikel per bulan: bulan tahun berjalan tampil langsung; tahun
- * sebelumnya diringkas sebagai collapse per tahun (isinya bulan-bulan
- * artikel pada tahun itu).
+ * Arsip artikel per bulan: bulan tahun berjalan tampil langsung (label
+ * bulan saja — tanpa tanggal & tahun); tahun sebelumnya diringkas
+ * sebagai collapse per tahun (isinya label bulan).
  */
 export function ArchiveSection({
   posts,
@@ -50,6 +49,12 @@ export function ArchiveSection({
   const { t, locale } = useT();
 
   const currentYear = String(new Date().getFullYear());
+
+  /** Nama bulan saja (mis. "September") sesuai locale aktif. */
+  const monthName = (month: string) =>
+    new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", {
+      month: "long",
+    }).format(new Date(`${month}-01T00:00:00Z`));
 
   /** Bulan unik (YYYY-MM) dari data blog, terbaru duluan. */
   const months = Array.from(new Set(posts.map((b) => b.datetime.slice(0, 7))))
@@ -72,8 +77,6 @@ export function ArchiveSection({
       months: months.filter((m) => m.startsWith(year)),
     }));
 
-  const monthLabel = (month: string) => formatDate(`${month}-01`, locale);
-
   return (
     <Card title={t("articles.archives")}>
       {months.length === 0 ? (
@@ -91,7 +94,7 @@ export function ArchiveSection({
                 <MonthButton
                   key={month}
                   month={month}
-                  label={monthLabel(month)}
+                  label={monthName(month)}
                   active={activeMonth === month}
                   onClick={onSelectMonth}
                 />
@@ -116,7 +119,7 @@ export function ArchiveSection({
                       <MonthButton
                         key={month}
                         month={month}
-                        label={monthLabel(month)}
+                        label={monthName(month)}
                         active={activeMonth === month}
                         onClick={onSelectMonth}
                       />

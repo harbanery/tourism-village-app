@@ -7,7 +7,6 @@ import { SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate } from "@/utils/format";
 import { ArchiveSection } from "./ArchiveSection";
-
 /** Blog aktif dari /api/web/blogs (kelola admin). */
 export interface WebBlog {
   id: string;
@@ -25,9 +24,8 @@ export interface WebBlog {
 type SortKey = "newest" | "oldest";
 
 /**
- * Halaman artikel: daftar blog aktif dari DB + pencarian, filter penulis,
- * urutan, dan arsip bulan (kolom kanan) — pola toolbar riwayat belanja
- * profile (search + filter + sort).
+ * Halaman artikel: daftar blog aktif dari DB + pencarian, urutan, dan
+ * arsip bulan (kolom kanan) — pola toolbar riwayat belanja profile.
  */
 export function ArticleListSection() {
   const { t, locale } = useT();
@@ -36,8 +34,6 @@ export function ArticleListSection() {
   const [loading, setLoading] = useState(true);
   /** Kata kunci pencarian (filter lokal judul + penulis). */
   const [keyword, setKeyword] = useState("");
-  /** Penulis terpilih (null = semua). */
-  const [author, setAuthor] = useState<string | null>(null);
   /** Bulan arsip terpilih (YYYY-MM; null = semua). */
   const [month, setMonth] = useState<string | null>(null);
   /** Urutan daftar (default terbaru duluan). */
@@ -59,30 +55,21 @@ export function ArticleListSection() {
     void Promise.resolve().then(fetchPosts);
   }, [fetchPosts]);
 
-  /** Opsi penulis unik (admin yang menulis artikel). */
-  const authorOptions = useMemo(() => {
-    const names = Array.from(
-      new Set(posts.map((post) => post.adminName).filter(Boolean)),
-    ) as string[];
-    return names.map((name) => ({ value: name, label: name }));
-  }, [posts]);
-
   const filtered = useMemo(() => {
     const q = keyword.trim().toLowerCase();
     const list = posts.filter((post) => {
       const matchMonth = !month || post.datetime.slice(0, 7) === month;
-      const matchAuthor = !author || post.adminName === author;
       const matchKeyword =
         !q ||
         [post.title, post.adminName ?? ""].join(" ").toLowerCase().includes(q);
-      return matchMonth && matchAuthor && matchKeyword;
+      return matchMonth && matchKeyword;
     });
     return list.sort((a, b) =>
       sortKey === "newest"
         ? b.datetime.localeCompare(a.datetime)
         : a.datetime.localeCompare(b.datetime),
     );
-  }, [posts, keyword, author, month, sortKey]);
+  }, [posts, keyword, month, sortKey]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 lg:grid-cols-[1fr_300px]">
@@ -92,8 +79,8 @@ export function ArticleListSection() {
         </h1>
         <p className="mt-1 text-foreground/60">{t("articles.subtitle")}</p>
 
-        {/* Pencarian, filter penulis & urutan (pola riwayat belanja). */}
-        <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+        {/* Pencarian & urutan (pola riwayat belanja). */}
+        <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
           <Input
             allowClear
             prefix={<SearchOutlined className="text-foreground/40!" />}
@@ -101,15 +88,6 @@ export function ArticleListSection() {
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
             aria-label={t("common.search")}
-          />
-          <Select
-            className="sm:w-44!"
-            placeholder={t("articles.filterAuthor")}
-            allowClear
-            showSearch
-            options={authorOptions}
-            value={author ?? undefined}
-            onChange={(value) => setAuthor(value ?? null)}
           />
           <Select
             className="sm:w-36!"

@@ -9,6 +9,7 @@ import {
   Input,
   InputNumber,
   Select,
+  Switch,
   Upload,
   FormProps,
 } from "antd";
@@ -226,6 +227,8 @@ function renderField(params: RenderFieldParams): ReactNode {
           options={select?.options}
         />
       );
+    case "switch":
+      return <Switch disabled={disabled} />;
     case "upload":
       return (
         <Upload.Dragger
@@ -396,6 +399,8 @@ const FormAdmin = ({
       name={item.name}
       label={item.label ?? t(`form.${item.name}`)}
       rules={buildRules(item, item.required)}
+      // Switch memakai prop `checked`, bukan `value`.
+      valuePropName={item.type === "switch" ? "checked" : undefined}
     >
       {renderField({
         type: item.type,

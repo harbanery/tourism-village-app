@@ -9,12 +9,19 @@ interface WebSponsor {
   id: string;
   name: string;
   filename: string;
+  /** Logo gelap (mis. hitam) — dibalik jadi putih di dark mode. */
+  invertDark: boolean;
 }
 
 /** Batas jumlah sponsor statis — lebih dari ini memakai marquee. */
 const STATIC_LIMIT = 5;
 
-/** Logo sponsor (gambar saja, tinggi seragam, rasio asli dipertahankan). */
+/**
+ * Logo sponsor (gambar saja, tinggi seragam, rasio asli dipertahankan).
+ * Logo bertanda invertDark (logo gelap seperti The North Face) dibalik
+ * warnanya HANYA di dark mode via filter invert — di light mode tampil
+ * apa adanya sehingga logo berwarna tidak rusak.
+ */
 function SponsorLogo({ sponsor }: { sponsor: WebSponsor }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -22,7 +29,11 @@ function SponsorLogo({ sponsor }: { sponsor: WebSponsor }) {
       src={sponsor.filename}
       alt={sponsor.name}
       title={sponsor.name}
-      className="h-10 w-auto shrink-0 cursor-pointer object-contain opacity-60 transition-opacity duration-500 hover:opacity-100 md:h-12"
+      className={[
+        "max-w-40 max-h-32 shrink-0 cursor-pointer object-contain opacity-60",
+        "transition-opacity duration-500 hover:opacity-100",
+        sponsor.invertDark ? "dark:invert" : "",
+      ].join(" ")}
     />
   );
 }

@@ -7,7 +7,7 @@ export async function GET() {
     const sponsors = await prisma.sponsor.findMany({
       where: { status: "ACTIVE" },
       orderBy: { id: "asc" },
-      select: { id: true, name: true, filename: true },
+      select: { id: true, name: true, filename: true, invertDark: true },
     });
     return NextResponse.json({ success: true, data: sponsors });
   } catch (error) {

@@ -216,6 +216,8 @@ model Sponsor {
   name        String  @map("sponsor_name")
   description String? @map("deskripsi")
   filename    String // logo image (Cloudinary URL)
+  /** Logo gelap (mis. hitam) — dibalik jadi putih otomatis di dark mode web. */
+  invertDark  Boolean @default(false) @map("invert_dark")
   status      Status @default(ACTIVE)
 
   @@map("sponsor")

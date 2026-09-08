@@ -159,7 +159,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "articles.archives": "Arsip",
     "articles.searchPlaceholder": "Cari artikel...",
     "articles.notFound": "Artikel tidak ditemukan",
-    "articles.filterAuthor": "Penulis",
     "articles.sort.newest": "Terbaru",
     "articles.sort.oldest": "Terlama",
 
@@ -570,6 +569,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "form.facilities": "Fasilitas",
     "form.price": "Harga",
     "form.description": "Deskripsi",
+    "form.invertDark": "Balik warna logo di dark mode",
     "form.username": "Username",
     "form.email": "Email",
     "form.role": "Role",
@@ -767,7 +767,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "articles.archives": "Archives",
     "articles.searchPlaceholder": "Search articles...",
     "articles.notFound": "Article not found",
-    "articles.filterAuthor": "Author",
     "articles.sort.newest": "Newest",
     "articles.sort.oldest": "Oldest",
 
@@ -1174,6 +1173,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "form.facilities": "Facilities",
     "form.price": "Price",
     "form.description": "Description",
+    "form.invertDark": "Invert logo colors in dark mode",
     "form.username": "Username",
     "form.email": "Email",
     "form.role": "Role",

@@ -32,6 +32,8 @@ interface SponsorRow {
   name: string;
   description: string | null;
   filename: string;
+  /** Logo gelap — dibalik jadi putih di dark mode web. */
+  invertDark: boolean;
   status: "ACTIVE" | "NONACTIVE";
 }
 
@@ -39,6 +41,7 @@ interface SponsorFormValues {
   name: string;
   description?: string;
   filename?: unknown;
+  invertDark?: boolean;
 }
 
 const SponsorDecorator = () => {
@@ -93,6 +96,7 @@ const SponsorDecorator = () => {
         filename: record.filename
           ? [uploadFileFromUrl(record.filename)]
           : undefined,
+        invertDark: record.invertDark,
       });
     } else {
       form.resetFields();
@@ -109,6 +113,7 @@ const SponsorDecorator = () => {
         name: values.name,
         description: values.description ?? null,
         filename,
+        invertDark: values.invertDark ?? false,
       };
       const res = editing
         ? await fetch(`/api/admin/sponsors/${editing.id}`, {
