@@ -114,6 +114,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.articles": "Artikel",
     "nav.tourism": "Wisata",
     "nav.documentation": "Dokumentasi",
+    "nav.about": "Tentang Kami",
     "nav.login": "Masuk",
     "nav.register": "Registrasi",
     "nav.logout": "Keluar",
@@ -440,6 +441,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.terms": "Syarat & Ketentuan",
     "footer.copyright": "© 2026 DesakuWisataku. All rights reserved.",
 
+    "userAgreement.title": "Perjanjian Pengguna",
+    "userAgreement.intro":
+      "Syarat & ketentuan beserta kebijakan privasi penggunaan situs DesakuWisataku tersedia dalam satu halaman ini. Mohon dibaca dengan saksama sebelum menggunakan layanan kami.",
+
     "about.title": "Tentang Kami",
     "about.subtitle": "Wisata desa oleh warga, untuk warga",
     "about.p1":
@@ -723,6 +728,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.articles": "Articles",
     "nav.tourism": "Tourism",
     "nav.documentation": "Documentation",
+    "nav.about": "About Us",
     "nav.login": "Login",
     "nav.register": "Register",
     "nav.logout": "Logout",
@@ -1043,6 +1049,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.privacy": "Privacy Policy",
     "footer.terms": "Terms & Conditions",
     "footer.copyright": "© 2026 DesakuWisataku. All rights reserved.",
+
+    "userAgreement.title": "User Agreement",
+    "userAgreement.intro":
+      "The terms & conditions and privacy policy of the DesakuWisataku site are available together on this page. Please read them carefully before using our services.",
 
     "about.title": "About Us",
     "about.subtitle": "Village tourism by the community, for the community",

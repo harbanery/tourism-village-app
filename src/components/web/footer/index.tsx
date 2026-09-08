@@ -34,26 +34,21 @@ export function Footer() {
         <div>
           <h3 className="mb-2 font-semibold">{t("footer.links")}</h3>
           <nav className="flex flex-col items-start gap-1">
+            {/* Tentang Kami dipindah ke menu navbar; terms & privacy
+                digabung di halaman user-agreement (anchor masing-masing). */}
             <button
               type="button"
-              onClick={() => goTo("/about")}
-              className="cursor-pointer! bg-transparent! text-left! text-sm! text-foreground/70! hover:text-primary!"
-            >
-              {t("footer.about")}
-            </button>
-            <button
-              type="button"
-              onClick={() => goTo("/privacy-policy")}
-              className="cursor-pointer! bg-transparent! text-left! text-sm! text-foreground/70! hover:text-primary!"
-            >
-              {t("footer.privacy")}
-            </button>
-            <button
-              type="button"
-              onClick={() => goTo("/terms")}
+              onClick={() => goTo("/user-agreement#terms")}
               className="cursor-pointer! bg-transparent! text-left! text-sm! text-foreground/70! hover:text-primary!"
             >
               {t("footer.terms")}
+            </button>
+            <button
+              type="button"
+              onClick={() => goTo("/user-agreement#privacy-policy")}
+              className="cursor-pointer! bg-transparent! text-left! text-sm! text-foreground/70! hover:text-primary!"
+            >
+              {t("footer.privacy")}
             </button>
           </nav>
         </div>

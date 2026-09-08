@@ -21,6 +21,7 @@ const links = [
   { href: "/article", key: "nav.articles" },
   { href: "/tourism", key: "nav.tourism" },
   { href: "/documentation", key: "nav.documentation" },
+  { href: "/about", key: "nav.about" },
 ];
 
 /** Threshold scroll (px) untuk menganggap halaman sudah digulir. */

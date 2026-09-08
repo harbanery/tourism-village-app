@@ -1,5 +1,6 @@
-import { PrivacySection } from "./section/PrivacySection";
+import { permanentRedirect } from "next/navigation";
 
+/** Kebijakan Privasi kini bagian dari halaman user-agreement. */
 export default function PrivacyPolicyPage() {
-  return <PrivacySection />;
+  permanentRedirect("/user-agreement#privacy-policy");
 }
