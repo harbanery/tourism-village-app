@@ -1,9 +1,0 @@
-import { TourismPackageSection } from "./section/TourismPackageSection";
-
-export default function TourismPage() {
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <TourismPackageSection />
-    </div>
-  );
-}
