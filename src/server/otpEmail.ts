@@ -6,7 +6,7 @@ import { OTP_TTL_MINUTES, type OtpPurpose } from "@/server/otp";
  * berwarna, kotak kode besar, dan signature, responsif HP/tablet/laptop.
  */
 
-const APP_NAME = META_APP ?? "Desaku Wisataku";
+const APP_NAME = META_APP ?? "DesakuWisataku";
 const THEME_COLOR = "#0d7a5f";
 
 function L(id: string, en: string): string {
@@ -42,10 +42,7 @@ export function buildOtpEmail(params: {
   const label = purposeLabel(params.purpose);
   const isId = NOTIFICATION_LOCALE === "id";
 
-  const subject = L(
-    `🔑 Kode OTP — ${APP_NAME}`,
-    `🔑 OTP Code — ${APP_NAME}`,
-  );
+  const subject = L(`🔑 Kode OTP — ${APP_NAME}`, `🔑 OTP Code — ${APP_NAME}`);
 
   const text = L(
     [

@@ -65,7 +65,7 @@ export async function downloadInvoicePdf(
   // Kop invoice.
   doc.setFontSize(16);
   doc.setTextColor(13, 122, 95);
-  doc.text("Desaku Wisataku", 14, 18);
+  doc.text("DesakuWisataku", 14, 18);
   doc.setFontSize(9);
   doc.setTextColor(90);
   doc.text(

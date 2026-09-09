@@ -6,7 +6,7 @@ import { META_APP, NOTIFICATION_LOCALE } from "@/config/variables";
  * kredensial, CTA, dan signature, responsif HP/tablet/laptop.
  */
 
-const APP_NAME = META_APP ?? "Desaku Wisataku";
+const APP_NAME = META_APP ?? "DesakuWisataku";
 const THEME_COLOR = "#0d7a5f";
 
 function L(id: string, en: string): string {
@@ -105,7 +105,10 @@ function buildCredentialEmailHtml(params: {
 
   const title = L("🔐 Kredensial Akun Baru", "🔐 Your New Account");
   const subtitle = `${APP_NAME} · ${formattedDate}`;
-  const greeting = L(`Halo ${escapeHtml(name)}! 👋`, `Hello ${escapeHtml(name)}! 👋`);
+  const greeting = L(
+    `Halo ${escapeHtml(name)}! 👋`,
+    `Hello ${escapeHtml(name)}! 👋`,
+  );
   const blurf = roleLabel
     ? L(
         `Akun <strong>${roleLabel}</strong> Anda telah dibuat di <strong>${APP_NAME}</strong>. Gunakan kredensial berikut untuk masuk.`,

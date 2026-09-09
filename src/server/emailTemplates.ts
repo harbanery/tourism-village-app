@@ -6,7 +6,7 @@ import { BASE_URL, NOTIFICATION_LOCALE } from "@/config/variables";
  * Bahasa mengikuti NOTIFICATION_LOCALE (server-side, id default).
  */
 
-const BRAND = "Desaku Wisataku";
+const BRAND = "DesakuWisataku";
 const BRAND_PRIMARY = "#0d7a5f";
 
 /** Label singkat order (id legacy apa adanya, UUID dipendekkan 8 karakter). */
@@ -72,9 +72,11 @@ function emailLayout(title: string, bodyHtml: string): string {
         ${bodyHtml}
       </div>
       <div style="padding:16px 24px;background:#f9fafb;color:#6b7280;font-size:12px;">
-        ${NOTIFICATION_LOCALE === "id"
-          ? `Email otomatis dari ${BRAND} — tidak perlu dibalas.`
-          : `Automated email from ${BRAND} — no reply needed.`}
+        ${
+          NOTIFICATION_LOCALE === "id"
+            ? `Email otomatis dari ${BRAND} — tidak perlu dibalas.`
+            : `Automated email from ${BRAND} — no reply needed.`
+        }
       </div>
     </div>
   </body>
