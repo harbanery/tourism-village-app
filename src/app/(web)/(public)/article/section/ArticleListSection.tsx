@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Empty, Input, Select, Spin } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Button, Card, Empty, Input, Spin, Tooltip } from "antd";
+import { ArrowUpOutlined, SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate } from "@/utils/format";
 import { displayImage } from "@/utils/image";
@@ -102,15 +102,34 @@ export function ArticleListSection({ posts }: { posts: WebBlog[] }) {
             onChange={(event) => setKeyword(event.target.value)}
             aria-label={t("common.search")}
           />
-          <Select
-            className="sm:w-36!"
-            value={sortKey}
-            onChange={setSortKey}
-            options={[
-              { value: "newest", label: t("articles.sort.newest") },
-              { value: "oldest", label: t("articles.sort.oldest") },
-            ]}
-          />
+          {/* Toggle urutan: satu icon panah yang di-rotate (bukan ganti
+              icon) — terbaru = panah atas, terlama = panah bawah. */}
+          <Tooltip
+            title={
+              sortKey === "newest"
+                ? t("articles.sort.newest")
+                : t("articles.sort.oldest")
+            }
+          >
+            <Button
+              icon={
+                <ArrowUpOutlined
+                  className={[
+                    "transition-transform duration-300",
+                    sortKey === "oldest" ? "rotate-180" : "",
+                  ].join(" ")}
+                />
+              }
+              onClick={() =>
+                setSortKey((key) => (key === "newest" ? "oldest" : "newest"))
+              }
+              aria-label={t(
+                sortKey === "newest"
+                  ? "articles.sort.newest"
+                  : "articles.sort.oldest",
+              )}
+            />
+          </Tooltip>
         </div>
 
         <div className="mt-6 flex flex-col gap-6">
@@ -127,47 +146,47 @@ export function ArticleListSection({ posts }: { posts: WebBlog[] }) {
               // Cover Cloudinary dioptimasi CDN (f_auto,q_auto,w_840).
               const { src, unoptimized } = displayImage(post.filename, 840);
               return (
-              <Card
-                key={post.id}
-                cover={
-                  post.filename ? (
-                    <Image
-                      src={src}
-                      alt={post.title}
-                      width={840}
-                      height={504}
-                      unoptimized={unoptimized}
-                      sizes="(max-width: 1024px) 100vw, 65vw"
-                      className="h-56 w-full object-cover"
-                    />
-                  ) : (
-                    <Empty
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description={false}
-                      className="grid! h-56! place-items-center!"
-                    />
-                  )
-                }
-              >
-                <h2 className="text-xl font-semibold">{post.title}</h2>
-                <p className="mt-1 text-xs text-foreground/50">
-                  {t("articles.postedBy", {
-                    date: formatDate(post.datetime, locale, true),
-                    author: post.adminName ?? "-",
-                  })}
-                </p>
-                <div
-                  className="mt-3 text-foreground/75 line-clamp-2"
-                  dangerouslySetInnerHTML={{ __html: post.para }}
-                />
-                <Button
-                  type="link"
-                  className="mt-4! px-0! text-primary! hover:text-primary/70!"
-                  onClick={() => router.push(`/article/${post.slug}`)}
+                <Card
+                  key={post.id}
+                  cover={
+                    post.filename ? (
+                      <Image
+                        src={src}
+                        alt={post.title}
+                        width={840}
+                        height={504}
+                        unoptimized={unoptimized}
+                        sizes="(max-width: 1024px) 100vw, 65vw"
+                        className="h-56 w-full object-cover"
+                      />
+                    ) : (
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={false}
+                        className="grid! h-56! place-items-center!"
+                      />
+                    )
+                  }
                 >
-                  {t("common.readMore")}
-                </Button>
-              </Card>
+                  <h2 className="text-xl font-semibold">{post.title}</h2>
+                  <p className="mt-1 text-xs text-foreground/50">
+                    {t("articles.postedBy", {
+                      date: formatDate(post.datetime, locale, true),
+                      author: post.adminName ?? "-",
+                    })}
+                  </p>
+                  <div
+                    className="mt-3 text-foreground/75 line-clamp-2"
+                    dangerouslySetInnerHTML={{ __html: post.para }}
+                  />
+                  <Button
+                    type="link"
+                    className="mt-4! px-0! text-primary! hover:text-primary/70!"
+                    onClick={() => router.push(`/article/${post.slug}`)}
+                  >
+                    {t("common.readMore")}
+                  </Button>
+                </Card>
               );
             })
           )}
