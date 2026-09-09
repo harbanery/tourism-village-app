@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Alert, App, Button, Card, Form, Input, Typography } from "antd";
-import { InfoCircleOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
+import { App, Button, Card, Form, Input } from "antd";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -100,26 +100,6 @@ export default function AdminLoginPage() {
             </Button>
           </Form.Item>
         </Form>
-        <Alert
-          type="info"
-          showIcon
-          icon={<InfoCircleOutlined />}
-          title={t("admin.login.credentials.title")}
-          description={
-            <div className="flex flex-col gap-0.5">
-              <Typography.Text className="text-xs!">
-                {t("admin.role.MASTER")}: masteradmin / Admin#1234
-              </Typography.Text>
-              <Typography.Text className="text-xs!">
-                {t("admin.role.VIEWER")}: vieweradmin / Viewer#1234
-              </Typography.Text>
-              <Typography.Text className="text-xs!">
-                {t("admin.role.AUTHOR")}: authoradmin / Author#1234
-              </Typography.Text>
-            </div>
-          }
-          className="mt-2!"
-        />
         <p className="mt-4 text-center text-sm text-foreground/60">
           {t("admin.login.backToSite")}
         </p>

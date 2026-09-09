@@ -1,3 +1,4 @@
+import { NODE_ENV } from "@/config/variables";
 import { PrismaClient } from "@prisma/client";
 
 /**
@@ -10,8 +11,7 @@ const globalForPrisma = globalThis as unknown as {
 
 function createPrismaClient(): PrismaClient {
   const client = new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    log: NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
   client.$connect().catch((err) => {
     console.error("[prisma] gagal koneksi awal:", err);
@@ -21,7 +21,7 @@ function createPrismaClient(): PrismaClient {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {

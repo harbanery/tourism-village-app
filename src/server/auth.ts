@@ -2,7 +2,12 @@ import { randomBytes, timingSafeEqual, createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import prisma from "@/server/db";
-import { ADMIN_SESSION_COOKIE, SESSION_TTL_HOURS, USER_SESSION_COOKIE } from "@/config/variables";
+import {
+  ADMIN_SESSION_COOKIE,
+  NODE_ENV,
+  SESSION_TTL_HOURS,
+  USER_SESSION_COOKIE,
+} from "@/config/variables";
 import type { AuthAdmin, AuthUser } from "@prisma/client";
 
 /**
@@ -87,7 +92,11 @@ export async function isIpBlocked(
 export async function recordFailedAttempt(
   ipAddress: string,
   scope: RateLimitScope,
-): Promise<{ blocked: boolean; blockedUntil: Date | null; attemptCount: number }> {
+): Promise<{
+  blocked: boolean;
+  blockedUntil: Date | null;
+  attemptCount: number;
+}> {
   const existing = await prisma.loginAttempt.findUnique({
     where: attemptKey(ipAddress, scope),
   });
@@ -213,7 +222,11 @@ export async function validateSession(
       .catch(() => {});
     return null;
   }
-  return { id: session.id, userId: session.userId, expiresAt: session.expiresAt };
+  return {
+    id: session.id,
+    userId: session.userId,
+    expiresAt: session.expiresAt,
+  };
 }
 
 export async function destroySession(
@@ -223,13 +236,9 @@ export async function destroySession(
   if (!token) return;
   const hashed = hashSessionId(token);
   if (scope === "admin") {
-    await prisma.adminSession
-      .delete({ where: { id: hashed } })
-      .catch(() => {});
+    await prisma.adminSession.delete({ where: { id: hashed } }).catch(() => {});
   } else {
-    await prisma.userSession
-      .delete({ where: { id: hashed } })
-      .catch(() => {});
+    await prisma.userSession.delete({ where: { id: hashed } }).catch(() => {});
   }
 }
 
@@ -244,7 +253,7 @@ export function sessionCookieOptions(
     value: token,
     expires: expiresAt,
     path: "/",
-    secure: process.env.NODE_ENV === "production",
+    secure: NODE_ENV === "production",
     httpOnly: true,
     sameSite: "lax" as const,
   };

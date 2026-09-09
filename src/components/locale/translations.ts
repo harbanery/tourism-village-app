@@ -296,7 +296,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.button": "Masuk",
     "auth.login.forgot": "Lupa Password?",
     "auth.login.noAccount": "Belum punya akun?",
-    "auth.login.credentialsTitle": "Kredensial demo (seed):",
     "auth.login.invalidRemaining":
       "Email/password salah. Sisa percobaan: {count}",
     "auth.register.successOtp":
@@ -613,8 +612,21 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Data yang dihapus tidak dapat dikembalikan. Lanjutkan?",
     "admin.footer.text": "© {year} DesakuWisataku",
     "admin.login.title": "Masuk Admin",
-    "admin.login.credentials.title": "Kredensial default (seed):",
     "admin.login.backToSite": "Kembali ke situs web",
+    "admin.dev.title": "Panel Dev",
+    "admin.dev.expireBtn": "Expire Order",
+    "admin.dev.expireTooltip":
+      "Jalankan sweep order PENDING kedaluwarsa → CANCELED (POST /api/cron/expire-orders).",
+    "admin.dev.expireSuccess": "Order di-expire: {val}",
+    "admin.dev.reminderBtn": "Pengingat H-1",
+    "admin.dev.reminderTooltip":
+      "Kirim notifikasi/email pengingat jadwal H-1 (POST /api/cron/trip-reminder).",
+    "admin.dev.reminderSuccess": "Pengingat terkirim: {val}",
+    "admin.dev.summaryBtn": "Ringkasan Harian",
+    "admin.dev.summaryTooltip":
+      "Kirim ringkasan harian order & pendapatan ke admin (POST /api/cron/daily-summary).",
+    "admin.dev.summarySuccess": "Ringkasan harian terkirim",
+    "admin.dev.failed": "Gagal menjalankan endpoint.",
     "admin.profile.title": "Profil Admin",
     "admin.profile.editHint": "Hanya avatar dan nama yang dapat diubah.",
     "admin.profile.avatarHint": "Klik avatar untuk mengunggah foto (maks 2MB)",
@@ -909,7 +921,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.button": "Login",
     "auth.login.forgot": "Forgot Password?",
     "auth.login.noAccount": "No account yet?",
-    "auth.login.credentialsTitle": "Demo credentials (seed):",
     "auth.login.invalidRemaining":
       "Invalid email/password. Attempts left: {count}",
     "auth.register.successOtp":
@@ -1220,8 +1231,21 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.deleteConfirm": "Deleted data cannot be restored. Continue?",
     "admin.footer.text": "© {year} DesakuWisataku",
     "admin.login.title": "Admin Login",
-    "admin.login.credentials.title": "Default credentials (seed):",
     "admin.login.backToSite": "Back to website",
+    "admin.dev.title": "Dev Panel",
+    "admin.dev.expireBtn": "Expire Orders",
+    "admin.dev.expireTooltip":
+      "Run sweep of expired PENDING orders → CANCELED (POST /api/cron/expire-orders).",
+    "admin.dev.expireSuccess": "Orders expired: {val}",
+    "admin.dev.reminderBtn": "Trip Reminder",
+    "admin.dev.reminderTooltip":
+      "Send H-1 trip schedule reminders (POST /api/cron/trip-reminder).",
+    "admin.dev.reminderSuccess": "Reminders sent: {val}",
+    "admin.dev.summaryBtn": "Daily Summary",
+    "admin.dev.summaryTooltip":
+      "Send daily order & revenue summary to admins (POST /api/cron/daily-summary).",
+    "admin.dev.summarySuccess": "Daily summary sent",
+    "admin.dev.failed": "Failed to run endpoint.",
     "admin.profile.title": "Admin Profile",
     "admin.profile.editHint": "Only the avatar and name can be edited.",
     "admin.profile.avatarHint": "Click the avatar to upload a photo (max 2MB)",

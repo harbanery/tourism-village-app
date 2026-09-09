@@ -73,7 +73,7 @@ function stayMultiplier(schedule: ScheduleValue | undefined): number {
 function MidtransLogo({ className }: { className?: string }) {
   return (
     <Image
-      src="/images/partners/Midtrans.png"
+      src="/images/midtrans.png"
       alt="Midtrans"
       width={83}
       height={16}

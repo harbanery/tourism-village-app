@@ -2,12 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Alert, App, Button, Card, Form, Input, Typography } from "antd";
-import {
-  InfoCircleOutlined,
-  LockOutlined,
-  MailOutlined,
-} from "@ant-design/icons";
+import { App, Button, Card, Form, Input } from "antd";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { useMounted } from "@/helpers/useMounted";
 
@@ -108,18 +104,6 @@ export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
             </Button>
           </Form.Item>
         </Form>
-        <Alert
-          type="info"
-          showIcon
-          icon={<InfoCircleOutlined />}
-          title={t("auth.login.credentialsTitle")}
-          description={
-            <Typography.Text className="text-xs!">
-              raihan@example.com / User#1234
-            </Typography.Text>
-          }
-          className="mb-4!"
-        />
         <div className="text-center space-y-2 text-sm">
           <p>
             <button

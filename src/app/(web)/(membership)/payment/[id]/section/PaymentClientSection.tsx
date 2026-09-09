@@ -151,7 +151,7 @@ function QrisLogo({ className }: { className?: string }) {
     >
       {/* SVG lokal → unoptimized (image optimizer Next menolak .svg). */}
       <Image
-        src="/images/partners/qris.svg"
+        src="/images/qris.svg"
         alt="QRIS"
         width={48}
         height={18}
@@ -165,7 +165,7 @@ function QrisLogo({ className }: { className?: string }) {
 function MidtransLogo({ className }: { className?: string }) {
   return (
     <Image
-      src="/images/partners/Midtrans.png"
+      src="/images/midtrans.png"
       alt="Midtrans"
       width={83}
       height={16}
