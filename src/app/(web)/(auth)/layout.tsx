@@ -11,9 +11,11 @@ import { HeroBackground } from "@/components/custom/hero-background/HeroBackgrou
  * agar terbaca di atas gambar gelap, termasuk tombol bahasa yang bukan
  * komponen antd (selector &_button mencakup keduanya).
  *
- * Kartu form rata tengah (atas-bawah kiri-kanan). Konten card yang lebih
- * tinggi dari layar tidak dipaksa center: container min-height (bukan
- * height fixed) + padding bawah sehingga halaman ikut di-scroll.
+ * Toggle bahasa + tema FIXED di pojok kanan atas (tidak mengambil ruang
+ * alur halaman) sehingga seluruh tinggi layar tersedia untuk kartu auth.
+ * Kartu rata tengah (atas-bawah kiri-kanan); konten yang lebih tinggi
+ * dari layar tidak dipaksa center — container min-height (bukan height
+ * fixed) sehingga halaman ikut di-scroll.
  * Halaman sudah login tidak bisa diakses (guard di page + proxy).
  */
 export default function AuthLayout({
@@ -22,17 +24,15 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-dvh flex-1 flex-col">
+    <div className="relative flex min-h-dvh flex-1 items-center justify-center px-4">
       <HeroBackground />
-      {/* Bar atas minimal: hanya toggle bahasa + tema (putih di atas hero,
-          baik light maupun dark mode — background selalu gambar gelap). */}
-      <div className="flex items-center justify-end gap-1 px-4 py-3 [&_button]:text-white!">
+      {/* Toggle bahasa + tema: fixed di pojok kanan atas (putih di atas
+          hero, baik light maupun dark mode — background selalu gelap). */}
+      <div className="fixed top-3 right-4 z-10 flex items-center gap-1 [&_button]:text-white!">
         <LanguageToggle />
         <ThemeToggle />
       </div>
-      <div className="flex flex-1 items-center justify-center px-4">
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
