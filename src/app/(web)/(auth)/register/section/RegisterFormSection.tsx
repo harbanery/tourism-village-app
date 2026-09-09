@@ -70,18 +70,21 @@ export function RegisterFormSection() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-lg px-4 py-8">
-      <Card>
-        <h1 className="text-2xl font-bold text-center">
+    // Varian compact: form register berisi 4 input + CTA — dipadatkan
+    // (padding & margin form item dikurangi) agar kartu tetap muat dalam
+    // satu layar tanpa scroll (permintaan layout auth).
+    <div className="mx-auto w-full max-w-lg px-4 py-6">
+      <Card styles={{ body: { padding: 20 } }}>
+        <h1 className="text-xl font-bold text-center">
           {t("auth.register.title")}
         </h1>
-        <p className="mt-1 text-center text-foreground/60">
+        <p className="mt-0.5 text-center text-sm text-foreground/60">
           {t("auth.register.subtitle")}
         </p>
         <Form
           form={form}
           layout="vertical"
-          className="mt-6!"
+          className="mt-4! [&_.ant-form-item]:mb-4!"
           onFinish={handleRegister}
           disabled={loading}
         >
@@ -152,7 +155,7 @@ export function RegisterFormSection() {
             </Button>
           </Form.Item>
         </Form>
-        <p className="text-center text-sm text-foreground/60">
+        <p className="mt-1 text-center text-sm text-foreground/60">
           {t("auth.register.haveAccount")}{" "}
           <button
             type="button"

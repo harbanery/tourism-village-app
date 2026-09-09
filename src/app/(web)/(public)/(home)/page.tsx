@@ -3,7 +3,7 @@ import { getActivePackages } from "@/services/packageService";
 import { getPublishedReviews } from "@/services/reviewService";
 import { getActiveSponsors } from "@/services/sponsorService";
 import { getActiveVideos } from "@/services/videoService";
-import { HeroBackground } from "./section/HeroBackground";
+import { HeroBackground } from "@/components/custom/hero-background/HeroBackground";
 import { HeroSection } from "./section/HeroSection";
 import { PopularSection } from "./section/PopularSection";
 import { FeatureSection } from "./section/FeatureSection";

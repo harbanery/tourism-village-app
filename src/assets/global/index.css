@@ -228,3 +228,39 @@ body {
     transform: translate(-50%, -50%) scale(0);
   }
 }
+
+/*
+ * Fix input/form antd di dark mode: pada state hover, active, dan focus
+ * background input berubah putih (terlihat di seluruh form web & admin).
+ * Dipaksa kembali ke warna container gelap (token colorBgContainer dark
+ * antd — #141414) di semua state; input di dalam affix wrapper (prefix/
+ * password) tetap transparan agar tidak menumpuk di atas wrapper.
+ */
+.dark .ant-input,
+.dark .ant-input-affix-wrapper,
+.dark .ant-select-selector,
+.dark .ant-input-number,
+.dark .ant-picker {
+  background-color: #141414 !important;
+}
+
+.dark .ant-input:hover,
+.dark .ant-input:active,
+.dark .ant-input:focus,
+.dark .ant-input-affix-wrapper:hover,
+.dark .ant-input-affix-wrapper:active,
+.dark .ant-input-affix-wrapper-focused,
+.dark .ant-select:hover .ant-select-selector,
+.dark .ant-select:active .ant-select-selector,
+.dark .ant-select-focused .ant-select-selector,
+.dark .ant-input-number:hover,
+.dark .ant-input-number-focused,
+.dark .ant-picker:hover,
+.dark .ant-picker-focused {
+  background-color: #141414 !important;
+}
+
+.dark .ant-input-affix-wrapper .ant-input,
+.dark .ant-select-selection-search-input {
+  background-color: transparent !important;
+}

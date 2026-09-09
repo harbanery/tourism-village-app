@@ -6,9 +6,10 @@ const HERO_IMAGES = ["/images/hero-a.png", "/images/hero-b.png"];
 const INTERVAL_MS = 7000;
 
 /**
- * Background parallax home: fixed di viewport sehingga terlihat "bergerak"
- * mengikuti scroll, dengan crossfade halus antara hero-a dan hero-b serta
- * gradient gelap agar konten tetap terbaca.
+ * Background parallax global (dipakai home dan halaman auth): fixed di
+ * viewport sehingga terlihat "bergerak" mengikuti scroll, dengan
+ * crossfade halus antara hero-a dan hero-b serta gradient gelap agar
+ * konten tetap terbaca.
  */
 export function HeroBackground() {
   const [index, setIndex] = useState(0);
