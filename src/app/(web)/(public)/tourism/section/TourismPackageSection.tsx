@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect } from "react";
 import { Anchor, Card, Col, Empty, Row, Tag } from "antd";
 import {
@@ -8,6 +9,7 @@ import {
   ShopOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
+import { displayImage } from "@/utils/image";
 import type { PlaceWithPackages } from "@/services/placeService";
 
 /**
@@ -87,12 +89,24 @@ export function TourismPackageSection({
                   styles={{ body: { padding: 0 } }}
                 >
                   {place.photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      alt={place.name}
-                      src={place.photo}
-                      className="h-52 w-full object-cover md:h-64"
-                    />
+                    (() => {
+                      // Cover Cloudinary dioptimasi CDN (f_auto,q_auto,w_1000).
+                      const { src, unoptimized } = displayImage(
+                        place.photo,
+                        1000,
+                      );
+                      return (
+                        <Image
+                          src={src}
+                          alt={place.name}
+                          width={1000}
+                          height={600}
+                          unoptimized={unoptimized}
+                          sizes="(max-width: 1024px) 100vw, 70vw"
+                          className="h-52 w-full object-cover md:h-64"
+                        />
+                      );
+                    })()
                   ) : (
                     <div className="grid h-52 w-full place-items-center bg-black/5 dark:bg-white/10 md:h-64">
                       <EnvironmentOutlined className="text-4xl! text-primary!" />

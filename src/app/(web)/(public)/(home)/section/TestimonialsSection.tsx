@@ -21,7 +21,7 @@ export function TestimonialsSection({
   const testimonials = reviews.slice(0, MAX_REVIEWS);
 
   return (
-    <section className="flex min-h-screen items-center bg-white dark:bg-[#141416]">
+    <section className="flex items-center bg-white dark:bg-[#141416]">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
         <div className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold">

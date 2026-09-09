@@ -33,12 +33,18 @@ function relativeTime(
 /**
  * Bell icon notifikasi in-app dengan popover daftar notifikasi.
  * Dipakai navbar web (default) dan header panel admin (endpoint admin).
- * Polling ringan tiap 60 detik — tanpa infra tambahan (pola rekomendasi).
+ *
+ * Web memakai stream SSE (`streamEndpoint`, rekomendasi 1.2) untuk
+ * update realtime tanpa polling; bila stream gagal (proxy memblokir,
+ * koneksi terputus) klien jatuh kembali ke polling ringan tiap 60
+ * detik. Admin (tanpa streamEndpoint) tetap polling.
  */
 export function NotificationBell({
   endpoint = "/api/web/notifications",
+  streamEndpoint,
 }: {
   endpoint?: string;
+  streamEndpoint?: string;
 }) {
   const { t } = useT();
   const router = useRouter();
@@ -65,15 +71,54 @@ export function NotificationBell({
     }
   }, [endpoint]);
 
+  /** Gabungkan notifikasi baru dari SSE ke daftar (dedupe + cap 20). */
+  const mergeNotification = useCallback((incoming: NotificationItem) => {
+    setItems((prev) =>
+      [incoming, ...prev.filter((row) => row.id !== incoming.id)].slice(0, 20),
+    );
+    if (!incoming.isRead) {
+      setUnreadCount((prev) => prev + 1);
+    }
+  }, []);
+
   useEffect(() => {
     void Promise.resolve().then(fetchNotifications);
-    // Polling hanya saat tab terlihat — tab di background tidak menjalankan
-    // request periodik (rekomendasi 1.3); kembali terlihat → langsung segar.
-    const interval = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        void Promise.resolve().then(fetchNotifications);
-      }
-    }, 60_000);
+
+    /** Fallback polling 60 detik (dipakai admin / saat SSE gagal). */
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+    const startPolling = () => {
+      if (pollInterval) return;
+      pollInterval = setInterval(() => {
+        if (document.visibilityState === "visible") {
+          void Promise.resolve().then(fetchNotifications);
+        }
+      }, 60_000);
+    };
+
+    // Stream SSE notifikasi realtime (rekomendasi 1.2) — hanya bila
+    // endpoint stream tersedia (web). Gagal → tutup & polling fallback.
+    let source: EventSource | null = null;
+    if (streamEndpoint && typeof EventSource !== "undefined") {
+      source = new EventSource(streamEndpoint);
+      source.addEventListener("notification", (event) => {
+        try {
+          const payload = JSON.parse((event as MessageEvent<string>).data);
+          mergeNotification(payload as NotificationItem);
+        } catch {
+          // Payload tidak valid — abaikan.
+        }
+      });
+      source.onerror = () => {
+        source?.close();
+        source = null;
+        startPolling();
+      };
+    } else {
+      startPolling();
+    }
+
+    // Kembali terlihat → langsung segarkan (menutup celah SSE/polling
+    // saat tab di background).
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         void Promise.resolve().then(fetchNotifications);
@@ -81,10 +126,11 @@ export function NotificationBell({
     };
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
-      clearInterval(interval);
+      source?.close();
+      if (pollInterval) clearInterval(pollInterval);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [fetchNotifications]);
+  }, [fetchNotifications, mergeNotification, streamEndpoint]);
 
   /** Tandai satu notifikasi dibaca lalu buka link-nya (bila ada). */
   const handleItemClick = async (item: NotificationItem) => {

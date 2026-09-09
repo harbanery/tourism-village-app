@@ -191,7 +191,10 @@ export function Navbar() {
           <div className={[actionWrap, "flex items-center"].join(" ")}>
             <LanguageToggle />
             <ThemeToggle />
-            {user && <NotificationBell />}
+            {/* SSE realtime (rekomendasi 1.2) — fallback polling otomatis. */}
+            {user && (
+              <NotificationBell streamEndpoint="/api/web/notifications/stream" />
+            )}
           </div>
           {user ? (
             <Dropdown

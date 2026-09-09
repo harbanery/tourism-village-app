@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Card, Empty } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
+import { displayImage } from "@/utils/image";
 import type { PlaceWithPackages } from "@/services/placeService";
 
 const MAX_PLACES = 3;
@@ -15,17 +17,26 @@ function PlaceCard({
   place: PlaceWithPackages;
   onClick: () => void;
 }) {
+  // Foto Cloudinary dioptimasi CDN (f_auto,q_auto,w_800) — kartu grid
+  // maksimal ~1/3 layar; sizes untuk fallback optimizer non-Cloudinary.
+  const { src, unoptimized } = place.photo
+    ? displayImage(place.photo, 800)
+    : { src: null, unoptimized: true };
+
   return (
     <Card
       hoverable
       className="h-full! cursor-pointer!"
       onClick={onClick}
       cover={
-        place.photo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+        place.photo && src ? (
+          <Image
+            src={src}
             alt={place.name}
-            src={place.photo}
+            width={800}
+            height={480}
+            unoptimized={unoptimized}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="h-48 w-full object-cover"
           />
         ) : (

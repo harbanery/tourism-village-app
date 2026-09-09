@@ -40,10 +40,10 @@ export default async function HomePage() {
       <HeroSection />
       <PopularSection places={places} />
       <FeatureSection />
-      <TestimonialsSection reviews={reviews} />
       <PackagesSection packages={packages} />
-      <SponsorsSection sponsors={sponsors} />
       <DocumentationSection videos={videos} />
+      <TestimonialsSection reviews={reviews} />
+      <SponsorsSection sponsors={sponsors} />
     </div>
   );
 }

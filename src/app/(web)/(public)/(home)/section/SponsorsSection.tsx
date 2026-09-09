@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useT } from "@/components/locale/LocaleProvider";
+import { displayImage } from "@/utils/image";
 import type { ActiveSponsor } from "@/services/sponsorService";
 
 /** Batas jumlah sponsor statis — lebih dari ini memakai marquee. */
@@ -10,17 +12,23 @@ const STATIC_LIMIT = 5;
  * Logo sponsor (gambar saja, tinggi seragam, rasio asli dipertahankan).
  * Logo bertanda invertDark (logo gelap seperti The North Face) dibalik
  * warnanya HANYA di dark mode via filter invert — di light mode tampil
- * apa adanya sehingga logo berwarna tidak rusak.
+ * apa adanya sehingga logo berwarna tidak rusak. Logo Cloudinary sudah
+ * bertransformasi (f_auto,q_auto,w_320) — dimensi atribut hanya hint
+ * rasio; CSS max-w/max-h + object-contain menjaga tampilan logo.
  */
 function SponsorLogo({ sponsor }: { sponsor: ActiveSponsor }) {
+  const { src, unoptimized } = displayImage(sponsor.filename, 320);
+
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={sponsor.filename}
+    <Image
+      src={src}
       alt={sponsor.name}
+      width={320}
+      height={256}
+      unoptimized={unoptimized}
       title={sponsor.name}
       className={[
-        "max-w-40 max-h-32 shrink-0 cursor-pointer object-contain opacity-60",
+        "max-w-40 max-h-32 shrink-0! cursor-pointer object-contain opacity-60",
         "transition-opacity duration-500 hover:opacity-100",
         sponsor.invertDark ? "dark:invert" : "",
       ].join(" ")}

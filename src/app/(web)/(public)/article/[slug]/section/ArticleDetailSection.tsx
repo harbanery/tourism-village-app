@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Card, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate } from "@/utils/format";
+import { displayImage } from "@/utils/image";
 import type { WebBlogDetail } from "@/services/blogService";
 
 export function ArticleDetailSection({ post }: { post: WebBlogDetail | null }) {
@@ -24,12 +26,23 @@ export function ArticleDetailSection({ post }: { post: WebBlogDetail | null }) {
         <Card
           cover={
             post.filename ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                alt={post.title}
-                src={post.filename}
-                className="max-h-96 w-full object-cover"
-              />
+              // LCP halaman detail — priority agar cover dimuat lebih
+              // awal (rekomendasi 1.1); Cloudinary f_auto,q_auto,w_960.
+              (() => {
+                const { src, unoptimized } = displayImage(post.filename, 960);
+                return (
+                  <Image
+                    src={src}
+                    alt={post.title}
+                    width={960}
+                    height={540}
+                    priority
+                    unoptimized={unoptimized}
+                    sizes="(max-width: 896px) 100vw, 896px"
+                    className="max-h-96 min-h-48 w-full object-cover"
+                  />
+                );
+              })()
             ) : (
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}

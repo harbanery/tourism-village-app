@@ -93,6 +93,24 @@ export async function getUserNotifications(
   return rows.map(toDto);
 }
 
+/**
+ * Notifikasi user yang dibuat SETELAH `since` (terbaru duluan) —
+ * dipakai stream SSE (rekomendasi 1.2): endpoint menanyakannya
+ * berkala lalu mendorong notifikasi baru ke klien.
+ */
+export async function getUserNotificationsSince(
+  userId: string,
+  since: Date,
+  take = 20,
+): Promise<NotificationDto[]> {
+  const rows = await prisma.notification.findMany({
+    where: { userId, createdAt: { gt: since } },
+    orderBy: { createdAt: "desc" },
+    take,
+  });
+  return rows.map(toDto);
+}
+
 /** Jumlah notifikasi belum dibaca milik user. */
 export async function countUnreadUserNotifications(
   userId: string,

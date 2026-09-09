@@ -1,11 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Empty, Input, Select, Spin } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/locale/LocaleProvider";
 import { formatDate } from "@/utils/format";
+import { displayImage } from "@/utils/image";
 import type { WebBlog } from "@/services/blogService";
 import { ArchiveSection } from "./ArchiveSection";
 
@@ -121,15 +123,21 @@ export function ArticleListSection({ posts }: { posts: WebBlog[] }) {
               />
             </Card>
           ) : (
-            visiblePosts.map((post) => (
+            visiblePosts.map((post) => {
+              // Cover Cloudinary dioptimasi CDN (f_auto,q_auto,w_840).
+              const { src, unoptimized } = displayImage(post.filename, 840);
+              return (
               <Card
                 key={post.id}
                 cover={
                   post.filename ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
+                      src={src}
                       alt={post.title}
-                      src={post.filename}
+                      width={840}
+                      height={504}
+                      unoptimized={unoptimized}
+                      sizes="(max-width: 1024px) 100vw, 65vw"
                       className="h-56 w-full object-cover"
                     />
                   ) : (
@@ -160,7 +168,8 @@ export function ArticleListSection({ posts }: { posts: WebBlog[] }) {
                   {t("common.readMore")}
                 </Button>
               </Card>
-            ))
+              );
+            })
           )}
         </div>
 
