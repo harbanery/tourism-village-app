@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, Empty, Rate } from "antd";
-import { useT } from "@/components/locale/LocaleProvider";
-import type { PublishedReview } from "@/services/reviewService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import type { PublishedReview } from "@/services/review";
 
 const MAX_REVIEWS = 3;
 

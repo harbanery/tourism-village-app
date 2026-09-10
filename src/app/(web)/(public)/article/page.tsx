@@ -1,4 +1,4 @@
-import { getActiveBlogs } from "@/services/blogService";
+import { getActiveBlogs } from "@/services/blog";
 import { ArticleListSection } from "./section/ArticleListSection";
 
 /**

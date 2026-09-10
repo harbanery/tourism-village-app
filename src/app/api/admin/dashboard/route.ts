@@ -1,10 +1,10 @@
-import prisma from "@/server/db";
-import { requireAdmin } from "@/server/auth";
+import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import {
   getDashboardAnalytics,
   type DashboardPeriod,
-} from "@/services/dashboardService";
+} from "@/services/dashboard";
 
 /**
  * GET /api/admin/dashboard?period=7|30|90 - statistik panel admin.

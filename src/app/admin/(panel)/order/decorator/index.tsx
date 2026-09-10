@@ -17,11 +17,11 @@ import {
   dateSorter,
   numberSorter,
   textSorter,
-} from "@/components/admin/table";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import LoaderPage from "@/components/admin/loader";
-import { formatDate, formatRupiah } from "@/utils/format";
+} from "@/features/admin/components/ui/table";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import LoaderPage from "@/features/admin/components/ui/loader";
+import { formatDate, formatRupiah } from "@/utils/helpers";
 import OrderDetailDrawer from "./OrderDetailDrawer";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";

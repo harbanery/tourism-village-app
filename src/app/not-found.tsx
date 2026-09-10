@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button, Result } from "antd";
-import { translations, DEFAULT_LOCALE, translate } from "@/components/locale/translations";
+import { translations, DEFAULT_LOCALE, translate } from "@/components/i18n/translations";
 
 /** 404 global — navigasi kembali ke home via useRouter (locale default). */
 export default function NotFound() {

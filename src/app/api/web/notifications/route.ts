@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/server/auth";
+import { getCurrentUser } from "@/lib/auth";
 import {
   countUnreadUserNotifications,
   getUserNotifications,
   markUserNotificationsRead,
-} from "@/services/notificationService";
+} from "@/services/notification";
 
 /**
  * GET /api/web/notifications — daftar notifikasi user login (terbaru duluan)

@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { VideoCameraOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import type { ActiveVideo } from "@/services/videoService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import type { ActiveVideo } from "@/services/video";
 
 /**
  * Video dokumentasi di home — video pertama di-embed sebagai preview.

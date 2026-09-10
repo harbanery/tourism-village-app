@@ -1,6 +1,6 @@
-import prisma from "@/server/db";
-import { requireAdmin, adminCanWrite } from "@/server/auth";
-import { revalidatePublicCache } from "@/server/cache";
+import prisma from "@/lib/prisma";
+import { requireAdmin, adminCanWrite } from "@/lib/auth";
+import { revalidatePublicCache } from "@/utils/server/cache";
 import { NextResponse } from "next/server";
 
 /** GET /api/admin/places — semua tempat wisata + agregat paketnya. */

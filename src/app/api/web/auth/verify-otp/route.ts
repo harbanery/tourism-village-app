@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { verifyOtp, createResetToken } from "@/server/otp";
+import prisma from "@/lib/prisma";
+import { verifyOtp, createResetToken } from "@/lib/otp";
 
 /**
  * POST /api/web/auth/verify-otp — verifikasi kode OTP di halaman /otp.

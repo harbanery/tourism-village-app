@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/server/auth";
+import { requireAdmin } from "@/lib/auth";
 import {
   countUnreadAdminNotifications,
   getAdminNotifications,
   markAdminNotificationsRead,
-} from "@/services/notificationService";
+} from "@/services/notification";
 
 /**
  * GET /api/admin/notifications — daftar notifikasi admin login (terbaru

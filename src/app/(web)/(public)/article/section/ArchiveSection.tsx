@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, Collapse, Empty } from "antd";
-import { useT } from "@/components/locale/LocaleProvider";
-import type { WebBlog } from "@/services/blogService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import type { WebBlog } from "@/services/blog";
 
 /** Tombol bulan arsip — klik memfilter daftar artikel secara lokal
  *  (bulan aktif diklik lagi untuk menghapus filter). */

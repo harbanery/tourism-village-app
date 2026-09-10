@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentAdmin } from "@/server/auth";
+import { getCurrentAdmin } from "@/lib/auth";
 
 /** GET /api/admin/auth/session — admin yang sedang login. */
 export async function GET() {

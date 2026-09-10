@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin, adminCanWrite, adminCanWriteBlog } from "@/server/auth";
+import { requireAdmin, adminCanWrite, adminCanWriteBlog } from "@/lib/auth";
 import {
   destroyCloudinaryAsset,
   publicIdFromUrl,
   resolveUploadFolder,
   signCloudinaryParams,
-} from "@/server/cloudinary";
+} from "@/lib/cloudinary";
+import {
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+  CLOUDINARY_CLOUD_NAME,
+} from "@/utils/config/variables";
 
 /** Folder Cloudinary yang diizinkan per sumber upload. */
 const ALLOWED_FOLDERS = [
@@ -37,12 +42,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
+    if (
+      !CLOUDINARY_CLOUD_NAME ||
+      !CLOUDINARY_API_KEY ||
+      !CLOUDINARY_API_SECRET
+    ) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "Cloudinary belum dikonfigurasi. Isi NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, dan CLOUDINARY_API_SECRET di .env.",
+            "Cloudinary belum dikonfigurasi. Isi CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, dan CLOUDINARY_API_SECRET di .env.",
         },
         { status: 500 },
       );
@@ -81,25 +90,18 @@ export async function POST(request: NextRequest) {
       folder: folder,
     };
 
-    const signature = signCloudinaryParams(
-      params,
-      process.env.CLOUDINARY_API_SECRET || "",
-    );
+    const signature = signCloudinaryParams(params, CLOUDINARY_API_SECRET || "");
 
     const formData = new FormData();
-    formData.append(
-      "file",
-      new Blob([buffer], { type: file.type }),
-      filename,
-    );
-    formData.append("api_key", process.env.CLOUDINARY_API_KEY || "");
+    formData.append("file", new Blob([buffer], { type: file.type }), filename);
+    formData.append("api_key", CLOUDINARY_API_KEY || "");
     formData.append("timestamp", uploadTimestamp.toString());
     formData.append("public_id", filename);
     formData.append("folder", folder);
     formData.append("signature", signature);
 
     const cloudinaryResponse = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
       {
         method: "POST",
         body: formData,
@@ -127,8 +129,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Upload error:", error);
     return NextResponse.json(
       { success: false, error: `Failed to upload file: ${message}` },
@@ -149,8 +150,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const pathParam = searchParams.get("path");
     const urlParam = searchParams.get("url");
-    const publicId =
-      pathParam ?? (urlParam ? publicIdFromUrl(urlParam) : null);
+    const publicId = pathParam ?? (urlParam ? publicIdFromUrl(urlParam) : null);
 
     if (!publicId) {
       return NextResponse.json(
@@ -169,8 +169,7 @@ export async function DELETE(request: NextRequest) {
       message: "Successfully deleted asset from Cloudinary",
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Delete error:", error);
     return NextResponse.json(
       { success: false, error: `Failed to delete file: ${message}` },

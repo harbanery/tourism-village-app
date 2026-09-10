@@ -1,4 +1,4 @@
-import { FormLayout } from "@/models/form";
+import { FormLayout } from "@/features/admin/types";
 
 /** Form tambah admin (MASTER saja). Password digenerate server-side. */
 export const adminFormLayout: FormLayout[] = [

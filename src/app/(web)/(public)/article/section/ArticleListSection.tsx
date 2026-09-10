@@ -5,10 +5,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Empty, Input, Spin, Tooltip } from "antd";
 import { ArrowUpOutlined, SearchOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { formatDate } from "@/utils/format";
-import { displayImage } from "@/utils/image";
-import type { WebBlog } from "@/services/blogService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { formatDate } from "@/utils/helpers";
+import { displayImage } from "@/utils/helpers";
+import type { WebBlog } from "@/services/blog";
 import { ArchiveSection } from "./ArchiveSection";
 
 /** Mode urutan daftar artikel. */

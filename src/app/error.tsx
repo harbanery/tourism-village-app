@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Result } from "antd";
-import { useT } from "@/components/locale/LocaleProvider";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 export default function RootError({
   error,

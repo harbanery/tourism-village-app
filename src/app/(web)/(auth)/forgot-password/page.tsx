@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/server/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { ForgotPasswordSection } from "./section/ForgotPasswordSection";
 
 /** Halaman lupa password — sudah login dialihkan ke beranda. */

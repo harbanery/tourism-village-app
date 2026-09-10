@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/server/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { OtpSection } from "./section/OtpSection";
 
 /**

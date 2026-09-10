@@ -1,5 +1,5 @@
-import { AdminSessionProvider } from "@/components/admin/session";
-import NotificationTest from "@/components/admin/dev/NotificationTest";
+import { AdminSessionProvider } from "@/features/admin/hooks/session";
+import NotificationTest from "@/features/admin/components/ui/dev/NotificationTest";
 
 /**
  * Layout bersama seluruh halaman admin (grup (auth) dan (panel)).

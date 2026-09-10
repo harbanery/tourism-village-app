@@ -1,6 +1,6 @@
-import prisma from "@/server/db";
-import { requireAdmin } from "@/server/auth";
-import { deleteCloudinaryUrls } from "@/server/cloudinary";
+import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
+import { deleteCloudinaryUrls } from "@/lib/cloudinary";
 import { NextResponse } from "next/server";
 
 /**

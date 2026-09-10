@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPublishedReviews } from "@/services/reviewService";
+import { getPublishedReviews } from "@/services/review";
 
 /** GET /api/web/reviews — ulasan publik untuk halaman depan. */
 export async function GET() {

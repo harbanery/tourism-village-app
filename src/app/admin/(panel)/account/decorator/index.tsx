@@ -21,21 +21,21 @@ import {
   StopOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import { useAdminSession } from "@/components/admin/session";
-import LoaderPage from "@/components/admin/loader";
-import FormAdmin from "@/components/admin/form";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import { useAdminSession } from "@/features/admin/hooks/session";
+import LoaderPage from "@/features/admin/components/ui/loader";
+import FormAdmin from "@/features/admin/components/ui/form";
 import {
   AdminTable,
   ROLE_TAG_COLORS,
   RowActions,
   textSorter,
   useAdminColumns,
-} from "@/components/admin/table";
-import { drawerBodyProps } from "@/helpers/drawer";
-import { asAppError } from "@/helpers/error";
-import { adminRoleOptions } from "@/helpers/menu";
+} from "@/features/admin/components/ui/table";
+import { drawerBodyProps } from "@/features/admin/utils/drawer";
+import { asAppError } from "@/features/admin/utils/error";
+import { adminRoleOptions } from "@/features/admin/utils/menu";
 import { adminFormLayout, adminRoleFormLayout } from "../config";
 
 interface AdminRow {

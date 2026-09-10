@@ -1,9 +1,9 @@
-import { getPlacesWithPackages } from "@/services/placeService";
-import { getActivePackages } from "@/services/packageService";
-import { getPublishedReviews } from "@/services/reviewService";
-import { getActiveSponsors } from "@/services/sponsorService";
-import { getActiveVideos } from "@/services/videoService";
-import { HeroBackground } from "@/components/custom/hero-background/HeroBackground";
+import { getPlacesWithPackages } from "@/services/place";
+import { getActivePackages } from "@/services/package";
+import { getPublishedReviews } from "@/services/review";
+import { getActiveSponsors } from "@/services/sponsor";
+import { getActiveVideos } from "@/services/video";
+import { HeroBackground } from "@/features/web/components/ui/hero-background/HeroBackground";
 import { HeroSection } from "./section/HeroSection";
 import { PopularSection } from "./section/PopularSection";
 import { FeatureSection } from "./section/FeatureSection";

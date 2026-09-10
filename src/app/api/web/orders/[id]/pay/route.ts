@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { getCurrentUser } from "@/server/auth";
-import { isPaymentExpired, paymentDeadline } from "@/server/orderExpiry";
-import { applyPaymentTransition } from "@/server/orderStatus";
-import { customerFromUser, ensureOrderQris } from "@/server/qris";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { isPaymentExpired, paymentDeadline } from "@/utils/server/orderExpiry";
+import { applyPaymentTransition } from "@/utils/server/orderStatus";
+import { customerFromUser, ensureOrderQris } from "@/lib/qris";
 
 /**
  * GET /api/web/orders/[id]/pay — lanjutkan pembayaran order PENDING.

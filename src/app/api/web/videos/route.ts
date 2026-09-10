@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getActiveVideos } from "@/services/videoService";
+import { getActiveVideos } from "@/services/video";
 
 /** GET /api/web/videos — video dokumentasi aktif (YouTube) untuk web. */
 export async function GET() {

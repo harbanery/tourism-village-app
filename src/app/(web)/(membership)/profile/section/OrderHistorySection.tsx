@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMounted } from "@/helpers/useMounted";
+import { useMounted } from "@/hooks/useMounted";
 import {
   App,
   Button,
@@ -24,10 +24,10 @@ import {
   CalendarOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { formatDate, formatRupiah } from "@/utils/format";
-import { downloadInvoicePdf } from "@/helpers/invoicePdf";
-import { issuePaymentAccess } from "@/helpers/paymentAccess";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { formatDate, formatRupiah } from "@/utils/helpers";
+import { downloadInvoicePdf } from "@/utils/pdf/invoicePdf";
+import { issuePaymentAccess } from "@/features/web/utils/paymentAccess";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 

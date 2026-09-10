@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/server/auth";
+import { getCurrentUser } from "@/lib/auth";
 
 /** GET /api/web/auth/session — user web yang sedang login. */
 export async function GET() {

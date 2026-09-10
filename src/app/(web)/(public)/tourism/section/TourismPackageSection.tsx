@@ -8,9 +8,9 @@ import {
   EnvironmentOutlined,
   ShopOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { displayImage } from "@/utils/image";
-import type { PlaceWithPackages } from "@/services/placeService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { displayImage } from "@/utils/helpers";
+import type { PlaceWithPackages } from "@/services/place";
 
 /**
  * Halaman wisata: penjelasan tiap tempat wisata (foto + deskripsi dari

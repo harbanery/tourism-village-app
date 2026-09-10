@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import { getCurrentUser } from "@/server/auth";
-import { getOrderForUser } from "@/services/orderService";
+import { getCurrentUser } from "@/lib/auth";
+import { getOrderForUser } from "@/services/order";
 import PaymentClientSection from "./section/PaymentClientSection";
 
 /**

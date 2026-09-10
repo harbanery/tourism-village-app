@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/server/auth";
-import { getActivePackages } from "@/services/packageService";
+import { getCurrentUser } from "@/lib/auth";
+import { getActivePackages } from "@/services/package";
 
 /**
  * GET /api/web/packages — paket wisata aktif untuk pengunjung web

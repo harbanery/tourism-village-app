@@ -1,5 +1,5 @@
-import prisma from "@/server/db";
-import { requireAdmin, adminCanWrite } from "@/server/auth";
+import prisma from "@/lib/prisma";
+import { requireAdmin, adminCanWrite } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { AdminRole, Status } from "@prisma/client";
 

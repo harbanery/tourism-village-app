@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/server/auth";
+import { getCurrentUser } from "@/lib/auth";
 import PackageClientSection from "./section/PackageClientSection";
 
 /** Halaman paket wisata — area membership, wajib login. */

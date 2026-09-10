@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPlacesWithPackages } from "@/services/placeService";
+import { getPlacesWithPackages } from "@/services/place";
 
 /**
  * GET /api/web/places — tempat wisata aktif + paket aktifnya + total

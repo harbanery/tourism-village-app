@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import AdminShell from "@/components/admin/layout";
-import AdminGuard from "@/components/admin/guard";
+import AdminShell from "@/features/admin/components/layout";
+import AdminGuard from "@/features/admin/components/ui/guard";
 
 export const metadata: Metadata = {
   title: "Panel Admin",

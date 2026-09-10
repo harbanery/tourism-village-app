@@ -10,10 +10,10 @@ import {
   StarFilled,
   StopOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import { useAdminSession } from "@/components/admin/session";
-import LoaderPage from "@/components/admin/loader";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import { useAdminSession } from "@/features/admin/hooks/session";
+import LoaderPage from "@/features/admin/components/ui/loader";
 import {
   AdminTable,
   RowActions,
@@ -21,9 +21,9 @@ import {
   numberSorter,
   textSorter,
   useAdminColumns,
-} from "@/components/admin/table";
-import { asAppError } from "@/helpers/error";
-import { formatDate } from "@/utils/format";
+} from "@/features/admin/components/ui/table";
+import { asAppError } from "@/features/admin/utils/error";
+import { formatDate } from "@/utils/helpers";
 
 interface TestimonialRow {
   id: string;

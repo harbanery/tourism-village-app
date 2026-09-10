@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { App, Col, Input, Row, Select } from "antd";
 import { FireOutlined, SearchOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import { readCart, writeCart } from "@/helpers/cart";
-import { issueCheckoutAccess } from "@/helpers/checkoutAccess";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import { readCart, writeCart } from "@/features/web/utils/cart";
+import { issueCheckoutAccess } from "@/features/web/utils/checkoutAccess";
 import {
   PackageCard,
   PackageListSection,

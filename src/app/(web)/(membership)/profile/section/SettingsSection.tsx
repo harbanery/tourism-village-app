@@ -23,9 +23,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import dayjs, { type Dayjs } from "dayjs";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import type { User } from "@/models";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import type { User } from "@/features/web/types";
 import type { ProfileSettings } from "../page";
 
 interface ProfileFormValues {

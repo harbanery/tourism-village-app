@@ -1,4 +1,4 @@
-import { FormLayout } from "@/models/form";
+import { FormLayout } from "@/features/admin/types";
 
 /**
  * Form blog (urutan): judul, slug, deskripsi (paragraf), foto, tempat wisata.

@@ -6,7 +6,7 @@ import {
   StarOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 /**
  * Halaman Tentang Kami: pengantar DesakuWisataku + nilai yang ditawarkan

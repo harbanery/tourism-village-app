@@ -14,13 +14,13 @@ import {
   theme,
 } from "antd";
 import { ArrowLeftOutlined, UserOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useAdminSession } from "@/components/admin/session";
-import LoaderPage from "@/components/admin/loader";
-import { ROLE_TAG_COLORS } from "@/components/admin/table";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { LanguageToggle } from "@/components/locale/LanguageToggle";
-import { asAppError } from "@/helpers/error";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useAdminSession } from "@/features/admin/hooks/session";
+import LoaderPage from "@/features/admin/components/ui/loader";
+import { ROLE_TAG_COLORS } from "@/features/admin/components/ui/table";
+import { ThemeToggle } from "@/components/ui/theme/ThemeToggle";
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { asAppError } from "@/features/admin/utils/error";
 
 interface ProfileFormValues {
   name?: string;

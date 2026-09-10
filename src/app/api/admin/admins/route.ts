@@ -1,9 +1,9 @@
 import { randomBytes } from "node:crypto";
-import prisma from "@/server/db";
-import { requireAdmin, adminCanWrite, hashPassword } from "@/server/auth";
-import { BASE_URL } from "@/config/variables";
-import { sendEmail } from "@/server/email";
-import { buildCredentialEmail } from "@/server/credentialEmail";
+import prisma from "@/lib/prisma";
+import { requireAdmin, adminCanWrite, hashPassword } from "@/lib/auth";
+import { BASE_URL } from "@/utils/config/variables";
+import { sendEmail } from "@/lib/email";
+import { buildCredentialEmail } from "@/utils/email/credentialEmail";
 import { NextResponse } from "next/server";
 
 /** Generate password acak kuat (tanpa karakter ambigu). */

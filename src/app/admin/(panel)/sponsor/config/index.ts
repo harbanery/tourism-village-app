@@ -1,4 +1,4 @@
-import { FormLayout } from "@/models/form";
+import { FormLayout } from "@/features/admin/types";
 
 /** Form sponsor: foto memakai form upload (Cloudinary), status takeout.
  * invertDark: logo berwarna gelap dibalik jadi putih di dark mode web. */

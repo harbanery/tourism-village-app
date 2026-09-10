@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { App, Button, Card, Form, Input } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { LanguageToggle } from "@/components/locale/LanguageToggle";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import { ThemeToggle } from "@/components/ui/theme/ThemeToggle";
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
 
 interface LoginFormValues {
   username: string;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { destroySession } from "@/server/auth";
-import { USER_SESSION_COOKIE } from "@/config/variables";
+import { destroySession } from "@/lib/auth";
+import { USER_SESSION_COOKIE } from "@/utils/config/variables";
 
 /** POST /api/web/auth/logout — hapus sesi user web. */
 export async function POST() {

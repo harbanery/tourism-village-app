@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/server/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { LoginFormSection } from "./section/LoginFormSection";
 
 /** Target default setelah login sukses. */

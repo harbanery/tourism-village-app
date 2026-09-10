@@ -7,7 +7,7 @@ import {
   StarOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 export function FeatureSection() {
   const { t } = useT();

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { CRON_SECRET, NODE_ENV } from "@/config/variables";
-import { sendTripReminders } from "@/server/orderEvents";
+import { CRON_SECRET, NODE_ENV } from "@/utils/config/variables";
+import { sendTripReminders } from "@/utils/server/orderEvents";
 
 /**
  * GET /api/cron/trip-reminder — pengingat jadwal H-1 keberangkatan.

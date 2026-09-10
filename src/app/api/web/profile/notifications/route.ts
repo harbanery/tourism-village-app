@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { getCurrentUser } from "@/server/auth";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 
 /**
  * PATCH /api/web/profile/notifications — preferensi notifikasi user

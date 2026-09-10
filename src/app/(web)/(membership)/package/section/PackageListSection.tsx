@@ -1,14 +1,14 @@
 "use client";
 
-import { useMounted } from "@/helpers/useMounted";
+import { useMounted } from "@/hooks/useMounted";
 import { Button, Card, Col, Empty, Row, Tag } from "antd";
 import {
   CheckCircleFilled,
   FireOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { formatRupiah } from "@/utils/format";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { formatRupiah } from "@/utils/helpers";
 
 /** Paket aktif dari DB (/api/web/packages, kelola di panel admin). */
 export interface WebPackage {

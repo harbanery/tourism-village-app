@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Card, Empty } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { displayImage } from "@/utils/image";
-import type { PlaceWithPackages } from "@/services/placeService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { displayImage } from "@/utils/helpers";
+import type { PlaceWithPackages } from "@/services/place";
 
 const MAX_PLACES = 3;
 

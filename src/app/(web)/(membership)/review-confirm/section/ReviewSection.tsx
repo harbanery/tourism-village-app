@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { App, Button, Input, Rate, Spin } from "antd";
-import { useT } from "@/components/locale/LocaleProvider";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 /** Durasi idle di halaman sebelum dialihkan ke beranda (1 menit). */
 const IDLE_TIMEOUT_MS = 60 * 1000;

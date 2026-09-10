@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import { peekReviewAccess, consumeReviewAccess } from "@/helpers/reviewAccess";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import { peekReviewAccess, consumeReviewAccess } from "@/features/web/utils/reviewAccess";
 
 /**
  * Konfirmasi pesanan sukses — halaman berlaku SEKALI: hanya bisa diakses

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { META_APP, META_DESCRIPTION, META_TITLE } from "@/config/variables";
+import { META_APP, META_DESCRIPTION, META_TITLE } from "@/utils/config/variables";
 
 /**
  * Web App Manifest (PWA) — pola progress-self.

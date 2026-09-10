@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { getCurrentUser } from "@/server/auth";
-import { getUserOrders } from "@/services/orderService";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { getUserOrders } from "@/services/order";
 
 /** GET /api/web/profile — data user + riwayat pesanan. */
 export async function GET() {

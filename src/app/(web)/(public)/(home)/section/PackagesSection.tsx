@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 import { Button, Card, Col, Row } from "antd";
 import { ArrowRightOutlined, CheckCircleFilled } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { readCart, writeCart } from "@/helpers/cart";
-import { formatRupiah } from "@/utils/format";
-import type { ActivePackage } from "@/services/packageService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { readCart, writeCart } from "@/features/web/utils/cart";
+import { formatRupiah } from "@/utils/helpers";
+import type { ActivePackage } from "@/services/package";
 
 /**
  * "Pesan Sekarang": paket langsung masuk keranjang lalu dibawa ke

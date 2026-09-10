@@ -1,7 +1,7 @@
-import prisma from "@/server/db";
-import { requireAdmin, adminCanWriteBlog } from "@/server/auth";
-import { revalidatePublicCache } from "@/server/cache";
-import { blogSlugBase, uniqueBlogSlug } from "@/server/blogSlug";
+import prisma from "@/lib/prisma";
+import { requireAdmin, adminCanWriteBlog } from "@/lib/auth";
+import { revalidatePublicCache } from "@/utils/server/cache";
+import { blogSlugBase, uniqueBlogSlug } from "@/utils/server/blogSlug";
 import { NextResponse } from "next/server";
 
 /** GET /api/admin/blogs — semua blog + penulis. */

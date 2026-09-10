@@ -1,6 +1,6 @@
-import { Navbar } from "@/components/web/navbar";
-import { Footer } from "@/components/web/footer";
-import { ScrollToTop } from "@/components/web/scroll-to-top";
+import { Navbar } from "@/features/web/components/layout/navbar";
+import { Footer } from "@/features/web/components/layout/footer";
+import { ScrollToTop } from "@/features/web/components/ui/scroll-to-top";
 
 export default function WebLayout({ children }: LayoutProps<"/">) {
   return (

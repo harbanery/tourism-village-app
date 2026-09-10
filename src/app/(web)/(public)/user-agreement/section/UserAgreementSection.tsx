@@ -1,7 +1,7 @@
 "use client";
 
 import { Anchor } from "antd";
-import { useT } from "@/components/locale/LocaleProvider";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 /** Kunci blok syarat & ketentuan (judul + isi per blok). */
 const TERMS_BLOCKS = ["s1", "s2", "s3", "s4", "s5"] as const;

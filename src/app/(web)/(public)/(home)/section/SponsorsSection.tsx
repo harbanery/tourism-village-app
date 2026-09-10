@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useT } from "@/components/locale/LocaleProvider";
-import { displayImage } from "@/utils/image";
-import type { ActiveSponsor } from "@/services/sponsorService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { displayImage } from "@/utils/helpers";
+import type { ActiveSponsor } from "@/services/sponsor";
 
 /** Batas jumlah sponsor statis — lebih dari ini memakai marquee. */
 const STATIC_LIMIT = 5;

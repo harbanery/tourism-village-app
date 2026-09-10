@@ -1,8 +1,8 @@
 ﻿import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/server/auth";
-import { getUserOrdersPage } from "@/services/orderService";
+import { getCurrentUser } from "@/lib/auth";
+import { getUserOrdersPage } from "@/services/order";
 import ProfileClientSection from "./section/ProfileClientSection";
-import type { User } from "@/models";
+import type { User } from "@/features/web/types";
 
 /** Preferensi & status verifikasi akun (dipakai panel pengaturan). */
 export interface ProfileSettings {

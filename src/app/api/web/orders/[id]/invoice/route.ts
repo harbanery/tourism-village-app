@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { getCurrentUser } from "@/server/auth";
-import { fetchMidtransStatus, isMidtransConfigured } from "@/server/midtrans";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { fetchMidtransStatus, isMidtransConfigured } from "@/lib/midtrans";
 
 /**
  * GET /api/web/orders/[id]/invoice — data bukti pembayaran (invoice)

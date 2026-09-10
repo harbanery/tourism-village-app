@@ -2,7 +2,7 @@
 
 import { Card, Empty } from "antd";
 import { VideoCameraOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 /**
  * Halaman dokumentasi (pengganti vlog + galeri): data foto/video desa

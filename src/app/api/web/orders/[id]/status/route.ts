@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { getCurrentUser } from "@/server/auth";
-import { fetchMidtransStatus, mapMidtransStatus } from "@/server/midtrans";
-import { isPaymentExpired } from "@/server/orderExpiry";
-import { applyPaymentTransition } from "@/server/orderStatus";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { fetchMidtransStatus, mapMidtransStatus } from "@/lib/midtrans";
+import { isPaymentExpired } from "@/utils/server/orderExpiry";
+import { applyPaymentTransition } from "@/utils/server/orderStatus";
 
 /**
  * GET /api/web/orders/[id]/status — periksa & sinkronkan status pembayaran.

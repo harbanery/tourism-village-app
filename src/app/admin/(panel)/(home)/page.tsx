@@ -13,15 +13,15 @@ import {
   StarOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import LoaderPage from "@/components/admin/loader";
-import RevenueTrendChart from "@/components/admin/chart/RevenueTrendChart";
-import OrdersStatusChart from "@/components/admin/chart/OrdersStatusChart";
-import StatusDoughnutChart from "@/components/admin/chart/StatusDoughnutChart";
-import TopPackagesChart from "@/components/admin/chart/TopPackagesChart";
-import RatioDoughnutChart from "@/components/admin/chart/RatioDoughnutChart";
-import { formatRupiah } from "@/utils/format";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import LoaderPage from "@/features/admin/components/ui/loader";
+import RevenueTrendChart from "@/features/admin/components/ui/chart/RevenueTrendChart";
+import OrdersStatusChart from "@/features/admin/components/ui/chart/OrdersStatusChart";
+import StatusDoughnutChart from "@/features/admin/components/ui/chart/StatusDoughnutChart";
+import TopPackagesChart from "@/features/admin/components/ui/chart/TopPackagesChart";
+import RatioDoughnutChart from "@/features/admin/components/ui/chart/RatioDoughnutChart";
+import { formatRupiah } from "@/utils/helpers";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 

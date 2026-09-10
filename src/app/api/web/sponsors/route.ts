@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getActiveSponsors } from "@/services/sponsorService";
+import { getActiveSponsors } from "@/services/sponsor";
 
 /** GET /api/web/sponsors — logo sponsor aktif untuk halaman depan. */
 export async function GET() {

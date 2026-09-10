@@ -1,4 +1,4 @@
-import { getPlacesWithPackages } from "@/services/placeService";
+import { getPlacesWithPackages } from "@/services/place";
 import { TourismPackageSection } from "./section/TourismPackageSection";
 
 /**

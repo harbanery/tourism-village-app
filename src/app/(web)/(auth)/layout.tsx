@@ -1,6 +1,6 @@
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { LanguageToggle } from "@/components/locale/LanguageToggle";
-import { HeroBackground } from "@/components/custom/hero-background/HeroBackground";
+import { ThemeToggle } from "@/components/ui/theme/ThemeToggle";
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { HeroBackground } from "@/features/web/components/ui/hero-background/HeroBackground";
 
 /**
  * Layout halaman auth (login, register, lupa/reset password, OTP).

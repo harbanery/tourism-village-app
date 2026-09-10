@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { getCurrentUser } from "@/server/auth";
-import { verifyOtp } from "@/server/otp";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { verifyOtp } from "@/lib/otp";
 
 /**
  * POST /api/web/profile/email/verify — verifikasi OTP ganti email

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { getCurrentUser, verifyPassword } from "@/server/auth";
-import { sendEmail, isEmailConfigured } from "@/server/email";
-import { createOtp } from "@/server/otp";
-import { buildOtpEmail } from "@/server/otpEmail";
-import { NODE_ENV } from "@/config/variables";
+import prisma from "@/lib/prisma";
+import { getCurrentUser, verifyPassword } from "@/lib/auth";
+import { sendEmail, isEmailConfigured } from "@/lib/email";
+import { createOtp } from "@/lib/otp";
+import { buildOtpEmail } from "@/utils/email/otpEmail";
+import { NODE_ENV } from "@/utils/config/variables";
 
 /**
  * POST /api/web/profile/email — minta ganti email (wajib login).

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { ADMIN_SESSION_COOKIE, USER_SESSION_COOKIE } from "@/config/variables";
+import { ADMIN_SESSION_COOKIE, USER_SESSION_COOKIE } from "@/utils/config/variables";
 
 /**
  * Proxy (pengganti middleware di Next.js 16) untuk proteksi rute.

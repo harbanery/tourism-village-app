@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { hashPassword, verifyPassword } from "@/server/auth";
-import { verifyResetToken } from "@/server/otp";
+import prisma from "@/lib/prisma";
+import { hashPassword, verifyPassword } from "@/lib/auth";
+import { verifyResetToken } from "@/lib/otp";
 
 /**
  * POST /api/web/auth/reset-password — set password baru memakai token

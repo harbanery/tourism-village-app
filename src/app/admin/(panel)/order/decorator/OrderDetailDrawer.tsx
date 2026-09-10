@@ -15,9 +15,9 @@ import {
   Typography,
 } from "antd";
 import { DownloadOutlined, QrcodeOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { formatDate, formatRupiah } from "@/utils/format";
-import { downloadInvoicePdf } from "@/helpers/invoicePdf";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { formatDate, formatRupiah } from "@/utils/helpers";
+import { downloadInvoicePdf } from "@/utils/pdf/invoicePdf";
 import type { OrderRow } from "./index";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";

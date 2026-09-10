@@ -8,10 +8,10 @@ import {
   WarningFilled,
   UserOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import type { User } from "@/models";
-import { formatDate } from "@/utils/format";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import type { User } from "@/features/web/types";
+import { formatDate } from "@/utils/helpers";
 import type { ProfileSettings } from "../page";
 
 export function ProfileInfoSection({

@@ -1,5 +1,5 @@
-import prisma from "@/server/db";
-import { requireAdmin } from "@/server/auth";
+import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 /** GET /api/admin/orders — semua pemesanan + user + item + log (MASTER | VIEWER). */

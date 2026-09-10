@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { LocaleProvider } from "@/components/locale/LocaleProvider";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { Analytics } from "@/components/vercel";
+import { LocaleProvider } from "@/components/i18n/LocaleProvider";
+import { ThemeProvider } from "@/components/ui/theme/ThemeProvider";
+import { Analytics } from "@/components/ui/vercel";
 import { geistSans, geistMono } from "@/utils/fonts/next-google";
 import {
   BASE_URL,
   META_APP,
   META_DESCRIPTION,
   META_TITLE,
-} from "@/config/variables";
+} from "@/utils/config/variables";
 import "@/assets/global/index.css";
 
 /** Fallback meta (pola progress-self: nilai dari env, fallback konstanta). */

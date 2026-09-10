@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { CRON_SECRET, NODE_ENV } from "@/config/variables";
-import { expireStalePendingOrders } from "@/server/orderExpiry";
+import { CRON_SECRET, NODE_ENV } from "@/utils/config/variables";
+import { expireStalePendingOrders } from "@/utils/server/orderExpiry";
 
 /**
  * GET /api/cron/expire-orders — sweep order PENDING kedaluwarsa → CANCELED

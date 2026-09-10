@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import prisma from "@/server/db";
+import prisma from "@/lib/prisma";
 import {
   RATE_LIMIT_SCOPES,
   clearFailedAttempts,
@@ -12,8 +12,8 @@ import {
   recordFailedAttempt,
   sessionCookieOptions,
   verifyPassword,
-} from "@/server/auth";
-import { USER_SESSION_COOKIE } from "@/config/variables";
+} from "@/lib/auth";
+import { USER_SESSION_COOKIE } from "@/utils/config/variables";
 
 function toRemainingMinutes(blockedUntil: Date | null | undefined): number {
   if (!blockedUntil) return LOGIN_BLOCK_MINUTES;

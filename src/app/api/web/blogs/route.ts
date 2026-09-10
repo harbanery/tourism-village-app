@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getActiveBlogs } from "@/services/blogService";
+import { getActiveBlogs } from "@/services/blog";
 
 /** GET /api/web/blogs — daftar blog aktif untuk halaman artikel web. */
 export async function GET() {

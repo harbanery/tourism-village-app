@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { sendEmail, isEmailConfigured } from "@/server/email";
-import { createOtp } from "@/server/otp";
-import { buildOtpEmail } from "@/server/otpEmail";
-import { NODE_ENV } from "@/config/variables";
+import prisma from "@/lib/prisma";
+import { sendEmail, isEmailConfigured } from "@/lib/email";
+import { createOtp } from "@/lib/otp";
+import { buildOtpEmail } from "@/utils/email/otpEmail";
+import { NODE_ENV } from "@/utils/config/variables";
 
 /**
  * POST /api/web/auth/forgot-password — minta OTP reset password.

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { CRON_SECRET, NODE_ENV } from "@/config/variables";
-import { buildDailySummary, sendDailySummary } from "@/server/orderEvents";
+import { CRON_SECRET, NODE_ENV } from "@/utils/config/variables";
+import { buildDailySummary, sendDailySummary } from "@/utils/server/orderEvents";
 
 /**
  * GET /api/cron/daily-summary — ringkasan harian order & pendapatan untuk

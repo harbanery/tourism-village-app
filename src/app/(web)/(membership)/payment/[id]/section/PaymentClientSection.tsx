@@ -12,14 +12,14 @@ import {
   LoadingOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
 import {
   peekPaymentAccess,
   consumePaymentAccess,
-} from "@/helpers/paymentAccess";
-import { issueReviewAccess } from "@/helpers/reviewAccess";
-import { formatRupiah, formatDate } from "@/utils/format";
+} from "@/features/web/utils/paymentAccess";
+import { issueReviewAccess } from "@/features/web/utils/reviewAccess";
+import { formatRupiah, formatDate } from "@/utils/helpers";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 

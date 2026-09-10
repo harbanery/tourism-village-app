@@ -1,4 +1,4 @@
-import { getActiveBlogBySlug } from "@/services/blogService";
+import { getActiveBlogBySlug } from "@/services/blog";
 import { ArticleDetailSection } from "./section/ArticleDetailSection";
 
 /**

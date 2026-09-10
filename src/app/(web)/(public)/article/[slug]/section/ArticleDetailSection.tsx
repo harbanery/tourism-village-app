@@ -4,10 +4,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Card, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { formatDate } from "@/utils/format";
-import { displayImage } from "@/utils/image";
-import type { WebBlogDetail } from "@/services/blogService";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { formatDate } from "@/utils/helpers";
+import { displayImage } from "@/utils/helpers";
+import type { WebBlogDetail } from "@/services/blog";
 
 export function ArticleDetailSection({ post }: { post: WebBlogDetail | null }) {
   const { t, locale } = useT();

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/server/db";
+import prisma from "@/lib/prisma";
 import {
   RATE_LIMIT_SCOPES,
   clearFailedAttempts,
@@ -7,11 +7,11 @@ import {
   hashPassword,
   isIpBlocked,
   recordFailedAttempt,
-} from "@/server/auth";
-import { NODE_ENV } from "@/config/variables";
-import { sendEmail, isEmailConfigured } from "@/server/email";
-import { createOtp } from "@/server/otp";
-import { buildOtpEmail } from "@/server/otpEmail";
+} from "@/lib/auth";
+import { NODE_ENV } from "@/utils/config/variables";
+import { sendEmail, isEmailConfigured } from "@/lib/email";
+import { createOtp } from "@/lib/otp";
+import { buildOtpEmail } from "@/utils/email/otpEmail";
 
 /**
  * POST /api/web/auth/register — registrasi user web (email + password).

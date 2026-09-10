@@ -17,15 +17,15 @@ import {
   Tabs,
 } from "antd";
 import { EditOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
-import { useMounted } from "@/helpers/useMounted";
-import { readCart, clearCart } from "@/helpers/cart";
-import { issuePaymentAccess } from "@/helpers/paymentAccess";
+import { useT } from "@/components/i18n/LocaleProvider";
+import { useMounted } from "@/hooks/useMounted";
+import { readCart, clearCart } from "@/features/web/utils/cart";
+import { issuePaymentAccess } from "@/features/web/utils/paymentAccess";
 import {
   peekCheckoutAccess,
   consumeCheckoutAccess,
-} from "@/helpers/checkoutAccess";
-import { formatRupiah } from "@/utils/format";
+} from "@/features/web/utils/checkoutAccess";
+import { formatRupiah } from "@/utils/helpers";
 import dayjs, { type Dayjs } from "dayjs";
 import Image from "next/image";
 

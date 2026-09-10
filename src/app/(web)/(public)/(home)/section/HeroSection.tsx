@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
-import { useT } from "@/components/locale/LocaleProvider";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 export function HeroSection() {
   const { t } = useT();

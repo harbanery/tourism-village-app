@@ -1,5 +1,5 @@
-import { getCurrentUser } from "@/server/auth";
-import { getUserNotificationsSince } from "@/services/notificationService";
+import { getCurrentUser } from "@/lib/auth";
+import { getUserNotificationsSince } from "@/services/notification";
 
 /**
  * GET /api/web/notifications/stream — stream SSE (Server-Sent Events)

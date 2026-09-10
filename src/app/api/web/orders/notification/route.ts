@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { BASE_URL } from "@/config/variables";
+import prisma from "@/lib/prisma";
+import { BASE_URL } from "@/utils/config/variables";
 import {
   fetchMidtransStatus,
   mapMidtransStatus,
   parseLegacyMidtransOrderId,
   verifyMidtransSignature,
-} from "@/server/midtrans";
-import { isPaymentExpired } from "@/server/orderExpiry";
-import { applyPaymentTransition } from "@/server/orderStatus";
+} from "@/lib/midtrans";
+import { isPaymentExpired } from "@/utils/server/orderExpiry";
+import { applyPaymentTransition } from "@/utils/server/orderStatus";
 import type { Order } from "@prisma/client";
 
 /**

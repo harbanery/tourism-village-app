@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import prisma from "@/server/db";
-import { getCurrentUser } from "@/server/auth";
-import { revalidatePublicCache } from "@/server/cache";
-import { onReviewPending } from "@/server/orderEvents";
+import prisma from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { revalidatePublicCache } from "@/utils/server/cache";
+import { onReviewPending } from "@/utils/server/orderEvents";
 
 /** Jeda minimal antar ulasan per user (24 jam). */
 const REVIEW_COOLDOWN_MS = 24 * 60 * 60 * 1000;
