@@ -19,13 +19,14 @@ import {
 import { EditOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { useBackGuard } from "@/features/web/hooks/useBackGuard";
 import { readCart, clearCart } from "@/features/web/utils/cart";
 import { issuePaymentAccess } from "@/features/web/utils/paymentAccess";
 import {
   peekCheckoutAccess,
   consumeCheckoutAccess,
 } from "@/features/web/utils/checkoutAccess";
-import { formatRupiah } from "@/utils/helpers";
+import { formatRupiah, maskEmail } from "@/utils/helpers";
 import dayjs, { type Dayjs } from "dayjs";
 import Image from "next/image";
 
@@ -103,6 +104,9 @@ export default function CheckoutClientSection({
 }) {
   const { t, locale } = useT();
   const router = useRouter();
+  // Guard back browser: konfirmasi dulu sebelum meninggalkan checkout
+  // (jadwal & data pemesan yang sudah diisi bisa hilang).
+  useBackGuard();
   const mounted = useMounted();
   const { notification, message, modal } = App.useApp();
   const [form] = Form.useForm<CheckoutFormValues>();
@@ -319,6 +323,14 @@ export default function CheckoutClientSection({
         } else if (json.error === "SCHEDULE_TOO_SOON") {
           message.warning(t("checkout.minDateError"));
           setStep(0);
+        } else if (json.error === "DUPLICATE_ORDER" && json.orderId) {
+          // Submit ganda terdeteksi (rekom 2.3) → order sama sudah dibuat;
+          // langsung arahkan ke pembayarannya, jangan buat order baru.
+          clearCart();
+          setCart([]);
+          issuePaymentAccess(json.orderId);
+          router.replace(`/payment/${json.orderId}`);
+          return;
         }
         throw new Error(json.error);
       }
@@ -665,7 +677,7 @@ export default function CheckoutClientSection({
                 </div>
                 <div className="min-w-52 rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
                   <p className="text-foreground/60">{t("common.email")}</p>
-                  <p className="font-medium break-all">{user.email}</p>
+                  <p className="font-medium break-all">{maskEmail(user.email)}</p>
                 </div>
                 <div className="min-w-40 rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
                   <p className="text-foreground/60">{t("common.phone")}</p>

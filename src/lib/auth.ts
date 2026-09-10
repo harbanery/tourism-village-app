@@ -19,6 +19,12 @@ import type { AuthAdmin, AuthUser } from "@prisma/client";
 export const SESSION_TTL_MS = SESSION_TTL_HOURS * 60 * 60 * 1000;
 
 /**
+ * Batas sesi aktif per user/admin (rekomendasi 2.1): sesi ke-6 memangkas
+ * sesi tertua — mencegah penumpukan sesi tak terbatas (login berulang).
+ */
+export const MAX_SESSIONS_PER_USER = 5;
+
+/**
  * Rate limit: 3 percobaan gagal → blokir 15 menit (per IP per scope).
  * Scope terpisah agar blokir login admin tidak memengaruhi login/register web.
  * Counter hanya diakumulasi dalam window 15 menit — kegagalan lama tidak
@@ -71,6 +77,25 @@ export function getClientIp(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
   return request.headers.get("x-real-ip") || "unknown";
+}
+
+/**
+ * Cek same-origin untuk mutasi (CSRF-lite, rekomendasi 2.4): browser
+ * modern selalu menyertakan Origin pada cross-site POST — bila Origin
+ * ada namun host-nya berbeda dengan Host header, tolak. Permintaan tanpa
+ * Origin (non-browser / server-to-server) dibiarkan lewat; autentikasi
+ * tetap memagari akses.
+ */
+export function isSameOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  const host = request.headers.get("host");
+  if (!host) return false;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
 }
 
 /** Kunci komposit (ipAddress, scope) model LoginAttempt. */
@@ -171,9 +196,20 @@ export async function createSession(
     await prisma.adminSession.create({
       data: { id: hashSessionId(token), adminId: userId, expiresAt },
     });
+    // Bersihkan sesi kedaluwarsa, lalu pangkas sesi melebihi kuota
+    // (terlama dihapus lebih dulu — rekomendasi 2.1).
     await prisma.adminSession.deleteMany({
       where: { adminId: userId, expiresAt: { lt: new Date() } },
     });
+    const sessions = await prisma.adminSession.findMany({
+      where: { adminId: userId },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    const excess = sessions.slice(MAX_SESSIONS_PER_USER).map((s) => s.id);
+    if (excess.length > 0) {
+      await prisma.adminSession.deleteMany({ where: { id: { in: excess } } });
+    }
   } else {
     await prisma.userSession.create({
       data: { id: hashSessionId(token), userId, expiresAt },
@@ -181,6 +217,15 @@ export async function createSession(
     await prisma.userSession.deleteMany({
       where: { userId, expiresAt: { lt: new Date() } },
     });
+    const sessions = await prisma.userSession.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    const excess = sessions.slice(MAX_SESSIONS_PER_USER).map((s) => s.id);
+    if (excess.length > 0) {
+      await prisma.userSession.deleteMany({ where: { id: { in: excess } } });
+    }
   }
 
   return { token, expiresAt };

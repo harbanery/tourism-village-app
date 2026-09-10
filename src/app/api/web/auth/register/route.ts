@@ -6,6 +6,7 @@ import {
   getClientIp,
   hashPassword,
   isIpBlocked,
+  isSameOrigin,
   recordFailedAttempt,
 } from "@/lib/auth";
 import { NODE_ENV } from "@/utils/config/variables";
@@ -27,6 +28,14 @@ import { buildOtpEmail } from "@/utils/email/otpEmail";
  */
 export async function POST(request: NextRequest) {
   try {
+    // Membuat akun + kirim OTP → wajib same-origin (CSRF-lite, rekom 2.4).
+    if (!isSameOrigin(request)) {
+      return NextResponse.json(
+        { success: false, error: "FORBIDDEN_ORIGIN" },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
     const { name, email, password } = body as Record<string, unknown>;
 

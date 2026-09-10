@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin, adminCanWriteBlog } from "@/lib/auth";
 import { revalidatePublicCache } from "@/utils/server/cache";
 import { blogSlugBase, uniqueBlogSlug } from "@/utils/server/blogSlug";
+import { sanitizeRichText } from "@/utils/server/sanitize";
 import { NextResponse } from "next/server";
 
 /** GET /api/admin/blogs — semua blog + penulis. */
@@ -55,7 +56,8 @@ export async function POST(request: Request) {
         slug: await uniqueBlogSlug(slugBase),
         title: body.title,
         filename: body.filename || "",
-        para: body.para || "",
+        // Rich text disanitasi server-side sebelum disimpan (rekom 2.2).
+        para: sanitizeRichText(body.para || ""),
         status: "NONACTIVE",
       },
       include: {

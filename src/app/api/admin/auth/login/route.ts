@@ -8,6 +8,7 @@ import {
   createSession,
   getClientIp,
   isIpBlocked,
+  isSameOrigin,
   LOGIN_BLOCK_MINUTES,
   MAX_LOGIN_ATTEMPTS,
   recordFailedAttempt,
@@ -29,6 +30,14 @@ function toRemainingMinutes(blockedUntil: Date | null | undefined): number {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Mutasi cookie sesi → wajib same-origin (CSRF-lite, rekom 2.4).
+    if (!isSameOrigin(request)) {
+      return NextResponse.json(
+        { success: false, error: "FORBIDDEN_ORIGIN" },
+        { status: 403 },
+      );
+    }
+
     let username: unknown;
     let password: unknown;
     try {

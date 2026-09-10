@@ -69,6 +69,8 @@ model AuthUser {
   address   String?  @map("alamat")
   avatar    String?
   status    Status   @default(ACTIVE)
+  /** Waktu login terakhir (diupdate tiap login web). */
+  lastLoginAt DateTime? @map("last_login_at")
   /** Verifikasi email via OTP (REGISTER_VERIFICATION). */
   emailVerified Boolean @default(false) @map("email_verified")
   /** Email baru yang menunggu verifikasi OTP (EMAIL_CHANGE). */
@@ -234,6 +236,7 @@ model Testimonial {
   note     String?  @map("keterangan")
   user     AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([status, featured])
   @@map("komentar")
 }
 
@@ -268,6 +271,8 @@ model Order {
   items         OrderItem[]
   logs          OrderLog[]
 
+  @@index([userId, dateOrder])
+  @@index([paymentStatus, paymentExpiresAt])
   @@map("wisata_pesan")
 }
 

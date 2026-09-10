@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import {
   MIDTRANS_IS_CONFIGURED,
   MIDTRANS_SERVER_KEY,
@@ -169,7 +169,11 @@ export function verifyMidtransSignature(params: {
       `${params.orderId}${params.statusCode}${params.grossAmount}${MIDTRANS_SERVER_KEY}`,
     )
     .digest("hex");
-  return expected === params.signatureKey;
+  // Perbandingan konstan-waktu (rekomendasi 2.3): hindari timing
+  // attack pada perbandingan signature — panjang beda langsung false.
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(params.signatureKey, "utf8");
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 /** Mapping transaction_status Midtrans → PaymentStatus aplikasi. */

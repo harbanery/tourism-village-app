@@ -11,6 +11,7 @@ import {
   CLOUDINARY_API_SECRET,
   CLOUDINARY_CLOUD_NAME,
 } from "@/utils/config/variables";
+import { validateImageFile } from "@/utils/server/fileGuard";
 
 /** Folder Cloudinary yang diizinkan per sumber upload. */
 const ALLOWED_FOLDERS = [
@@ -21,6 +22,9 @@ const ALLOWED_FOLDERS = [
   "admins",
   "misc",
 ];
+
+/** Batas ukuran upload konten admin (rekomendasi 2.4). */
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
   const admin = await requireAdmin();
@@ -59,6 +63,16 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // Validasi server-side (rekomendasi 2.4): ukuran + magic bytes —
+    // MIME dari klien mudah dipalsukan.
+    const fileError = validateImageFile(buffer, file.size, MAX_UPLOAD_BYTES);
+    if (fileError) {
+      return NextResponse.json(
+        { success: false, error: fileError },
+        { status: 400 },
+      );
+    }
 
     // Subfolder per menu (mis. "places" → tourism-village/places).
     const rawFolder = data.get("folder") as string | null;

@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getClientIp, getCurrentUser } from "@/lib/auth";
 import { fetchMidtransStatus, mapMidtransStatus } from "@/lib/midtrans";
 import { isPaymentExpired } from "@/utils/server/orderExpiry";
 import { applyPaymentTransition } from "@/utils/server/orderStatus";
+import { rateLimit, tooManyRequests } from "@/utils/server/rateLimit";
+
+/**
+ * Kuota hit per user per IP (rekomendasi 2.1). 12/menit menampung
+ * auto-poll halaman pembayaran (tiap 10 detik) + tombol cek manual.
+ */
+const STATUS_RATE_LIMIT = 12;
 
 /**
  * GET /api/web/orders/[id]/status — periksa & sinkronkan status pembayaran.
@@ -14,7 +21,7 @@ import { applyPaymentTransition } from "@/utils/server/orderStatus";
  * Tanpa QR (Midtrans tidak dikonfigurasi) cukup membalas status DB.
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const user = await getCurrentUser();
@@ -24,6 +31,14 @@ export async function GET(
       { status: 401 },
     );
   }
+
+  // Rate limit per user per IP — endpoint memanggil status API Midtrans
+  // (server-to-server), jadi perlu dijaga dari abuse (rekomendasi 2.1).
+  const { allowed, retryAfterMs } = rateLimit(
+    `order-status:${user.id}:${getClientIp(request)}`,
+    STATUS_RATE_LIMIT,
+  );
+  if (!allowed) return tooManyRequests(retryAfterMs);
 
   const { id } = await params;
   if (!id) {

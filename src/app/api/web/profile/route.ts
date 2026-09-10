@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { getUserOrders } from "@/services/order";
 
-/** GET /api/web/profile — data user + riwayat pesanan. */
+/**
+ * GET /api/web/profile — data user login (riwayat pesanan TIDAK disertakan:
+ * sudah diambil terpaginasi dari /api/web/orders; klien hanya memakai PATCH
+ * profil di sini).
+ */
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) {
@@ -12,8 +15,6 @@ export async function GET() {
       { status: 401 },
     );
   }
-
-  const orders = await getUserOrders(user);
 
   return NextResponse.json({
     success: true,
@@ -32,7 +33,6 @@ export async function GET() {
         notifWeb: user.notifWeb,
         notifEmail: user.notifEmail,
       },
-      orders,
     },
   });
 }

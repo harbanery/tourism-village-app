@@ -36,6 +36,7 @@ import {
 import { drawerBodyProps } from "@/features/admin/utils/drawer";
 import { asAppError } from "@/features/admin/utils/error";
 import { adminRoleOptions } from "@/features/admin/utils/menu";
+import { maskEmail, maskPhone } from "@/utils/helpers";
 import { adminFormLayout, adminRoleFormLayout } from "../config";
 
 interface AdminRow {
@@ -303,13 +304,15 @@ const AccountDecorator = () => {
       dataIndex: "email",
       key: "email",
       sorter: textSorter<UserRow>((row) => row.email),
+      // Email dimasking di tampilan (keamanan); sorter tetap pakai data asli.
+      render: (v: string) => maskEmail(v),
     },
     {
       title: t("common.phone"),
       dataIndex: "phone",
       key: "phone",
       sorter: textSorter<UserRow>((row) => row.phone),
-      render: (v: string | null) => v ?? "-",
+      render: (v: string | null) => maskPhone(v),
     },
     // Kolom status & opsi: fixed kanan, width statis (global).
     userCols.status,
@@ -377,6 +380,8 @@ const AccountDecorator = () => {
       dataIndex: "email",
       key: "email",
       sorter: textSorter<AdminRow>((row) => row.email),
+      // Email dimasking di tampilan (keamanan); sorter tetap pakai data asli.
+      render: (v: string) => maskEmail(v),
     },
     {
       // Tag role (align tengah) dibedakan dari tag status (MASTER tidak hijau).

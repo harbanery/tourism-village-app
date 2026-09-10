@@ -16,7 +16,7 @@ import {
 } from "antd";
 import { DownloadOutlined, QrcodeOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
-import { formatDate, formatRupiah } from "@/utils/helpers";
+import { formatDate, formatRupiah, maskEmail, maskPhone } from "@/utils/helpers";
 import { downloadInvoicePdf } from "@/utils/pdf/invoicePdf";
 import type { OrderRow } from "./index";
 
@@ -241,10 +241,10 @@ export default function OrderDetailDrawer({
                       {order.user.name}
                     </Descriptions.Item>
                     <Descriptions.Item label={t("common.email")}>
-                      {order.user.email}
+                      {maskEmail(order.user.email)}
                     </Descriptions.Item>
                     <Descriptions.Item label={t("common.phone")}>
-                      {order.user.phone || "—"}
+                      {order.user.phone ? maskPhone(order.user.phone) : "—"}
                     </Descriptions.Item>
                   </Descriptions>
                 ),

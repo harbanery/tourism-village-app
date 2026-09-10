@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getClientIp, getCurrentUser } from "@/lib/auth";
 import { isPaymentExpired, paymentDeadline } from "@/utils/server/orderExpiry";
 import { applyPaymentTransition } from "@/utils/server/orderStatus";
 import { customerFromUser, ensureOrderQris } from "@/lib/qris";
+import { rateLimit, tooManyRequests } from "@/utils/server/rateLimit";
+
+/** Kuota hit endpoint ini per user per IP (rekomendasi 2.1). */
+const PAY_RATE_LIMIT = 6;
 
 /**
  * GET /api/web/orders/[id]/pay — lanjutkan pembayaran order PENDING.
@@ -13,7 +17,7 @@ import { customerFromUser, ensureOrderQris } from "@/lib/qris";
  * ulang) untuk order milik user login.
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const user = await getCurrentUser();
@@ -23,6 +27,14 @@ export async function GET(
       { status: 401 },
     );
   }
+
+  // Rate limit per user per IP — endpoint memanggil Core API Midtrans
+  // (buat QR), jadi perlu dijaga dari abuse (rekomendasi 2.1).
+  const { allowed, retryAfterMs } = rateLimit(
+    `order-pay:${user.id}:${getClientIp(request)}`,
+    PAY_RATE_LIMIT,
+  );
+  if (!allowed) return tooManyRequests(retryAfterMs);
 
   const { id } = await params;
   if (!id) {

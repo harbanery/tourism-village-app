@@ -7,6 +7,7 @@ import {
   createSession,
   getClientIp,
   isIpBlocked,
+  isSameOrigin,
   LOGIN_BLOCK_MINUTES,
   MAX_LOGIN_ATTEMPTS,
   recordFailedAttempt,
@@ -26,6 +27,14 @@ function toRemainingMinutes(blockedUntil: Date | null | undefined): number {
 /** POST /api/web/auth/login — login user web dengan email + password. */
 export async function POST(request: NextRequest) {
   try {
+    // Mutasi cookie sesi → wajib same-origin (CSRF-lite, rekom 2.4).
+    if (!isSameOrigin(request)) {
+      return NextResponse.json(
+        { success: false, error: "FORBIDDEN_ORIGIN" },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
     const { email, password } = body as Record<string, unknown>;
 
@@ -99,6 +108,11 @@ export async function POST(request: NextRequest) {
 
     await clearFailedAttempts(ip, scope);
     const { token, expiresAt } = await createSession("web", user.id);
+    // Catat login terakhir (rekomendasi 2.1) — info keamanan di profil.
+    await prisma.authUser.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
     const store = await cookies();
     store.set(sessionCookieOptions(USER_SESSION_COOKIE, token, expiresAt));
 

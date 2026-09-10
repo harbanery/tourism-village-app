@@ -7,6 +7,7 @@ import {
   CLOUDINARY_API_SECRET,
   CLOUDINARY_CLOUD_NAME,
 } from "@/utils/config/variables";
+import { validateImageFile } from "@/utils/server/fileGuard";
 
 /** Batas ukuran avatar (bytes). */
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
@@ -52,6 +53,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validasi server-side (rekomendasi 2.4): magic bytes — MIME dari
+    // klien mudah dipalsukan.
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const fileError = validateImageFile(buffer, file.size, MAX_AVATAR_BYTES);
+    if (fileError) {
+      return NextResponse.json(
+        { success: false, error: fileError },
+        { status: 400 },
+      );
+    }
+
     // Nama file random per unggahan (tanpa nama asli user).
     const filename = `avatar-${user.id}-${Date.now()}`;
     const folder = "tourism-village/avatars";
@@ -64,7 +76,12 @@ export async function POST(request: NextRequest) {
     );
 
     const formData = new FormData();
-    formData.append("file", file, filename);
+    // Blob dari buffer tervalidasi (bukan File mentah klien).
+    formData.append(
+      "file",
+      new Blob([buffer], { type: file.type }),
+      filename,
+    );
     formData.append("api_key", CLOUDINARY_API_KEY || "");
     formData.append("timestamp", uploadTimestamp.toString());
     formData.append("public_id", filename);

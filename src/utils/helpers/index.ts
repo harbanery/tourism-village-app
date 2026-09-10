@@ -24,6 +24,31 @@ export function formatDate(
 }
 
 // ------------------------------------------------------------
+// Masking data pribadi (email & telepon) — keamanan tampilan
+// ------------------------------------------------------------
+
+/** Mask email: huruf pertama + 5 bintang + domain. r*****@example.com */
+export function maskEmail(email: string | null | undefined): string {
+  if (!email || !email.includes("@")) return "-";
+  const [local, domain] = email.split("@");
+  const head = local.slice(0, 1) || "*";
+  return `${head}${"*".repeat(5)}@${domain}`;
+}
+
+/**
+ * Mask nomor telepon: 2 digit pertama + bintang + 4 digit terakhir.
+ * 089605567347 → 08*******6347 (minimal panjang 6 agar aman dipotong).
+ */
+export function maskPhone(phone: string | null | undefined): string {
+  if (!phone) return "-";
+  const digits = phone.trim();
+  if (digits.length < 6) return "*".repeat(Math.max(3, digits.length));
+  const head = digits.slice(0, 2);
+  const tail = digits.slice(-4);
+  return `${head}${"*".repeat(Math.max(3, digits.length - 6))}${tail}`;
+}
+
+// ------------------------------------------------------------
 // Slug
 // ------------------------------------------------------------
 

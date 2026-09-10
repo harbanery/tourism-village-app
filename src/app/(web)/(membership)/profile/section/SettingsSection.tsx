@@ -27,6 +27,7 @@ import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import { clearWebSession } from "@/features/web/hooks/session";
 import type { User } from "@/features/web/types";
+import { maskEmail } from "@/utils/helpers";
 import type { ProfileSettings } from "../page";
 
 interface ProfileFormValues {
@@ -38,6 +39,8 @@ interface ProfileFormValues {
 }
 
 interface EmailFormValues {
+  /** Email lama — konfirmasi kepemilikan (email aktif tidak ditampilkan). */
+  oldEmail: string;
   email: string;
   password: string;
 }
@@ -160,7 +163,7 @@ export function SettingsSection({
   const { t } = useT();
   const router = useRouter();
   const mounted = useMounted();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
 
   const [profileForm] = Form.useForm<ProfileFormValues>();
   const [emailForm] = Form.useForm<EmailFormValues>();
@@ -170,6 +173,7 @@ export function SettingsSection({
   const [requestingEmail, setRequestingEmail] = useState(false);
   const [requestingPassword, setRequestingPassword] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [loggingOutAll, setLoggingOutAll] = useState(false);
 
   // --- Modal OTP (dipakai ganti email & ganti password; non-closeable) ---
   /** Flow yang sedang menunggu OTP di modal. */
@@ -183,6 +187,7 @@ export function SettingsSection({
   const [otpRateLimited, setOtpRateLimited] = useState(false);
   /** Permintaan terakhir (untuk kirim ulang OTP tanpa isi form lagi). */
   const [lastEmailRequest, setLastEmailRequest] = useState<{
+    oldEmail: string;
     email: string;
     password: string;
   } | null>(null);
@@ -242,6 +247,7 @@ export function SettingsSection({
 
   /** Ajukan ganti email (kirim OTP ke email baru). Hasil: ok + devCode. */
   const requestEmailChange = async (
+    oldEmail: string,
     email: string,
     password: string,
   ): Promise<{
@@ -253,7 +259,7 @@ export function SettingsSection({
     const res = await fetch("/api/web/profile/email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ oldEmail, email, password }),
     });
     const result = await res.json();
     if (!result.success) {
@@ -266,6 +272,16 @@ export function SettingsSection({
           {
             name: "password",
             errors: [t("settings.email.wrongPassword")],
+          },
+        ]);
+        return { ok: false };
+      }
+      // Email lama tidak cocok → error pada field email lama.
+      if (result.error === "OLD_EMAIL_MISMATCH") {
+        emailForm.setFields([
+          {
+            name: "oldEmail",
+            errors: [t("settings.email.oldMismatch")],
           },
         ]);
         return { ok: false };
@@ -291,7 +307,11 @@ export function SettingsSection({
   const handleRequestEmailChange = async (values: EmailFormValues) => {
     setRequestingEmail(true);
     try {
-      const result = await requestEmailChange(values.email, values.password);
+      const result = await requestEmailChange(
+        values.oldEmail,
+        values.email,
+        values.password,
+      );
       if (!result.ok) {
         // Rate limit saat meminta ulang dari tab email → tampilkan pesan.
         if (result.rateLimited) {
@@ -304,9 +324,13 @@ export function SettingsSection({
         return;
       }
       // OTP terkirim ke email baru → buka modal OTP (non-closeable).
-      setLastEmailRequest({ email: values.email, password: values.password });
+      setLastEmailRequest({
+        oldEmail: values.oldEmail,
+        email: values.email,
+        password: values.password,
+      });
       setOtpFlow("email");
-      setOtpTargetEmail(values.email);
+      setOtpTargetEmail(maskEmail(values.email));
       setOtpDevCode(result.devCode);
       setOtpCode("");
       setOtpRateLimited(false);
@@ -408,7 +432,7 @@ export function SettingsSection({
         newPassword: values.newPassword,
       });
       setOtpFlow("password");
-      setOtpTargetEmail(user?.email ?? "");
+      setOtpTargetEmail(maskEmail(user?.email));
       setOtpDevCode(result.devCode);
       setOtpCode("");
       setOtpRateLimited(false);
@@ -502,6 +526,7 @@ export function SettingsSection({
               lastPasswordRequest?.newPassword ?? "",
             )
           : await requestEmailChange(
+              lastEmailRequest?.oldEmail ?? "",
               lastEmailRequest?.email ?? "",
               lastEmailRequest?.password ?? "",
             );
@@ -528,6 +553,40 @@ export function SettingsSection({
     } finally {
       setOtpResending(false);
     }
+  };
+
+  /** Keluar dari semua perangkat — cabut semua sesi lalu ke /login. */
+  const handleLogoutAll = async () => {
+    setLoggingOutAll(true);
+    try {
+      const res = await fetch("/api/web/profile/sessions", {
+        method: "DELETE",
+      });
+      const result = await res.json();
+      if (!result.success) {
+        message.error(result.error || t("notif.error"));
+        return;
+      }
+      clearWebSession();
+      message.success(t("settings.sessions.done"));
+      router.push("/login");
+    } catch {
+      message.error(t("notif.error"));
+    } finally {
+      setLoggingOutAll(false);
+    }
+  };
+
+  /** Konfirmasi dulu — aksi mencabut sesi di semua perangkat. */
+  const confirmLogoutAll = () => {
+    modal.confirm({
+      title: t("settings.sessions.confirmTitle"),
+      content: t("settings.sessions.confirmContent"),
+      okText: t("settings.sessions.logoutAll"),
+      okButtonProps: { danger: true },
+      cancelText: t("common.cancel"),
+      onOk: handleLogoutAll,
+    });
   };
 
   return (
@@ -659,33 +718,46 @@ export function SettingsSection({
             label: t("settings.tab.email"),
             children: (
               <div className="mt-2 max-w-md">
-                <p className="text-sm text-foreground/60">
-                  {t("settings.email.current")}: <b>{user?.email}</b>
-                </p>
+                {/* Email aktif sengaja tidak ditampilkan (keamanan) —
+                    kepemilikan dikonfirmasi lewat field email lama. */}
                 {settings.pendingEmail && (
-                  <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                  <p className="mb-1 text-xs text-amber-600 dark:text-amber-400">
                     {t("profile.pendingEmail", {
-                      email: settings.pendingEmail,
+                      email: maskEmail(settings.pendingEmail),
                     })}
                   </p>
                 )}
                 <Form
                   form={emailForm}
                   layout="vertical"
-                  className="mt-4!"
+                  className={settings.pendingEmail ? "mt-2!" : "mt-4!"}
                   preserve={false}
                   onFinish={handleRequestEmailChange}
                   disabled={requestingEmail}
                 >
+                  {/* Email lama: konfirmasi kepemilikan akun. */}
+                  <Form.Item
+                    name="oldEmail"
+                    label={t("settings.email.old")}
+                    rules={[
+                      { required: true },
+                      { type: "email" },
+                    ]}
+                  >
+                    <Input
+                      placeholder={t("settings.email.oldPlaceholder")}
+                      autoComplete="email"
+                    />
+                  </Form.Item>
                   <Form.Item
                     name="email"
                     label={t("settings.email.new")}
                     rules={[
                       { required: true },
                       { type: "email" },
-                      () => ({
+                      ({ getFieldValue }) => ({
                         validator(_, value) {
-                          if (!value || value === user?.email) {
+                          if (!value || value === getFieldValue("oldEmail")) {
                             return Promise.reject(
                               new Error(t("settings.email.same")),
                             );
@@ -811,6 +883,25 @@ export function SettingsSection({
                 <p className="mt-3 text-xs text-foreground/60">
                   {t("settings.password.hint")}
                 </p>
+
+                {/* Keluar dari semua perangkat (rekomendasi 2.1) — satu
+                    tombol darurat tanpa perlu OTP karena sesi aktif tetap
+                    valid (pemilik akun sudah login). */}
+                <div className="mt-6 border-t border-black/5 pt-4 dark:border-white/10">
+                  <p className="font-medium">
+                    {t("settings.sessions.title")}
+                  </p>
+                  <p className="mt-1 mb-3 text-xs text-foreground/60">
+                    {t("settings.sessions.hint")}
+                  </p>
+                  <Button
+                    danger
+                    loading={loggingOutAll}
+                    onClick={confirmLogoutAll}
+                  >
+                    {t("settings.sessions.logoutAll")}
+                  </Button>
+                </div>
               </div>
             ),
           },

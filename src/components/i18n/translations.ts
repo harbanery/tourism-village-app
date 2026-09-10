@@ -401,6 +401,18 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.verified": "Terverifikasi",
     "profile.pendingEmail": "Menunggu verifikasi email baru: {email}",
 
+    "guard.backTitle": "Keluar dari halaman ini?",
+    "guard.backContent":
+      "Pesanan atau pembayaran yang belum selesai bisa hilang. Yakin ingin kembali?",
+    "guard.backConfirm": "Ya, kembali",
+    "guard.cancel": "Tetap di sini",
+
+    "consent.title": "Izin Cookie",
+    "consent.text":
+      "Kami memakai cookie esensial untuk sesi login. Statistik kunjungan anonim hanya aktif dengan izin Anda (UU PDP).",
+    "consent.accept": "Setuju",
+    "consent.essential": "Hanya Esensial",
+
     "settings.title": "Pengaturan",
     "settings.tab.profile": "Profil",
     "settings.tab.avatar": "Avatar",
@@ -410,6 +422,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.avatar.hint":
       "Gambar persegi disarankan, format umum (JPG/PNG/WebP), maks 2MB.",
     "settings.email.current": "Email aktif",
+    "settings.email.old": "Email aktif (konfirmasi)",
+    "settings.email.oldPlaceholder": "email-aktif@example.com",
+    "settings.email.oldMismatch":
+      "Email aktif tidak cocok — periksa kembali email akun Anda",
     "settings.email.new": "Email baru",
     "settings.email.password": "Password aktif",
     "settings.email.wrongPassword": "Password salah",
@@ -439,6 +455,14 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Password baru berlaku setelah verifikasi OTP. Semua perangkat akan otomatis keluar dan Anda perlu masuk kembali.",
     "settings.password.changed":
       "Password berhasil diganti — silakan masuk kembali",
+    "settings.sessions.title": "Sesi & perangkat",
+    "settings.sessions.hint":
+      "Mencabut semua sesi login di seluruh perangkat. Berguna bila Anda lupa logout di perangkat lain.",
+    "settings.sessions.logoutAll": "Keluar dari Semua Perangkat",
+    "settings.sessions.confirmTitle": "Keluar dari semua perangkat?",
+    "settings.sessions.confirmContent":
+      "Anda akan langsung keluar dari sesi ini dan semua perangkat lain. Lanjutkan?",
+    "settings.sessions.done": "Semua sesi dicabut — silakan masuk kembali",
     "settings.notif.web": "Notifikasi Web",
     "settings.notif.webDesc":
       "Notifikasi di dalam aplikasi (status pesanan, pengingat).",
@@ -1040,6 +1064,18 @@ export const translations: Record<Locale, Record<string, string>> = {
     "profile.verified": "Verified",
     "profile.pendingEmail": "Awaiting verification of new email: {email}",
 
+    "guard.backTitle": "Leave this page?",
+    "guard.backContent":
+      "An unfinished order or payment may be lost. Are you sure you want to go back?",
+    "guard.backConfirm": "Yes, go back",
+    "guard.cancel": "Stay here",
+
+    "consent.title": "Cookie Consent",
+    "consent.text":
+      "We use essential cookies for your login session. Anonymous visit statistics are only enabled with your consent (Indonesian PDP Law).",
+    "consent.accept": "Accept",
+    "consent.essential": "Essential Only",
+
     "settings.title": "Settings",
     "settings.tab.profile": "Profile",
     "settings.tab.avatar": "Avatar",
@@ -1049,6 +1085,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.avatar.hint":
       "Square image recommended, common formats (JPG/PNG/WebP), max 2MB.",
     "settings.email.current": "Current email",
+    "settings.email.old": "Current email (confirm)",
+    "settings.email.oldPlaceholder": "current-email@example.com",
+    "settings.email.oldMismatch":
+      "Current email does not match — please double-check your account email",
     "settings.email.new": "New email",
     "settings.email.password": "Current password",
     "settings.email.wrongPassword": "Incorrect password",
@@ -1077,6 +1117,15 @@ export const translations: Record<Locale, Record<string, string>> = {
       "The new password takes effect after OTP verification. All devices will be signed out and you will need to sign in again.",
     "settings.password.changed":
       "Password changed — please sign in again",
+    "settings.sessions.title": "Sessions & devices",
+    "settings.sessions.hint":
+      "Revoke all signed-in sessions across every device. Useful when you forgot to log out on another device.",
+    "settings.sessions.logoutAll": "Sign Out of All Devices",
+    "settings.sessions.confirmTitle": "Sign out of all devices?",
+    "settings.sessions.confirmContent":
+      "You will be signed out of this session and every other device immediately. Continue?",
+    "settings.sessions.done":
+      "All sessions revoked — please sign in again",
     "settings.notif.web": "Web Notifications",
     "settings.notif.webDesc": "In-app notifications (order status, reminders).",
     "settings.notif.email": "Email Notifications",

@@ -98,9 +98,6 @@ const HeaderLayout: React.FC<{
                     <span className="font-semibold">
                       {session.name ?? session.username}
                     </span>
-                    <span className="text-xs! text-foreground/60!">
-                      {session.email}
-                    </span>
                   </div>
                 ) : (
                   "-"

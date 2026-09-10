@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { isSameOrigin } from "@/lib/auth";
 import { verifyOtp, createResetToken } from "@/lib/otp";
 
 /**
@@ -16,6 +17,14 @@ import { verifyOtp, createResetToken } from "@/lib/otp";
  */
 export async function POST(request: NextRequest) {
   try {
+    // Konsumsi OTP / terbitkan token reset → same-origin (rekom 2.4).
+    if (!isSameOrigin(request)) {
+      return NextResponse.json(
+        { success: false, error: "FORBIDDEN_ORIGIN" },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
     const { userId, code, purpose } = body as Record<string, unknown>;
 

@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { useBackGuard } from "@/features/web/hooks/useBackGuard";
 import {
   peekPaymentAccess,
   consumePaymentAccess,
@@ -215,6 +216,11 @@ export default function PaymentClientSection({
     }
     consumePaymentAccess(order.id);
   }, [allowed, order.id, router]);
+
+  // Guard back browser SAAT pembayaran masih berjalan (PENDING) —
+  // meninggalkan halaman selesai bayar bisa membuat user kehilangan QR
+  // aktif; setelah final (PAID/GAGAL/BATAL) back bebas tanpa konfirmasi.
+  useBackGuard(allowed && status === "PENDING");
 
   // Dibatalkan / gagal → redirect replace ke beranda setelah 5 detik.
   // (tick pertama lewat setTimeout agar bukan setState langsung di effect)

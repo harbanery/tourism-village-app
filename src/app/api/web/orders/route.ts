@@ -24,6 +24,41 @@ const STATUS_FILTERS: PaymentStatus[] = [
 /** Mode sorting riwayat yang dikenali. */
 const SORT_MODES: OrdersSortMode[] = ["default", "newest", "schedule"];
 
+/** Window guard order duplikat: submit ganda dalam 2 menit (rekom 2.3). */
+const DUPLICATE_WINDOW_MS = 2 * 60 * 1000;
+
+/**
+ * Sidik jari keranjang: gabungan (paket, qty, jadwal, menginap) yang
+ * diurutkan — dipakai mendeteksi submit ganda dengan isi identik.
+ */
+function cartFingerprint(
+  items: {
+    packageId: string;
+    quantity: number;
+    dateSchedule: Date | string | null;
+    homestay: boolean;
+    homestayTime: number | null;
+  }[],
+): string {
+  return items
+    .map((item) => {
+      // Item tanpa jadwal (legacy) diberi penanda khusus "none".
+      const day =
+        item.dateSchedule === null
+          ? "none"
+          : new Date(item.dateSchedule).toISOString().slice(0, 10);
+      return [
+        item.packageId,
+        item.quantity,
+        day,
+        item.homestay ? 1 : 0,
+        item.homestayTime ?? 0,
+      ].join(":");
+    })
+    .sort()
+    .join("|");
+}
+
 /**
  * GET /api/web/orders?take=&skip=&status=&sort=&q= — satu halaman riwayat
  * pesanan milik user login untuk infinite scroll. Urutan default: PENDING
@@ -182,6 +217,46 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { success: false, error: "ORDER_LIMIT_REACHED" },
       { status: 429 },
+    );
+  }
+
+  // Guard order duplikat (rekom 2.3): double-click / retry submit dengan
+  // isi keranjang identik dalam window singkat → arahkan ke order yang
+  // sudah ada, jangan buat order baru.
+  const latest = await prisma.order.findFirst({
+    where: {
+      userId: user.id,
+      dateOrder: { gte: new Date(Date.now() - DUPLICATE_WINDOW_MS) },
+    },
+    orderBy: { dateOrder: "desc" },
+    include: { items: true },
+  });
+  if (
+    latest &&
+    cartFingerprint(
+      cartItems.map((item, index) => {
+        const row = itemSchedules[index] as {
+          schedule: Date;
+          homestay: boolean;
+          homestayTime: number | null;
+        };
+        return {
+          packageId: item.packageId,
+          quantity: item.quantity,
+          dateSchedule: row.schedule,
+          homestay: row.homestay,
+          homestayTime: row.homestayTime,
+        };
+      }),
+    ) === cartFingerprint(latest.items)
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "DUPLICATE_ORDER",
+        orderId: latest.id,
+      },
+      { status: 409 },
     );
   }
 

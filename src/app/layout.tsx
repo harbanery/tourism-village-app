@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { preload } from "react-dom";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ThemeProvider } from "@/components/ui/theme/ThemeProvider";
-import { Analytics } from "@/components/ui/vercel";
+import { CookieConsent } from "@/components/ui/consent/CookieConsent";
 import { geistSans, geistMono } from "@/utils/fonts/next-google";
 import {
   BASE_URL,
@@ -18,6 +19,10 @@ const TITLE = META_TITLE ?? APP_NAME;
 const DESCRIPTION =
   META_DESCRIPTION ??
   "Website desa wisata DesakuWisataku — paket wisata, galeri, vlog, dan artikel.";
+
+// Preload frame pertama hero (LCP beranda) — gambar dimuat paralel
+// dengan CSS/JS alih-alih menunggu render (rekomendasi 1.2).
+preload("/images/hero-a.png", { as: "image" });
 
 export const metadata: Metadata = {
   title: {
@@ -115,10 +120,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <AntdRegistry>
           <LocaleProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              {children}
+              {/* Banner persetujuan cookie + analytics ter-gate (rekom 2.5).
+                  Harus DI DALAM LocaleProvider agar translate jalan. */}
+              <CookieConsent />
+            </ThemeProvider>
           </LocaleProvider>
         </AntdRegistry>
-        <Analytics />
       </body>
     </html>
   );

@@ -28,6 +28,16 @@ const MEMBERSHIP_PAGE_PREFIXES = [
   "/review-confirm",
 ];
 
+/**
+ * Tandai respons agar TIDAK di-cache (rekomendasi 2.5): halaman/API yang
+ * menyangkut data pribadi (membership, admin, API terautentikasi) wajib
+ * no-store agar tidak tersangkut di cache bersama/CDN.
+ */
+function noStore(response: NextResponse): NextResponse {
+  response.headers.set("Cache-Control", "no-store");
+  return response;
+}
+
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const hasAdminCookie = request.cookies.has(ADMIN_SESSION_COOKIE);
@@ -38,29 +48,38 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/api/admin/auth/") ||
     pathname.startsWith("/api/web/auth/")
   ) {
-    return NextResponse.next();
+    return noStore(NextResponse.next());
   }
 
   // API admin + upload: butuh cookie sesi admin.
   if (pathname.startsWith("/api/admin") || pathname === "/api/upload") {
     if (!hasAdminCookie) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 },
+      return noStore(
+        NextResponse.json(
+          { success: false, error: "Unauthorized" },
+          { status: 401 },
+        ),
       );
     }
-    return NextResponse.next();
+    return noStore(NextResponse.next());
   }
 
   // API profil user web: butuh cookie sesi user.
   if (pathname.startsWith("/api/web/profile")) {
     if (!hasUserCookie) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 },
+      return noStore(
+        NextResponse.json(
+          { success: false, error: "Unauthorized" },
+          { status: 401 },
+        ),
       );
     }
-    return NextResponse.next();
+    return noStore(NextResponse.next());
+  }
+
+  // API web lain (orders, testimonials, …): data user login → no-store.
+  if (pathname.startsWith("/api/web")) {
+    return noStore(NextResponse.next());
   }
 
   // Halaman login admin: sudah punya sesi → langsung ke panel.
@@ -76,7 +95,7 @@ export function proxy(request: NextRequest) {
     if (!hasAdminCookie) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
-    return NextResponse.next();
+    return noStore(NextResponse.next());
   }
 
   // Form auth web: sudah login → tidak bisa diakses lagi (kembali ke
@@ -104,6 +123,10 @@ export function proxy(request: NextRequest) {
     loginUrl.searchParams.set("redirect", `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
   }
+  // Halaman membership berisi data pribadi → tidak boleh di-cache.
+  if (isMembershipPage) {
+    return noStore(NextResponse.next());
+  }
 
   return NextResponse.next();
 }
@@ -113,7 +136,7 @@ export const config = {
     "/admin/:path*",
     "/api/admin/:path*",
     "/api/upload",
-    "/api/web/profile/:path*",
+    "/api/web/:path*",
     "/login",
     "/register",
     "/forgot-password",

@@ -8,7 +8,9 @@ import { NODE_ENV } from "@/utils/config/variables";
 
 /**
  * POST /api/web/profile/email — minta ganti email (wajib login).
- * Wajib menyertakan password aktif (keamanan: memastikan pemilik akun).
+ * Wajib menyertakan password aktif + EMAIL LAMA (keamanan: memastikan
+ * pemilik akun — email aktif tidak ditampilkan lagi di UI, jadi user
+ * harus mengisikan sendiri sebagai konfirmasi kepemilikan).
  * Email baru disimpan sementara (pendingEmail) dan OTP dikirim ke email
  * BARU tersebut; email aktif berubah hanya setelah OTP diverifikasi.
  */
@@ -22,7 +24,7 @@ export async function POST(request: NextRequest) {
   }
   try {
     const body = await request.json();
-    const { email, password } = body as Record<string, unknown>;
+    const { oldEmail, email, password } = body as Record<string, unknown>;
 
     // Verifikasi password: hanya pemilik akun yang boleh mengajukan ganti email.
     if (typeof password !== "string" || !password) {
@@ -35,6 +37,18 @@ export async function POST(request: NextRequest) {
     if (!passwordValid) {
       return NextResponse.json(
         { success: false, error: "INVALID_PASSWORD" },
+        { status: 403 },
+      );
+    }
+
+    // Konfirmasi email lama: harus persis sama dengan email aktif
+    // (pesan generik agar tidak membocorkan email yang benar).
+    if (
+      typeof oldEmail !== "string" ||
+      oldEmail.toLowerCase().trim() !== user.email
+    ) {
+      return NextResponse.json(
+        { success: false, error: "OLD_EMAIL_MISMATCH" },
         { status: 403 },
       );
     }

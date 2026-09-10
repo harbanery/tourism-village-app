@@ -3,6 +3,7 @@ import { requireAdmin, adminCanWriteBlog } from "@/lib/auth";
 import { revalidatePublicCache } from "@/utils/server/cache";
 import { deleteCloudinaryUrls } from "@/lib/cloudinary";
 import { blogSlugBase, uniqueBlogSlug } from "@/utils/server/blogSlug";
+import { sanitizeRichText } from "@/utils/server/sanitize";
 import { NextResponse } from "next/server";
 
 type Params = { params: Promise<{ id: string }> };
@@ -59,7 +60,8 @@ export async function PUT(request: Request, { params }: Params) {
         slug: nextSlug,
         ...(body.placeId !== undefined && { placeId: body.placeId ?? null }),
         ...(body.filename !== undefined && { filename: nextFilename }),
-        para: body.para,
+        // Rich text disanitasi server-side sebelum disimpan (rekom 2.2).
+        para: sanitizeRichText(body.para ?? existing.para),
         datetimeAfter: new Date(),
       },
       include: {

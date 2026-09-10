@@ -21,7 +21,7 @@ import OrdersStatusChart from "@/features/admin/components/ui/chart/OrdersStatus
 import StatusDoughnutChart from "@/features/admin/components/ui/chart/StatusDoughnutChart";
 import TopPackagesChart from "@/features/admin/components/ui/chart/TopPackagesChart";
 import RatioDoughnutChart from "@/features/admin/components/ui/chart/RatioDoughnutChart";
-import { formatRupiah } from "@/utils/helpers";
+import { formatRupiah, maskEmail } from "@/utils/helpers";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
@@ -317,7 +317,7 @@ export default function DashboardPage() {
                         {buyer.name}
                       </div>
                       <div className="truncate text-xs text-foreground/50">
-                        {buyer.email}
+                        {maskEmail(buyer.email)}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">

@@ -11,7 +11,7 @@ import {
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import type { User } from "@/features/web/types";
-import { formatDate } from "@/utils/helpers";
+import { formatDate, maskEmail, maskPhone } from "@/utils/helpers";
 import type { ProfileSettings } from "../page";
 
 export function ProfileInfoSection({
@@ -53,11 +53,13 @@ export function ProfileInfoSection({
         </Badge>
         <h1 className="mt-4 text-xl font-bold">{user?.name ?? "-"}</h1>
         <div className="mt-1 flex items-center gap-2">
-          <p className="text-foreground/60">{user?.email}</p>
+          <p className="text-foreground/60">{maskEmail(user?.email)}</p>
         </div>
         {settings.pendingEmail && (
           <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-            {t("profile.pendingEmail", { email: settings.pendingEmail })}
+            {t("profile.pendingEmail", {
+              email: maskEmail(settings.pendingEmail),
+            })}
           </p>
         )}
       </div>
@@ -66,7 +68,7 @@ export function ProfileInfoSection({
         {/* Jenis kelamin tidak disebutkan bila belum diisi. */}
         {(
           [
-            [t("common.phone"), user?.phone ?? "-"],
+            [t("common.phone"), user?.phone ? maskPhone(user.phone) : "-"],
             user?.gender
               ? [
                   t("profile.gender"),

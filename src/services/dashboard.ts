@@ -100,7 +100,7 @@ export async function getDashboardAnalytics(
     lastMonthCount,
     canceledTotal,
     periodOrders,
-    firstPaidByUser,
+    paidBuyers,
   ] = await Promise.all([
     prisma.order.count(),
     prisma.order.aggregate({
@@ -145,11 +145,12 @@ export async function getDashboardAnalytics(
         },
       },
     }),
-    // PAID pertama setiap user — dipakai menghitung jumlah pembeli unik.
-    prisma.order.findMany({
+    // Pembeli unik (PAID) — groupBy di DB, bukan findMany seluruh riwayat
+    // (rekomendasi 1.1: query lama tumbuh tanpa batas seiring order).
+    prisma.order.groupBy({
+      by: ["userId"],
       where: { paymentStatus: "PAID" },
-      select: { userId: true, paidAt: true },
-      orderBy: { paidAt: "asc" },
+      _count: { _all: true },
     }),
   ]);
 
@@ -279,8 +280,7 @@ export async function getDashboardAnalytics(
           : 0,
       pendingActive,
       canceledTotal,
-      paidBuyersTotal: new Set(firstPaidByUser.map((o) => String(o.userId)))
-        .size,
+      paidBuyersTotal: paidBuyers.length,
     },
     timeseries: dayKeys.map((day) => ({
       day,
