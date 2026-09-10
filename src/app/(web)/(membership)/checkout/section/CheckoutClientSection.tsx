@@ -534,7 +534,7 @@ export default function CheckoutClientSection({
         <Form
           form={form}
           layout="vertical"
-          className="mt-6! grid items-start gap-6 lg:grid-cols-[1fr_360px]"
+          className="mt-6! grid! items-start! gap-6! lg:grid-cols-[1fr_360px]!"
         >
           <Card title={t("checkout.schedulePerPackage")}>
             {/* Paket tunggal → tanpa tab; tiga paket atau lebih → tab per paket. */}
@@ -745,7 +745,7 @@ export default function CheckoutClientSection({
               size="large"
               disabled={submitting}
               onClick={() => setStep(0)}
-              className="w-full! sm:flex-1"
+              className="w-full! sm:flex-1!"
             >
               {t("checkout.editSchedule")}
             </Button>
@@ -754,7 +754,7 @@ export default function CheckoutClientSection({
               size="large"
               loading={submitting}
               onClick={showConfirmPay}
-              className="w-full! sm:flex-1"
+              className="w-full! sm:flex-1!"
             >
               {t("checkout.process")}
             </Button>

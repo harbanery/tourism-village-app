@@ -292,7 +292,7 @@ export function Navbar() {
                 {t("settings.title")}
               </button>
               <Button
-                className="mt-2 justify-start! px-1!"
+                className="mt-2! justify-start! px-1!"
                 type="text"
                 danger
                 icon={<LogoutOutlined />}

@@ -79,7 +79,7 @@ export default function NotificationTest() {
     <div className="pointer-events-none fixed bottom-4 right-4 z-50">
       <Card
         size="small"
-        className="pointer-events-auto w-full max-w-xs shadow-lg"
+        className="pointer-events-auto! w-full! max-w-xs! shadow-lg!"
         styles={{ body: { padding: 12 } }}
         title={
           <div className="flex items-center gap-2">
