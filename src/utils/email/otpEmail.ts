@@ -24,6 +24,8 @@ function purposeLabel(purpose: OtpPurpose): { id: string; en: string } {
       return { id: "Atur ulang password", en: "Reset your password" };
     case "EMAIL_CHANGE":
       return { id: "Verifikasi email baru", en: "Verify your new email" };
+    case "PASSWORD_CHANGE":
+      return { id: "Ganti password", en: "Change your password" };
   }
 }
 

@@ -422,6 +422,23 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.email.hint":
       "Email baru hanya aktif setelah kode OTP diverifikasi.",
     "settings.email.changed": "Email berhasil diganti",
+    "settings.tab.password": "Password",
+    "settings.password.current": "Password saat ini",
+    "settings.password.new": "Password baru",
+    "settings.password.confirm": "Ulangi password baru",
+    "settings.password.wrongPassword": "Password saat ini salah",
+    "settings.password.requirement": "Kombinasi huruf dan angka",
+    "settings.password.invalid":
+      "Password baru minimal 8 karakter, kombinasi huruf dan angka",
+    "settings.password.same":
+      "Password baru harus berbeda dengan password saat ini",
+    "settings.password.sendOtp": "Kirim Kode OTP",
+    "settings.password.otpTitle": "Verifikasi Ganti Password",
+    "settings.password.otpSent": "Kode OTP dikirim ke email aktif",
+    "settings.password.hint":
+      "Password baru berlaku setelah verifikasi OTP. Semua perangkat akan otomatis keluar dan Anda perlu masuk kembali.",
+    "settings.password.changed":
+      "Password berhasil diganti — silakan masuk kembali",
     "settings.notif.web": "Notifikasi Web",
     "settings.notif.webDesc":
       "Notifikasi di dalam aplikasi (status pesanan, pengingat).",
@@ -1044,6 +1061,22 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.email.hint":
       "The new email only becomes active after the OTP code is verified.",
     "settings.email.changed": "Email changed successfully",
+    "settings.tab.password": "Password",
+    "settings.password.current": "Current password",
+    "settings.password.new": "New password",
+    "settings.password.confirm": "Repeat new password",
+    "settings.password.wrongPassword": "Current password is wrong",
+    "settings.password.requirement": "Must combine letters and numbers",
+    "settings.password.invalid":
+      "New password: at least 8 characters with letters and numbers",
+    "settings.password.same": "New password must differ from the current one",
+    "settings.password.sendOtp": "Send OTP Code",
+    "settings.password.otpTitle": "Verify Password Change",
+    "settings.password.otpSent": "OTP code sent to your active email",
+    "settings.password.hint":
+      "The new password takes effect after OTP verification. All devices will be signed out and you will need to sign in again.",
+    "settings.password.changed":
+      "Password changed — please sign in again",
     "settings.notif.web": "Web Notifications",
     "settings.notif.webDesc": "In-app notifications (order status, reminders).",
     "settings.notif.email": "Email Notifications",

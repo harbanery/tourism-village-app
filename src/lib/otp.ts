@@ -7,6 +7,8 @@ import prisma from "@/lib/prisma";
  * - REGISTER_VERIFICATION: verifikasi email setelah register
  * - RESET_PASSWORD: bukti kepemilikan akun sebelum set password baru
  * - EMAIL_CHANGE: verifikasi email baru saat ganti email di pengaturan
+ * - PASSWORD_CHANGE: verifikasi ganti password di pengaturan (semua sesi
+ *   dicabut setelah password baru diterapkan)
  *
  * Kebijakan kirim ulang: jeda antar kirim 5 menit; setelah 5 kali kirim
  * ulang dalam jendela 15 menit → rate limit sampai jendela berlalu.
@@ -32,12 +34,14 @@ const RESET_TOKEN_PURPOSE = "RESET_PASSWORD_TOKEN";
 export type OtpPurpose =
   | "REGISTER_VERIFICATION"
   | "RESET_PASSWORD"
-  | "EMAIL_CHANGE";
+  | "EMAIL_CHANGE"
+  | "PASSWORD_CHANGE";
 
 export const OTP_PURPOSES: OtpPurpose[] = [
   "REGISTER_VERIFICATION",
   "RESET_PASSWORD",
   "EMAIL_CHANGE",
+  "PASSWORD_CHANGE",
 ];
 
 function hashOtp(code: string): string {

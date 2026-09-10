@@ -25,6 +25,7 @@ import {
 import dayjs, { type Dayjs } from "dayjs";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { clearWebSession } from "@/features/web/hooks/session";
 import type { User } from "@/features/web/types";
 import type { ProfileSettings } from "../page";
 
@@ -39,6 +40,12 @@ interface ProfileFormValues {
 interface EmailFormValues {
   email: string;
   password: string;
+}
+
+interface PasswordFormValues {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 /**
@@ -127,11 +134,13 @@ function formatCountdown(seconds: number): string {
 
 /**
  * Section pengaturan akun (menggantikan section riwayat belanja, bukan
- * modal): ubah profil, ubah avatar, ganti email (via OTP), dan preferensi
+ * modal): ubah profil, ubah avatar, ganti email (via OTP), ganti password
+ * (via OTP — semua sesi dicabut setelah berhasil), dan preferensi
  * notifikasi (web notif + email + cron mendatang).
  *
- * Ganti email memakai MODAL OTP (bukan pindah halaman): modal tidak bisa
- * ditutup sampai OTP berhasil — mencegah kebingungan alur & redirect.
+ * Ganti email/password memakai MODAL OTP (bukan pindah halaman): modal
+ * tidak bisa ditutup sampai OTP berhasil — mencegah kebingungan alur &
+ * redirect.
  */
 export function SettingsSection({
   user,
@@ -141,7 +150,12 @@ export function SettingsSection({
   user: User | null;
   settings: ProfileSettings;
   /** Tab awal (mis. "email" saat kembali dari verifikasi OTP ganti email). */
-  initialTab?: "profile" | "avatar" | "email" | "notifications";
+  initialTab?:
+    | "profile"
+    | "avatar"
+    | "email"
+    | "password"
+    | "notifications";
 }) {
   const { t } = useT();
   const router = useRouter();
@@ -150,12 +164,16 @@ export function SettingsSection({
 
   const [profileForm] = Form.useForm<ProfileFormValues>();
   const [emailForm] = Form.useForm<EmailFormValues>();
+  const [passwordForm] = Form.useForm<PasswordFormValues>();
   const [tab, setTab] = useState<string>(initialTab);
   const [savingProfile, setSavingProfile] = useState(false);
   const [requestingEmail, setRequestingEmail] = useState(false);
+  const [requestingPassword, setRequestingPassword] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-  // --- Modal OTP ganti email (non-closeable sampai OTP berhasil) ---
+  // --- Modal OTP (dipakai ganti email & ganti password; non-closeable) ---
+  /** Flow yang sedang menunggu OTP di modal. */
+  const [otpFlow, setOtpFlow] = useState<"email" | "password">("email");
   const [otpOpen, setOtpOpen] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpVerifying, setOtpVerifying] = useState(false);
@@ -167,6 +185,10 @@ export function SettingsSection({
   const [lastEmailRequest, setLastEmailRequest] = useState<{
     email: string;
     password: string;
+  } | null>(null);
+  const [lastPasswordRequest, setLastPasswordRequest] = useState<{
+    currentPassword: string;
+    newPassword: string;
   } | null>(null);
   const [otpDevCode, setOtpDevCode] = useState<string | undefined>();
   const [otpTargetEmail, setOtpTargetEmail] = useState("");
@@ -283,6 +305,7 @@ export function SettingsSection({
       }
       // OTP terkirim ke email baru → buka modal OTP (non-closeable).
       setLastEmailRequest({ email: values.email, password: values.password });
+      setOtpFlow("email");
       setOtpTargetEmail(values.email);
       setOtpDevCode(result.devCode);
       setOtpCode("");
@@ -297,15 +320,127 @@ export function SettingsSection({
     }
   };
 
-  /** Verifikasi OTP ganti email — otomatis saat 6 digit terisi. */
+  /** Ajukan ganti password (kirim OTP ke email aktif). Hasil: ok + devCode. */
+  const requestPasswordChange = async (
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{
+    ok: boolean;
+    devCode?: string;
+    cooldownSeconds?: number;
+    rateLimited?: boolean;
+  }> => {
+    const res = await fetch("/api/web/profile/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    const result = await res.json();
+    if (!result.success) {
+      // Password lama salah → error pada field password lama.
+      if (
+        result.error === "INVALID_PASSWORD" ||
+        result.error === "PASSWORD_REQUIRED"
+      ) {
+        passwordForm.setFields([
+          {
+            name: "currentPassword",
+            errors: [t("settings.password.wrongPassword")],
+          },
+        ]);
+        return { ok: false };
+      }
+      // Password baru tidak lolos aturan / sama dengan lama.
+      if (
+        result.error === "NEW_PASSWORD_INVALID" ||
+        result.error === "NEW_PASSWORD_SAME"
+      ) {
+        passwordForm.setFields([
+          {
+            name: "newPassword",
+            errors: [
+              result.error === "NEW_PASSWORD_SAME"
+                ? t("settings.password.same")
+                : t("settings.password.invalid"),
+            ],
+          },
+        ]);
+        return { ok: false };
+      }
+      // Rate limit kirim ulang → sinyalkan ke modal (countdown panjang).
+      if (result.error === "RATE_LIMITED") {
+        return {
+          ok: false,
+          rateLimited: true,
+          cooldownSeconds: result.seconds ?? 15 * 60,
+        };
+      }
+      message.error(result.error || t("notif.error"));
+      return { ok: false };
+    }
+    return {
+      ok: true,
+      devCode: result.data?.devCode,
+      cooldownSeconds: result.data?.cooldownSeconds,
+    };
+  };
+
+  const handleRequestPasswordChange = async (values: PasswordFormValues) => {
+    setRequestingPassword(true);
+    try {
+      const result = await requestPasswordChange(
+        values.currentPassword,
+        values.newPassword,
+      );
+      if (!result.ok) {
+        if (result.rateLimited) {
+          message.warning(
+            t("auth.otp.rateLimited", {
+              time: formatCountdown(result.cooldownSeconds ?? 15 * 60),
+            }),
+          );
+        }
+        return;
+      }
+      // OTP terkirim ke email aktif → buka modal OTP (non-closeable).
+      setLastPasswordRequest({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      });
+      setOtpFlow("password");
+      setOtpTargetEmail(user?.email ?? "");
+      setOtpDevCode(result.devCode);
+      setOtpCode("");
+      setOtpRateLimited(false);
+      setOtpResendIn(result.cooldownSeconds ?? 300);
+      setOtpOpen(true);
+      message.success(t("settings.password.otpSent"));
+    } catch {
+      message.error(t("notif.error"));
+    } finally {
+      setRequestingPassword(false);
+    }
+  };
+
+  /** Verifikasi OTP — otomatis saat 6 digit terisi (email & password). */
   const handleOtpVerify = async (value: string) => {
     setOtpVerifying(true);
     try {
-      const res = await fetch("/api/web/profile/email/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: value }),
-      });
+      const res =
+        otpFlow === "password"
+          ? await fetch("/api/web/profile/password/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                code: value,
+                newPassword: lastPasswordRequest?.newPassword,
+              }),
+            })
+          : await fetch("/api/web/profile/email/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ code: value }),
+            });
       const result = await res.json();
       if (!result.success) {
         if (result.remainingAttempts !== undefined) {
@@ -320,11 +455,23 @@ export function SettingsSection({
         setOtpCode("");
         return;
       }
-      // Berhasil → tutup modal & segarkan data profil.
+      // Berhasil → tutup modal & bersihkan state.
       setOtpOpen(false);
-      setLastEmailRequest(null);
       setOtpCode("");
       setOtpDevCode(undefined);
+
+      if (otpFlow === "password") {
+        // Semua sesi sudah dicabut server → bersihkan cache sesi klien,
+        // lalu arahkan ke login untuk masuk kembali dengan password baru.
+        setLastPasswordRequest(null);
+        passwordForm.resetFields();
+        clearWebSession();
+        message.success(t("settings.password.changed"));
+        router.push("/login");
+        return;
+      }
+
+      setLastEmailRequest(null);
       emailForm.resetFields();
       message.success(t("settings.email.changed"));
       router.refresh();
@@ -344,15 +491,20 @@ export function SettingsSection({
     }
   };
 
-  /** Kirim ulang OTP ganti email (ajukan ulang dengan data form terakhir). */
+  /** Kirim ulang OTP (ajukan ulang dengan data form terakhir per flow). */
   const handleOtpResend = async () => {
-    if (!lastEmailRequest) return;
     setOtpResending(true);
     try {
-      const result = await requestEmailChange(
-        lastEmailRequest.email,
-        lastEmailRequest.password,
-      );
+      const result =
+        otpFlow === "password"
+          ? await requestPasswordChange(
+              lastPasswordRequest?.currentPassword ?? "",
+              lastPasswordRequest?.newPassword ?? "",
+            )
+          : await requestEmailChange(
+              lastEmailRequest?.email ?? "",
+              lastEmailRequest?.password ?? "",
+            );
       if (!result.ok) {
         // Rate limit → kunci kirim ulang selama sisa jendela (15 menit).
         if (result.rateLimited) {
@@ -572,6 +724,97 @@ export function SettingsSection({
             ),
           },
           {
+            key: "password",
+            label: t("settings.tab.password"),
+            children: (
+              <div className="mt-2 max-w-md">
+                <Form
+                  form={passwordForm}
+                  layout="vertical"
+                  preserve={false}
+                  onFinish={handleRequestPasswordChange}
+                  disabled={requestingPassword}
+                >
+                  {/* Password lama: keamanan — pastikan pengajuan datang
+                      dari pemilik akun (bukan orang lain di sesi terbuka). */}
+                  <Form.Item
+                    name="currentPassword"
+                    label={t("settings.password.current")}
+                    rules={[{ required: true }]}
+                  >
+                    <Input.Password
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="newPassword"
+                    label={t("settings.password.new")}
+                    rules={[
+                      { required: true },
+                      { min: 8, message: t("auth.register.passwordMin") },
+                      {
+                        pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
+                        message: t("settings.password.requirement"),
+                      },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (
+                            !value ||
+                            value === getFieldValue("currentPassword")
+                          ) {
+                            return Promise.reject(
+                              new Error(t("settings.password.same")),
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      }),
+                    ]}
+                  >
+                    <Input.Password
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="confirmPassword"
+                    label={t("settings.password.confirm")}
+                    dependencies={["newPassword"]}
+                    rules={[
+                      { required: true },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || value === getFieldValue("newPassword")) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(
+                            new Error(t("auth.register.passwordMismatch")),
+                          );
+                        },
+                      }),
+                    ]}
+                  >
+                    <Input.Password
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                    />
+                  </Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={requestingPassword}
+                  >
+                    {t("settings.password.sendOtp")}
+                  </Button>
+                </Form>
+                <p className="mt-3 text-xs text-foreground/60">
+                  {t("settings.password.hint")}
+                </p>
+              </div>
+            ),
+          },
+          {
             key: "notifications",
             label: t("settings.tab.notifications"),
             children: <NotifSwitches settings={settings} />,
@@ -590,7 +833,9 @@ export function SettingsSection({
         title={
           <span className="inline-flex items-center gap-2">
             <SafetyOutlined className="text-primary!" />
-            {t("settings.email.otpTitle")}
+            {otpFlow === "password"
+              ? t("settings.password.otpTitle")
+              : t("settings.email.otpTitle")}
           </span>
         }
       >

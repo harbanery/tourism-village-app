@@ -37,7 +37,12 @@ export default function ProfileClientSection({
   /** Total seluruh pesanan user. */
   totalOrders?: number;
   initialView?: ProfileView;
-  initialSettingsTab?: "profile" | "avatar" | "email" | "notifications";
+  initialSettingsTab?:
+    | "profile"
+    | "avatar"
+    | "email"
+    | "password"
+    | "notifications";
 }) {
   const { t } = useT();
   const mounted = useMounted();

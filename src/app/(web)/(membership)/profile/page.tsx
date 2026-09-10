@@ -31,6 +31,7 @@ export default async function ProfilePage({
   const settingsTab =
     params.tab === "email" ||
     params.tab === "avatar" ||
+    params.tab === "password" ||
     params.tab === "notifications"
       ? params.tab
       : "profile";

@@ -139,6 +139,47 @@ function button(url: string, label: string): string {
   </p>`;
 }
 
+/** Data notifikasi ganti password (security notice). */
+export interface PasswordChangedData {
+  userName: string;
+  email: string;
+}
+
+/**
+ * Email pemberitahuan password berhasil diganti (dikirim setelah OTP
+ * ganti password terverifikasi & semua sesi dicabut) — security notice
+ * standar agar pemilik akun sadar bila perubahan tidak dikenal.
+ */
+export function passwordChangedEmail(
+  data: PasswordChangedData,
+): EmailContent {
+  const isId = NOTIFICATION_LOCALE === "id";
+  const title = isId ? "Password Diganti" : "Password Changed";
+  const greeting = isId
+    ? `Halo ${data.userName}, password akun Anda (${data.email}) berhasil diganti.`
+    : `Hello ${data.userName}, the password for your account (${data.email}) has been changed.`;
+  const notice = isId
+    ? `Semua sesi login telah dicabut — Anda perlu masuk kembali dengan password baru. Bila Anda TIDAK melakukan perubahan ini, segera atur ulang password melalui menu "Lupa Password".`
+    : `All login sessions have been revoked — you need to sign in again with your new password. If you did NOT make this change, reset your password immediately via "Forgot Password".`;
+
+  const bodyHtml = `
+    <p style="margin:0 0 12px;">${greeting}</p>
+    <p style="margin:0 0 4px;">${notice}</p>
+    ${button(`${BASE_URL}/login`, isId ? "Masuk" : "Sign In")}`;
+
+  const text = `${greeting}
+${notice}
+${BASE_URL}/login`;
+
+  return {
+    subject: isId
+      ? `[${BRAND}] Password akun Anda telah diganti`
+      : `[${BRAND}] Your password has been changed`,
+    text,
+    html: emailLayout(title, bodyHtml),
+  };
+}
+
 /** Email konfirmasi pesanan baru (checkout sukses, status PENDING). */
 export function orderConfirmationEmail(order: OrderEmailData): EmailContent {
   const isId = NOTIFICATION_LOCALE === "id";
