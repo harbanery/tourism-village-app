@@ -1,5 +1,4 @@
 import { AdminSessionProvider } from "@/features/admin/hooks/session";
-import NotificationTest from "@/features/admin/components/ui/dev/NotificationTest";
 
 /**
  * Layout bersama seluruh halaman admin (grup (auth) dan (panel)).
@@ -14,10 +13,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AdminSessionProvider>
-      {children}
-      <NotificationTest />
-    </AdminSessionProvider>
-  );
+  return <AdminSessionProvider>{children}</AdminSessionProvider>;
 }

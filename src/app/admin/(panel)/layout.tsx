@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
 import AdminShell from "@/features/admin/components/layout";
 import AdminGuard from "@/features/admin/components/ui/guard";
+import NotificationTest from "@/features/admin/components/ui/dev/NotificationTest";
 
 export const metadata: Metadata = {
   title: "Panel Admin",
 };
 
-export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
+export default function AdminPanelLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <AdminGuard>
       <AdminShell>{children}</AdminShell>
+      <NotificationTest />
     </AdminGuard>
   );
 }
