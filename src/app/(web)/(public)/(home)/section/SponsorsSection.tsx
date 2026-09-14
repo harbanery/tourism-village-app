@@ -27,9 +27,13 @@ function SponsorLogo({ sponsor }: { sponsor: ActiveSponsor }) {
       height={256}
       unoptimized={unoptimized}
       title={sponsor.name}
+      tabIndex={0}
       className={[
         "max-w-40 max-h-32 shrink-0! cursor-pointer object-contain opacity-60",
-        "transition-opacity duration-500 hover:opacity-100",
+        // Hitam-putih default, berwarna saat hover/focus (rekomendasi home
+        // sponsor section); opacity & invert dark tetap perilaku lama.
+        "grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0",
+        "focus:opacity-100 focus:grayscale-0 focus:outline-none!",
         sponsor.invertDark ? "dark:invert" : "",
       ].join(" ")}
     />

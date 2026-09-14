@@ -14,22 +14,22 @@ export function FeatureSection() {
 
   const features = [
     {
-      icon: <HomeOutlined className="text-2xl! text-primary!" />,
+      icon: <HomeOutlined className="text-4xl! text-white!" />,
       title: t("home.why.facility.title"),
       desc: t("home.why.facility.desc"),
     },
     {
-      icon: <CustomerServiceOutlined className="text-2xl! text-primary!" />,
+      icon: <CustomerServiceOutlined className="text-4xl! text-white!" />,
       title: t("home.why.service.title"),
       desc: t("home.why.service.desc"),
     },
     {
-      icon: <WalletOutlined className="text-2xl! text-primary!" />,
+      icon: <WalletOutlined className="text-4xl! text-white!" />,
       title: t("home.why.cheap.title"),
       desc: t("home.why.cheap.desc"),
     },
     {
-      icon: <StarOutlined className="text-2xl! text-primary!" />,
+      icon: <StarOutlined className="text-4xl! text-white!" />,
       title: t("home.why.local.title"),
       desc: t("home.why.local.desc"),
     },
@@ -49,18 +49,28 @@ export function FeatureSection() {
           </p>
         </div>
 
-        {/* Grid 2 kolom; items-stretch + h-full membuat semua card setinggi sama. */}
-        <div className="mt-8 grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
+        {/* Grid 4 kartu (responsif: HP 1, tablet 2, ≥lg 4); bg transparan,
+            border transparan KECUALI garis atas (tetap ada saat state
+            normal maupun hover/focus); hover/focus → gradient rise
+            (bawah→atas, semi-transparan; tabIndex agar bisa difokuskan). */}
+        <div className="mt-8 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => (
-            <Card key={feature.title} className="h-full!" styles={{ body: { height: "100%" } }}>
-              <div className="flex h-full items-start gap-4">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/10">
+            <Card
+              key={feature.title}
+              tabIndex={0}
+              className="h-full! border-transparent! bg-transparent! text-center! transition-all! duration-300! hover:bg-gradient-rise! focus:bg-gradient-rise! focus:outline-none!"
+              styles={{ body: { height: "100%" } }}
+            >
+              <div className="flex h-full flex-col items-center gap-3 text-center">
+                {/* Icon besar di atas dalam wadah rounded transparan
+                    bernuansa secondary (pola lama, ukuran lebih besar). */}
+                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/10">
                   {feature.icon}
                 </span>
-                <div>
-                  <h3 className="font-semibold text-lg">{feature.title}</h3>
-                  <p className="mt-1 text-foreground/70">{feature.desc}</p>
-                </div>
+                <h3 className="font-semibold text-lg text-white">
+                  {feature.title}
+                </h3>
+                <p className="text-white/80">{feature.desc}</p>
               </div>
             </Card>
           ))}

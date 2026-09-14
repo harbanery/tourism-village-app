@@ -13,7 +13,7 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 /** Palet aksen (selain status) untuk grafik komposisi. */
-export const ACCENT_COLORS = ["#0d7a5f", "#f59e0b", "#3b82f6", "#8c8c8c"];
+export const ACCENT_COLORS = ["#0d7a5f", "#053227", "#f59e0b", "#3b82f6"];
 
 /** Konfigurasi warna dasar mengikuti mode tema. */
 export function chartPalette(isDark: boolean) {

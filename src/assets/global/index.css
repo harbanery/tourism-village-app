@@ -17,10 +17,28 @@
   --color-foreground: var(--foreground);
   /* Primary brand (hijau) — selaras dengan token colorPrimary AntD. */
   --color-primary: #0d7a5f;
+  /* Secondary brand (hijau hutan) — utility Tailwind bg-/text-secondary. */
+  --color-secondary: #053227;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   /* Marquee sponsor (pola skills-marquee portfolio). */
   --animate-scroll: scroll 45s linear infinite;
+}
+
+/*
+ * Gradient "rise" (dari bawah ke atas → transparan, semi-transparan):
+ * efek hover/focus kartu popular & feature (DROID — gradient 135° lama
+ * di-takeout). Dipasang sebagai background-image sehingga menumpuk di
+ * atas background-color kartu (primary / transparan). Didefinisikan
+ * dengan `@utility` agar mendukung varian (hover:, focus:) dan
+ * suffix `!` pada komponen antd.
+ */
+@utility bg-gradient-rise {
+  background-image: linear-gradient(
+    to top,
+    rgb(5 50 39 / 0.85) 0%,
+    rgb(5 50 39 / 0) 100%
+  );
 }
 
 @keyframes scroll {

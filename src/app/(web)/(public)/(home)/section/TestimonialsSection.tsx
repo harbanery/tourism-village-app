@@ -43,12 +43,12 @@ export function TestimonialsSection({
             </div>
           ) : (
             testimonials.map((review) => (
-              <Card key={review.id} className="h-full!">
+              <Card key={review.id} className="h-full! border-primary! bg-primary!">
                 <Rate disabled defaultValue={review.rating} />
-                <p className="mt-3 text-foreground/80">
+                <p className="mt-3 text-white/85">
                   &ldquo;{review.comment}&rdquo;
                 </p>
-                <p className="mt-4 font-medium">— {review.userName ?? "-"}</p>
+                <p className="mt-4 font-medium text-white">— {review.userName ?? "-"}</p>
               </Card>
             ))
           )}

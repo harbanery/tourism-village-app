@@ -145,6 +145,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         theme={{
           algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
           token: {
+            // Primary hijau (DROID) — selaras dengan --color-primary di
+            // assets/global/index.css. Catatan: antd 6 tidak lagi punya token
+            // colorSecondary; warna secondary (hijau hutan #053227) dipakai
+            // via utility Tailwind (--color-secondary: bg-secondary/dst.).
             colorPrimary: "#0d7a5f",
             borderRadius: 10,
             fontFamily:

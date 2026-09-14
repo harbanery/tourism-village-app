@@ -26,7 +26,8 @@ function PlaceCard({
   return (
     <Card
       hoverable
-      className="h-full! cursor-pointer!"
+      tabIndex={0}
+      className="group h-full! cursor-pointer! border-primary! bg-primary! transition-all! duration-300! hover:border-primary! focus:border-primary! focus:outline-none!"
       onClick={onClick}
       cover={
         place.photo && src ? (
@@ -48,11 +49,14 @@ function PlaceCard({
         )
       }
     >
-      <Card.Meta
-        avatar={<EnvironmentOutlined className="text-xl! text-primary!" />}
-        title={place.name}
-        description="Indonesia"
-      />
+      {/* Meta custom (div baru) agar teks putih terbaca di atas bg primary. */}
+      <div className="flex items-center gap-3">
+        <EnvironmentOutlined className="text-xl! text-white!" />
+        <div>
+          <h3 className="font-semibold text-white">{place.name}</h3>
+          <p className="text-sm text-white/75">Indonesia</p>
+        </div>
+      </div>
     </Card>
   );
 }

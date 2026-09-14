@@ -1,8 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button, Card, Col, Row } from "antd";
-import { ArrowRightOutlined, CheckCircleFilled } from "@ant-design/icons";
+import { Button, Card, Col, Row, Tag } from "antd";
+import {
+  ArrowRightOutlined,
+  CheckCircleFilled,
+  EnvironmentOutlined,
+  FireOutlined,
+} from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { readCart, writeCart } from "@/features/web/utils/cart";
 import { formatRupiah } from "@/utils/helpers";
@@ -64,15 +69,30 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
             <Col xs={24} sm={12} md={8} key={pkg.id} className="h-full!">
               {/* Kartu flex-col: daftar fasilitas yang beda jumlah tetap
                 menghasilkan tinggi kartu sama, dengan CTA terpacu di dasar. */}
+              {/* Header menyatu dengan bg kartu (primary); extra = tag
+                  Populer gold + icon api (sama seperti halaman package,
+                  dari timesPurchased > 0) — tidak populer → tidak tampil. */}
               <Card
-                title={pkg.name}
-                extra={
-                  <span className="text-foreground/60 text-sm">
-                    {pkg.placeName ?? "-"}
-                  </span>
+                title={
+                  <span className="font-semibold! text-white!">{pkg.name}</span>
                 }
-                className="flex! h-full! flex-col!"
+                extra={
+                  pkg.timesPurchased > 0 ? (
+                    <Tag
+                      color="orange"
+                      variant="outlined"
+                      icon={<FireOutlined />}
+                      className="m-0!"
+                    >
+                      {t("package.popularTag")}
+                    </Tag>
+                  ) : null
+                }
+                className="flex! h-full! flex-col! border-primary! bg-primary!"
                 styles={{
+                  header: {
+                    borderBottomColor: "rgba(255,255,255,0.25)",
+                  },
                   body: {
                     flex: 1,
                     display: "flex",
@@ -80,12 +100,13 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
                   },
                 }}
               >
-                <div className="text-3xl font-bold text-primary">
-                  {formatRupiah(pkg.price)}
-                  <span className="text-sm font-normal text-foreground/60">
-                    {t("common.perPerson")}
-                  </span>
-                </div>
+                {/* Urutan body: lokasi (kiri + icon) → fasilitas → harga (tengah). */}
+                {pkg.placeName && (
+                  <div className="flex items-center justify-start gap-2 text-white/85">
+                    <EnvironmentOutlined className="text-base!" />
+                    <span>{pkg.placeName}</span>
+                  </div>
+                )}
                 {/* Maksimal 4 fasilitas: tiap item min-height satu baris
                   sehingga tinggi daftar seragam antar card. */}
                 <ul className="mt-4 flex-1 space-y-2">
@@ -95,17 +116,26 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
                     .map((f) => (
                       <li
                         key={f}
-                        className="flex min-h-6 items-start gap-2 text-sm text-foreground/80"
+                        className="flex min-h-6 items-start gap-2 text-sm text-white/85"
                       >
-                        <CheckCircleFilled className="mt-0.5 text-primary" />
+                        <CheckCircleFilled className="mt-0.5 text-white" />
                         {f}
                       </li>
                     ))}
                 </ul>
+                <div className="mt-4 text-center text-3xl font-bold text-white">
+                  {formatRupiah(pkg.price)}
+                  <span className="text-sm font-normal text-white/70">
+                    {t("common.perPerson")}
+                  </span>
+                </div>
+                {/* CTA: bg primary (menyatu dengan card) + border putih;
+                    hover/focus sedikit lebih gelap dari primary (bukan
+                    secondary). */}
                 <Button
                   type="primary"
                   block
-                  className="mt-6!"
+                  className="mt-6! border-white! hover:border-white! hover:bg-[#0b6b53]! focus:border-white! focus:bg-[#0b6b53]!"
                   onClick={() => handleOrder(pkg)}
                 >
                   {t("home.packages.cta")}
@@ -115,9 +145,11 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
           ))}
         </Row>
 
-        {/* Lihat lainnya → halaman lengkap paket (icon di sebelah kanan). */}
+        {/* Lihat lainnya → halaman lengkap paket (icon di sebelah kanan);
+            tombol primary (hijau) sesuai tema section. */}
         <div className="mt-8 text-center">
           <Button
+            type="primary"
             size="large"
             icon={<ArrowRightOutlined />}
             iconPosition="end"
