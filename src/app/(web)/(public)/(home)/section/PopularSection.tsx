@@ -27,7 +27,7 @@ function PlaceCard({
     <Card
       hoverable
       tabIndex={0}
-      className="group h-full! cursor-pointer! border-primary! bg-primary! transition-all! duration-300! hover:border-primary! focus:border-primary! focus:outline-none!"
+      className="group h-full! cursor-pointer! border-1! border-solid! border-white! bg-primary! hover:border-white! focus:border-white! focus:outline-none!"
       onClick={onClick}
       cover={
         place.photo && src ? (
@@ -38,7 +38,7 @@ function PlaceCard({
             height={480}
             unoptimized={unoptimized}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="h-48 w-full object-cover"
+            className="h-48 w-full border-1! border-solid! border-white! object-cover"
           />
         ) : (
           <Empty
@@ -76,16 +76,15 @@ export function PopularSection({ places }: { places: PlaceWithPackages[] }) {
     .sort((a, b) => b.totalPurchased - a.totalPurchased)
     .slice(0, MAX_PLACES);
 
+  // Section bg primary (dark & light); heading putih agar terbaca.
   return (
-    <section className="flex min-h-screen items-center bg-white dark:bg-[#141416]">
+    <section className="flex min-h-screen items-center rounded-4xl bg-primary">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
         <div className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold">
+          <h2 className="text-2xl md:text-3xl font-bold text-white">
             {t("home.popular.title")}
           </h2>
-          <p className="mt-1 text-foreground/60">
-            {t("home.popular.subtitle")}
-          </p>
+          <p className="mt-1 text-white/70">{t("home.popular.subtitle")}</p>
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">

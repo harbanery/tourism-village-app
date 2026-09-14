@@ -49,16 +49,14 @@ export function FeatureSection() {
           </p>
         </div>
 
-        {/* Grid 4 kartu (responsif: HP 1, tablet 2, ≥lg 4); bg transparan,
-            border transparan KECUALI garis atas (tetap ada saat state
-            normal maupun hover/focus); hover/focus → gradient rise
-            (bawah→atas, semi-transparan; tabIndex agar bisa difokuskan). */}
+        {/* Grid 4 kartu (responsif: HP 1, tablet 2, ≥lg 4); bg & border
+            transparan (hero terlihat di belakang) — tanpa efek hover/focus
+            (gradient di-takeout, DROID). */}
         <div className="mt-8 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => (
             <Card
               key={feature.title}
-              tabIndex={0}
-              className="h-full! border-transparent! bg-transparent! text-center! transition-all! duration-300! hover:bg-gradient-rise! focus:bg-gradient-rise! focus:outline-none!"
+              className="h-full! border-transparent! bg-transparent! text-center!"
               styles={{ body: { height: "100%" } }}
             >
               <div className="flex h-full flex-col items-center gap-3 text-center">

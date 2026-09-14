@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button, Card, Col, Row, Tag } from "antd";
+import { Badge, Button, Card, Col, Row } from "antd";
 import {
   ArrowRightOutlined,
   CheckCircleFilled,
@@ -50,113 +50,122 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
   const handleOrder = useOrderPackage();
 
   return (
-    <section
-      id="packages"
-      className="flex min-h-screen items-center bg-white dark:bg-[#141416]"
-    >
-      <div className="mx-auto w-full max-w-6xl px-4 py-16">
-        <div className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold">
-            {t("home.packages.title")}
-          </h2>
-          <p className="mt-1 text-foreground/60">
-            {t("home.packages.subtitle")}
-          </p>
-        </div>
+    <section id="packages" className="bg-white dark:bg-[#141416] rounded-t-4xl">
+      <div className="flex min-h-screen items-center bg-primary rounded-4xl">
+        <div className="mx-auto w-full max-w-6xl px-4 py-16">
+          <div className="text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-white">
+              {t("home.packages.title")}
+            </h2>
+            <p className="mt-1 text-white/70">{t("home.packages.subtitle")}</p>
+          </div>
 
-        <Row gutter={[16, 16]} className="mt-8!">
-          {packages.slice(0, 3).map((pkg) => (
-            <Col xs={24} sm={12} md={8} key={pkg.id} className="h-full!">
-              {/* Kartu flex-col: daftar fasilitas yang beda jumlah tetap
-                menghasilkan tinggi kartu sama, dengan CTA terpacu di dasar. */}
-              {/* Header menyatu dengan bg kartu (primary); extra = tag
-                  Populer gold + icon api (sama seperti halaman package,
-                  dari timesPurchased > 0) — tidak populer → tidak tampil. */}
-              <Card
-                title={
-                  <span className="font-semibold! text-white!">{pkg.name}</span>
-                }
-                extra={
-                  pkg.timesPurchased > 0 ? (
-                    <Tag
-                      color="orange"
-                      variant="outlined"
-                      icon={<FireOutlined />}
-                      className="m-0!"
-                    >
-                      {t("package.popularTag")}
-                    </Tag>
-                  ) : null
-                }
-                className="flex! h-full! flex-col! border-primary! bg-primary!"
-                styles={{
-                  header: {
-                    borderBottomColor: "rgba(255,255,255,0.25)",
-                  },
-                  body: {
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                  },
-                }}
-              >
-                {/* Urutan body: lokasi (kiri + icon) → fasilitas → harga (tengah). */}
-                {pkg.placeName && (
-                  <div className="flex items-center justify-start gap-2 text-white/85">
-                    <EnvironmentOutlined className="text-base!" />
-                    <span>{pkg.placeName}</span>
-                  </div>
-                )}
-                {/* Maksimal 4 fasilitas: tiap item min-height satu baris
+          <Row gutter={[16, 16]} className="mt-8!">
+            {packages.slice(0, 3).map((pkg) => {
+              // Kartu flex-col: daftar fasilitas yang beda jumlah tetap
+              // menghasilkan tinggi kartu sama, dengan CTA terpacu di dasar.
+              const card = (
+                <Card
+                  title={
+                    <span className="font-semibold! text-white!">
+                      {pkg.name}
+                    </span>
+                  }
+                  className="flex! h-full! flex-col! border-white! bg-primary!"
+                  styles={{
+                    header: {
+                      borderBottomColor: "rgba(255,255,255,0.25)",
+                    },
+                    body: {
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                    },
+                  }}
+                >
+                  {/* Urutan body: lokasi (kiri + icon) → fasilitas → harga (tengah). */}
+                  {pkg.placeName && (
+                    <div className="flex items-center justify-start gap-2 text-white/85">
+                      <EnvironmentOutlined className="text-base!" />
+                      <span>{pkg.placeName}</span>
+                    </div>
+                  )}
+                  {/* Maksimal 4 fasilitas: tiap item min-height satu baris
                   sehingga tinggi daftar seragam antar card. */}
-                <ul className="mt-4 flex-1 space-y-2">
-                  {pkg.facilities
-                    .filter(Boolean)
-                    .slice(0, 4)
-                    .map((f) => (
-                      <li
-                        key={f}
-                        className="flex min-h-6 items-start gap-2 text-sm text-white/85"
-                      >
-                        <CheckCircleFilled className="mt-0.5 text-white" />
-                        {f}
-                      </li>
-                    ))}
-                </ul>
-                <div className="mt-4 text-center text-3xl font-bold text-white">
-                  {formatRupiah(pkg.price)}
-                  <span className="text-sm font-normal text-white/70">
-                    {t("common.perPerson")}
-                  </span>
-                </div>
-                {/* CTA: bg primary (menyatu dengan card) + border putih;
+                  <ul className="mt-4 flex-1 space-y-2">
+                    {pkg.facilities
+                      .filter(Boolean)
+                      .slice(0, 4)
+                      .map((f) => (
+                        <li
+                          key={f}
+                          className="flex min-h-6 items-start gap-2 text-sm text-white/85"
+                        >
+                          <CheckCircleFilled className="mt-0.5 text-white" />
+                          {f}
+                        </li>
+                      ))}
+                  </ul>
+                  <div className="mt-4 text-center text-3xl font-bold text-white">
+                    {formatRupiah(pkg.price)}
+                    <span className="text-sm font-normal text-white/70">
+                      {t("common.perPerson")}
+                    </span>
+                  </div>
+                  {/* CTA: bg primary (menyatu dengan card) + border putih;
                     hover/focus sedikit lebih gelap dari primary (bukan
                     secondary). */}
-                <Button
-                  type="primary"
-                  block
-                  className="mt-6! border-white! hover:border-white! hover:bg-[#0b6b53]! focus:border-white! focus:bg-[#0b6b53]!"
-                  onClick={() => handleOrder(pkg)}
-                >
-                  {t("home.packages.cta")}
-                </Button>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                  <Button
+                    type="primary"
+                    block
+                    className="mt-6! border-white! hover:border-white! focus:border-white!"
+                    onClick={() => handleOrder(pkg)}
+                  >
+                    {t("home.packages.cta")}
+                  </Button>
+                </Card>
+              );
 
-        {/* Lihat lainnya → halaman lengkap paket (icon di sebelah kanan);
-            tombol primary (hijau) sesuai tema section. */}
-        <div className="mt-8 text-center">
-          <Button
-            type="primary"
-            size="large"
-            icon={<ArrowRightOutlined />}
-            iconPosition="end"
-            onClick={() => router.push("/package")}
-          >
-            {t("home.packages.viewMore")}
-          </Button>
+              return (
+                <Col xs={24} sm={12} md={8} key={pkg.id} className="h-full!">
+                  {/* Badge ribbon "Populer" (gold + icon api, dari
+                    timesPurchased > 0) menempel di pojok kanan atas kartu;
+                    tidak populer → kartu polos tanpa ribbon. */}
+                  {pkg.timesPurchased > 0 ? (
+                    <Badge.Ribbon
+                      text={
+                        <span className="inline-flex items-center gap-1">
+                          <FireOutlined />
+                          {t("package.popularTag")}
+                        </span>
+                      }
+                      color="orange"
+                    >
+                      {card}
+                    </Badge.Ribbon>
+                  ) : (
+                    card
+                  )}
+                </Col>
+              );
+            })}
+          </Row>
+
+          {/* Lihat lainnya → halaman lengkap paket (icon di sebelah kanan);
+            tombol primary + border putih; hover/focus lebih gelap
+            (selaras dengan CTA "Pesan Sekarang"). */}
+          <div className="mt-8 text-center">
+            <Button
+              type="primary"
+              size="large"
+              icon={<ArrowRightOutlined />}
+              iconPosition="end"
+              className="border-white! hover:border-white! focus:border-white!"
+              onClick={() => router.push("/package")}
+            >
+              {t("home.packages.viewMore")}
+            </Button>
+          </div>
         </div>
       </div>
     </section>
