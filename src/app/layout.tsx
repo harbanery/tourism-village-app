@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { preload } from "react-dom";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ThemeProvider } from "@/components/ui/theme/ThemeProvider";
@@ -20,9 +19,9 @@ const DESCRIPTION =
   META_DESCRIPTION ??
   "Website desa wisata DesakuWisataku — paket wisata, galeri, vlog, dan artikel.";
 
-// Preload frame pertama hero (LCP beranda) — gambar dimuat paralel
-// dengan CSS/JS alih-alih menunggu render (rekomendasi 1.2).
-preload("/images/hero-a.png", { as: "image" });
+// Preload LCP hero ditangani `next/image priority` di HeroBackground
+// (rekomendasi 1.2): Next menyuntikkan preload varian teroptimasi
+// (WebP/AVIF) — preload manual PNG asli justru akan muat ganda.
 
 export const metadata: Metadata = {
   title: {

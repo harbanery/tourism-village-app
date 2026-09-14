@@ -28,6 +28,35 @@ const MEMBERSHIP_PAGE_PREFIXES = [
   "/review-confirm",
 ];
 
+/** Method HTTP yang mengubah state (layak dijaga dari cross-site). */
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+/**
+ * Cek same-origin untuk SEMUA mutasi API (rekomendasi 2.4): browser
+ * modern selalu menyertakan Origin pada cross-site POST/PATCH/… — bila
+ * Origin ada namun host-nya berbeda dengan Host header, tolak. Request
+ * tanpa Origin (non-browser / server-to-server, mis. webhook Midtrans
+ * dan cron) dibiarkan lewat; autentikasi tetap memagari akses.
+ *
+ * Dipusatkan di proxy agar mencakup orders, ulasan, profile, dan seluruh
+ * CRUD admin sekaligus (sebelumnya hanya 4 route auth yang memeriksa).
+ */
+function isCrossSiteApiMutation(request: NextRequest): boolean {
+  if (!MUTATING_METHODS.has(request.method)) return false;
+  if (!request.nextUrl.pathname.startsWith("/api/")) return false;
+
+  const origin = request.headers.get("origin");
+  if (!origin) return false; // server-to-server (webhook/cron) — lewat.
+
+  const host = request.headers.get("host");
+  if (!host) return true;
+  try {
+    return new URL(origin).host !== host;
+  } catch {
+    return true;
+  }
+}
+
 /**
  * Tandai respons agar TIDAK di-cache (rekomendasi 2.5): halaman/API yang
  * menyangkut data pribadi (membership, admin, API terautentikasi) wajib
@@ -42,6 +71,16 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const hasAdminCookie = request.cookies.has(ADMIN_SESSION_COOKIE);
   const hasUserCookie = request.cookies.has(USER_SESSION_COOKIE);
+
+  // Mutasi API cross-site (Origin ≠ Host) → tolak (rekomendasi 2.4).
+  if (isCrossSiteApiMutation(request)) {
+    return noStore(
+      NextResponse.json(
+        { success: false, error: "FORBIDDEN_ORIGIN" },
+        { status: 403 },
+      ),
+    );
+  }
 
   // Endpoint auth selalu diizinkan (login/logout/session/register).
   if (

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getClientIp, getCurrentUser } from "@/lib/auth";
+import { createPageTicket } from "@/lib/otp";
 import { fetchMidtransStatus, mapMidtransStatus } from "@/lib/midtrans";
 import { isPaymentExpired } from "@/utils/server/orderExpiry";
 import { applyPaymentTransition } from "@/utils/server/orderStatus";
@@ -103,6 +104,16 @@ export async function GET(
     }
   }
 
+  // Pembayaran berhasil → terbitkan token ulasan sekali pakai (rekom 2.3)
+  // untuk halaman review-confirm; dikonsumsi penuh saat ulasan dikirim.
+  // Token lama purpose sama otomatis dikonsumsi (satu aktif per user).
+  let reviewTicket: string | null = null;
+  if (current.paymentStatus === "PAID") {
+    reviewTicket = await createPageTicket(user.id, "ORDER_REVIEW").catch(
+      () => null,
+    );
+  }
+
   return NextResponse.json({
     success: true,
     data: {
@@ -111,6 +122,7 @@ export async function GET(
       paymentMethod: current.paymentMethod,
       paidAt: current.paidAt?.toISOString() ?? null,
       paymentExpiresAt: current.paymentExpiresAt?.toISOString() ?? null,
+      reviewTicket,
     },
   });
 }

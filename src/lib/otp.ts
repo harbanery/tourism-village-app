@@ -163,6 +163,86 @@ export type OtpVerifyResult =
   | { ok: true }
   | { ok: false; reason: "NOT_FOUND" | "EXPIRED" | "TOO_MANY_ATTEMPTS"; remainingAttempts?: number };
 
+// ---------------------------------------------------------------------------
+// Tiket akses halaman versi SERVER (rekomendasi 2.3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Hardening tiket "halaman sekali masuk": selain tiket sessionStorage di
+ * klien, endpoint sensitif kini memvalidasi token sekali pakai yang
+ * diterbitkan server (hash sha256 di tabel OtpCode — purpose khusus,
+ * tanpa migrasi schema). Token terikat user + purpose dan berkedaluwarsa.
+ *
+ * - ORDER_PAYMENT: wajib pada GET /api/web/orders/[id]/pay (QR QRIS).
+ *   Verifikasi TANPA konsumsi — refresh halaman tetap boleh selama token
+ *   belum kedaluwarsa (token baru diterbitkan tiap order dibuat / tombol
+ *   "Bayar Sekarang" di profil).
+ * - ORDER_REVIEW: wajib pada POST /api/web/testimonials (konsumsi penuh —
+ *   benar-benar sekali pakai per pembayaran).
+ */
+export type PageTicketPurpose = "ORDER_PAYMENT" | "ORDER_REVIEW";
+
+/** Usia pakai tiket per purpose (menit). */
+export const PAGE_TICKET_TTL_MINUTES: Record<PageTicketPurpose, number> = {
+  ORDER_PAYMENT: 60,
+  ORDER_REVIEW: 30,
+};
+
+/** Terbitkan tiket halaman baru; tiket lama purpose sama dikonsumsi. */
+export async function createPageTicket(
+  userId: string,
+  purpose: PageTicketPurpose,
+): Promise<string> {
+  const token = randomBytes(32).toString("hex");
+  await prisma.otpCode.updateMany({
+    where: { userId, purpose, consumedAt: null },
+    data: { consumedAt: new Date() },
+  });
+  await prisma.otpCode.create({
+    data: {
+      userId,
+      purpose,
+      codeHash: hashOtp(token),
+      expiresAt: new Date(
+        Date.now() + PAGE_TICKET_TTL_MINUTES[purpose] * 60 * 1000,
+      ),
+    },
+  });
+  return token;
+}
+
+/**
+ * Verifikasi tiket halaman (terikat user + purpose).
+ * `consume: true` → sekali pakai penuh (ulasan); default hanya cek
+ * (pembayaran — refresh halaman tetap valid sampai kedaluwarsa).
+ */
+export async function verifyPageTicket(
+  token: string,
+  userId: string,
+  purpose: PageTicketPurpose,
+  options: { consume?: boolean } = {},
+): Promise<boolean> {
+  const { consume = false } = options;
+  if (!token) return false;
+  const row = await prisma.otpCode.findFirst({
+    where: { userId, purpose, codeHash: hashOtp(token), consumedAt: null },
+    orderBy: { createdAt: "desc" },
+  });
+  if (!row) return false;
+  if (row.expiresAt.getTime() <= Date.now()) {
+    await prisma.otpCode
+      .update({ where: { id: row.id }, data: { consumedAt: new Date() } })
+      .catch(() => {});
+    return false;
+  }
+  if (consume) {
+    await prisma.otpCode
+      .update({ where: { id: row.id }, data: { consumedAt: new Date() } })
+      .catch(() => {});
+  }
+  return true;
+}
+
 /**
  * Verifikasi kode OTP: hitung percobaan saat salah, dan konsumsi saat
  * cocok (default). Untuk flow reset password (otp → reset → login),

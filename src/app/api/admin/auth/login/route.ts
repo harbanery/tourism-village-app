@@ -111,6 +111,14 @@ export async function POST(request: NextRequest) {
     }
 
     await clearFailedAttempts(ip, scope);
+    // Catat login terakhir admin (rekomendasi 2.1 — paritas dengan user
+    // web); best-effort: kegagalan update tidak menggagalkan login.
+    await prisma.authAdmin
+      .update({
+        where: { id: admin.id },
+        data: { lastLoginAt: new Date() },
+      })
+      .catch((err) => console.error("Gagal mencatat lastLoginAt admin:", err));
     const { token, expiresAt } = await createSession("admin", admin.id);
     const store = await cookies();
     store.set(

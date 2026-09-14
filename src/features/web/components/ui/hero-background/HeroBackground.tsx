@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 const HERO_IMAGES = ["/images/hero-a.png", "/images/hero-b.png"];
 const INTERVAL_MS = 7000;
@@ -10,6 +11,10 @@ const INTERVAL_MS = 7000;
  * viewport sehingga terlihat "bergerak" mengikuti scroll, dengan
  * crossfade halus antara hero-a dan hero-b serta gradient gelap agar
  * konten tetap terbaca.
+ *
+ * Rekomendasi 1.2: hero dirender lewat `next/image` (fill) — optimizer
+ * Next menyajikan WebP/AVIF responsif menggantikan PNG asli multi-MB,
+ * dan frame pertama diberi `priority` agar tetap menjadi preload LCP.
  */
 export function HeroBackground() {
   const [index, setIndex] = useState(0);
@@ -28,11 +33,20 @@ export function HeroBackground() {
         <div
           key={src}
           aria-hidden
-          className={`fixed inset-0 -z-10 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out ${
+          className={`fixed inset-0 -z-10 transition-opacity duration-[1500ms] ease-in-out ${
             i === index ? "opacity-100" : "opacity-0"
           }`}
-          style={{ backgroundImage: `url(${src})` }}
-        />
+        >
+          <Image
+            src={src}
+            alt=""
+            fill
+            priority={i === 0}
+            sizes="100vw"
+            quality={80}
+            className="object-cover"
+          />
+        </div>
       ))}
       {/* Gradient gelap di atas gambar */}
       <div

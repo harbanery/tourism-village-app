@@ -11,7 +11,7 @@ import {
   CLOUDINARY_API_SECRET,
   CLOUDINARY_CLOUD_NAME,
 } from "@/utils/config/variables";
-import { validateImageFile } from "@/utils/server/fileGuard";
+import { validateImageFile, validateImageDimensions } from "@/utils/server/fileGuard";
 
 /** Folder Cloudinary yang diizinkan per sumber upload. */
 const ALLOWED_FOLDERS = [
@@ -128,6 +128,20 @@ export async function POST(request: NextRequest) {
     }
 
     const cloudinaryData = await cloudinaryResponse.json();
+
+    // Batas dimensi (rekomendasi 2.4): cek width/height dari respons
+    // Cloudinary — aset raksasa (dekompresi-bomb) dihapus lalu ditolak.
+    const dimError = validateImageDimensions(
+      cloudinaryData.width,
+      cloudinaryData.height,
+    );
+    if (dimError) {
+      await destroyCloudinaryAsset(cloudinaryData.public_id).catch(() => {});
+      return NextResponse.json(
+        { success: false, error: dimError },
+        { status: 400 },
+      );
+    }
 
     return NextResponse.json({
       success: true,

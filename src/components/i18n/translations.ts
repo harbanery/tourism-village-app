@@ -276,6 +276,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notif.reviewCooldown":
       "Anda sudah memberikan ulasan dalam 24 jam terakhir — tunggu 24 jam untuk bisa mengirim ulasan lagi.",
     "notif.reviewSubmitted": "Ulasan terkirim — menunggu moderasi admin",
+    "notif.review_too_short":
+      "Ulasan terlalu pendek — tulis minimal 10 karakter agar bermanfaat.",
+    "notif.review_too_long":
+      "Ulasan terlalu panjang — maksimal 500 karakter.",
+    "notif.review_profanity":
+      "Ulasan mengandung kata yang tidak pantas — mohon perbaiki kata-katanya.",
 
     "success.title": "Pesanan Berhasil!",
     "success.message":
@@ -942,6 +948,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notif.reviewCooldown":
       "You already submitted a review within the last 24 hours — wait 24 hours before submitting another one.",
     "notif.reviewSubmitted": "Review submitted — awaiting admin moderation",
+    "notif.review_too_short":
+      "Your review is too short — write at least 10 characters to be helpful.",
+    "notif.review_too_long":
+      "Your review is too long — 500 characters maximum.",
+    "notif.review_profanity":
+      "Your review contains inappropriate words — please rephrase it.",
 
     "success.title": "Order Successful!",
     "success.message":

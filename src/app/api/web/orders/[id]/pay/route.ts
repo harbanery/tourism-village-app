@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getClientIp, getCurrentUser } from "@/lib/auth";
+import { verifyPageTicket } from "@/lib/otp";
 import { isPaymentExpired, paymentDeadline } from "@/utils/server/orderExpiry";
 import { applyPaymentTransition } from "@/utils/server/orderStatus";
 import { customerFromUser, ensureOrderQris } from "@/lib/qris";
@@ -15,6 +16,10 @@ const PAY_RATE_LIMIT = 6;
  * Dipakai halaman /payment/[id] dan tombol "Bayar" di riwayat profil:
  * memastikan QR QRIS tersedia (dibuat sekali via Core API, lalu dipakai
  * ulang) untuk order milik user login.
+ *
+ * Wajib membawa header `x-payment-ticket` (rekomendasi 2.3): token sekali
+ * pakai terbitan server (dari POST /orders atau /ticket) — menggantikan
+ * penuh tiket sessionStorage klien pada endpoint sensitif ini.
  */
 export async function GET(
   request: Request,
@@ -35,6 +40,21 @@ export async function GET(
     PAY_RATE_LIMIT,
   );
   if (!allowed) return tooManyRequests(retryAfterMs);
+
+  // Token server sekali pakai (rekomendasi 2.3): verifikasi tanpa
+  // konsumsi — refresh halaman tetap boleh selama token belum basi.
+  const paymentTicket = request.headers.get("x-payment-ticket") ?? "";
+  const ticketOk = await verifyPageTicket(
+    paymentTicket,
+    user.id,
+    "ORDER_PAYMENT",
+  );
+  if (!ticketOk) {
+    return NextResponse.json(
+      { success: false, error: "PAYMENT_TICKET_REQUIRED" },
+      { status: 403 },
+    );
+  }
 
   const { id } = await params;
   if (!id) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { CRON_SECRET, NODE_ENV } from "@/utils/config/variables";
+import { NODE_ENV } from "@/utils/config/variables";
 import { buildDailySummary, sendDailySummary } from "@/utils/server/orderEvents";
+import { isCronAuthorized } from "@/utils/server/cronAuth";
 
 /**
  * GET /api/cron/daily-summary — ringkasan harian order & pendapatan untuk
@@ -8,8 +9,7 @@ import { buildDailySummary, sendDailySummary } from "@/utils/server/orderEvents"
  * setiap hari 21:00 WIB (14:00 UTC).
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

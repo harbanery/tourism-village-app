@@ -66,3 +66,29 @@ export function validateImageFile(
   }
   return null;
 }
+
+/**
+ * Batas dimensi gambar per sisi dalam pixel (rekomendasi 2.4): mencegah
+ * dekompresi-bomb — file kecil yang meledak jadi kanvas raksasa.
+ */
+export const MAX_IMAGE_DIMENSION = 8000;
+
+/**
+ * Validasi dimensi gambar dari respons upload Cloudinary (width/height).
+ * Mengembalikan pesan error (untuk respons 400) atau null bila lolos.
+ * Aset yang ternyata melanggar harus dihapus pemanggil (destroy).
+ */
+export function validateImageDimensions(
+  width: unknown,
+  height: unknown,
+): string | null {
+  const w = Number(width);
+  const h = Number(height);
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) {
+    return "Dimensi gambar tidak terbaca dari Cloudinary.";
+  }
+  if (w > MAX_IMAGE_DIMENSION || h > MAX_IMAGE_DIMENSION) {
+    return `Dimensi gambar maksimal ${MAX_IMAGE_DIMENSION}×${MAX_IMAGE_DIMENSION}px.`;
+  }
+  return null;
+}

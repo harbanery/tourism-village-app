@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { CRON_SECRET, NODE_ENV } from "@/utils/config/variables";
+import { NODE_ENV } from "@/utils/config/variables";
 import { expireStalePendingOrders } from "@/utils/server/orderExpiry";
+import { isCronAuthorized } from "@/utils/server/cronAuth";
 
 /**
  * GET /api/cron/expire-orders — sweep order PENDING kedaluwarsa → CANCELED
@@ -8,11 +9,11 @@ import { expireStalePendingOrders } from "@/utils/server/orderExpiry";
  *
  * Cadangan terjadwal untuk sweep lazy (yang sudah berjalan di endpoint order
  * web). Scheduler eksternal dapat memanggil endpoint ini per menit bila
- * diperlukan; diproteksi CRON_SECRET (header Authorization: Bearer).
+ * diperlukan; diproteksi CRON_SECRET (header Authorization: Bearer,
+ * konstan-waktu + tolak secret kosong — rekomendasi 2.6).
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma, { REMOTE_TX_OPTIONS, withRetry } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { createPageTicket } from "@/lib/otp";
 import { paymentDeadline } from "@/utils/server/orderExpiry";
 import { buildOrderCode } from "@/lib/midtrans";
 import { customerFromUser, ensureOrderQris } from "@/lib/qris";
@@ -363,6 +364,14 @@ export async function POST(request: Request) {
     // Notifikasi + email konfirmasi pesanan (best-effort, tidak memblok respons).
     void onOrderCreated(order.id);
 
+    // Token server sekali pakai untuk halaman pembayaran (rekom 2.3) —
+    // divalidasi endpoint pay saat memuat QR. Best-effort: bila gagal
+    // diterbitkan, klien masih bisa mint ulang lewat /ticket.
+    const paymentTicket = await createPageTicket(
+      user.id,
+      "ORDER_PAYMENT",
+    ).catch(() => null);
+
     return NextResponse.json(
       {
         success: true,
@@ -375,6 +384,7 @@ export async function POST(request: Request) {
           paymentStatus: "PENDING" as const,
           paymentExpiresAt:
             order.paymentExpiresAt?.toISOString() ?? null,
+          paymentTicket,
           items: orderItems.map((item) => ({
             packageId: item.packageId,
             name: item.name,

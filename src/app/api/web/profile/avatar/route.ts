@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { deleteCloudinaryUrls } from "@/lib/cloudinary";
+import { deleteCloudinaryUrls, destroyCloudinaryAsset } from "@/lib/cloudinary";
 import {
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,
   CLOUDINARY_CLOUD_NAME,
 } from "@/utils/config/variables";
-import { validateImageFile } from "@/utils/server/fileGuard";
+import {
+  validateImageFile,
+  validateImageDimensions,
+} from "@/utils/server/fileGuard";
 
 /** Batas ukuran avatar (bytes). */
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
@@ -98,6 +101,20 @@ export async function POST(request: NextRequest) {
     }
     const cloudinaryData = await cloudinaryResponse.json();
     const url = cloudinaryData.secure_url as string;
+
+    // Batas dimensi (rekomendasi 2.4): aset raksasa (dekompresi-bomb)
+    // dihapus dari Cloudinary lalu ditolak.
+    const dimError = validateImageDimensions(
+      cloudinaryData.width,
+      cloudinaryData.height,
+    );
+    if (dimError) {
+      await destroyCloudinaryAsset(cloudinaryData.public_id).catch(() => {});
+      return NextResponse.json(
+        { success: false, error: dimError },
+        { status: 400 },
+      );
+    }
 
     // Hapus avatar lama (best-effort) lalu simpan yang baru.
     if (user.avatar) {

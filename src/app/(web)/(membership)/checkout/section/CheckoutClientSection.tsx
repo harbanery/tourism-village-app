@@ -22,6 +22,7 @@ import { useMounted } from "@/hooks/useMounted";
 import { useBackGuard } from "@/features/web/hooks/useBackGuard";
 import { readCart, clearCart } from "@/features/web/utils/cart";
 import { issuePaymentAccess } from "@/features/web/utils/paymentAccess";
+import { setPaymentTicket } from "@/features/web/utils/accessTokens";
 import {
   peekCheckoutAccess,
   consumeCheckoutAccess,
@@ -328,6 +329,18 @@ export default function CheckoutClientSection({
           // langsung arahkan ke pembayarannya, jangan buat order baru.
           clearCart();
           setCart([]);
+          // Mint token server untuk order yang sudah ada (rekom 2.3) agar
+          // halaman pembayaran bisa memuat QR (best-effort — bila gagal,
+          // halaman pembayaran mengarahkan ulang ke profil).
+          try {
+            const tRes = await fetch(`/api/web/orders/${json.orderId}/ticket`);
+            const tJson = await tRes.json();
+            if (tJson.success && tJson.data?.ticket) {
+              setPaymentTicket(json.orderId, tJson.data.ticket);
+            }
+          } catch {
+            // dicatat di penanganan error halaman pembayaran
+          }
           issuePaymentAccess(json.orderId);
           router.replace(`/payment/${json.orderId}`);
           return;
@@ -342,6 +355,11 @@ export default function CheckoutClientSection({
       });
       clearCart();
       setCart([]);
+      // Token server sekali pakai (rekom 2.3) — dikirim ke endpoint pay
+      // saat memuat QR; simpan dulu sebelum navigasi.
+      if (json.data.paymentTicket) {
+        setPaymentTicket(json.data.orderId, json.data.paymentTicket);
+      }
       // Tiket sekali masuk halaman pembayaran (dikonsumsi saat dibuka —
       // kunjungan ulang tanpa tiket dialihkan ke profil).
       issuePaymentAccess(json.data.orderId);

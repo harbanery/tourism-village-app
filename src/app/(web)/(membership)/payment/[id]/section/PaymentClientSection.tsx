@@ -20,6 +20,10 @@ import {
   consumePaymentAccess,
 } from "@/features/web/utils/paymentAccess";
 import { issueReviewAccess } from "@/features/web/utils/reviewAccess";
+import {
+  getPaymentTicket,
+  setReviewTicket,
+} from "@/features/web/utils/accessTokens";
 import { formatRupiah, formatDate } from "@/utils/helpers";
 
 type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
@@ -250,9 +254,25 @@ export default function PaymentClientSection({
   const loadOption = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/web/orders/${order.id}/pay`);
+      const res = await fetch(`/api/web/orders/${order.id}/pay`, {
+        // Token server sekali pakai (rekom 2.3) — wajib untuk memuat QR.
+        headers: { "x-payment-ticket": getPaymentTicket(order.id) ?? "" },
+      });
       const json = await res.json();
-      if (!json.success) throw new Error(json.error);
+      if (!json.success) {
+        if (json.error === "PAYMENT_TICKET_REQUIRED") {
+          // Tiket basi/hilang → kembali ke profil; user bisa mint ulang
+          // lewat tombol "Bayar Sekarang" di riwayat.
+          notification.warning({
+            title: t("notif.error"),
+            description: t("notif.paymentTicketRequired"),
+            placement: "bottomRight",
+          });
+          router.replace("/profile");
+          return;
+        }
+        throw new Error(json.error);
+      }
       if (json.data.paymentExpiresAt) setExpiresAt(json.data.paymentExpiresAt);
       if (json.data.expired) {
         setExpired(true);
@@ -273,7 +293,7 @@ export default function PaymentClientSection({
     } finally {
       setLoading(false);
     }
-  }, [order.id, notification, t]);
+  }, [order.id, notification, t, router]);
 
   useEffect(() => {
     void Promise.resolve().then(loadOption);
@@ -287,6 +307,11 @@ export default function PaymentClientSection({
         const res = await fetch(`/api/web/orders/${order.id}/status`);
         const json = await res.json();
         if (!json.success) throw new Error(json.error);
+        // Token ulasan sekali pakai dari server (rekom 2.3) — disimpan
+        // untuk halaman review-confirm setelah redirect.
+        if (json.data.reviewTicket) {
+          setReviewTicket(json.data.reviewTicket);
+        }
         if (json.data.paymentStatus !== "PENDING") {
           setStatus(json.data.paymentStatus);
           if (json.data.paymentStatus === "PAID") {

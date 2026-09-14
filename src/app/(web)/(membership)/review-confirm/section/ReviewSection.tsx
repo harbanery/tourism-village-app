@@ -121,6 +121,19 @@ export function ReviewSection() {
           );
           return;
         }
+        // Validasi isi ulasan (rekomendasi 2.2): panjang + kata kasar.
+        if (
+          json.error === "REVIEW_TOO_SHORT" ||
+          json.error === "REVIEW_TOO_LONG" ||
+          json.error === "REVIEW_PROFANITY"
+        ) {
+          notification.warning({
+            title: t("notif.validationError"),
+            description: t(`notif.${json.error.toLowerCase()}`),
+            placement: "bottomRight",
+          });
+          return;
+        }
         throw new Error(json.error);
       }
       // Sukses → ucapan terima kasih; tidak bisa mengisi ulasan lagi.
@@ -188,6 +201,7 @@ export function ReviewSection() {
       <Input.TextArea
         className="mt-3!"
         rows={4}
+        maxLength={500}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder={t("success.review.comment")}

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { CRON_SECRET, NODE_ENV } from "@/utils/config/variables";
+import { NODE_ENV } from "@/utils/config/variables";
 import { sendTripReminders } from "@/utils/server/orderEvents";
+import { isCronAuthorized } from "@/utils/server/cronAuth";
 
 /**
  * GET /api/cron/trip-reminder — pengingat jadwal H-1 keberangkatan.
@@ -8,8 +9,7 @@ import { sendTripReminders } from "@/utils/server/orderEvents";
  * yang berangkat besok menghasilkan notifikasi + email ke user.
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

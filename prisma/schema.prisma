@@ -51,6 +51,8 @@ model AuthAdmin {
   avatar   String?
   role     AdminRole @default(VIEWER)
   status   Status    @default(ACTIVE)
+  /** Waktu login terakhir (diupdate tiap login admin — rekomendasi 2.1). */
+  lastLoginAt DateTime? @map("last_login_at")
   blogs    Blog[]
   sessions AdminSession[]
   notifications AdminNotification[]
