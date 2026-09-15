@@ -80,7 +80,7 @@ export function TourismPackageSection({
               <section
                 key={place.id}
                 id={`place-${place.id}`}
-                className="scroll-mt-24"
+                className="scroll-mt-20"
               >
                 {/* Kartu tempat wisata: foto cover lebar penuh, lalu
                     nama + jumlah paket + deskripsi admin di body. */}

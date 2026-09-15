@@ -53,7 +53,7 @@ export function UserAgreementSection() {
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_200px]">
         <div className="space-y-12">
           {/* Syarat & Ketentuan — anchor utama #terms. */}
-          <section id="terms" className="scroll-mt-24">
+          <section id="terms" className="scroll-mt-20">
             <h2 className="text-xl md:text-2xl font-bold">
               {t("terms.title")}
             </h2>
@@ -66,7 +66,7 @@ export function UserAgreementSection() {
                 <section
                   key={`terms-${key}`}
                   id={`terms-${key}`}
-                  className="scroll-mt-24"
+                  className="scroll-mt-20"
                 >
                   <h3 className="text-lg font-semibold">
                     <span className="mr-2 text-primary">{index + 1}.</span>
@@ -81,7 +81,7 @@ export function UserAgreementSection() {
           </section>
 
           {/* Kebijakan Privasi — anchor utama #privacy-policy. */}
-          <section id="privacy-policy" className="scroll-mt-24">
+          <section id="privacy-policy" className="scroll-mt-20">
             <h2 className="text-xl md:text-2xl font-bold">
               {t("privacy.title")}
             </h2>
@@ -94,7 +94,7 @@ export function UserAgreementSection() {
                 <section
                   key={`privacy-${key}`}
                   id={`privacy-${key}`}
-                  className="scroll-mt-24"
+                  className="scroll-mt-20"
                 >
                   <h3 className="text-lg font-semibold">
                     <span className="mr-2 text-primary">{index + 1}.</span>
