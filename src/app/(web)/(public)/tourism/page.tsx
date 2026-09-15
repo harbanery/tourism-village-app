@@ -12,7 +12,9 @@ export default async function TourismPage() {
   const places = await getPlacesWithPackages();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    // pb ekstra: halaman ber-anchor (#place-{id}) — data terakhir tetap
+    // berjarak dari footer saat scroll ke anchor terakhir.
+    <div className="mx-auto max-w-6xl px-4 pt-10 pb-20">
       <TourismPackageSection places={places} />
     </div>
   );

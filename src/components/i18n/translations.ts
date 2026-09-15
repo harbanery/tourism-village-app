@@ -104,6 +104,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.perPerson": "/orang",
     "common.until": "s/d",
     "common.viewAll": "Lihat Semua",
+    "common.view": "Lihat",
     "common.readMore": "Baca Selengkapnya",
     "common.backToHome": "Kembali ke Beranda",
     "common.back": "Kembali",
@@ -499,7 +500,6 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Semua paket disusun dan dikelola bersama warga desa: pemandu lokal yang paham medan, penginapan (homestay) milik warga, serta fasilitas yang dirawat langsung oleh masyarakat. Setiap pemesanan berdampak langsung pada perekonomian desa.",
     "about.p3":
       "Misi kami mengembangkan wisata berbasis masyarakat (community-based tourism) yang berkelanjutan — menjaga alam dan budaya, sekaligus membuka lapangan bagi warga.",
-    "about.values": "Nilai yang Kami Tawarkan",
 
     "privacy.title": "Kebijakan Privasi",
     "privacy.updated": "Terakhir diperbarui: 8 September 2026",
@@ -639,6 +639,31 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.orders.transactionId": "Transaction ID",
     "admin.orders.autoRefresh": "Refresh otomatis",
     "admin.orders.autoRefreshHint": "Muat ulang data pesanan setiap 5 menit",
+    "admin.orders.cancelOrder": "Batalkan Order",
+    "admin.orders.cancelConfirmTitle": "Batalkan pesanan?",
+    "admin.orders.cancelConfirmContent":
+      "Pesanan {orderId} akan dibatalkan secara manual dan tidak dapat dikembalikan. Lanjutkan?",
+    "admin.orders.cancelSuccess": "Pesanan berhasil dibatalkan",
+    "admin.orders.cancelFailed": "Gagal membatalkan pesanan",
+    "admin.orders.cancelNotPending":
+      "Hanya pesanan berstatus menunggu pembayaran yang bisa dibatalkan",
+    "admin.orders.cancelAlreadyPaid":
+      "Pesanan sudah dibayar di Midtrans — status disinkronkan menjadi lunas",
+    "admin.orders.masterOnly":
+      "Hanya admin Master yang dapat melakukan aksi ini",
+    "admin.orders.syncStatus": "Sinkronkan Status",
+    "admin.orders.syncSuccess": "Status Midtrans disinkronkan",
+    "admin.orders.syncNoChange": "Status Midtrans tidak ada perubahan",
+    "admin.orders.syncFailed": "Gagal sinkronkan status Midtrans",
+    "admin.orders.midtransUnavailable":
+      "Midtrans tidak terkonfigurasi / tidak dapat dihubungi",
+    "admin.orders.resendEmail": "Kirim Ulang Email",
+    "admin.orders.resendSuccess": "Email terkirim ke {email}",
+    "admin.orders.resendFailed": "Gagal mengirim email",
+    "admin.orders.resendInvalidStatus":
+      "Email hanya dapat dikirim untuk pesanan menunggu pembayaran / lunas",
+    "admin.orders.emailUnavailable":
+      "SMTP belum dikonfigurasi — email tidak terkirim",
     "admin.sponsors.title": "Sponsor",
     "admin.sponsors.name": "Nama Sponsor",
     "admin.sponsors.desc": "Deskripsi",
@@ -777,6 +802,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.perPerson": "/person",
     "common.until": "to",
     "common.viewAll": "View All",
+    "common.view": "View",
     "common.readMore": "Read More",
     "common.backToHome": "Back to Home",
     "common.back": "Back",
@@ -1167,7 +1193,6 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Every package is arranged and managed together with the villagers: local guides who know the terrain, community-owned homestays, and facilities maintained by the residents themselves. Each booking directly supports the village economy.",
     "about.p3":
       "Our mission is to grow sustainable community-based tourism — preserving nature and culture while opening opportunities for the villagers.",
-    "about.values": "What We Offer",
 
     "privacy.title": "Privacy Policy",
     "privacy.updated": "Last updated: September 8, 2026",
@@ -1307,6 +1332,30 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.orders.transactionId": "Transaction ID",
     "admin.orders.autoRefresh": "Auto refresh",
     "admin.orders.autoRefreshHint": "Reload order data every 5 minutes",
+    "admin.orders.cancelOrder": "Cancel Order",
+    "admin.orders.cancelConfirmTitle": "Cancel this order?",
+    "admin.orders.cancelConfirmContent":
+      "Order {orderId} will be canceled manually and cannot be restored. Continue?",
+    "admin.orders.cancelSuccess": "Order canceled successfully",
+    "admin.orders.cancelFailed": "Failed to cancel the order",
+    "admin.orders.cancelNotPending":
+      "Only orders awaiting payment can be canceled",
+    "admin.orders.cancelAlreadyPaid":
+      "The order was already paid at Midtrans — status synced to paid",
+    "admin.orders.masterOnly": "Only Master admins can perform this action",
+    "admin.orders.syncStatus": "Sync Status",
+    "admin.orders.syncSuccess": "Midtrans status synced",
+    "admin.orders.syncNoChange": "No change in the Midtrans status",
+    "admin.orders.syncFailed": "Failed to sync the Midtrans status",
+    "admin.orders.midtransUnavailable":
+      "Midtrans is not configured / unreachable",
+    "admin.orders.resendEmail": "Resend Email",
+    "admin.orders.resendSuccess": "Email sent to {email}",
+    "admin.orders.resendFailed": "Failed to send the email",
+    "admin.orders.resendInvalidStatus":
+      "Email can only be sent for pending / paid orders",
+    "admin.orders.emailUnavailable":
+      "SMTP is not configured — the email was not sent",
     "admin.sponsors.title": "Sponsors",
     "admin.sponsors.name": "Sponsor Name",
     "admin.sponsors.desc": "Description",

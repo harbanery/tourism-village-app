@@ -1,72 +1,61 @@
 "use client";
 
-import {
-  CustomerServiceOutlined,
-  HomeOutlined,
-  StarOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 
 /**
- * Halaman Tentang Kami: pengantar DesakuWisataku + nilai yang ditawarkan
- * (key yang sama dengan feature section home). Judul rata tengah,
- * deskripsi rata kanan-kiri (justify), nilai tampil sederhana — icon +
- * teks tanpa card/grid.
+ * Render teks dengan merek "DesakuWisataku" disorot: kata "Wisataku"
+ * diberi warna primary (pola brand navbar/hero). Kata yang tidak
+ * mengandung merek ditampilkan apa adanya.
+ */
+function BrandText({ text }: { text: string }) {
+  const parts = text.split("DesakuWisataku");
+  if (parts.length === 1) return <>{text}</>;
+  return (
+    <>
+      {parts.map((part, index) => (
+        <span key={index}>
+          {index > 0 && (
+            <>
+              Desaku<span className="font-semibold text-primary">Wisataku</span>
+            </>
+          )}
+          {part}
+        </span>
+      ))}
+    </>
+  );
+}
+
+/**
+ * Halaman Tentang Kami: pengantar DesakuWisataku — konten rata tengah
+ * (vertikal + horizontal) dalam section min-h-screen, berlatar hero
+ * background (dirender oleh page) sehingga teks memakai warna putih.
+ * Section "nilai yang kami tawarkan" diambil dari sini (nilai cukup
+ * tampil di feature section home).
  */
 export function AboutSection() {
   const { t } = useT();
 
-  const values = [
-    {
-      icon: <HomeOutlined className="text-xl! text-primary!" />,
-      title: t("home.why.facility.title"),
-      desc: t("home.why.facility.desc"),
-    },
-    {
-      icon: <CustomerServiceOutlined className="text-xl! text-primary!" />,
-      title: t("home.why.service.title"),
-      desc: t("home.why.service.desc"),
-    },
-    {
-      icon: <WalletOutlined className="text-xl! text-primary!" />,
-      title: t("home.why.cheap.title"),
-      desc: t("home.why.cheap.desc"),
-    },
-    {
-      icon: <StarOutlined className="text-xl! text-primary!" />,
-      title: t("home.why.local.title"),
-      desc: t("home.why.local.desc"),
-    },
-  ];
-
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="text-center text-2xl md:text-3xl font-bold">
-        {t("about.title")}
-      </h1>
-      <p className="mt-1 text-center text-foreground/60">{t("about.subtitle")}</p>
+    <section className="flex min-h-screen items-center justify-center">
+      <div className="mx-auto w-full max-w-4xl px-4 py-24 text-center">
+        <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow">
+          {t("about.title")}
+        </h1>
+        <p className="mt-1 text-white/60">{t("about.subtitle")}</p>
 
-      <div className="mt-6 space-y-4 text-foreground/80">
-        <p className="text-justify leading-relaxed">{t("about.p1")}</p>
-        <p className="text-justify leading-relaxed">{t("about.p2")}</p>
-        <p className="text-justify leading-relaxed">{t("about.p3")}</p>
+        <div className="mt-8 space-y-5 text-white/80">
+          <p className="leading-relaxed drop-shadow">
+            <BrandText text={t("about.p1")} />
+          </p>
+          <p className="leading-relaxed drop-shadow">
+            <BrandText text={t("about.p2")} />
+          </p>
+          <p className="leading-relaxed drop-shadow">
+            <BrandText text={t("about.p3")} />
+          </p>
+        </div>
       </div>
-
-      <h2 className="mt-10 text-center text-xl font-semibold">
-        {t("about.values")}
-      </h2>
-      <div className="mt-6 flex flex-col gap-5">
-        {values.map((value) => (
-          <div key={value.title} className="flex items-start gap-3">
-            <span className="mt-0.5 shrink-0">{value.icon}</span>
-            <div>
-              <h3 className="font-semibold">{value.title}</h3>
-              <p className="mt-0.5 text-sm text-foreground/70">{value.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    </section>
   );
 }

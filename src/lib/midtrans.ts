@@ -263,3 +263,39 @@ export async function fetchMidtransStatus(
     return null;
   }
 }
+
+/**
+ * Batalkan transaksi di sisi Midtrans (POST /v2/{order_id}/cancel) —
+ * dipakai pembatalan manual order PENDING oleh admin agar QR tidak
+ * bisa dibayar lagi setelah order dibatalkan. Best-effort: 412 berarti
+ * transaksi sudah berubah status (mis. settlement) dan tidak bisa
+ * dibatalkan — pemanggil tetap wajib cek status otoritatif dulu.
+ */
+export async function cancelMidtransTransaction(
+  midtransOrderId: string,
+): Promise<boolean> {
+  if (!isMidtransConfigured()) return false;
+
+  try {
+    const response = await fetch(
+      `${MIDTRANS_CORE_API_URL}/${encodeURIComponent(midtransOrderId)}/cancel`,
+      {
+        method: "POST",
+        headers: coreApiHeaders(),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok && response.status !== 412) {
+      console.error(
+        "Midtrans cancel error:",
+        response.status,
+        await response.text(),
+      );
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Midtrans cancel request failed:", error);
+    return false;
+  }
+}

@@ -86,10 +86,20 @@ const OrderDecorator = () => {
   const [fetching, setFetching] = useState(true);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [query, setQuery] = useState("");
-  /** Row yang drawer detailnya sedang terbuka (null = tertutup). */
-  const [active, setActive] = useState<OrderRow | null>(null);
+  /** Id row yang drawer detailnya sedang terbuka (null = tertutup). */
+  const [activeId, setActiveId] = useState<string | null>(null);
   /** Auto refresh data order tiap 5 menit saat diaktifkan. */
   const [autoRefresh, setAutoRefresh] = useState(false);
+
+  /**
+   * Row aktif di-derive dari data terbaru — setelah aksi di drawer
+   * (cancel/sinkron Midtrans) memuat ulang tabel, tag status + log di
+   * drawer langsung memakai versi terbaru tanpa sinkronisasi manual.
+   */
+  const active = useMemo(
+    () => orders.find((order) => order.id === activeId) ?? null,
+    [orders, activeId],
+  );
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -237,16 +247,19 @@ const OrderDecorator = () => {
           columns={columns}
           rowClassName="cursor-pointer"
           onRow={(record) => ({
-            onClick: () => setActive(record),
+            onClick: () => setActiveId(record.id),
           })}
         />
       </Card>
 
-      {/* Detail lengkap pesanan terpilih (order, pemesan, log, QRIS, invoice). */}
+      {/* Detail lengkap pesanan terpilih (order, pemesan, log, QRIS,
+          invoice) — onUpdated memuat ulang tabel setelah aksi cancel/
+          sinkron Midtrans mengubah status order. */}
       <OrderDetailDrawer
         order={active}
         open={!!active}
-        onClose={() => setActive(null)}
+        onClose={() => setActiveId(null)}
+        onUpdated={() => void fetchOrders()}
       />
     </div>
   );

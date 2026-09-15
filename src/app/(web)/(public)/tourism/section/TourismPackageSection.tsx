@@ -128,23 +128,18 @@ export function TourismPackageSection({
                     </p>
 
                     {/* Paket-paket tempat ini: kartu border ringan,
-                        nama + harga di kepala, fasilitas checklist. */}
+                        grid 3 di layar besar (responsif menyesuaikan),
+                        nama di kepala, fasilitas checklist, harga di
+                        bawah fasilitas (menempel bawah kartu). */}
                     {place.packages.length > 0 && (
                       <Row gutter={[16, 16]} className="mt-5!">
                         {place.packages.map((pkg) => (
-                          <Col xs={24} md={12} key={pkg.id}>
+                          <Col xs={24} sm={12} lg={8} key={pkg.id}>
                             <div className="flex h-full flex-col gap-4 rounded-xl border border-black/10 p-5 dark:border-white/15">
-                              <div className="flex flex-wrap items-center justify-between gap-2">
-                                <span className="flex items-center gap-2 font-semibold">
-                                  <ShopOutlined className="text-primary!" />
-                                  {pkg.name}
-                                </span>
-                                <span className="font-semibold text-primary">
-                                  {t("tourism.pricePerPerson", {
-                                    price: pkg.price.toLocaleString("id-ID"),
-                                  })}
-                                </span>
-                              </div>
+                              <span className="flex items-center gap-2 font-semibold">
+                                <ShopOutlined className="text-primary!" />
+                                {pkg.name}
+                              </span>
                               {pkg.facilities.filter(Boolean).length > 0 && (
                                 <ul className="space-y-1.5">
                                   {pkg.facilities
@@ -160,6 +155,13 @@ export function TourismPackageSection({
                                     ))}
                                 </ul>
                               )}
+                              {/* Harga di bawah fasilitas — mt-auto menjaga
+                                  posisinya rata bawah antar kartu. */}
+                              <span className="mt-auto border-t border-black/10 pt-3 font-semibold text-primary dark:border-white/15">
+                                {t("tourism.pricePerPerson", {
+                                  price: pkg.price.toLocaleString("id-ID"),
+                                })}
+                              </span>
                             </div>
                           </Col>
                         ))}

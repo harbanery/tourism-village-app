@@ -14,8 +14,15 @@ import {
   Tooltip,
   Typography,
 } from "antd";
-import { DownloadOutlined, QrcodeOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  MailOutlined,
+  QrcodeOutlined,
+  StopOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { useAdminSession } from "@/features/admin/hooks/session";
 import { formatDate, formatRupiah, maskEmail, maskPhone } from "@/utils/helpers";
 import { downloadInvoicePdf } from "@/utils/pdf/invoicePdf";
 import type { OrderRow } from "./index";
@@ -55,22 +62,64 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
  * Judul memuat tag status di kanan; isi: detail pesanan (order id,
  * deskripsi + daftar paket & total bergaya checkout), tab informasi
  * pemesan & log pesanan (OrderLog), tombol QRIS (lightbox Image antd,
- * pola lihat foto blog) + unduh invoice.
+ * pola lihat foto blog), unduh invoice, sinkronisasi status Midtrans,
+ * kirim ulang email invoice/receipt, dan pembatalan manual (khusus
+ * MASTER, hanya order PENDING — role selain Master tidak melihat
+ * tombolnya dan API menolak aksinya dengan 403).
  */
 export default function OrderDetailDrawer({
   order,
   open,
   onClose,
+  onUpdated,
 }: {
   order: OrderRow | null;
   open: boolean;
   onClose: () => void;
+  /** Dipanggil setelah aksi mengubah data (cancel/sync) agar tabel + drawer ikut segar. */
+  onUpdated?: () => void;
 }) {
   const { t, locale } = useT();
-  const { notification } = App.useApp();
+  const { notification, modal } = App.useApp();
+  const { session } = useAdminSession();
   const [downloading, setDownloading] = useState(false);
+  const [canceling, setCanceling] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [resending, setResending] = useState(false);
   /** QRIS yang sedang dipreview di lightbox (bukan ditampilkan inline). */
   const [qrisPreview, setQrisPreview] = useState<string | null>(null);
+
+  /** Pembatalan manual hanya untuk MASTER (role selain master hidden). */
+  const isMaster = session?.role === "MASTER";
+  const canResend =
+    order?.paymentStatus === "PENDING" || order?.paymentStatus === "PAID";
+
+  /** Pesan error standar untuk aksi order (kode error API → locale). */
+  const actionError = (error: unknown): string => {
+    switch (error) {
+      case "NOT_PENDING":
+        return t("admin.orders.cancelNotPending");
+      case "ALREADY_PAID":
+        return t("admin.orders.cancelAlreadyPaid");
+      case "Forbidden":
+        return t("admin.orders.masterOnly");
+      case "MIDTRANS_UNAVAILABLE":
+        return t("admin.orders.midtransUnavailable");
+      case "INVALID_STATUS":
+        return t("admin.orders.resendInvalidStatus");
+      case "EMAIL_UNAVAILABLE":
+        return t("admin.orders.emailUnavailable");
+      default:
+        return t("notif.fetchFailed");
+    }
+  };
+
+  const notifyError = (description: string) =>
+    notification.error({
+      title: t("notif.error"),
+      description,
+      placement: "bottomRight",
+    });
 
   /** Unduh invoice via endpoint admin (data Midtrans otoritatif). */
   const handleDownloadInvoice = async () => {
@@ -80,22 +129,115 @@ export default function OrderDetailDrawer({
       const res = await fetch(`/api/admin/orders/${order.id}/invoice`);
       const result = await res.json();
       if (!result.success) {
-        notification.error({
-          title: t("notif.error"),
-          description: t("notif.fetchFailed"),
-          placement: "bottomRight",
-        });
+        notifyError(t("notif.fetchFailed"));
         return;
       }
       await downloadInvoicePdf(result.data, t, locale);
     } catch {
-      notification.error({
-        title: t("notif.error"),
-        description: t("notif.fetchFailed"),
-        placement: "bottomRight",
-      });
+      notifyError(t("notif.fetchFailed"));
     } finally {
       setDownloading(false);
+    }
+  };
+
+  /** Batalkan order manual (MASTER + PENDING) — konfirmasi modal dulu. */
+  const handleCancel = () => {
+    if (!order) return;
+    modal.confirm({
+      title: t("admin.orders.cancelConfirmTitle"),
+      content: t("admin.orders.cancelConfirmContent", {
+        orderId: order.orderId,
+      }),
+      okButtonProps: { danger: true },
+      okText: t("admin.orders.cancelOrder"),
+      cancelText: t("common.cancel"),
+      onOk: async () => {
+        setCanceling(true);
+        try {
+          const res = await fetch(`/api/admin/orders/${order.id}/cancel`, {
+            method: "POST",
+          });
+          const result = await res.json();
+          if (!result.success) {
+            notifyError(actionError(result.error));
+            // Status sudah bergeser di Midtrans → muat data terbaru.
+            if (result.error === "ALREADY_PAID") onUpdated?.();
+            return;
+          }
+          notification.success({
+            title: t("notif.success"),
+            description: t("admin.orders.cancelSuccess"),
+            placement: "bottomRight",
+          });
+          onUpdated?.();
+        } catch {
+          notifyError(t("admin.orders.cancelFailed"));
+        } finally {
+          setCanceling(false);
+        }
+      },
+    });
+  };
+
+  /** Sinkronkan status pembayaran dengan status transaksi Midtrans. */
+  const handleSync = async () => {
+    if (!order) return;
+    setSyncing(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/sync`, {
+        method: "POST",
+      });
+      const result = await res.json();
+      if (!result.success) {
+        notifyError(actionError(result.error));
+        return;
+      }
+      if (result.data.changed) {
+        notification.success({
+          title: t("notif.success"),
+          description: t("admin.orders.syncSuccess"),
+          placement: "bottomRight",
+        });
+        onUpdated?.();
+      } else {
+        notification.info({
+          title: t("notif.success"),
+          description: t("admin.orders.syncNoChange"),
+          placement: "bottomRight",
+        });
+      }
+    } catch {
+      notifyError(t("admin.orders.syncFailed"));
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  /** Kirim ulang email invoice (PENDING) / receipt (PAID) ke pemesan. */
+  const handleResend = async () => {
+    if (!order) return;
+    setResending(true);
+    try {
+      const res = await fetch(
+        `/api/admin/orders/${order.id}/resend-email`,
+        { method: "POST" },
+      );
+      const result = await res.json();
+      if (!result.success) {
+        notifyError(actionError(result.error));
+        return;
+      }
+      notification.success({
+        title: t("notif.success"),
+        description: t("admin.orders.resendSuccess", {
+          email: maskEmail(result.data.recipient as string),
+        }),
+        placement: "bottomRight",
+      });
+    } catch {
+      notifyError(t("admin.orders.resendFailed"));
+    } finally {
+      setResending(false);
     }
   };
 
@@ -118,28 +260,57 @@ export default function OrderDetailDrawer({
         </span>
       }
       footer={
-        <div className="flex justify-end gap-2">
-          {/* QRIS: buka gambar di lightbox Image antd (pola lihat foto
-              blog) — tidak ditampilkan di dalam drawer. */}
-          <Tooltip
-            title={order?.qrisImageUrl ? "" : t("admin.orders.qrisEmpty")}
-          >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* Pembatalan manual: hanya MASTER + order PENDING — role
+              selain master tidak melihat tombol ini (API tetap 403). */}
+          {isMaster && order?.paymentStatus === "PENDING" && (
             <Button
-              icon={<QrcodeOutlined />}
-              disabled={!order?.qrisImageUrl}
-              onClick={() => setQrisPreview(order?.qrisImageUrl ?? null)}
+              danger
+              icon={<StopOutlined />}
+              loading={canceling}
+              onClick={handleCancel}
             >
-              {t("admin.orders.qrisTitle")}
+              {t("admin.orders.cancelOrder")}
             </Button>
-          </Tooltip>
-          <Button
-            type="primary"
-            icon={<DownloadOutlined />}
-            loading={downloading}
-            onClick={handleDownloadInvoice}
-          >
-            {t("admin.orders.downloadInvoice")}
-          </Button>
+          )}
+          <div className="ml-auto flex flex-wrap justify-end gap-2">
+            {/* QRIS: buka gambar di lightbox Image antd (pola lihat foto
+                blog) — tidak ditampilkan di dalam drawer. */}
+            <Tooltip
+              title={order?.qrisImageUrl ? "" : t("admin.orders.qrisEmpty")}
+            >
+              <Button
+                icon={<QrcodeOutlined />}
+                disabled={!order?.qrisImageUrl}
+                onClick={() => setQrisPreview(order?.qrisImageUrl ?? null)}
+              >
+                {t("admin.orders.qrisTitle")}
+              </Button>
+            </Tooltip>
+            <Button
+              icon={<MailOutlined />}
+              loading={resending}
+              disabled={!canResend}
+              onClick={handleResend}
+            >
+              {t("admin.orders.resendEmail")}
+            </Button>
+            <Button
+              icon={<SyncOutlined />}
+              loading={syncing}
+              onClick={handleSync}
+            >
+              {t("admin.orders.syncStatus")}
+            </Button>
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              loading={downloading}
+              onClick={handleDownloadInvoice}
+            >
+              {t("admin.orders.downloadInvoice")}
+            </Button>
+          </div>
         </div>
       }
     >

@@ -42,7 +42,9 @@ export function UserAgreementSection() {
   ];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
+    // pb ekstra: halaman ber-anchor (#terms/#privacy-*) — blok terakhir
+    // tetap berjarak dari footer saat scroll ke anchor terakhir.
+    <div className="mx-auto max-w-4xl px-4 pt-10 pb-20">
       <h1 className="text-2xl md:text-3xl font-bold">
         {t("userAgreement.title")}
       </h1>
