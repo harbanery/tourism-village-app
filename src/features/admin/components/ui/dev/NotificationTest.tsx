@@ -93,7 +93,7 @@ export default function NotificationTest() {
           </div>
         }
       >
-        <Space direction="vertical" size={8} className="w-full">
+        <Space direction="vertical" size={8} className="w-full!">
           <Tooltip title={t("admin.dev.expireTooltip")}>
             <Button
               size="small"

@@ -37,7 +37,10 @@ import {
 import { drawerBodyProps } from "@/features/admin/utils/drawer";
 import { asAppError } from "@/features/admin/utils/error";
 import { facilityOptions } from "@/features/admin/utils/menu";
-import { getImageString, uploadFileFromUrl } from "@/features/admin/utils/image";
+import {
+  getImageString,
+  uploadFileFromUrl,
+} from "@/features/admin/utils/image";
 import { formatRupiah } from "@/utils/helpers";
 import { placeFormLayout, packageFormLayout } from "../config";
 
@@ -245,7 +248,8 @@ const TourismDecorator = () => {
       notification.error({
         title: t("notif.error"),
         description:
-          err.message || t("notif.toggleFailed", { entity: t("admin.tourism.places") }),
+          err.message ||
+          t("notif.toggleFailed", { entity: t("admin.tourism.places") }),
         placement: "bottomRight",
       });
     }
@@ -276,7 +280,6 @@ const TourismDecorator = () => {
     }
   };
 
-  
   // ------------------------------------------------------------------
   // Packages
   // ------------------------------------------------------------------
@@ -410,7 +413,7 @@ const TourismDecorator = () => {
     }
   };
 
-    // ------------------------------------------------------------------
+  // ------------------------------------------------------------------
   // Columns
   // ------------------------------------------------------------------
 
@@ -427,7 +430,7 @@ const TourismDecorator = () => {
 
   const placeColumns = [
     {
-      title: t("admin.tourism.places"),
+      title: t("common.name"),
       dataIndex: "name",
       key: "name",
       sorter: textSorter<PlaceRow>((row) => row.name),
@@ -543,7 +546,7 @@ const TourismDecorator = () => {
 
   const packageColumns = [
     {
-      title: t("admin.tourism.packages"),
+      title: t("common.name"),
       dataIndex: "name",
       key: "name",
       sorter: textSorter<PackageRow>((row) => row.name),
@@ -552,7 +555,10 @@ const TourismDecorator = () => {
         { text: t("admin.tourism.popular"), value: "popular" },
         { text: t("admin.tourism.notPopular"), value: "regular" },
       ],
-      onFilter: (value: string | number | bigint | symbol | boolean, record: PackageRow) =>
+      onFilter: (
+        value: string | number | bigint | symbol | boolean,
+        record: PackageRow,
+      ) =>
         value === "popular"
           ? record.timesPurchased > 0
           : record.timesPurchased === 0,
@@ -572,8 +578,10 @@ const TourismDecorator = () => {
       filters: places
         .map((p) => ({ text: p.name, value: p.id }))
         .sort((a, b) => a.text.localeCompare(b.text)),
-      onFilter: (value: string | number | bigint | symbol | boolean, record: PackageRow) =>
-        record.placeId === value,
+      onFilter: (
+        value: string | number | bigint | symbol | boolean,
+        record: PackageRow,
+      ) => record.placeId === value,
       render: (v: string | null) => v ?? "-",
     },
     {
@@ -581,18 +589,14 @@ const TourismDecorator = () => {
       dataIndex: "facilities",
       key: "facilities",
       sorter: textSorter<PackageRow>((row) => row.facilities.join(", ")),
-      filters: [
-        ...new Set(packages.flatMap((pkg) => pkg.facilities)),
-      ]
+      filters: [...new Set(packages.flatMap((pkg) => pkg.facilities))]
         .sort((a, b) => a.localeCompare(b))
         .map((facility) => ({ text: facility, value: facility })),
       onFilter: (
         value: string | number | bigint | symbol | boolean,
         record: PackageRow,
       ) => record.facilities.includes(String(value)),
-      render: (facilities: string[]) => (
-        <span>{facilities.join(", ")}</span>
-      ),
+      render: (facilities: string[]) => <span>{facilities.join(", ")}</span>,
     },
     {
       title: t("common.price"),
@@ -847,11 +851,7 @@ const TourismDecorator = () => {
             >
               {t("common.cancel")}
             </Button>
-            <Button
-              type="primary"
-              loading={saving}
-              onClick={handleSavePackage}
-            >
+            <Button type="primary" loading={saving} onClick={handleSavePackage}>
               {t("common.save")}
             </Button>
           </div>

@@ -15,7 +15,7 @@ export const placeFormLayout: FormLayout[] = [
         name: "description",
         type: "textarea",
         required: false,
-        maxLength: 500,
+        maxLength: 2500,
       },
       { name: "photo", type: "upload", required: true },
     ],

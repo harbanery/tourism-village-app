@@ -156,5 +156,5 @@ export async function downloadInvoicePdf(
   doc.setTextColor(120);
   doc.text("Powered by Midtrans QRIS", 14, 285);
 
-  doc.save(`invoice-${data.midtransOrderId}.pdf`);
+  doc.save(`INVOICE-${data.midtransOrderId}.pdf`);
 }

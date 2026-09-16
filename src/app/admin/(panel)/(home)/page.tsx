@@ -152,7 +152,7 @@ export default function DashboardPage() {
             <Statistic
               title={t("admin.tourism.places")}
               value={data?.placesWithPackages ?? 0}
-              prefix={<ShopOutlined className="text-primary!" />}
+              prefix={<ShopOutlined />}
               suffix={`/ ${data?.totalPlaces ?? 0}`}
             />
             <div className="mt-1 text-xs text-foreground/50">
@@ -165,7 +165,7 @@ export default function DashboardPage() {
             <Statistic
               title={t("admin.dashboard.ordersMonth")}
               value={kpi?.ordersThisMonth ?? 0}
-              prefix={<ShoppingOutlined className="text-primary!" />}
+              prefix={<ShoppingOutlined />}
             />
             <Delta pct={kpi?.ordersDeltaPct ?? null} />
           </Card>
@@ -175,7 +175,7 @@ export default function DashboardPage() {
             <Statistic
               title={t("admin.dashboard.buyersTotal")}
               value={kpi?.paidBuyersTotal ?? 0}
-              prefix={<TeamOutlined className="text-primary!" />}
+              prefix={<TeamOutlined />}
             />
           </Card>
         </Col>
@@ -185,7 +185,7 @@ export default function DashboardPage() {
               title={t("admin.dashboard.ratingSummary")}
               value={data?.ratingAvg ?? 0}
               suffix="/ 5"
-              prefix={<StarOutlined className="text-primary!" />}
+              prefix={<StarOutlined />}
             />
             <div className="mt-1 flex items-center gap-2">
               <Rate
@@ -212,7 +212,7 @@ export default function DashboardPage() {
               title={t("admin.dashboard.revenueMonth")}
               value={kpi?.revenueThisMonth ?? 0}
               formatter={(value) => formatRupiah(Number(value))}
-              prefix={<DollarOutlined className="text-primary!" />}
+              prefix={<DollarOutlined />}
             />
             <Delta pct={kpi?.revenueDeltaPct ?? null} />
           </Card>
@@ -223,7 +223,7 @@ export default function DashboardPage() {
               title={t("admin.dashboard.revenueTotal")}
               value={kpi?.revenueTotal ?? 0}
               formatter={(value) => formatRupiah(Number(value))}
-              prefix={<BankOutlined className="text-primary!" />}
+              prefix={<BankOutlined />}
             />
           </Card>
         </Col>
@@ -233,7 +233,7 @@ export default function DashboardPage() {
               title={t("admin.dashboard.aov")}
               value={kpi?.aov ?? 0}
               formatter={(value) => formatRupiah(Number(value))}
-              prefix={<RiseOutlined className="text-primary!" />}
+              prefix={<RiseOutlined />}
             />
             <div className="mt-1 text-xs text-foreground/50">
               {t("admin.dashboard.paidTotal", { n: kpi?.paidTotal ?? 0 })}
@@ -246,7 +246,7 @@ export default function DashboardPage() {
               title={t("admin.dashboard.successRate")}
               value={kpi?.successRate ?? 0}
               suffix="%"
-              prefix={<ArrowUpOutlined className="text-primary!" />}
+              prefix={<ArrowUpOutlined />}
             />
             <div className="mt-1 text-xs text-foreground/50">
               {t("admin.dashboard.pendingActive", {

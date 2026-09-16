@@ -46,7 +46,7 @@ export const loadAntdIcon: DynamicIconLoader<AntdIconProps> = (iconName) => {
     return IconComponent ? (
       <IconComponent {...props} />
     ) : (
-      <LoadingOutlined spin className="flex justify-center items-center" />
+      <LoadingOutlined spin className="flex! justify-center! items-center!" />
     );
   });
 

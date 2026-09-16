@@ -279,8 +279,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notif.reviewSubmitted": "Ulasan terkirim — menunggu moderasi admin",
     "notif.review_too_short":
       "Ulasan terlalu pendek — tulis minimal 10 karakter agar bermanfaat.",
-    "notif.review_too_long":
-      "Ulasan terlalu panjang — maksimal 500 karakter.",
+    "notif.review_too_long": "Ulasan terlalu panjang — maksimal 500 karakter.",
     "notif.review_profanity":
       "Ulasan mengandung kata yang tidak pantas — mohon perbaiki kata-katanya.",
 
@@ -862,7 +861,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "articles.sort.oldest": "Oldest",
 
     "documentation.title": "Documentation",
-    "documentation.subtitle": "Photo and video documentation of village tourism",
+    "documentation.subtitle":
+      "Photo and video documentation of village tourism",
     "documentation.comingSoon": "Coming soon",
     "documentation.comingSoonNote":
       "Photo and video documentation is still being prepared — stay tuned!",
@@ -1153,8 +1153,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.password.otpSent": "OTP code sent to your active email",
     "settings.password.hint":
       "The new password takes effect after OTP verification. All devices will be signed out and you will need to sign in again.",
-    "settings.password.changed":
-      "Password changed — please sign in again",
+    "settings.password.changed": "Password changed — please sign in again",
     "settings.sessions.title": "Sessions & devices",
     "settings.sessions.hint":
       "Revoke all signed-in sessions across every device. Useful when you forgot to log out on another device.",
@@ -1162,8 +1161,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.sessions.confirmTitle": "Sign out of all devices?",
     "settings.sessions.confirmContent":
       "You will be signed out of this session and every other device immediately. Continue?",
-    "settings.sessions.done":
-      "All sessions revoked — please sign in again",
+    "settings.sessions.done": "All sessions revoked — please sign in again",
     "settings.notif.web": "Web Notifications",
     "settings.notif.webDesc": "In-app notifications (order status, reminders).",
     "settings.notif.email": "Email Notifications",
