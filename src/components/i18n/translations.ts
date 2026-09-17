@@ -34,6 +34,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notif.error": "Terjadi kesalahan",
     "notif.success": "Berhasil",
     "notif.fetchFailed": "Gagal mengambil data",
+    "notif.paymentTicketRequired":
+      "Sesi pembayaran tidak valid atau kedaluwarsa. Silakan mulai ulang pembayaran dari riwayat pesanan.",
     "notif.saveSuccess": "{entity} berhasil disimpan",
     "notif.saveFailed": "Gagal menyimpan {entity}",
     "notif.createSuccess":
@@ -732,6 +734,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notif.error": "An error occurred",
     "notif.success": "Success",
     "notif.fetchFailed": "Failed to fetch data",
+    "notif.paymentTicketRequired":
+      "Payment session is invalid or expired. Please restart the payment from your order history.",
     "notif.saveSuccess": "{entity} saved successfully",
     "notif.saveFailed": "Failed to save {entity}",
     "notif.createSuccess":
