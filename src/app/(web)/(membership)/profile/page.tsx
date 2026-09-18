@@ -1,6 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getUserOrdersPage } from "@/services/order";
+import { GOOGLE_IS_CONFIGURED } from "@/utils/config/variables";
 import ProfileClientSection from "./section/ProfileClientSection";
 import type { User } from "@/features/web/types";
 
@@ -10,6 +11,8 @@ export interface ProfileSettings {
   pendingEmail: string | null;
   notifWeb: boolean;
   notifEmail: boolean;
+  /** Akun tertaut ke Google (SSO aktif untuk akun ini). */
+  googleLinked: boolean;
 }
 
 /**
@@ -29,6 +32,7 @@ export default async function ProfilePage({
   const params = await searchParams;
   const view = params.view === "settings" ? "settings" : "history";
   const settingsTab =
+    params.tab === "security" ||
     params.tab === "email" ||
     params.tab === "avatar" ||
     params.tab === "password" ||
@@ -62,7 +66,17 @@ export default async function ProfilePage({
     pendingEmail: user.pendingEmail,
     notifWeb: user.notifWeb,
     notifEmail: user.notifEmail,
+    googleLinked: user.googleId !== null,
   };
+
+  // Hasil alur taut Google dari callback OAuth (?googleLinked / ?googleError).
+  const googleStatus =
+    params.googleLinked === "1"
+      ? ("linked" as const)
+      : params.googleError === "email_mismatch" ||
+          params.googleError === "linked_other"
+        ? (params.googleError as "email_mismatch" | "linked_other")
+        : null;
 
   return (
     <ProfileClientSection
@@ -73,6 +87,8 @@ export default async function ProfilePage({
       totalOrders={ordersPage.total}
       initialView={view}
       initialSettingsTab={settingsTab}
+      googleEnabled={GOOGLE_IS_CONFIGURED}
+      googleStatus={googleStatus}
     />
   );
 }

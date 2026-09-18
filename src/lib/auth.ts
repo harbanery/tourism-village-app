@@ -60,8 +60,10 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(
   password: string,
-  hash: string,
+  hash: string | null | undefined,
 ): Promise<boolean> {
+  // Akun Google-only belum membuat password → tidak ada hash pembanding.
+  if (!hash) return false;
   try {
     return await bcrypt.compare(password, hash);
   } catch {
@@ -163,6 +165,55 @@ export async function clearFailedAttempts(
     where: { ipAddress, scope },
     data: { attemptCount: 0, blockedUntil: null, lastAttemptAt: new Date() },
   });
+}
+
+// ---------------------------------------------------------------------------
+// Google SSO — token pending penautan akun (sekali pakai, 15 menit)
+// Disimpan sebagai hash di tabel OtpCode (purpose GOOGLE_LINK) supaya
+// BUKAN sesi valid — hanya bukti sementara email Google terverifikasi.
+// ---------------------------------------------------------------------------
+
+/** Durasi token pending penautan Google (menit). */
+export const PENDING_LINK_TTL_MINUTES = 15;
+
+/** Purpose khusus di tabel OtpCode untuk penautan Google. */
+export const GOOGLE_LINK_PURPOSE = "GOOGLE_LINK";
+
+function hashPendingToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+/** Buat token pending penautan Google untuk user (sekali pakai). */
+export async function createPendingLinkToken(userId: string): Promise<string> {
+  const token = newSessionId();
+  await prisma.otpCode.create({
+    data: {
+      userId,
+      purpose: GOOGLE_LINK_PURPOSE,
+      codeHash: hashPendingToken(token),
+      expiresAt: new Date(Date.now() + PENDING_LINK_TTL_MINUTES * 60 * 1000),
+    },
+  });
+  return token;
+}
+
+/** Pakai token pending penautan — kembalikan userId bila masih valid. */
+export async function consumePendingLinkToken(
+  token: string,
+): Promise<{ userId: string } | null> {
+  const record = await prisma.otpCode.findFirst({
+    where: {
+      purpose: GOOGLE_LINK_PURPOSE,
+      codeHash: hashPendingToken(token),
+      consumedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+  });
+  if (!record) return null;
+  await prisma.otpCode
+    .update({ where: { id: record.id }, data: { consumedAt: new Date() } })
+    .catch(() => {});
+  return { userId: record.userId };
 }
 
 // ---------------------------------------------------------------------------

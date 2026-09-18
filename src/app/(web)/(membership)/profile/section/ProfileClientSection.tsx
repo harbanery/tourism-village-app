@@ -28,6 +28,8 @@ export default function ProfileClientSection({
   totalOrders = 0,
   initialView = "history",
   initialSettingsTab = "profile",
+  googleEnabled = false,
+  googleStatus = null,
 }: {
   user: User;
   settings: ProfileSettings;
@@ -38,11 +40,16 @@ export default function ProfileClientSection({
   totalOrders?: number;
   initialView?: ProfileView;
   initialSettingsTab?:
+    | "security"
     | "profile"
     | "avatar"
     | "email"
     | "password"
     | "notifications";
+  /** Google SSO aktif (server: GOOGLE_CLIENT_ID + SECRET terisi). */
+  googleEnabled?: boolean;
+  /** Hasil alur taut Google dari callback (?googleLinked / ?googleError). */
+  googleStatus?: "linked" | "email_mismatch" | "linked_other" | null;
 }) {
   const { t } = useT();
   const mounted = useMounted();
@@ -89,6 +96,8 @@ export default function ProfileClientSection({
             user={user}
             settings={settings}
             initialTab={initialSettingsTab}
+            googleEnabled={googleEnabled}
+            googleStatus={googleStatus}
           />
         )}
       </div>

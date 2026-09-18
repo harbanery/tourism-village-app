@@ -17,6 +17,9 @@ import type { NextConfig } from "next";
  *   terblokir. Nonce hanya aman untuk route yang selalu dinamis.
  * - va.vercel-scripts.com di script-src sebagai fallback host untuk
  *   skrip analytics yang disuntik runtime.
+ * - lh3.googleusercontent.com (img-src) untuk avatar profil Google —
+ *   alur SSO sendiri adalah redirect top-level ke accounts.google.com
+ *   (tanpa script/popup pihak ketiga) sehingga tidak perlu di-CSP.
  */
 const IS_DEV = process.env.NODE_ENV === "development";
 
@@ -39,7 +42,7 @@ const SECURITY_HEADERS = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "img-src 'self' data: blob: https://res.cloudinary.com https://picsum.photos https://*.midtrans.com",
+      "img-src 'self' data: blob: https://res.cloudinary.com https://picsum.photos https://*.midtrans.com https://lh3.googleusercontent.com",
       "style-src 'self' 'unsafe-inline'",
       `script-src ${CSP_SCRIPT_SRC}`,
       "font-src 'self' data:",

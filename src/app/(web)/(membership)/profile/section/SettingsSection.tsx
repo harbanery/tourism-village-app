@@ -15,9 +15,11 @@ import {
   Select,
   Switch,
   Tabs,
+  Tag,
   Upload,
 } from "antd";
 import {
+  GoogleOutlined,
   SafetyOutlined,
   UploadOutlined,
   UserOutlined,
@@ -26,6 +28,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import { clearWebSession } from "@/features/web/hooks/session";
+import { GoogleButton } from "@/components/ui/GoogleButton";
 import type { User } from "@/features/web/types";
 import { maskEmail } from "@/utils/helpers";
 import type { ProfileSettings } from "../page";
@@ -149,16 +152,23 @@ export function SettingsSection({
   user,
   settings,
   initialTab = "profile",
+  googleEnabled = false,
+  googleStatus = null,
 }: {
   user: User | null;
   settings: ProfileSettings;
   /** Tab awal (mis. "email" saat kembali dari verifikasi OTP ganti email). */
   initialTab?:
+    | "security"
     | "profile"
     | "avatar"
     | "email"
     | "password"
     | "notifications";
+  /** Google SSO aktif (server: GOOGLE_CLIENT_ID + SECRET terisi). */
+  googleEnabled?: boolean;
+  /** Hasil alur taut Google dari callback (?googleLinked / ?googleError). */
+  googleStatus?: "linked" | "email_mismatch" | "linked_other" | null;
 }) {
   const { t } = useT();
   const router = useRouter();
@@ -174,6 +184,7 @@ export function SettingsSection({
   const [requestingPassword, setRequestingPassword] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [loggingOutAll, setLoggingOutAll] = useState(false);
+  const [unlinkingGoogle, setUnlinkingGoogle] = useState(false);
 
   // --- Modal OTP (dipakai ganti email & ganti password; non-closeable) ---
   /** Flow yang sedang menunggu OTP di modal. */
@@ -197,6 +208,19 @@ export function SettingsSection({
   } | null>(null);
   const [otpDevCode, setOtpDevCode] = useState<string | undefined>();
   const [otpTargetEmail, setOtpTargetEmail] = useState("");
+
+  // Pesan hasil alur taut Google (balikan redirect callback) — sekali saja.
+  useEffect(() => {
+    if (!googleStatus) return;
+    if (googleStatus === "linked") {
+      message.success(t("settings.linked.linkSuccess"));
+    } else if (googleStatus === "email_mismatch") {
+      message.error(t("settings.linked.emailMismatch"));
+    } else if (googleStatus === "linked_other") {
+      message.error(t("settings.linked.linkedToOther"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Tick countdown kirim ulang OTP tiap detik.
   useEffect(() => {
@@ -589,12 +613,99 @@ export function SettingsSection({
     });
   };
 
+  /** Lepas tautan Google (akun tetap bisa login dengan password). */
+  const handleUnlinkGoogle = async () => {
+    setUnlinkingGoogle(true);
+    try {
+      const res = await fetch("/api/web/profile/google", {
+        method: "DELETE",
+      });
+      const result = await res.json();
+      if (!result.success) {
+        message.error(
+          result.error === "PASSWORD_REQUIRED"
+            ? t("settings.linked.unlinkNeedPassword")
+            : t("notif.error"),
+        );
+        return;
+      }
+      message.success(t("settings.linked.unlinkedSuccess"));
+      router.refresh();
+    } catch {
+      message.error(t("notif.error"));
+    } finally {
+      setUnlinkingGoogle(false);
+    }
+  };
+
+  const confirmUnlinkGoogle = () => {
+    modal.confirm({
+      title: t("settings.linked.unlinkConfirmTitle"),
+      content: t("settings.linked.unlinkConfirmContent"),
+      okText: t("settings.linked.unlink"),
+      okButtonProps: { danger: true },
+      cancelText: t("common.cancel"),
+      onOk: handleUnlinkGoogle,
+    });
+  };
+
   return (
     <Card title={t("settings.title")}>
       <Tabs
         activeKey={tab}
         onChange={setTab}
         items={[
+          {
+            key: "security",
+            label: t("settings.tab.security"),
+            children: (
+              <div className="mt-2 max-w-md">
+                {/* Kartu tautan Google — status "linked to google" tampil
+                    bila email akun ini ada di database Google (terverifikasi
+                    via SSO/login Google). */}
+                <Card size="small" className="mb-4!">
+                  <div className="flex flex-wrap items-center justify-between gap-3 py-2">
+                    <div className="flex items-center gap-3">
+                      <GoogleOutlined className="text-lg! text-primary!" />
+                      <div>
+                        <p className="font-medium">{t("settings.linked.google")}</p>
+                        <p className="text-xs text-foreground/60">
+                          {settings.googleLinked
+                            ? t("settings.linked.linkedDesc")
+                            : t("settings.linked.notLinkedDesc")}
+                        </p>
+                      </div>
+                    </div>
+                    {settings.googleLinked ? (
+                      <div className="flex items-center gap-2">
+                        <Tag color="green" className="m-0!">
+                          {t("settings.linked.linked")}
+                        </Tag>
+                        <Button
+                          size="small"
+                          danger
+                          loading={unlinkingGoogle}
+                          onClick={confirmUnlinkGoogle}
+                        >
+                          {t("settings.linked.unlink")}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Tag className="m-0!">{t("settings.linked.notLinked")}</Tag>
+                    )}
+                  </div>
+                  {!settings.googleLinked && (
+                    <div className="flex justify-center pb-2">
+                      <GoogleButton enabled={googleEnabled} mode="link" />
+                    </div>
+                  )}
+                </Card>
+                <p className="text-xs text-foreground/60">
+                  {t("settings.linked.hint")}
+                </p>
+              </div>
+            ),
+          },
           {
             key: "profile",
             label: t("settings.tab.profile"),

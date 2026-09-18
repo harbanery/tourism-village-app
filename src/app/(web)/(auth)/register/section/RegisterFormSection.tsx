@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { App, Button, Card, Form, Input } from "antd";
+import { App, Button, Card, Divider, Form, Input } from "antd";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { GoogleButton } from "@/components/ui/GoogleButton";
 
 interface RegisterFormValues {
   name: string;
@@ -14,7 +15,12 @@ interface RegisterFormValues {
   retypePassword: string;
 }
 
-export function RegisterFormSection() {
+export function RegisterFormSection({
+  googleEnabled,
+}: {
+  /** Google SSO aktif (server: GOOGLE_CLIENT_ID + SECRET terisi). */
+  googleEnabled: boolean;
+}) {
   const { t } = useT();
   const router = useRouter();
   const mounted = useMounted();
@@ -152,7 +158,15 @@ export function RegisterFormSection() {
             </Button>
           </Form.Item>
         </Form>
-        <p className="text-center text-sm text-foreground/60">
+        <Divider plain className="my-2! text-xs!">
+          <span className="text-xs text-foreground/50">
+            {t("auth.google.divider")}
+          </span>
+        </Divider>
+        <div className="flex justify-center">
+          <GoogleButton enabled={googleEnabled} redirectTo="/profile" />
+        </div>
+        <p className="mt-6 text-center text-sm text-foreground/60">
           {t("auth.register.haveAccount")}{" "}
           <button
             type="button"

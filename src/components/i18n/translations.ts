@@ -303,6 +303,24 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.subtitle": "Masuk untuk memesan paket wisata",
     "auth.login.button": "Masuk",
     "auth.login.forgot": "Lupa Password?",
+    "auth.google.divider": "atau",
+    "auth.google.button": "Masuk dengan Google",
+    "auth.google.failed": "Gagal masuk dengan Google",
+    "auth.google.notConfigured": "Login Google belum dikonfigurasi di server",
+    "auth.google.emailUnverified": "Email Google belum terverifikasi",
+    "auth.google.inactive": "Akun Anda dinonaktifkan",
+    "auth.setPassword.title": "Buat Password",
+    "auth.setPassword.subtitle":
+      "Satu langkah lagi: buat password agar bisa login tanpa Google",
+    "auth.setPassword.subtitlePending":
+      "Email ini sudah terdaftar — buat password untuk menautkan akun Google Anda",
+    "auth.setPassword.submit": "Simpan Password & Masuk",
+    "auth.setPassword.success": "Password dibuat. Anda sudah masuk.",
+    "auth.setPassword.failed": "Gagal membuat password",
+    "auth.setPassword.pendingInvalid":
+      "Tautan pembuatan password kedaluwarsa — silakan login ulang",
+    "auth.setPassword.hint":
+      "Password bisa dipakai untuk login manual tanpa Google.",
     "auth.login.noAccount": "Belum punya akun?",
     "auth.login.invalidRemaining":
       "Email/password salah. Sisa percobaan: {count}",
@@ -422,6 +440,25 @@ export const translations: Record<Locale, Record<string, string>> = {
     "consent.essential": "Hanya Esensial",
 
     "settings.title": "Pengaturan",
+    "settings.tab.security": "Keamanan",
+    "settings.linked.google": "Google",
+    "settings.linked.linked": "Tertaut",
+    "settings.linked.notLinked": "Belum tertaut",
+    "settings.linked.link": "Hubungkan Google",
+    "settings.linked.linkSuccess": "Akun Google berhasil ditautkan",
+    "settings.linked.linkedDesc": "Akun ini tertaut dengan Google — bisa login sekali klik.",
+    "settings.linked.notLinkedDesc": "Tautkan akun Google untuk login tanpa password.",
+    "settings.linked.unlink": "Lepas Tautan",
+    "settings.linked.unlinkConfirmTitle": "Lepas tautan Google?",
+    "settings.linked.unlinkConfirmContent": "Anda tetap bisa login dengan email dan password.",
+    "settings.linked.unlinkNeedPassword":
+      "Akun belum punya password — tautan Google tidak bisa dilepas.",
+    "settings.linked.unlinkedSuccess": "Tautan Google dilepas",
+    "settings.linked.emailMismatch":
+      "Email akun Google berbeda dengan email akun ini",
+    "settings.linked.linkedToOther": "Akun Google ini sudah dipakai akun lain",
+    "settings.linked.hint":
+      "Tautan hanya bisa dibuat bila email akun Google sama dengan email akun ini.",
     "settings.tab.profile": "Profil",
     "settings.tab.avatar": "Avatar",
     "settings.tab.email": "Email",
@@ -1003,6 +1040,24 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.subtitle": "Log in to order tour packages",
     "auth.login.button": "Login",
     "auth.login.forgot": "Forgot Password?",
+    "auth.google.divider": "or",
+    "auth.google.button": "Log in with Google",
+    "auth.google.failed": "Google sign-in failed",
+    "auth.google.notConfigured": "Google sign-in is not configured on the server",
+    "auth.google.emailUnverified": "Google email is not verified",
+    "auth.google.inactive": "Your account is inactive",
+    "auth.setPassword.title": "Create Password",
+    "auth.setPassword.subtitle":
+      "One more step: create a password to log in without Google",
+    "auth.setPassword.subtitlePending":
+      "This email is already registered — create a password to link your Google account",
+    "auth.setPassword.submit": "Save Password & Log In",
+    "auth.setPassword.success": "Password created. You are logged in.",
+    "auth.setPassword.failed": "Failed to create password",
+    "auth.setPassword.pendingInvalid":
+      "Password setup link expired — please log in again",
+    "auth.setPassword.hint":
+      "The password can be used to log in manually without Google.",
     "auth.login.noAccount": "No account yet?",
     "auth.login.invalidRemaining":
       "Invalid email/password. Attempts left: {count}",
@@ -1119,6 +1174,25 @@ export const translations: Record<Locale, Record<string, string>> = {
     "consent.essential": "Essential Only",
 
     "settings.title": "Settings",
+    "settings.tab.security": "Security",
+    "settings.linked.google": "Google",
+    "settings.linked.linked": "Linked",
+    "settings.linked.notLinked": "Not linked",
+    "settings.linked.link": "Link Google",
+    "settings.linked.linkSuccess": "Google account linked successfully",
+    "settings.linked.linkedDesc": "This account is linked to Google — one-click sign-in enabled.",
+    "settings.linked.notLinkedDesc": "Link a Google account to sign in without a password.",
+    "settings.linked.unlink": "Unlink",
+    "settings.linked.unlinkConfirmTitle": "Unlink Google account?",
+    "settings.linked.unlinkConfirmContent": "You can still log in with your email and password.",
+    "settings.linked.unlinkNeedPassword":
+      "Account has no password yet — Google cannot be unlinked.",
+    "settings.linked.unlinkedSuccess": "Google account unlinked",
+    "settings.linked.emailMismatch":
+      "The Google account email doesn't match this account's email",
+    "settings.linked.linkedToOther": "This Google account is already linked to another account",
+    "settings.linked.hint":
+      "A link can only be created when the Google email matches this account's email.",
     "settings.tab.profile": "Profile",
     "settings.tab.avatar": "Avatar",
     "settings.tab.email": "Email",

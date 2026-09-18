@@ -21,6 +21,7 @@ export async function GET() {
       birthDate: user.birthDate,
       address: user.address,
       avatar: user.avatar,
+      googleId: user.googleId,
     },
   });
 }

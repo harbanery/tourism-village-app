@@ -64,7 +64,10 @@ model AuthUser {
   id        String   @id @default(uuid())
   email     String   @unique
   phone     String?  @map("no_tlp")
-  password  String
+  /** Nullable sejak Google SSO: akun "Google-only" belum membuat password. */
+  password  String?
+  /** Subject Google (id unik akun Google) — null bila belum tertaut. */
+  googleId  String?  @unique @map("google_id")
   name      String
   gender    Gender?  @map("jenis_kelamin")
   birthDate DateTime? @map("tgl_lahir") @db.Date

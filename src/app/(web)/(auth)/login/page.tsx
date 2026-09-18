@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { GOOGLE_IS_CONFIGURED } from "@/utils/config/variables";
 import { LoginFormSection } from "./section/LoginFormSection";
 
 /** Target default setelah login sukses. */
@@ -31,6 +32,20 @@ export default async function LoginPage({
   const redirectTo = sanitizeRedirect(
     typeof params.redirect === "string" ? params.redirect : undefined,
   );
+  // Kode error whitelist dari callback OAuth Google (?googleError=...).
+  const googleError =
+    typeof params.googleError === "string" &&
+    ["failed", "unverified", "inactive", "unconfigured"].includes(
+      params.googleError,
+    )
+      ? params.googleError
+      : undefined;
 
-  return <LoginFormSection redirectTo={redirectTo} />;
+  return (
+    <LoginFormSection
+      redirectTo={redirectTo}
+      googleEnabled={GOOGLE_IS_CONFIGURED}
+      googleError={googleError}
+    />
+  );
 }

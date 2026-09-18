@@ -21,6 +21,29 @@ export const USER_SESSION_COOKIE = "tourism_user_session";
 export const SESSION_TTL_HOURS = 12;
 
 // ---------------------------------------------------------------------------
+// Google SSO (OAuth 2.0 redirect flow — bukan Firebase, tanpa popup GIS)
+// ---------------------------------------------------------------------------
+
+/** OAuth2 Client ID Google (wajib untuk mengaktifkan Google Sign-In). */
+export const GOOGLE_CLIENT_ID: string = process.env.GOOGLE_CLIENT_ID || "";
+
+/** OAuth2 Client Secret Google (dipakai server menukar authorization code). */
+export const GOOGLE_CLIENT_SECRET: string =
+  process.env.GOOGLE_CLIENT_SECRET || "";
+
+/**
+ * Redirect URI terdaftar di Google Console. Default mengikuti URL aplikasi;
+ * daftarkan `${NEXT_PUBLIC_URL}/api/web/auth/google/callback` di Console.
+ */
+export const GOOGLE_REDIRECT_URI: string =
+  process.env.GOOGLE_REDIRECT_URI ||
+  `${BASE_URL}/api/web/auth/google/callback`;
+
+/** Google SSO aktif bila client ID + secret terisi. */
+export const GOOGLE_IS_CONFIGURED: boolean =
+  GOOGLE_CLIENT_ID !== "" && GOOGLE_CLIENT_SECRET !== "";
+
+// ---------------------------------------------------------------------------
 // SMTP (Nodemailer) — pola admin-portfolio / progress-self
 // ---------------------------------------------------------------------------
 

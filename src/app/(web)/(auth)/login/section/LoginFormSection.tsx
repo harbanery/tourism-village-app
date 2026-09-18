@@ -1,29 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { App, Button, Card, Form, Input } from "antd";
+import { App, Button, Card, Divider, Form, Input } from "antd";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { GoogleButton } from "@/components/ui/GoogleButton";
 
 interface LoginFormValues {
   email: string;
   password: string;
 }
 
+/** Kode error balikan callback Google → kunci terjemahan pesan. */
+const GOOGLE_ERROR_KEYS: Record<string, string> = {
+  failed: "auth.google.failed",
+  unverified: "auth.google.emailUnverified",
+  inactive: "auth.google.inactive",
+  unconfigured: "auth.google.notConfigured",
+};
+
 /**
  * Form login.
  * `redirectTo`: halaman tujuan setelah login sukses (mis. user belum login
  * saat membuka /package → kembali ke /package, bukan ke profile).
+ * `googleError`: kode error dari callback OAuth Google (?googleError=...).
  */
-export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
+export function LoginFormSection({
+  redirectTo,
+  googleEnabled,
+  googleError,
+}: {
+  redirectTo: string;
+  /** Google SSO aktif (server: GOOGLE_CLIENT_ID + SECRET terisi). */
+  googleEnabled: boolean;
+  /** Kode error alur OAuth Google (bila ada). */
+  googleError?: string;
+}) {
   const { t } = useT();
   const router = useRouter();
   const mounted = useMounted();
   const { message } = App.useApp();
   const [form] = Form.useForm<LoginFormValues>();
   const [loading, setLoading] = useState(false);
+
+  // Pesan error satu kali dari callback OAuth Google (redirect penuh).
+  useEffect(() => {
+    if (!googleError) return;
+    const key = GOOGLE_ERROR_KEYS[googleError];
+    if (key) message.error(t(key));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!mounted) return null;
 
@@ -104,7 +132,15 @@ export function LoginFormSection({ redirectTo }: { redirectTo: string }) {
             </Button>
           </Form.Item>
         </Form>
-        <div className="text-center space-y-2 text-sm">
+        <Divider plain className="my-2! text-xs!">
+          <span className="text-xs text-foreground/50">
+            {t("auth.google.divider")}
+          </span>
+        </Divider>
+        <div className="w-full flex justify-center">
+          <GoogleButton enabled={googleEnabled} redirectTo={redirectTo} />
+        </div>
+        <div className="mt-6 text-center space-y-2 text-sm">
           <p>
             <button
               type="button"
