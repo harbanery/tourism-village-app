@@ -64,7 +64,6 @@ export function GoogleButton({
   return (
     <div className="flex w-full flex-col items-center gap-1">
       <Button
-        size="large"
         block
         disabled={!enabled}
         title={enabled ? undefined : t("auth.google.notConfigured")}
@@ -75,7 +74,9 @@ export function GoogleButton({
         {mode === "link" ? t("settings.linked.link") : t("auth.google.button")}
       </Button>
       {!enabled && (
-        <p className="text-xs text-foreground/50">{t("auth.google.notConfigured")}</p>
+        <p className="text-xs text-foreground/50">
+          {t("auth.google.notConfigured")}
+        </p>
       )}
     </div>
   );
