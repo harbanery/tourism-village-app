@@ -226,6 +226,7 @@ export function Navbar() {
             >
               <Avatar
                 className="ml-1! cursor-pointer!"
+                src={user?.avatar}
                 icon={<UserOutlined />}
               />
             </Dropdown>
