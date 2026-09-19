@@ -308,7 +308,7 @@ export default function PaymentClientSection({
         const json = await res.json();
         if (!json.success) throw new Error(json.error);
         // Token ulasan sekali pakai dari server (rekom 2.3) — disimpan
-        // untuk halaman review-confirm setelah redirect.
+        // untuk halaman review setelah redirect.
         if (json.data.reviewTicket) {
           setReviewTicket(json.data.reviewTicket);
         }
@@ -355,11 +355,11 @@ export default function PaymentClientSection({
   }, [option, handleCheck]);
 
   // Pembayaran berhasil → terbitkan tiket sekali masuk halaman review
-  // (review-confirm hanya bisa diakses setelah payment sukses), lalu arahkan.
+  // (review hanya bisa diakses setelah payment sukses), lalu arahkan.
   useEffect(() => {
     if (status === "PAID") {
       issueReviewAccess();
-      router.replace("/review-confirm");
+      router.replace("/review");
     }
   }, [status, router]);
 

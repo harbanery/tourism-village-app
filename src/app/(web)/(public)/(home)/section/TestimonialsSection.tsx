@@ -2,6 +2,7 @@
 
 import { Card, Empty, Rate } from "antd";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { Reveal } from "@/features/web/components/ui/reveal";
 import type { PublishedReview } from "@/services/review";
 
 const MAX_REVIEWS = 3;
@@ -23,14 +24,14 @@ export function TestimonialsSection({
   return (
     <section className="flex items-center bg-white dark:bg-[#141416]">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
-        <div className="text-center">
+        <Reveal className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold">
             {t("home.testimonials.title")}
           </h2>
           <p className="mt-1 text-foreground/60">
             {t("home.testimonials.subtitle")}
           </p>
-        </div>
+        </Reveal>
 
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           {testimonials.length === 0 ? (
@@ -42,14 +43,18 @@ export function TestimonialsSection({
               />
             </div>
           ) : (
-            testimonials.map((review) => (
-              <Card key={review.id} className="h-full! border-primary! bg-primary!">
-                <Rate disabled defaultValue={review.rating} />
-                <p className="mt-3 text-white/85">
-                  &ldquo;{review.comment}&rdquo;
-                </p>
-                <p className="mt-4 font-medium text-white">— {review.userName ?? "-"}</p>
-              </Card>
+            testimonials.map((review, index) => (
+              <Reveal key={review.id} delay={index * 100} className="h-full">
+                <Card className="h-full! border-primary! bg-primary!">
+                  <Rate disabled defaultValue={review.rating} />
+                  <p className="mt-3 text-white/85">
+                    &ldquo;{review.comment}&rdquo;
+                  </p>
+                  <p className="mt-4 font-medium text-white">
+                    — {review.userName ?? "-"}
+                  </p>
+                </Card>
+              </Reveal>
             ))
           )}
         </div>

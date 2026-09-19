@@ -6,6 +6,7 @@ import { Alert, App, Button, Card, Form, Input } from "antd";
 import { MailOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { Reveal } from "@/features/web/components/ui/reveal";
 
 interface ForgotFormValues {
   email: string;
@@ -84,7 +85,8 @@ export function ForgotPasswordSection() {
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-8">
-      <Card>
+      <Reveal>
+        <Card>
         <h1 className="text-2xl font-bold text-center">
           {t("auth.forgot.title")}
         </h1>
@@ -103,7 +105,11 @@ export function ForgotPasswordSection() {
             label={t("common.email")}
             rules={[{ required: true }, { type: "email" }]}
           >
-            <Input prefix={<MailOutlined />} placeholder="email@example.com" />
+            <Input
+              prefix={<MailOutlined />}
+              placeholder={t("auth.forgot.emailPlaceholder")}
+              autoComplete="email"
+            />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block loading={loading}>
@@ -126,7 +132,8 @@ export function ForgotPasswordSection() {
             ← {t("auth.forgot.backToLogin")}
           </button>
         </p>
-      </Card>
+        </Card>
+      </Reveal>
     </div>
   );
 }

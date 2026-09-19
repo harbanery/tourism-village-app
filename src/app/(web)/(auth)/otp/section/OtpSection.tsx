@@ -6,6 +6,7 @@ import { Alert, App, Button, Card, Input } from "antd";
 import { SafetyOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { Reveal } from "@/features/web/components/ui/reveal";
 
 type OtpPurpose = "REGISTER" | "RESET_PASSWORD";
 
@@ -185,7 +186,8 @@ export function OtpSection({
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-8">
-      <Card>
+      <Reveal>
+        <Card>
         <div className="text-center">
           <SafetyOutlined className="text-4xl! text-primary!" />
           <h1 className="mt-3 text-2xl font-bold">{t("auth.otp.title")}</h1>
@@ -238,7 +240,8 @@ export function OtpSection({
               : t("auth.otp.resend")}
           </Button>
         </div>
-      </Card>
+        </Card>
+      </Reveal>
     </div>
   );
 }

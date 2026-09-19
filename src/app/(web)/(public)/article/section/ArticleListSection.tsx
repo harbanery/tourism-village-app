@@ -8,6 +8,7 @@ import { ArrowUpOutlined, SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { formatDate } from "@/utils/helpers";
 import { displayImage } from "@/utils/helpers";
+import { Reveal } from "@/features/web/components/ui/reveal";
 import type { WebBlog } from "@/services/blog";
 import { ArchiveSection } from "./ArchiveSection";
 
@@ -87,10 +88,12 @@ export function ArticleListSection({ posts }: { posts: WebBlog[] }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 lg:grid-cols-[1fr_300px]">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">
-          {t("articles.title")}
-        </h1>
-        <p className="mt-1 text-foreground/60">{t("articles.subtitle")}</p>
+        <Reveal>
+          <h1 className="text-2xl md:text-3xl font-bold">
+            {t("articles.title")}
+          </h1>
+          <p className="mt-1 text-foreground/60">{t("articles.subtitle")}</p>
+        </Reveal>
 
         {/* Pencarian & urutan (pola riwayat belanja). */}
         <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -146,8 +149,8 @@ export function ArticleListSection({ posts }: { posts: WebBlog[] }) {
               // Cover Cloudinary dioptimasi CDN (f_auto,q_auto,w_840).
               const { src, unoptimized } = displayImage(post.filename, 840);
               return (
-                <Card
-                  key={post.id}
+                <Reveal key={post.id}>
+                  <Card
                   cover={
                     post.filename ? (
                       <Image
@@ -186,7 +189,8 @@ export function ArticleListSection({ posts }: { posts: WebBlog[] }) {
                   >
                     {t("common.readMore")}
                   </Button>
-                </Card>
+                  </Card>
+                </Reveal>
               );
             })
           )}

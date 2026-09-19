@@ -7,6 +7,7 @@ import { LockOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import { refreshWebSession } from "@/features/web/hooks/session";
+import { Reveal } from "@/features/web/components/ui/reveal";
 
 interface SetPasswordValues {
   password: string;
@@ -83,7 +84,8 @@ export function SetPasswordSection({
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-8">
-      <Card>
+      <Reveal>
+        <Card>
         <h1 className="text-2xl font-bold text-center">
           {t("auth.setPassword.title")}
         </h1>
@@ -113,7 +115,7 @@ export function SetPasswordSection({
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="••••••••"
+              placeholder={t("auth.setPassword.passwordPlaceholder")}
               autoComplete="new-password"
             />
           </Form.Item>
@@ -137,7 +139,7 @@ export function SetPasswordSection({
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="••••••••"
+              placeholder={t("auth.setPassword.retypePlaceholder")}
               autoComplete="new-password"
             />
           </Form.Item>
@@ -150,7 +152,8 @@ export function SetPasswordSection({
         <p className="text-center text-sm text-foreground/60">
           {t("auth.setPassword.hint")}
         </p>
-      </Card>
+        </Card>
+      </Reveal>
     </div>
   );
 }

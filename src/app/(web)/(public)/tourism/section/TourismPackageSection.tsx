@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { displayImage } from "@/utils/helpers";
+import { Reveal } from "@/features/web/components/ui/reveal";
 import type { PlaceWithPackages } from "@/services/place";
 
 /**
@@ -63,8 +64,12 @@ export function TourismPackageSection({
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_180px]">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">{t("tourism.title")}</h1>
-        <p className="mt-1 text-foreground/60">{t("tourism.subtitle")}</p>
+        <Reveal>
+          <h1 className="text-2xl md:text-3xl font-bold">
+            {t("tourism.title")}
+          </h1>
+          <p className="mt-1 text-foreground/60">{t("tourism.subtitle")}</p>
+        </Reveal>
 
         <div className="mt-8 space-y-10">
           {places.length === 0 ? (
@@ -76,12 +81,12 @@ export function TourismPackageSection({
               />
             </Card>
           ) : (
-            places.map((place) => (
-              <section
-                key={place.id}
-                id={`place-${place.id}`}
-                className="scroll-mt-20"
-              >
+            places.map((place, index) => (
+              <Reveal key={place.id} delay={(index % 2) * 100}>
+                <section
+                  id={`place-${place.id}`}
+                  className="scroll-mt-20"
+                >
                 {/* Kartu tempat wisata: foto cover lebar penuh, lalu
                     nama + jumlah paket + deskripsi admin di body. */}
                 <Card
@@ -169,7 +174,8 @@ export function TourismPackageSection({
                     )}
                   </div>
                 </Card>
-              </section>
+                </section>
+              </Reveal>
             ))
           )}
         </div>

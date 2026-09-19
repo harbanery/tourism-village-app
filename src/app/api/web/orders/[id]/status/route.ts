@@ -105,7 +105,7 @@ export async function GET(
   }
 
   // Pembayaran berhasil → terbitkan token ulasan sekali pakai (rekom 2.3)
-  // untuk halaman review-confirm; dikonsumsi penuh saat ulasan dikirim.
+  // untuk halaman review; dikonsumsi penuh saat ulasan dikirim.
   // Token lama purpose sama otomatis dikonsumsi (satu aktif per user).
   let reviewTicket: string | null = null;
   if (current.paymentStatus === "PAID") {

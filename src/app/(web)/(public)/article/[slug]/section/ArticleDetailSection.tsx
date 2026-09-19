@@ -7,6 +7,7 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { formatDate } from "@/utils/helpers";
 import { displayImage } from "@/utils/helpers";
+import { Reveal } from "@/features/web/components/ui/reveal";
 import type { WebBlogDetail } from "@/services/blog";
 
 export function ArticleDetailSection({ post }: { post: WebBlogDetail | null }) {
@@ -23,7 +24,8 @@ export function ArticleDetailSection({ post }: { post: WebBlogDetail | null }) {
         {t("articles.title")}
       </Button>
       {post ? (
-        <Card
+        <Reveal>
+          <Card
           cover={
             post.filename ? (
               // LCP halaman detail — priority agar cover dimuat lebih
@@ -70,7 +72,8 @@ export function ArticleDetailSection({ post }: { post: WebBlogDetail | null }) {
             className="mt-6 space-y-4 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: post.para }}
           />
-        </Card>
+          </Card>
+        </Reveal>
       ) : (
         <Card>
           <p>{t("articles.notFound")}</p>

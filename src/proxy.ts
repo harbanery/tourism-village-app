@@ -10,7 +10,7 @@ import { ADMIN_SESSION_COOKIE, USER_SESSION_COOKIE } from "@/utils/config/variab
  * - /api/upload: tanpa cookie sesi admin → 401 JSON.
  * - /api/web/profile*: tanpa cookie sesi user → 401 JSON.
  * - Halaman membership (/profile, /package, /checkout, /payment/**,
- *   /review-confirm): tanpa cookie sesi user → redirect ke
+ *   /review): tanpa cookie sesi user → redirect ke
  *   /login?redirect=<halaman asal> agar setelah login kembali ke sana.
  * - /login, /register, /forgot-password & /reset-password dengan cookie
  *   sesi user → redirect / (sudah login tidak boleh membuka form auth).
@@ -25,7 +25,7 @@ const MEMBERSHIP_PAGE_PREFIXES = [
   "/package",
   "/checkout",
   "/payment",
-  "/review-confirm",
+  "/review",
 ];
 
 /** Method HTTP yang mengubah state (layak dijaga dari cross-site). */
@@ -184,6 +184,6 @@ export const config = {
     "/package",
     "/checkout",
     "/payment/:path*",
-    "/review-confirm",
+    "/review",
   ],
 };

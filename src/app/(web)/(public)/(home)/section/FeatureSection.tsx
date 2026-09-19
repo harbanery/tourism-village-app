@@ -1,6 +1,7 @@
 "use client";
 
-import { Card } from "antd";
+import { useRouter } from "next/navigation";
+import { Button, Card } from "antd";
 import {
   CustomerServiceOutlined,
   HomeOutlined,
@@ -8,9 +9,11 @@ import {
   WalletOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { Reveal } from "@/features/web/components/ui/reveal";
 
 export function FeatureSection() {
   const { t } = useT();
+  const router = useRouter();
 
   const features = [
     {
@@ -38,7 +41,7 @@ export function FeatureSection() {
   return (
     <section className="flex min-h-screen items-center">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
-        <div className="text-center">
+        <Reveal className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
             {t("home.why.titlePrefix")}{" "}
             <span className="text-white">Desaku</span>
@@ -47,30 +50,46 @@ export function FeatureSection() {
           <p className="mt-1 text-white/80 drop-shadow">
             {t("home.why.subtitle")}
           </p>
-        </div>
+        </Reveal>
 
-        {/* Grid 4 kartu (responsif: HP 1, tablet 2, ≥lg 4); bg & border
-            transparan (hero terlihat di belakang) — tanpa efek hover/focus
-            (gradient di-takeout, DROID). */}
-        <div className="mt-8 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => (
-            <Card
+        {/* Grid 4 kartu berposisi "gunung" (zigzag): kartu pertama di
+            bawah, kedua di atas, bergantian — offset via margin-top di
+            div Reveal (parent komponen antd). Background kartu hitam
+            transparan (dark mode sedikit lebih transparan) + blur tipis
+            agar terbaca di atas hero; tiap kartu punya tombol "Lainnya"
+            yang menuju section feature lengkap di /about#feature. */}
+        <div className="mt-8 grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((feature, index) => (
+            <Reveal
               key={feature.title}
-              className="h-full! border-transparent! bg-transparent! text-center!"
-              styles={{ body: { height: "100%" } }}
+              delay={index * 100}
+              className={index % 2 === 0 ? "sm:mt-10" : ""}
             >
-              <div className="flex h-full flex-col items-center gap-3 text-center">
-                {/* Icon besar di atas dalam wadah rounded transparan
-                    bernuansa secondary (pola lama, ukuran lebih besar). */}
-                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/10">
-                  {feature.icon}
-                </span>
-                <h3 className="font-semibold text-lg text-white">
-                  {feature.title}
-                </h3>
-                <p className="text-white/80">{feature.desc}</p>
-              </div>
-            </Card>
+              <Card
+                className="h-full! border-white/10! bg-white/60! text-center! backdrop-blur-sm! dark:bg-black/60!"
+                styles={{ body: { height: "100%" } }}
+              >
+                <div className="flex h-full flex-col items-center gap-3 text-center">
+                  {/* Icon besar di atas dalam wadah rounded transparan
+                      bernuansa secondary. */}
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/40">
+                    {feature.icon}
+                  </span>
+                  <h3 className="font-semibold text-lg text-foreground/95">
+                    {feature.title}
+                  </h3>
+                  <p className=" text-foreground/80">{feature.desc}</p>
+                  {/* mt-auto menjaga tombol rata bawah antar kartu. */}
+                  <Button
+                    ghost
+                    className="mt-auto! border-foreground/70! text-foreground! hover:border-foreground!"
+                    onClick={() => router.push("/about#feature")}
+                  >
+                    {t("home.why.more")}
+                  </Button>
+                </div>
+              </Card>
+            </Reveal>
           ))}
         </div>
       </div>

@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { readCart, writeCart } from "@/features/web/utils/cart";
+import { Reveal } from "@/features/web/components/ui/reveal";
 import { formatRupiah } from "@/utils/helpers";
 import type { ActivePackage } from "@/services/package";
 
@@ -53,15 +54,16 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
     <section id="packages" className="bg-white dark:bg-[#141416] rounded-t-4xl">
       <div className="flex min-h-screen items-center bg-primary rounded-4xl">
         <div className="mx-auto w-full max-w-6xl px-4 py-16">
-          <div className="text-center">
+          <Reveal className="text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-white">
               {t("home.packages.title")}
             </h2>
             <p className="mt-1 text-white/70">{t("home.packages.subtitle")}</p>
-          </div>
+          </Reveal>
 
-          <Row gutter={[16, 16]} className="mt-8!">
-            {packages.slice(0, 3).map((pkg) => {
+          <Reveal delay={150} className="mt-8!">
+            <Row gutter={[16, 16]}>
+              {packages.slice(0, 3).map((pkg) => {
               // Kartu flex-col: daftar fasilitas yang beda jumlah tetap
               // menghasilkan tinggi kartu sama, dengan CTA terpacu di dasar.
               const card = (
@@ -148,13 +150,14 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
                   )}
                 </Col>
               );
-            })}
-          </Row>
+              })}
+            </Row>
+          </Reveal>
 
           {/* Lihat lainnya → halaman lengkap paket (icon di sebelah kanan);
             tombol primary + border putih; hover/focus lebih gelap
             (selaras dengan CTA "Pesan Sekarang"). */}
-          <div className="mt-8 text-center">
+          <Reveal delay={300} className="mt-8 text-center">
             <Button
               type="primary"
               size="large"
@@ -165,7 +168,7 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
             >
               {t("home.packages.viewMore")}
             </Button>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

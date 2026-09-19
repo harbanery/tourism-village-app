@@ -6,7 +6,8 @@ import { App, Button, Card, Divider, Form, Input } from "antd";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
-import { GoogleButton } from "@/components/ui/GoogleButton";
+import { GoogleButton } from "@/components/ui/button/google";
+import { Reveal } from "@/features/web/components/ui/reveal";
 
 interface LoginFormValues {
   email: string;
@@ -98,7 +99,8 @@ export function LoginFormSection({
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-8">
-      <Card>
+      <Reveal>
+        <Card>
         <h1 className="text-2xl font-bold text-center">
           {t("auth.login.title")}
         </h1>
@@ -117,14 +119,22 @@ export function LoginFormSection({
             label={t("common.email")}
             rules={[{ required: true }, { type: "email" }]}
           >
-            <Input prefix={<MailOutlined />} placeholder="email@example.com" />
+            <Input
+              prefix={<MailOutlined />}
+              placeholder={t("auth.login.emailPlaceholder")}
+              autoComplete="email"
+            />
           </Form.Item>
           <Form.Item
             name="password"
             label={t("auth.register.password")}
             rules={[{ required: true }]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="••••••••" />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder={t("auth.login.passwordPlaceholder")}
+              autoComplete="current-password"
+            />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block loading={loading}>
@@ -161,7 +171,8 @@ export function LoginFormSection({
             </button>
           </p>
         </div>
-      </Card>
+        </Card>
+      </Reveal>
     </div>
   );
 }

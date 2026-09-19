@@ -2,6 +2,7 @@
 
 import { Anchor } from "antd";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { Reveal } from "@/features/web/components/ui/reveal";
 
 /** Kunci blok syarat & ketentuan (judul + isi per blok). */
 const TERMS_BLOCKS = ["s1", "s2", "s3", "s4", "s5"] as const;
@@ -45,17 +46,20 @@ export function UserAgreementSection() {
     // pb ekstra: halaman ber-anchor (#terms/#privacy-*) — blok terakhir
     // tetap berjarak dari footer saat scroll ke anchor terakhir.
     <div className="mx-auto max-w-4xl px-4 pt-10 pb-20">
-      <h1 className="text-2xl md:text-3xl font-bold">
-        {t("userAgreement.title")}
-      </h1>
-      <p className="mt-2 text-justify leading-relaxed text-foreground/80">
-        {t("userAgreement.intro")}
-      </p>
+      <Reveal>
+        <h1 className="text-2xl md:text-3xl font-bold">
+          {t("userAgreement.title")}
+        </h1>
+        <p className="mt-2 text-justify leading-relaxed text-foreground/80">
+          {t("userAgreement.intro")}
+        </p>
+      </Reveal>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_200px]">
         <div className="space-y-12">
           {/* Syarat & Ketentuan — anchor utama #terms. */}
-          <section id="terms" className="scroll-mt-20">
+          <Reveal>
+            <section id="terms" className="scroll-mt-20">
             <h2 className="text-xl md:text-2xl font-bold">
               {t("terms.title")}
             </h2>
@@ -80,10 +84,12 @@ export function UserAgreementSection() {
                 </section>
               ))}
             </div>
-          </section>
+            </section>
+          </Reveal>
 
           {/* Kebijakan Privasi — anchor utama #privacy-policy. */}
-          <section id="privacy-policy" className="scroll-mt-20">
+          <Reveal>
+            <section id="privacy-policy" className="scroll-mt-20">
             <h2 className="text-xl md:text-2xl font-bold">
               {t("privacy.title")}
             </h2>
@@ -108,7 +114,8 @@ export function UserAgreementSection() {
                 </section>
               ))}
             </div>
-          </section>
+            </section>
+          </Reveal>
         </div>
 
         <aside className="hidden lg:block">

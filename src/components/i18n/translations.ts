@@ -145,6 +145,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.why.cheap.desc": "Harga paket bersahabat untuk semua kalangan.",
     "home.why.local.title": "Kearifan Lokal",
     "home.why.local.desc": "Budaya dan tradisi asli desa yang terjaga.",
+    "home.why.more": "Lainnya",
     "home.packages.title": "Paket Wisata",
     "home.packages.subtitle": "Pilihan paket wisata dengan harga terjangkau",
     "home.packages.cta": "Pesan Sekarang",
@@ -302,6 +303,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.title": "Masuk",
     "auth.login.subtitle": "Masuk untuk memesan paket wisata",
     "auth.login.button": "Masuk",
+    "auth.login.emailPlaceholder": "Masukkan email",
+    "auth.login.passwordPlaceholder": "Masukkan password",
     "auth.login.forgot": "Lupa Password?",
     "auth.google.divider": "atau",
     "auth.google.button": "Masuk dengan Google",
@@ -321,9 +324,10 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Tautan pembuatan password kedaluwarsa — silakan login ulang",
     "auth.setPassword.hint":
       "Password bisa dipakai untuk login manual tanpa Google.",
+    "auth.setPassword.passwordPlaceholder": "Buat password baru",
+    "auth.setPassword.retypePlaceholder": "Ulangi password baru",
     "auth.login.noAccount": "Belum punya akun?",
-    "auth.login.invalidRemaining":
-      "Email/password salah. Sisa percobaan: {count}",
+    "auth.login.invalidRemaining": "Email/password salah.",
     "auth.register.successOtp":
       "Akun dibuat! Silakan verifikasi email lewat kode OTP.",
 
@@ -334,6 +338,7 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Jika email terdaftar, kode OTP akan dikirim dalam beberapa menit.",
     "auth.forgot.backToLogin": "Kembali ke halaman masuk",
     "auth.forgot.emailNotFound": "Email tidak terdaftar",
+    "auth.forgot.emailPlaceholder": "Masukkan email terdaftar",
     "auth.reset.title": "Atur Ulang Password",
     "auth.reset.subtitle":
       "Kode OTP sudah diverifikasi — buat password baru Anda",
@@ -348,6 +353,8 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Email tidak diketahui — ulangi dari halaman lupa password",
     "auth.reset.tokenInvalid":
       "Tautan reset tidak valid atau kedaluwarsa — mulai ulang dari lupa password.",
+    "auth.reset.passwordPlaceholder": "Password baru Anda",
+    "auth.reset.retypePlaceholder": "Ulangi password baru",
 
     "auth.otp.title": "Verifikasi OTP",
     "auth.otp.subtitleRegister":
@@ -367,7 +374,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.otp.resendsLeft": "Sisa kesempatan kirim ulang: {count}",
     "auth.otp.resent": "Kode baru telah dikirim",
     "auth.otp.cooldown": "Tunggu {seconds} detik sebelum kirim ulang",
-    "auth.otp.invalidRemaining": "Kode salah. Sisa percobaan: {count}",
+    "auth.otp.invalidRemaining": "Kode salah.",
     "auth.otp.needVerification":
       "Email belum terverifikasi — lanjutkan verifikasi OTP",
     "auth.otp.devCode": "Kode OTP (mode dev — SMTP belum aktif):",
@@ -389,6 +396,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.register.passwordPattern":
       "Password harus mengandung huruf dan angka",
     "auth.register.passwordPlaceholder": "Minimal 8 karakter, huruf & angka",
+    "auth.register.emailPlaceholder": "Masukkan email",
     "auth.register.phonePattern": "Nomor telepon tidak valid",
     "auth.register.retypePassword": "Ulangi Password",
     "auth.register.retypePlaceholder": "Ulangi password Anda",
@@ -446,11 +454,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.linked.notLinked": "Belum tertaut",
     "settings.linked.link": "Hubungkan Google",
     "settings.linked.linkSuccess": "Akun Google berhasil ditautkan",
-    "settings.linked.linkedDesc": "Akun ini tertaut dengan Google — bisa login sekali klik.",
-    "settings.linked.notLinkedDesc": "Tautkan akun Google untuk login tanpa password.",
+    "settings.linked.linkedDesc":
+      "Akun ini tertaut dengan Google — bisa login sekali klik.",
+    "settings.linked.notLinkedDesc":
+      "Tautkan akun Google untuk login tanpa password.",
     "settings.linked.unlink": "Lepas Tautan",
     "settings.linked.unlinkConfirmTitle": "Lepas tautan Google?",
-    "settings.linked.unlinkConfirmContent": "Anda tetap bisa login dengan email dan password.",
+    "settings.linked.unlinkConfirmContent":
+      "Anda tetap bisa login dengan email dan password.",
     "settings.linked.unlinkNeedPassword":
       "Akun belum punya password — tautan Google tidak bisa dilepas.",
     "settings.linked.unlinkedSuccess": "Tautan Google dilepas",
@@ -538,6 +549,17 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Semua paket disusun dan dikelola bersama warga desa: pemandu lokal yang paham medan, penginapan (homestay) milik warga, serta fasilitas yang dirawat langsung oleh masyarakat. Setiap pemesanan berdampak langsung pada perekonomian desa.",
     "about.p3":
       "Misi kami mengembangkan wisata berbasis masyarakat (community-based tourism) yang berkelanjutan — menjaga alam dan budaya, sekaligus membuka lapangan bagi warga.",
+    "about.feature.title": "Nilai yang Kami Tawarkan",
+    "about.feature.subtitle":
+      "Empat keunggulan yang membuat wisata di desa kami berkesan",
+    "about.feature.facility.desc":
+      "Fasilitas lengkap dan terbaik untuk kenyamanan Anda — area parkir yang luas, musala, toilet bersih, gazebo istirahat, hingga spot foto yang dirawat warga. Semua fasilitas diperiksa dan dibersihkan secara rutin sehingga setiap kunjungan terasa nyaman, mulai dari keluarga dengan anak hingga rombongan besar.",
+    "about.feature.service.desc":
+      "Pelayanan ramah dan profesional dari warga desa. Pemandu lokal kami paham medan serta cerita di balik setiap sudut desa, siap menemani perjalanan Anda dari proses pemesanan hingga kepulangan. Setiap pertanyaan dan kebutuhan khusus ditangani dengan sepenuh hati — kepuasan Anda adalah kebanggaan kami.",
+    "about.feature.cheap.desc":
+      "Harga paket bersahabat untuk semua kalangan tanpa mengurangi kualitas pengalaman. Kami menyusun pilihan paket dari yang paling hemat hingga lengkap dengan menginap, sehingga wisata desa bisa dinikmati pelajar, keluarga, maupun rombongan. Setiap rupiah yang Anda bayarkan langsung kembali ke perekonomian warga.",
+    "about.feature.local.desc":
+      "Budaya dan tradisi asli desa yang terjaga. Mulai dari seni pertunjukan, kuliner khas, kerajinan tangan, hingga ritual adat yang turun-temurun — semuanya hidup dalam keseharian warga, bukan pertunjukan artifisial. Berkunjung ke desa kami berarti ikut melestarikan warisan budaya Indonesia.",
 
     "privacy.title": "Kebijakan Privasi",
     "privacy.updated": "Terakhir diperbarui: 8 September 2026",
@@ -723,6 +745,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.footer.text": "© {year} DesakuWisataku",
     "admin.login.title": "Masuk Admin",
     "admin.login.backToSite": "Kembali ke situs web",
+    "admin.login.usernameEmail": "Username / Email",
+    "admin.login.usernameEmailPlaceholder": "Masukkan username atau email",
     "admin.dev.title": "Panel Dev",
     "admin.dev.expireBtn": "Expire Order",
     "admin.dev.expireTooltip":
@@ -880,6 +904,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "home.why.cheap.desc": "Friendly prices for every traveler.",
     "home.why.local.title": "Local Wisdom",
     "home.why.local.desc": "Authentic, well-preserved village traditions.",
+    "home.why.more": "More",
     "home.packages.title": "Tour Packages",
     "home.packages.subtitle": "Affordable tour package options",
     "home.packages.cta": "Book Now",
@@ -1039,11 +1064,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.login.title": "Login",
     "auth.login.subtitle": "Log in to order tour packages",
     "auth.login.button": "Login",
+    "auth.login.emailPlaceholder": "Enter your email",
+    "auth.login.passwordPlaceholder": "Enter your password",
     "auth.login.forgot": "Forgot Password?",
     "auth.google.divider": "or",
     "auth.google.button": "Log in with Google",
     "auth.google.failed": "Google sign-in failed",
-    "auth.google.notConfigured": "Google sign-in is not configured on the server",
+    "auth.google.notConfigured":
+      "Google sign-in is not configured on the server",
     "auth.google.emailUnverified": "Google email is not verified",
     "auth.google.inactive": "Your account is inactive",
     "auth.setPassword.title": "Create Password",
@@ -1058,9 +1086,10 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Password setup link expired — please log in again",
     "auth.setPassword.hint":
       "The password can be used to log in manually without Google.",
+    "auth.setPassword.passwordPlaceholder": "Create a new password",
+    "auth.setPassword.retypePlaceholder": "Repeat the new password",
     "auth.login.noAccount": "No account yet?",
-    "auth.login.invalidRemaining":
-      "Invalid email/password. Attempts left: {count}",
+    "auth.login.invalidRemaining": "Invalid email/password. Please try again.",
     "auth.register.successOtp":
       "Account created! Please verify your email with the OTP code.",
 
@@ -1071,6 +1100,7 @@ export const translations: Record<Locale, Record<string, string>> = {
       "If the email is registered, an OTP code will arrive within minutes.",
     "auth.forgot.backToLogin": "Back to login page",
     "auth.forgot.emailNotFound": "Email is not registered",
+    "auth.forgot.emailPlaceholder": "Enter your registered email",
     "auth.reset.title": "Reset Password",
     "auth.reset.subtitle": "OTP code verified — create your new password",
     "auth.reset.subtitleNoEmail": "Open the forgot password page first",
@@ -1084,6 +1114,8 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Email unknown — restart from the forgot password page",
     "auth.reset.tokenInvalid":
       "The reset link is invalid or expired — start over from forgot password.",
+    "auth.reset.passwordPlaceholder": "Your new password",
+    "auth.reset.retypePlaceholder": "Repeat the new password",
 
     "auth.otp.title": "OTP Verification",
     "auth.otp.subtitleRegister": "Enter the 6-digit code sent to your email",
@@ -1101,7 +1133,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.otp.resendsLeft": "Resends left: {count}",
     "auth.otp.resent": "A new code has been sent",
     "auth.otp.cooldown": "Wait {seconds} seconds before resending",
-    "auth.otp.invalidRemaining": "Wrong code. Attempts left: {count}",
+    "auth.otp.invalidRemaining": "Wrong code. Please try again.",
     "auth.otp.needVerification":
       "Email not verified yet — continue with OTP verification",
     "auth.otp.devCode": "OTP code (dev mode — SMTP not configured):",
@@ -1123,6 +1155,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.register.passwordPattern":
       "Password must contain letters and numbers",
     "auth.register.passwordPlaceholder": "Min 8 characters, letters & numbers",
+    "auth.register.emailPlaceholder": "Enter your email",
     "auth.register.phonePattern": "Invalid phone number",
     "auth.register.retypePassword": "Retype Password",
     "auth.register.retypePlaceholder": "Retype your password",
@@ -1180,17 +1213,21 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.linked.notLinked": "Not linked",
     "settings.linked.link": "Link Google",
     "settings.linked.linkSuccess": "Google account linked successfully",
-    "settings.linked.linkedDesc": "This account is linked to Google — one-click sign-in enabled.",
-    "settings.linked.notLinkedDesc": "Link a Google account to sign in without a password.",
+    "settings.linked.linkedDesc":
+      "This account is linked to Google — one-click sign-in enabled.",
+    "settings.linked.notLinkedDesc":
+      "Link a Google account to sign in without a password.",
     "settings.linked.unlink": "Unlink",
     "settings.linked.unlinkConfirmTitle": "Unlink Google account?",
-    "settings.linked.unlinkConfirmContent": "You can still log in with your email and password.",
+    "settings.linked.unlinkConfirmContent":
+      "You can still log in with your email and password.",
     "settings.linked.unlinkNeedPassword":
       "Account has no password yet — Google cannot be unlinked.",
     "settings.linked.unlinkedSuccess": "Google account unlinked",
     "settings.linked.emailMismatch":
       "The Google account email doesn't match this account's email",
-    "settings.linked.linkedToOther": "This Google account is already linked to another account",
+    "settings.linked.linkedToOther":
+      "This Google account is already linked to another account",
     "settings.linked.hint":
       "A link can only be created when the Google email matches this account's email.",
     "settings.tab.profile": "Profile",
@@ -1269,6 +1306,17 @@ export const translations: Record<Locale, Record<string, string>> = {
       "Every package is arranged and managed together with the villagers: local guides who know the terrain, community-owned homestays, and facilities maintained by the residents themselves. Each booking directly supports the village economy.",
     "about.p3":
       "Our mission is to grow sustainable community-based tourism — preserving nature and culture while opening opportunities for the villagers.",
+    "about.feature.title": "The Values We Offer",
+    "about.feature.subtitle":
+      "Four advantages that make tourism in our village memorable",
+    "about.feature.facility.desc":
+      "Complete, top facilities for your comfort — a spacious parking area, a prayer room, clean restrooms, rest gazebos, and photo spots maintained by the residents. Every facility is checked and cleaned regularly so each visit feels comfortable, from families with children to large groups.",
+    "about.feature.service.desc":
+      "Friendly, professional service from the villagers. Our local guides know the terrain and the stories behind every corner of the village, ready to accompany you from booking until you head home. Every question and special request is handled wholeheartedly — your satisfaction is our pride.",
+    "about.feature.cheap.desc":
+      "Friendly prices for every traveler without cutting the quality of the experience. We arrange options from the most budget-friendly to full stay packages, so village tourism can be enjoyed by students, families, and groups alike. Every rupiah you pay goes straight back to the village economy.",
+    "about.feature.local.desc":
+      "Authentic, well-preserved village traditions. From performing arts, signature cuisine, and handicrafts to generations-old rituals — everything lives in the residents' daily life, not as an artificial show. Visiting our village means taking part in preserving Indonesia's cultural heritage.",
 
     "privacy.title": "Privacy Policy",
     "privacy.updated": "Last updated: September 8, 2026",
@@ -1451,6 +1499,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.footer.text": "© {year} DesakuWisataku",
     "admin.login.title": "Admin Login",
     "admin.login.backToSite": "Back to website",
+    "admin.login.usernameEmail": "Username / Email",
+    "admin.login.usernameEmailPlaceholder": "Enter your username or email",
     "admin.dev.title": "Dev Panel",
     "admin.dev.expireBtn": "Expire Orders",
     "admin.dev.expireTooltip":

@@ -26,7 +26,8 @@ function toRemainingMinutes(blockedUntil: Date | null | undefined): number {
 
 /**
  * POST /api/admin/auth/login
- * Login admin dengan username + password. Rate-limit per IP, sesi 12 jam.
+ * Login admin dengan username ATAU email + password. Rate-limit per IP,
+ * sesi 12 jam.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -80,9 +81,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const admin = await prisma.authAdmin.findUnique({
-      where: { username },
-    });
+    // Identifier login: username ATAU email (input di-trim; email
+    // dicocokkan case-insensitive agar aman untuk variasi kapital).
+    const identifier = username.trim();
+    const admin = (await prisma.authAdmin.findUnique({
+      where: { username: identifier },
+    })) ??
+      (identifier.includes("@")
+        ? await prisma.authAdmin.findFirst({
+            where: { email: { equals: identifier, mode: "insensitive" } },
+          })
+        : null);
 
     const ok = admin
       ? admin.status === "ACTIVE" && (await verifyPassword(password, admin.password))

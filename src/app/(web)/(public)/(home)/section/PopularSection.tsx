@@ -6,6 +6,7 @@ import { Button } from "antd";
 import { ArrowRightOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { displayImage } from "@/utils/helpers";
+import { Reveal } from "@/features/web/components/ui/reveal";
 import type { PlaceWithPackages } from "@/services/place";
 
 const MAX_PLACES = 3;
@@ -129,22 +130,24 @@ export function PopularSection({ places }: { places: PlaceWithPackages[] }) {
   return (
     <section className="rounded-4xl bg-primary">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
-        <div className="text-center">
+        <Reveal className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white">
             {t("home.popular.title")}
           </h2>
           <p className="mt-1 text-white/70">{t("home.popular.subtitle")}</p>
-        </div>
+        </Reveal>
 
-        <div className="group/list mt-8 flex flex-col gap-4 md:h-[480px] md:flex-row">
-          {popularPlaces.map((place) => (
-            <PlaceCard
-              key={place.id}
-              place={place}
-              onClick={() => router.push(`/tourism#place-${place.id}`)}
-            />
-          ))}
-        </div>
+        <Reveal delay={150}>
+          <div className="group/list mt-8 flex flex-col gap-4 md:h-[480px] md:flex-row">
+            {popularPlaces.map((place) => (
+              <PlaceCard
+                key={place.id}
+                place={place}
+                onClick={() => router.push(`/tourism#place-${place.id}`)}
+              />
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   );

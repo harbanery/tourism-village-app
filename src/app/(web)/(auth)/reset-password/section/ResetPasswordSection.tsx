@@ -6,6 +6,7 @@ import { App, Button, Card, Form, Input } from "antd";
 import { LockOutlined, SafetyOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
+import { Reveal } from "@/features/web/components/ui/reveal";
 
 interface ResetFormValues {
   password: string;
@@ -94,7 +95,8 @@ export function ResetPasswordSection({ token }: { token: string }) {
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-8">
-      <Card>
+      <Reveal>
+        <Card>
         <div className="text-center">
           <SafetyOutlined className="text-4xl! text-primary!" />
           <h1 className="mt-3 text-2xl font-bold">{t("auth.reset.title")}</h1>
@@ -122,7 +124,7 @@ export function ResetPasswordSection({ token }: { token: string }) {
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="••••••••"
+              placeholder={t("auth.reset.passwordPlaceholder")}
               autoComplete="new-password"
             />
           </Form.Item>
@@ -146,7 +148,7 @@ export function ResetPasswordSection({ token }: { token: string }) {
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="••••••••"
+              placeholder={t("auth.reset.retypePlaceholder")}
               autoComplete="new-password"
             />
           </Form.Item>
@@ -157,6 +159,7 @@ export function ResetPasswordSection({ token }: { token: string }) {
           </Form.Item>
         </Form>
       </Card>
+      </Reveal>
     </div>
   );
 }

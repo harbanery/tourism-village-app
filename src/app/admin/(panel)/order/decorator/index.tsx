@@ -33,6 +33,11 @@ type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 /** Interval auto refresh data order (ms). */
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
 
+/** Persistensi switch auto refresh (localStorage) — pilihan admin
+ *  bertahan antar kunjungan: jika sebelumnya menyala, tidak perlu
+ *  menyalakan ulang. */
+const AUTO_REFRESH_KEY = "tourism-village:adminOrderAutoRefresh";
+
 /** Tahun (YYYY) dari tanggal ISO. */
 function yearKey(iso: string): string {
   return iso.slice(0, 4);
@@ -97,8 +102,12 @@ const OrderDecorator = () => {
   const [query, setQuery] = useState("");
   /** Id row yang drawer detailnya sedang terbuka (null = tertutup). */
   const [activeId, setActiveId] = useState<string | null>(null);
-  /** Auto refresh data order tiap 5 menit saat diaktifkan. */
-  const [autoRefresh, setAutoRefresh] = useState(false);
+  /** Auto refresh data order tiap 5 menit — state tersimpan di
+   *  localStorage sehingga tetap aktif pada kunjungan berikutnya. */
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(AUTO_REFRESH_KEY) === "1";
+  });
   /** Id row yang sedang disinkronkan ke Midtrans (disable item menunya). */
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
@@ -374,14 +383,22 @@ const OrderDecorator = () => {
       <Card
         extra={
           <Space wrap>
-            {/* Auto refresh: data order dimuat ulang tiap 5 menit. */}
+            {/* Auto refresh: data order dimuat ulang tiap 5 menit;
+                pilihan disimpan agar tetap aktif di kunjungan
+                berikutnya. */}
             <Tooltip title={t("admin.orders.autoRefreshHint")}>
               <label className="flex cursor-pointer items-center gap-2 text-sm">
                 {t("admin.orders.autoRefresh")}
                 <Switch
                   size="small"
                   checked={autoRefresh}
-                  onChange={setAutoRefresh}
+                  onChange={(checked) => {
+                    setAutoRefresh(checked);
+                    window.localStorage.setItem(
+                      AUTO_REFRESH_KEY,
+                      checked ? "1" : "0",
+                    );
+                  }}
                 />
               </label>
             </Tooltip>

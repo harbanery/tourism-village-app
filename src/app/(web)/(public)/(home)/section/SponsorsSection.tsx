@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useT } from "@/components/i18n/LocaleProvider";
+import { Reveal } from "@/features/web/components/ui/reveal";
 import { displayImage } from "@/utils/helpers";
 import type { ActiveSponsor } from "@/services/sponsor";
 
@@ -58,30 +59,34 @@ export function SponsorsSection({ sponsors }: { sponsors: ActiveSponsor[] }) {
   return (
     <section className="flex max-h-screen flex-col items-center justify-center bg-white py-14 dark:bg-[#141416]">
       <div className="w-full">
-        <p className="text-center text-sm font-medium uppercase tracking-widest text-foreground/50">
-          {t("home.sponsors.label")}
-        </p>
+        <Reveal>
+          <p className="text-center text-sm font-medium uppercase tracking-widest text-foreground/50">
+            {t("home.sponsors.label")}
+          </p>
+        </Reveal>
 
-        {useMarquee ? (
-          <div className="group relative mt-12 overflow-hidden">
-            <div className="pointer-events-none absolute left-0 z-10 h-full w-3/12 bg-linear-to-r from-white to-transparent dark:from-[#141416]" />
-            <div className="pointer-events-none absolute right-0 z-10 h-full w-3/12 bg-linear-to-l from-white to-transparent dark:from-[#141416]" />
-            <div className="flex w-max animate-scroll items-center gap-16 pr-16 group-hover:[animation-play-state:paused] md:gap-24 md:pr-24">
-              {[...sponsors, ...sponsors].map((sponsor, index) => (
-                <SponsorLogo
-                  key={`sponsor-${sponsor.id}-${index + 1}`}
-                  sponsor={sponsor}
-                />
+        <Reveal delay={150}>
+          {useMarquee ? (
+            <div className="group relative mt-12 overflow-hidden">
+              <div className="pointer-events-none absolute left-0 z-10 h-full w-3/12 bg-linear-to-r from-white to-transparent dark:from-[#141416]" />
+              <div className="pointer-events-none absolute right-0 z-10 h-full w-3/12 bg-linear-to-l from-white to-transparent dark:from-[#141416]" />
+              <div className="flex w-max animate-scroll items-center gap-16 pr-16 group-hover:[animation-play-state:paused] md:gap-24 md:pr-24">
+                {[...sponsors, ...sponsors].map((sponsor, index) => (
+                  <SponsorLogo
+                    key={`sponsor-${sponsor.id}-${index + 1}`}
+                    sponsor={sponsor}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-12 md:gap-16">
+              {sponsors.map((sponsor) => (
+                <SponsorLogo key={sponsor.id} sponsor={sponsor} />
               ))}
             </div>
-          </div>
-        ) : (
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-12 md:gap-16">
-            {sponsors.map((sponsor) => (
-              <SponsorLogo key={sponsor.id} sponsor={sponsor} />
-            ))}
-          </div>
-        )}
+          )}
+        </Reveal>
       </div>
     </section>
   );

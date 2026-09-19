@@ -28,7 +28,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import { clearWebSession } from "@/features/web/hooks/session";
-import { GoogleButton } from "@/components/ui/GoogleButton";
+import { GoogleButton } from "@/components/ui/button/google";
 import type { User } from "@/features/web/types";
 import { maskEmail } from "@/utils/helpers";
 import type { ProfileSettings } from "../page";

@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ui/theme/ThemeToggle";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
 
 interface LoginFormValues {
+  /** Identifier login: username ATAU email admin. */
   username: string;
   password: string;
 }
@@ -67,7 +68,9 @@ export default function AdminLoginPage() {
         <h1 className="text-2xl font-bold text-center">
           {t("admin.login.title")}
         </h1>
-        <p className="mt-1 text-center text-foreground/60">{t("admin.title")}</p>
+        <p className="mt-1 text-center text-foreground/60">
+          {t("admin.title")}
+        </p>
         <Form
           form={form}
           layout="vertical"
@@ -77,32 +80,32 @@ export default function AdminLoginPage() {
         >
           <Form.Item
             name="username"
-            label={t("admin.accounts.username")}
+            label={t("admin.login.usernameEmail")}
             rules={[{ required: true }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="masteradmin" />
+            <Input
+              prefix={<UserOutlined />}
+              placeholder={t("admin.login.usernameEmailPlaceholder")}
+              autoComplete="username"
+            />
           </Form.Item>
           <Form.Item
             name="password"
             label={t("auth.register.password")}
             rules={[{ required: true }]}
           >
-            <Input.Password prefix={<LockOutlined />} />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder={t("auth.login.passwordPlaceholder")}
+              autoComplete="current-password"
+            />
           </Form.Item>
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              loading={loading}
-            >
+            <Button type="primary" htmlType="submit" block loading={loading}>
               {t("auth.login.button")}
             </Button>
           </Form.Item>
         </Form>
-        <p className="mt-4 text-center text-sm text-foreground/60">
-          {t("admin.login.backToSite")}
-        </p>
       </Card>
     </div>
   );
