@@ -4,7 +4,7 @@ import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ThemeProvider } from "@/components/ui/theme/ThemeProvider";
 import { CookieConsent } from "@/components/ui/consent/CookieConsent";
 import { helveticaNeue, advercase } from "@/utils/fonts/next-local";
-import { martianMono, styleScript } from "@/utils/fonts/next-google";
+import { martianMono, fredericka } from "@/utils/fonts/next-google";
 import {
   BASE_URL,
   META_APP,
@@ -115,7 +115,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="id"
       suppressHydrationWarning
-      className={`${helveticaNeue.variable} ${martianMono.variable} ${advercase.variable} ${styleScript.variable} h-full antialiased`}
+      className={`${helveticaNeue.variable} ${martianMono.variable} ${advercase.variable} ${fredericka.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <AntdRegistry>

@@ -1,4 +1,4 @@
-import { Martian_Mono, Style_Script } from "next/font/google";
+import { Fredericka_the_Great, Martian_Mono } from "next/font/google";
 
 /**
  * Font GOOGLE — dipakai untuk kebutuhan yang file-nya tidak tersedia
@@ -6,9 +6,9 @@ import { Martian_Mono, Style_Script } from "next/font/google";
  * font Google lewat sini; keduanya baru dipakai di app/layout.tsx).
  */
 
-/** Style Script — font tulisan tangan khusus teks merek DesakuWisataku. */
-export const styleScript = Style_Script({
-  variable: "--font-style-script",
+/** Fredericka the Great — font merek DesakuWisataku (ganti Style Script). */
+export const fredericka = Fredericka_the_Great({
+  variable: "--font-fredericka",
   subsets: ["latin"],
   display: "swap",
   adjustFontFallback: true,

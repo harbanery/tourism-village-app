@@ -26,11 +26,8 @@ export function TestimonialsSection({
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
         <Reveal className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold tracking-wider">
-            {t("home.testimonials.title")}
-          </h2>
-          <p className="mt-1 text-foreground/60 tracking-wider">
             {t("home.testimonials.subtitle")}
-          </p>
+          </h2>
         </Reveal>
 
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">

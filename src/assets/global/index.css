@@ -22,8 +22,9 @@
   /* Body: Helvetica Neue (lokal); mono: Martian Mono (Google) — DROID. */
   --font-sans: var(--font-helvetica);
   --font-mono: var(--font-martian-mono);
-  /* Style Script — khusus teks merek DesakuWisataku (font-script). */
-  --font-script: var(--font-style-script);
+  /* Fredericka the Great — khusus teks merek DesakuWisataku
+     (utility font-script). */
+  --font-script: var(--font-fredericka);
   /* Marquee sponsor (pola skills-marquee portfolio). */
   --animate-scroll: scroll 45s linear infinite;
 }
