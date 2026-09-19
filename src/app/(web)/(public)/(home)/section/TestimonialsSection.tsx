@@ -25,10 +25,10 @@ export function TestimonialsSection({
     <section className="flex items-center bg-white dark:bg-[#141416]">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
         <Reveal className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-wider">
             {t("home.testimonials.title")}
           </h2>
-          <p className="mt-1 text-foreground/60">
+          <p className="mt-1 text-foreground/60 tracking-wider">
             {t("home.testimonials.subtitle")}
           </p>
         </Reveal>

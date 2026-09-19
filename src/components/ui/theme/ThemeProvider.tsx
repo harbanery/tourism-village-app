@@ -152,7 +152,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             colorPrimary: "#0d7a5f",
             borderRadius: 10,
             fontFamily:
-              "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
+              "var(--font-helvetica), ui-sans-serif, system-ui, sans-serif",
             // Override kontras WCAG (minimal 4.5:1 pada background terang).
             ...(isDark
               ? {}

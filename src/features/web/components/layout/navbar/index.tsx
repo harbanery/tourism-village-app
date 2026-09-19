@@ -152,7 +152,7 @@ export function Navbar() {
         <button
           type="button"
           onClick={() => router.push("/")}
-          className="group cursor-pointer bg-transparent text-lg font-bold tracking-tight"
+          className="group cursor-pointer bg-transparent text-lg font-normal tracking-tight font-script"
         >
           {/* Hover di area brand → seluruh teks berubah warna bersamaan. */}
           <span

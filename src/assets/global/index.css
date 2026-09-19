@@ -19,8 +19,11 @@
   --color-primary: #0d7a5f;
   /* Secondary brand (hijau hutan) — utility Tailwind bg-/text-secondary. */
   --color-secondary: #053227;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Body: Helvetica Neue (lokal); mono: Martian Mono (Google) — DROID. */
+  --font-sans: var(--font-helvetica);
+  --font-mono: var(--font-martian-mono);
+  /* Style Script — khusus teks merek DesakuWisataku (font-script). */
+  --font-script: var(--font-style-script);
   /* Marquee sponsor (pola skills-marquee portfolio). */
   --animate-scroll: scroll 45s linear infinite;
 }
@@ -37,7 +40,24 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-helvetica), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * Judul (h1–h6) memakai Advercase (font display lokal) — bila variabel
+ * belum terpasang jatuh ke Helvetica Neue lalu system. Bobot tetap
+ * mengikuti class Tailwind (Advercase punya Regular 400 & Bold 700 +
+ * italic). Judul memakai tracking lebih renggang (permintaan DROID).
+ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-advercase), var(--font-helvetica), ui-sans-serif,
+    system-ui, sans-serif;
+  letter-spacing: 0.05em;
 }
 
 .dynamic-scrollbar::-webkit-scrollbar,

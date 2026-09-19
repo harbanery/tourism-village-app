@@ -3,7 +3,8 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ThemeProvider } from "@/components/ui/theme/ThemeProvider";
 import { CookieConsent } from "@/components/ui/consent/CookieConsent";
-import { geistSans, geistMono } from "@/utils/fonts/next-google";
+import { helveticaNeue, advercase } from "@/utils/fonts/next-local";
+import { martianMono, styleScript } from "@/utils/fonts/next-google";
 import {
   BASE_URL,
   META_APP,
@@ -114,7 +115,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="id"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${helveticaNeue.variable} ${martianMono.variable} ${advercase.variable} ${styleScript.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <AntdRegistry>

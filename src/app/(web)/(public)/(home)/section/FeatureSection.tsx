@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 import { Button, Card } from "antd";
 import {
-  CustomerServiceOutlined,
-  HomeOutlined,
-  StarOutlined,
-  WalletOutlined,
+  CustomerServiceFilled,
+  HomeFilled,
+  StarFilled,
+  WalletFilled,
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { Reveal } from "@/features/web/components/ui/reveal";
@@ -17,22 +17,22 @@ export function FeatureSection() {
 
   const features = [
     {
-      icon: <HomeOutlined className="text-4xl! text-primary!" />,
+      icon: <HomeFilled className="text-4xl! text-primary!" />,
       title: t("home.why.facility.title"),
       desc: t("home.why.facility.desc"),
     },
     {
-      icon: <CustomerServiceOutlined className="text-4xl! text-primary!" />,
+      icon: <CustomerServiceFilled className="text-4xl! text-primary!" />,
       title: t("home.why.service.title"),
       desc: t("home.why.service.desc"),
     },
     {
-      icon: <WalletOutlined className="text-4xl! text-primary!" />,
+      icon: <WalletFilled className="text-4xl! text-primary!" />,
       title: t("home.why.cheap.title"),
       desc: t("home.why.cheap.desc"),
     },
     {
-      icon: <StarOutlined className="text-4xl! text-primary!" />,
+      icon: <StarFilled className="text-4xl! text-primary!" />,
       title: t("home.why.local.title"),
       desc: t("home.why.local.desc"),
     },
@@ -44,8 +44,13 @@ export function FeatureSection() {
         <Reveal className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
             {t("home.why.titlePrefix")}{" "}
-            <span className="text-white">Desaku</span>
-            <span className="text-primary">Wisataku</span>?
+            <span className="font-script font-normal tracking-normal text-white">
+              Desaku
+            </span>
+            <span className="font-script font-normal tracking-normal text-primary">
+              Wisataku
+            </span>
+            ?
           </h2>
           <p className="mt-1 text-white/80 drop-shadow">
             {t("home.why.subtitle")}
@@ -72,7 +77,7 @@ export function FeatureSection() {
                 <div className="flex h-full flex-col items-center gap-3 text-center">
                   {/* Icon besar di atas dalam wadah rounded: background
                       secondary, icon primary. */}
-                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary">
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/75">
                     {feature.icon}
                   </span>
                   <h3 className="font-semibold text-lg text-foreground/95">

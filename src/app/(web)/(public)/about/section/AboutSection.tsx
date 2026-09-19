@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  CustomerServiceOutlined,
-  HomeOutlined,
-  StarOutlined,
-  WalletOutlined,
+  CustomerServiceFilled,
+  HomeFilled,
+  StarFilled,
+  WalletFilled,
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { Reveal } from "@/features/web/components/ui/reveal";
@@ -22,9 +22,10 @@ function BrandText({ text }: { text: string }) {
       {parts.map((part, index) => (
         <span key={index}>
           {index > 0 && (
-            <>
-              Desaku<span className="font-semibold text-primary">Wisataku</span>
-            </>
+            <span className="font-script font-normal tracking-normal">
+              Desaku
+              <span className="text-primary">Wisataku</span>
+            </span>
           )}
           {part}
         </span>
@@ -47,22 +48,22 @@ export function AboutSection() {
 
   const features = [
     {
-      icon: <HomeOutlined className="text-3xl! text-primary!" />,
+      icon: <HomeFilled className="text-3xl! text-primary!" />,
       title: t("home.why.facility.title"),
       desc: t("about.feature.facility.desc"),
     },
     {
-      icon: <CustomerServiceOutlined className="text-3xl! text-primary!" />,
+      icon: <CustomerServiceFilled className="text-3xl! text-primary!" />,
       title: t("home.why.service.title"),
       desc: t("about.feature.service.desc"),
     },
     {
-      icon: <WalletOutlined className="text-3xl! text-primary!" />,
+      icon: <WalletFilled className="text-3xl! text-primary!" />,
       title: t("home.why.cheap.title"),
       desc: t("about.feature.cheap.desc"),
     },
     {
-      icon: <StarOutlined className="text-3xl! text-primary!" />,
+      icon: <StarFilled className="text-3xl! text-primary!" />,
       title: t("home.why.local.title"),
       desc: t("about.feature.local.desc"),
     },
@@ -71,7 +72,7 @@ export function AboutSection() {
   return (
     <>
       <section className="flex min-h-screen items-center justify-center">
-        <div className="mx-auto w-full max-w-4xl px-4 py-24 text-center">
+        <div className="mx-auto w-full max-w-4xl px-4 text-center">
           <Reveal>
             <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow">
               {t("about.title")}
@@ -118,7 +119,7 @@ export function AboutSection() {
             {features.map((feature, index) => (
               <Reveal key={feature.title} delay={index * 100}>
                 <div className="flex items-start gap-5 py-8">
-                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary">
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/75">
                     {feature.icon}
                   </span>
                   <div className="text-left">

@@ -29,7 +29,7 @@ export function HeroSection() {
         <Reveal>
           <h1 className="text-3xl md:text-6xl font-bold max-w-3xl leading-tight drop-shadow-md">
             <span className="block">{t("home.hero.title1")}</span>
-            <span className="block">
+            <span className="block font-script font-normal tracking-normal">
               Desaku<span className="text-primary">Wisataku</span>
             </span>
           </h1>

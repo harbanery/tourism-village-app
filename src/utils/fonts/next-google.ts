@@ -1,17 +1,27 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Martian_Mono, Style_Script } from "next/font/google";
 
-export const geistSans = Geist({
-  variable: "--font-geist-sans",
+/**
+ * Font GOOGLE — dipakai untuk kebutuhan yang file-nya tidak tersedia
+ * lokal di public/fonts (alur DROID: font lokal lewat next-local.ts,
+ * font Google lewat sini; keduanya baru dipakai di app/layout.tsx).
+ */
+
+/** Style Script — font tulisan tangan khusus teks merek DesakuWisataku. */
+export const styleScript = Style_Script({
+  variable: "--font-style-script",
   subsets: ["latin"],
   display: "swap",
   adjustFontFallback: true,
-  fallback: ["system-ui", "sans-serif"],
+  fallback: ["cursive"],
+  weight: "400",
 });
 
-export const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+/** Martian Mono — font mono (menggantikan Geist Mono). */
+export const martianMono = Martian_Mono({
   subsets: ["latin"],
+  variable: "--font-martian-mono",
   display: "swap",
+  weight: ["400", "700"],
   adjustFontFallback: true,
-  fallback: ["monospace"],
+  fallback: ["system-ui", "monospace"],
 });

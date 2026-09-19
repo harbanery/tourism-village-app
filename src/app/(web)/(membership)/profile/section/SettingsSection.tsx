@@ -19,7 +19,6 @@ import {
   Upload,
 } from "antd";
 import {
-  GoogleOutlined,
   SafetyOutlined,
   UploadOutlined,
   UserOutlined,
@@ -32,6 +31,7 @@ import { GoogleButton } from "@/components/ui/button/google";
 import type { User } from "@/features/web/types";
 import { maskEmail } from "@/utils/helpers";
 import type { ProfileSettings } from "../page";
+import { GoogleLogo } from "@/components/ui/logo";
 
 interface ProfileFormValues {
   name: string;
@@ -666,9 +666,11 @@ export function SettingsSection({
                 <Card size="small" className="mb-4!">
                   <div className="flex flex-wrap items-center justify-between gap-3 py-2">
                     <div className="flex items-center gap-3">
-                      <GoogleOutlined className="text-lg! text-primary!" />
+                      <GoogleLogo />
                       <div>
-                        <p className="font-medium">{t("settings.linked.google")}</p>
+                        <p className="font-medium">
+                          {t("settings.linked.google")}
+                        </p>
                         <p className="text-xs text-foreground/60">
                           {settings.googleLinked
                             ? t("settings.linked.linkedDesc")
@@ -691,7 +693,9 @@ export function SettingsSection({
                         </Button>
                       </div>
                     ) : (
-                      <Tag className="m-0!">{t("settings.linked.notLinked")}</Tag>
+                      <Tag className="m-0!">
+                        {t("settings.linked.notLinked")}
+                      </Tag>
                     )}
                   </div>
                   {!settings.googleLinked && (
@@ -850,10 +854,7 @@ export function SettingsSection({
                   <Form.Item
                     name="oldEmail"
                     label={t("settings.email.old")}
-                    rules={[
-                      { required: true },
-                      { type: "email" },
-                    ]}
+                    rules={[{ required: true }, { type: "email" }]}
                   >
                     <Input
                       placeholder={t("settings.email.oldPlaceholder")}
@@ -968,7 +969,10 @@ export function SettingsSection({
                       { required: true },
                       ({ getFieldValue }) => ({
                         validator(_, value) {
-                          if (!value || value === getFieldValue("newPassword")) {
+                          if (
+                            !value ||
+                            value === getFieldValue("newPassword")
+                          ) {
                             return Promise.resolve();
                           }
                           return Promise.reject(
@@ -999,9 +1003,7 @@ export function SettingsSection({
                     tombol darurat tanpa perlu OTP karena sesi aktif tetap
                     valid (pemilik akun sudah login). */}
                 <div className="mt-6 border-t border-black/5 pt-4 dark:border-white/10">
-                  <p className="font-medium">
-                    {t("settings.sessions.title")}
-                  </p>
+                  <p className="font-medium">{t("settings.sessions.title")}</p>
                   <p className="mt-1 mb-3 text-xs text-foreground/60">
                     {t("settings.sessions.hint")}
                   </p>
