@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LoginOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 
 export function Footer() {
@@ -69,7 +68,7 @@ export function Footer() {
           aria-label={t("admin.login.title")}
           title={t("admin.login.title")}
           onClick={() => goTo("/admin")}
-          className="group absolute right-0 bottom-0 grid h-16 w-16 cursor-pointer! translate-x-1/2 translate-y-1/2 place-items-center rounded-full border border-white/25 bg-white/10 backdrop-blur-sm transition-all duration-300 ease-out hover:bg-white/40!"
+          className="group absolute right-0 bottom-0 grid h-16 w-16 cursor-pointer! translate-x-1/2 translate-y-1/2 place-items-center rounded-full border border-white/25 bg-white/10 backdrop-blur-sm transition-all duration-300 ease-out hover:translate-x-0 hover:translate-y-0 hover:bg-white/40!"
         />
       </div>
     </footer>

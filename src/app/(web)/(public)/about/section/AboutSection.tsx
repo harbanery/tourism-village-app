@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "antd";
 import {
   CustomerServiceOutlined,
   HomeOutlined,
@@ -39,30 +38,31 @@ function BrandText({ text }: { text: string }) {
  * (vertikal + horizontal) dalam section min-h-screen, berlatar hero
  * background (dirender oleh page) sehingga teks memakai warna putih.
  * Di bawah pengantar ada section "nilai yang kami tawarkan" (anchor
- * #feature) berisi keempat feature home dengan deskripsi lebih
- * lengkap — tombol "Lainnya" di kartu feature home mengarah ke sini.
+ * #feature) berisi keempat feature home sebagai LIST ke bawah tanpa
+ * card (icon + judul + deskripsi lengkap) — tombol "Lainnya" di kartu
+ * feature home mengarah ke sini.
  */
 export function AboutSection() {
   const { t } = useT();
 
   const features = [
     {
-      icon: <HomeOutlined className="text-4xl! text-white!" />,
+      icon: <HomeOutlined className="text-3xl! text-primary!" />,
       title: t("home.why.facility.title"),
       desc: t("about.feature.facility.desc"),
     },
     {
-      icon: <CustomerServiceOutlined className="text-4xl! text-white!" />,
+      icon: <CustomerServiceOutlined className="text-3xl! text-primary!" />,
       title: t("home.why.service.title"),
       desc: t("about.feature.service.desc"),
     },
     {
-      icon: <WalletOutlined className="text-4xl! text-white!" />,
+      icon: <WalletOutlined className="text-3xl! text-primary!" />,
       title: t("home.why.cheap.title"),
       desc: t("about.feature.cheap.desc"),
     },
     {
-      icon: <StarOutlined className="text-4xl! text-white!" />,
+      icon: <StarOutlined className="text-3xl! text-primary!" />,
       title: t("home.why.local.title"),
       desc: t("about.feature.local.desc"),
     },
@@ -99,11 +99,12 @@ export function AboutSection() {
         </div>
       </section>
 
-      {/* Section feature lengkap — tujuan tombol "Lainnya" di home
-          (zigzag "gunung" + kartu hitam transparan, konsisten dengan
-          feature section home namun deskripsi lebih panjang). */}
+      {/* Section feature lengkap — tujuan tombol "Lainnya" di home.
+          LIST ke bawah tanpa card: tiap baris icon (bg secondary,
+          icon primary — konsisten feature home) + judul + deskripsi
+          lengkap, dipisah garis tipis. */}
       <section id="feature" className="scroll-mt-20">
-        <div className="mx-auto w-full max-w-6xl px-4 py-16">
+        <div className="mx-auto w-full max-w-4xl px-4 py-16">
           <Reveal className="text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
               {t("about.feature.title")}
@@ -113,27 +114,22 @@ export function AboutSection() {
             </p>
           </Reveal>
 
-          <div className="mt-8 grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 flex flex-col divide-y divide-white/10">
             {features.map((feature, index) => (
-              <Reveal
-                key={feature.title}
-                delay={index * 100}
-                className={index % 2 === 0 ? "sm:mt-10" : ""}
-              >
-                <Card
-                  className="h-full! border-white/10! bg-black/60! text-center! backdrop-blur-sm! dark:bg-black/40!"
-                  styles={{ body: { height: "100%" } }}
-                >
-                  <div className="flex h-full flex-col items-center gap-3 text-center">
-                    <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/40">
-                      {feature.icon}
-                    </span>
-                    <h3 className="font-semibold text-lg text-white">
+              <Reveal key={feature.title} delay={index * 100}>
+                <div className="flex items-start gap-5 py-8">
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary">
+                    {feature.icon}
+                  </span>
+                  <div className="text-left">
+                    <h3 className="text-lg font-semibold text-white drop-shadow">
                       {feature.title}
                     </h3>
-                    <p className="text-white/80">{feature.desc}</p>
+                    <p className="mt-1 leading-relaxed text-white/80 drop-shadow">
+                      {feature.desc}
+                    </p>
                   </div>
-                </Card>
+                </div>
               </Reveal>
             ))}
           </div>

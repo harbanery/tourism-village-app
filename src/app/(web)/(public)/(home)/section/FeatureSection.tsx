@@ -17,22 +17,22 @@ export function FeatureSection() {
 
   const features = [
     {
-      icon: <HomeOutlined className="text-4xl! text-white!" />,
+      icon: <HomeOutlined className="text-4xl! text-primary!" />,
       title: t("home.why.facility.title"),
       desc: t("home.why.facility.desc"),
     },
     {
-      icon: <CustomerServiceOutlined className="text-4xl! text-white!" />,
+      icon: <CustomerServiceOutlined className="text-4xl! text-primary!" />,
       title: t("home.why.service.title"),
       desc: t("home.why.service.desc"),
     },
     {
-      icon: <WalletOutlined className="text-4xl! text-white!" />,
+      icon: <WalletOutlined className="text-4xl! text-primary!" />,
       title: t("home.why.cheap.title"),
       desc: t("home.why.cheap.desc"),
     },
     {
-      icon: <StarOutlined className="text-4xl! text-white!" />,
+      icon: <StarOutlined className="text-4xl! text-primary!" />,
       title: t("home.why.local.title"),
       desc: t("home.why.local.desc"),
     },
@@ -70,9 +70,9 @@ export function FeatureSection() {
                 styles={{ body: { height: "100%" } }}
               >
                 <div className="flex h-full flex-col items-center gap-3 text-center">
-                  {/* Icon besar di atas dalam wadah rounded transparan
-                      bernuansa secondary. */}
-                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/40">
+                  {/* Icon besar di atas dalam wadah rounded: background
+                      secondary, icon primary. */}
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary">
                     {feature.icon}
                   </span>
                   <h3 className="font-semibold text-lg text-foreground/95">
