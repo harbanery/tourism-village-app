@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   App,
   Button,
-  Descriptions,
   Drawer,
   Empty,
   Image,
@@ -56,6 +55,27 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     >
       {children}
     </Typography.Text>
+  );
+}
+
+/**
+ * Baris info ala ProfileInfoSection — label di kiri (foreground/60),
+ * value rata kanan (font-medium) dengan garis pemisah antar-baris.
+ */
+function InfoRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex justify-between gap-4 py-2.5 text-sm">
+      <span className="shrink-0 text-foreground/60">{label}</span>
+      <span className="min-w-0 text-right font-medium break-words">
+        {children}
+      </span>
+    </div>
   );
 }
 
@@ -217,29 +237,22 @@ export default function OrderDetailDrawer({
       {order && (
         <div className="flex flex-col gap-6">
           {/* Detail pesanan: identitas + tanggal (status di judul, total
-              di daftar paket). */}
+              di daftar paket) — value rata kanan ala profile info. */}
           <section>
             <SectionTitle>{t("admin.orders.detailOrder")}</SectionTitle>
-            <Descriptions size="small" column={1} className="text-sm!">
-              <Descriptions.Item
-                label={t("admin.orders.orderId")}
-                className="text-xs!"
-              >
-                <Typography.Text className="font-mono!">
-                  {order.orderId}
-                </Typography.Text>
-              </Descriptions.Item>
+            <div className="divide-y divide-black/5 dark:divide-white/10">
+              <InfoRow label={t("admin.orders.orderId")}>
+                <span className="font-mono">{order.orderId}</span>
+              </InfoRow>
               {order.transactionId && (
-                <Descriptions.Item label={t("admin.orders.transactionId")}>
-                  <Typography.Text className="font-mono!">
-                    {order.transactionId}
-                  </Typography.Text>
-                </Descriptions.Item>
+                <InfoRow label={t("admin.orders.transactionId")}>
+                  <span className="font-mono">{order.transactionId}</span>
+                </InfoRow>
               )}
-              <Descriptions.Item label={t("common.date")}>
+              <InfoRow label={t("common.date")}>
                 {formatDate(order.dateOrder, locale, true)}
-              </Descriptions.Item>
-            </Descriptions>
+              </InfoRow>
+            </div>
 
             {/* Daftar paket + total — pola halaman checkout (garis pemisah,
                 harga per paket, total besar di bawah). */}
@@ -307,17 +320,17 @@ export default function OrderDetailDrawer({
                 key: "customer",
                 label: t("admin.orders.customerInfo"),
                 children: (
-                  <Descriptions size="small" column={1} className="text-sm!">
-                    <Descriptions.Item label={t("common.name")}>
+                  <div className="divide-y divide-black/5 dark:divide-white/10">
+                    <InfoRow label={t("common.name")}>
                       {order.user.name}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={t("common.email")}>
+                    </InfoRow>
+                    <InfoRow label={t("common.email")}>
                       {maskEmail(order.user.email)}
-                    </Descriptions.Item>
-                    <Descriptions.Item label={t("common.phone")}>
+                    </InfoRow>
+                    <InfoRow label={t("common.phone")}>
                       {order.user.phone ? maskPhone(order.user.phone) : "—"}
-                    </Descriptions.Item>
-                  </Descriptions>
+                    </InfoRow>
+                  </div>
                 ),
               },
               {

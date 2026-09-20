@@ -164,7 +164,9 @@ export function Navbar() {
           >
             Desaku
           </span>
-          <span className="text-secondary transition-colors group-hover:text-secondary/60 dark:text-primary dark:group-hover:text-primary/60">
+          <span
+            className={`transition-colors ${onHero ? "text-secondary group-hover:text-secondary/60" : "text-secondary group-hover:text-secondary/60 dark:text-primary dark:group-hover:text-primary/60"}`}
+          >
             Wisataku
           </span>
         </button>
