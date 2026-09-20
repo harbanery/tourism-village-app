@@ -1,11 +1,11 @@
 "use client";
 
 import { useMounted } from "@/hooks/useMounted";
-import { Button, Card, Col, Empty, Row, Tag } from "antd";
+import { Badge, Button, Card, Col, Empty, Row } from "antd";
 import {
   CheckCircleFilled,
-  FireOutlined,
   ShoppingCartOutlined,
+  StarFilled,
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { formatRupiah } from "@/utils/helpers";
@@ -33,10 +33,12 @@ export interface CartItem {
 
 /**
  * Kartu paket — satu gaya untuk semua daftar (paket utama maupun
- * "sering dibeli"). Judul, badge, dan lokasi dipotong (truncate) agar
- * nama panjang tidak merusak tata letak kartu. Icon ceklis fasilitas
- * mengikuti section packages di home (CheckCircleFilled).
- * Kuantitas TIDAK diatur di kartu — cukup lewat stepper di keranjang.
+ * "sering dibeli"). Judul dan lokasi dipotong (truncate) agar nama
+ * panjang tidak merusak tata letak kartu. Icon ceklis fasilitas
+ * mengikuti section packages di home (CheckCircleFilled). Paket populer
+ * (pernah dibayar) ditandai Badge.Ribbon antd bintang di pojok kanan
+ * atas kartu (pola section packages home). Kuantitas TIDAK diatur di
+ * kartu — cukup lewat stepper di keranjang.
  */
 export function PackageCard({
   pkg,
@@ -47,39 +49,25 @@ export function PackageCard({
 }) {
   const { t } = useT();
 
-  return (
+  const card = (
     <Card
       title={
-        <span className="flex w-full min-w-0 items-center gap-2">
-          <span className="min-w-0 flex-1 truncate font-medium" title={pkg.name}>
-            {pkg.name}
-          </span>
-          {pkg.timesPurchased > 0 && (
-            <Tag
-              color="orange"
-              icon={<FireOutlined />}
-              className="m-0! shrink-0!"
-            >
-              {t("package.popularTag")}
-            </Tag>
-          )}
+        <span
+          className="block w-full min-w-0 truncate font-medium"
+          title={pkg.name}
+        >
+          {pkg.name}
         </span>
       }
     >
-      {/* Lokasi tepat di bawah judul (badge popular di kanan judul). */}
+      {/* Lokasi tepat di bawah judul (ribbon populer di pojok kartu). */}
       <p
         className="truncate text-xs text-foreground/50"
         title={pkg.placeName ?? undefined}
       >
         📍 {pkg.placeName ?? "-"}
       </p>
-      <div className="mt-2 text-2xl font-bold text-primary">
-        {formatRupiah(pkg.price)}
-        <span className="text-sm font-normal text-foreground/60">
-          {" "}
-          {t("common.perPerson")}
-        </span>
-      </div>
+
       <ul className="mt-3 space-y-2">
         {pkg.facilities.filter(Boolean).map((f) => (
           <li
@@ -92,12 +80,37 @@ export function PackageCard({
           </li>
         ))}
       </ul>
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-4 flex justify-between items-end gap-2">
         <Button type="primary" icon={<ShoppingCartOutlined />} onClick={onAdd}>
           {t("cart.order")}
         </Button>
+        <div className="mt-2 text-2xl font-bold text-primary">
+          {formatRupiah(pkg.price)}
+          <span className="text-sm font-normal text-foreground/60">
+            {" "}
+            {t("common.perPerson")}
+          </span>
+        </div>
       </div>
     </Card>
+  );
+
+  // Populer (pernah dibayar user mana pun) → ribbon bintang (antd
+  // Badge.Ribbon) menempel di pojok kanan atas kartu.
+  return pkg.timesPurchased > 0 ? (
+    <Badge.Ribbon
+      text={
+        <span className="inline-flex items-center gap-1">
+          <StarFilled />
+          {t("package.popularTag")}
+        </span>
+      }
+      color="orange"
+    >
+      {card}
+    </Badge.Ribbon>
+  ) : (
+    card
   );
 }
 

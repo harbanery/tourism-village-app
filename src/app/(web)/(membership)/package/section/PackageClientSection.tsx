@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { App, Col, Input, Row, Select } from "antd";
-import { FireOutlined, SearchOutlined } from "@ant-design/icons";
+import { FireFilled, SearchOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import { readCart, writeCart } from "@/features/web/utils/cart";
@@ -245,7 +245,7 @@ export default function PackageClientSection() {
             {showPopular && (
               <section className="mb-8!">
                 <h2 className="mb-3 inline-flex items-center gap-2 text-lg font-semibold">
-                  <FireOutlined className="text-orange-500!" />
+                  <FireFilled className="text-orange-500!" />
                   {t("package.frequentlyBought")}
                 </h2>
                 <Row gutter={[16, 16]}>

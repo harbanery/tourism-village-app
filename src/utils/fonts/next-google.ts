@@ -1,4 +1,4 @@
-import { Geist_Mono, Martian_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 
 /**
  * Font GOOGLE — dipakai untuk kebutuhan yang file-nya tidak tersedia

@@ -6,7 +6,6 @@ import {
   ArrowRightOutlined,
   CheckCircleFilled,
   EnvironmentOutlined,
-  FireOutlined,
   StarFilled,
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -131,7 +130,7 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
 
                 return (
                   <Col xs={24} sm={12} md={8} key={pkg.id} className="h-full!">
-                    {/* Badge ribbon "Populer" (gold + icon api, dari
+                    {/* Badge ribbon "Populer" (gold + icon bintang, dari
                     timesPurchased > 0) menempel di pojok kanan atas kartu;
                     tidak populer → kartu polos tanpa ribbon. */}
                     {pkg.timesPurchased > 0 ? (
