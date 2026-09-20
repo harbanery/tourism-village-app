@@ -53,7 +53,7 @@ export function ScrollToTop() {
         "rounded-full border border-black/10 bg-white/80 py-2 pl-3 pr-3 text-sm",
         "text-foreground/70 shadow-sm backdrop-blur-md transition-all duration-500",
         "hover:border-primary/40 hover:text-primary",
-        "dark:border-white/15 dark:bg-[#141416]/80 dark:text-foreground/70",
+        "dark:border-white/15 dark:bg-[#1a1831]/80 dark:text-foreground/70",
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-4 opacity-0",

@@ -31,8 +31,8 @@ export function HeroSection() {
             <span className="text-3xl md:text-6xl block">
               {t("home.hero.title1")}
             </span>
-            <span className="text-3xl md:text-7xl block font-script font-normal tracking-normal">
-              Desaku<span className="text-primary">Wisataku</span>
+            <span className="text-3xl md:text-7xl block font-script font-bold tracking-normal">
+              Desaku<span className="text-secondary">Wisataku</span>
             </span>
           </h1>
         </Reveal>

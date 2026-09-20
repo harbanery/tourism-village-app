@@ -3,28 +3,31 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f5f5f7;
-  --foreground: #171717;
+  --background: #ebe1d1;
+  --foreground: #1a1831;
 }
 
 .dark {
-  --background: #0a0a0b;
-  --foreground: #ededed;
+  --background: #1a1831;
+  --foreground: #ebe1d1;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Primary brand (hijau) — selaras dengan token colorPrimary AntD. */
-  --color-primary: #0d7a5f;
-  /* Secondary brand (hijau hutan) — utility Tailwind bg-/text-secondary. */
-  --color-secondary: #053227;
-  /* Body: Helvetica Neue (lokal); mono: Martian Mono (Google) — DROID. */
-  --font-sans: var(--font-helvetica);
+  /* Palet DROID: primary forest crown, secondary midnight forest.
+     Token white/black Tailwind dioverride ke vintage paper / dark
+     sehingga SEMUA utility (bg-white, text-white, bg-black/60, dst.)
+     ikut memakai palet. */
+  --color-white: #ebe1d1;
+  --color-black: #1a1831;
+  --color-primary: #41644a;
+  --color-secondary: #0d4715;
+  /* Body: Switzer (lokal, variable); mono: Martian Mono (Google). */
+  --font-sans: var(--font-switzer);
   --font-mono: var(--font-martian-mono);
-  /* Fredericka the Great — khusus teks merek DesakuWisataku
-     (utility font-script). */
-  --font-script: var(--font-fredericka);
+  /* Paquito Bold — khusus teks merek DesakuWisataku (font-script). */
+  --font-script: var(--font-paquito);
   /* Marquee sponsor (pola skills-marquee portfolio). */
   --animate-scroll: scroll 45s linear infinite;
 }
@@ -41,14 +44,14 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-helvetica), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
 }
 
 /*
  * Judul (h1–h6) memakai Advercase (font display lokal) — bila variabel
- * belum terpasang jatuh ke Helvetica Neue lalu system. Bobot tetap
- * mengikuti class Tailwind (Advercase punya Regular 400 & Bold 700 +
- * italic). Judul memakai tracking lebih renggang (permintaan DROID).
+ * belum terpasang jatuh ke Switzer lalu system. Bobot tetap mengikuti
+ * class Tailwind (Advercase punya Regular 400 & Bold 700 + italic).
+ * Judul memakai tracking lebih renggang (permintaan DROID).
  */
 h1,
 h2,
@@ -56,8 +59,9 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-advercase), var(--font-helvetica), ui-sans-serif,
-    system-ui, sans-serif;
+  font-family:
+    var(--font-advercase), var(--font-switzer), ui-sans-serif, system-ui,
+    sans-serif;
   letter-spacing: 0.05em;
 }
 
@@ -146,7 +150,11 @@ h6 {
  */
 .ant-table-row-expand-icon {
   color: var(--color-primary) !important;
-  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary) 45%,
+    transparent
+  ) !important;
 }
 .ant-table-row-expand-icon:hover,
 .ant-table-row-expand-icon:focus {
@@ -182,7 +190,7 @@ h6 {
   box-sizing: border-box;
 }
 .dark .loader-ripple {
-  --color-1: #fff;
+  --color-1: #ebe1d1;
 }
 .loader-ripple::before,
 .loader-ripple::after {
@@ -224,7 +232,7 @@ h6 {
   display: block;
 }
 .dark .loader-push {
-  --color-1: #fff;
+  --color-1: #ebe1d1;
 }
 .loader-push::before,
 .loader-push::after {
@@ -264,8 +272,8 @@ h6 {
 /*
  * Fix input/form antd di dark mode: pada state hover, active, dan focus
  * background input berubah putih (terlihat di seluruh form web & admin).
- * Dipaksa kembali ke warna container gelap (token colorBgContainer dark
- * antd — #141414) di semua state; input di dalam affix wrapper (prefix/
+ * Dipaksa kembali ke warna container gelap (palet dark DROID —
+ * #141414) di semua state; input di dalam affix wrapper (prefix/
  * password) tetap transparan agar tidak menumpuk di atas wrapper.
  */
 .dark .ant-input,

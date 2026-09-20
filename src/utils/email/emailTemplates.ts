@@ -7,7 +7,7 @@ import { BASE_URL, NOTIFICATION_LOCALE } from "@/utils/config/variables";
  */
 
 const BRAND = "DesakuWisataku";
-const BRAND_PRIMARY = "#0d7a5f";
+const BRAND_PRIMARY = "#41644a";
 
 /** Label singkat order (id legacy apa adanya, UUID dipendekkan 8 karakter). */
 function orderRef(orderId: string): string {

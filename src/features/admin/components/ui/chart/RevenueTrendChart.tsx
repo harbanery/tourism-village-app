@@ -48,7 +48,7 @@ export default function RevenueTrendChart({ data }: Props) {
     [data],
   );
 
-  const primary = "#0d7a5f";
+  const primary = "#41644a";
 
   const chartData: ChartData<"line"> = {
     labels,

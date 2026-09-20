@@ -51,7 +51,7 @@ export default function TopPackagesChart({ data }: Props) {
       {
         label: "Revenue",
         data: values,
-        backgroundColor: "#0d7a5f",
+        backgroundColor: "#41644a",
         borderRadius: 4,
         barPercentage: 0.7,
         categoryPercentage: 0.8,

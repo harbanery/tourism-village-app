@@ -3,8 +3,8 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ThemeProvider } from "@/components/ui/theme/ThemeProvider";
 import { CookieConsent } from "@/components/ui/consent/CookieConsent";
-import { helveticaNeue, advercase } from "@/utils/fonts/next-local";
-import { martianMono, fredericka } from "@/utils/fonts/next-google";
+import { switzerSans, advercase, paquito } from "@/utils/fonts/next-local";
+import { martianMono } from "@/utils/fonts/next-google";
 import {
   BASE_URL,
   META_APP,
@@ -105,8 +105,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f5f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0b" },
+    { media: "(prefers-color-scheme: light)", color: "#ebe1d1" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1831" },
   ],
 };
 
@@ -115,7 +115,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="id"
       suppressHydrationWarning
-      className={`${helveticaNeue.variable} ${martianMono.variable} ${advercase.variable} ${fredericka.variable} h-full antialiased`}
+      className={`${switzerSans.variable} ${martianMono.variable} ${advercase.variable} ${paquito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <AntdRegistry>

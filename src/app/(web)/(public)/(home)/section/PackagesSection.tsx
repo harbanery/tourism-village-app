@@ -51,7 +51,7 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
   const handleOrder = useOrderPackage();
 
   return (
-    <section id="packages" className="bg-white dark:bg-[#141416] rounded-t-4xl">
+    <section id="packages" className="bg-white dark:bg-[#1a1831] rounded-t-4xl">
       <div className="flex min-h-screen items-center bg-primary rounded-4xl">
         <div className="mx-auto w-full max-w-6xl px-4 py-16">
           <Reveal className="text-center">

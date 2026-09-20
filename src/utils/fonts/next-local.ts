@@ -4,7 +4,7 @@ import localFont from "next/font/local";
  * Font LOKAL — didaftarkan di sini dulu, lalu variabelnya dipasang di
  * app/layout.tsx (alur permintaan DROID: next-local → layout).
  * next/font mengoptimasi + meng-host file otomatis (self-host, tanpa
- * request pihak ketiga saat runtime).
+ * request pihak ketiga saat runtime). Format dipakai: woff2 (terkecil).
  *
  * CATATAN PENEMPATAN FILE:
  * - Master font ada di public/fonts (sesuai struktur project). File
@@ -13,36 +13,38 @@ import localFont from "next/font/local";
  *   menunjuk ke dalam public/ (panic "Missing content ... static
  *   asset"). Jika menambah/mengubah font: perbarui public/fonts LALU
  *   salin ke src/assets/fonts agar keduanya sinkron.
- * - Gudlak di-takeout (permintaan DROID): body kini Helvetica Neue.
- * - Bobot yang didaftarkan dibatasi ke yang dipakai UI (400/500/700 +
- *   italic 400) — set tambahan tinggal menambah entry src; jika build
- *   panic "Missing content ... static asset", satu file font spesifik
- *   biasanya pemicunya (pernah terjadi pada GCGudlakDemo-Medium) —
- *   isolasi dengan bisect lalu ganti/file-nya dibuang.
+ * - Switzer memakai file VARIABLE (satu file untuk seluruh bobot
+ *   100–900 + satu file italic-nya) — selain hemat, ini juga
+ *   menghindari bug Turbopack content-hash pada src array banyak file
+ *   (pernah terjadi pada GCGudlakDemo-Medium; gudlak & helvetica kini
+ *   di-takeout, body memakai Switzer).
  */
 
-/** Helvetica Neue — font body utama (menggantikan Geist, lalu Gudlak). */
-export const helveticaNeue = localFont({
-  variable: "--font-helvetica",
+/** Switzer — font body utama (variable, bobot 100–900 + italic). */
+export const switzerSans = localFont({
+  variable: "--font-switzer",
   display: "swap",
   src: [
     {
-      path: "../../assets/fonts/helveticaneue/HelveticaNeueRoman.otf",
-      weight: "400",
+      path: "../../assets/fonts/switzer/Switzer-Variable.woff2",
+      weight: "100 900",
       style: "normal",
     },
     {
-      path: "../../assets/fonts/helveticaneue/HelveticaNeueItalic.ttf",
-      weight: "400",
+      path: "../../assets/fonts/switzer/Switzer-VariableItalic.woff2",
+      weight: "100 900",
       style: "italic",
     },
+  ],
+});
+
+/** Paquito — font merek DesakuWisataku (bold, permintaan DROID). */
+export const paquito = localFont({
+  variable: "--font-paquito",
+  display: "swap",
+  src: [
     {
-      path: "../../assets/fonts/helveticaneue/HelveticaNeueMedium.otf",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../../assets/fonts/helveticaneue/HelveticaNeueBold.otf",
+      path: "../../assets/fonts/paquito/Paquito-Bold.woff2",
       weight: "700",
       style: "normal",
     },

@@ -6,14 +6,14 @@
 
 /** Warna konsisten per status pembayaran di semua grafik. */
 export const STATUS_COLORS: Record<string, string> = {
-  PAID: "#0d7a5f",
+  PAID: "#41644a",
   PENDING: "#faad14",
   FAILED: "#ff4d4f",
   CANCELED: "#8c8c8c",
 };
 
 /** Palet aksen (selain status) untuk grafik komposisi. */
-export const ACCENT_COLORS = ["#0d7a5f", "#053227", "#f59e0b", "#3b82f6"];
+export const ACCENT_COLORS = ["#41644a", "#0d4715", "#f59e0b", "#3b82f6"];
 
 /** Konfigurasi warna dasar mengikuti mode tema. */
 export function chartPalette(isDark: boolean) {
@@ -21,7 +21,7 @@ export function chartPalette(isDark: boolean) {
     gridColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
     tickColor: isDark ? "#9ca3af" : "#6b7280",
     tooltip: {
-      backgroundColor: isDark ? "#1f2937" : "#ffffff",
+      backgroundColor: isDark ? "#1f2937" : "#ebe1d1",
       titleColor: isDark ? "#f9fafb" : "#111827",
       bodyColor: isDark ? "#e5e7eb" : "#374151",
       borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
@@ -29,7 +29,7 @@ export function chartPalette(isDark: boolean) {
       padding: 10,
     },
     /** Warna garis pemisah segmen doughnut (menyatu dengan kartu). */
-    doughnutBorder: isDark ? "#141414" : "#ffffff",
+    doughnutBorder: isDark ? "#1a1831" : "#ebe1d1",
   };
 }
 

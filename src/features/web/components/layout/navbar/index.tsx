@@ -145,14 +145,14 @@ export function Navbar() {
         shouldShow ? "translate-y-0" : "-translate-y-full",
         onHero
           ? "border-transparent bg-transparent text-white"
-          : "border-black/5 bg-white/80 text-foreground backdrop-blur-md dark:border-white/10 dark:bg-[#141416]/80",
+          : "border-black/5 bg-white/80 text-foreground backdrop-blur-md dark:border-white/10 dark:bg-[#1a1831]/80",
       ].join(" ")}
     >
       <nav className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={() => router.push("/")}
-          className="group cursor-pointer bg-transparent text-lg font-normal tracking-tight font-script"
+          className="group cursor-pointer bg-transparent text-lg font-bold tracking-tight font-script"
         >
           {/* Hover di area brand → seluruh teks berubah warna bersamaan. */}
           <span
@@ -164,7 +164,7 @@ export function Navbar() {
           >
             Desaku
           </span>
-          <span className="text-primary transition-colors group-hover:text-primary/60">
+          <span className="text-secondary transition-colors group-hover:text-primary/60">
             Wisataku
           </span>
         </button>

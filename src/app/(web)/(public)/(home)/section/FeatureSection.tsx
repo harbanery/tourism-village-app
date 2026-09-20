@@ -44,10 +44,10 @@ export function FeatureSection() {
         <Reveal className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
             {t("home.why.titlePrefix")}{" "}
-            <span className="font-script font-normal tracking-normal text-white">
+            <span className="font-script font-bold tracking-normal text-white">
               Desaku
             </span>
-            <span className="font-script font-normal tracking-normal text-primary">
+            <span className="font-script font-bold tracking-normal text-primary">
               Wisataku
             </span>
             ?

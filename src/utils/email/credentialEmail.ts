@@ -7,7 +7,7 @@ import { META_APP, NOTIFICATION_LOCALE } from "@/utils/config/variables";
  */
 
 const APP_NAME = META_APP ?? "DesakuWisataku";
-const THEME_COLOR = "#0d7a5f";
+const THEME_COLOR = "#41644a";
 
 function L(id: string, en: string): string {
   return NOTIFICATION_LOCALE === "en" ? en : id;

@@ -57,7 +57,7 @@ export function SponsorsSection({ sponsors }: { sponsors: ActiveSponsor[] }) {
   const useMarquee = sponsors.length > STATIC_LIMIT;
 
   return (
-    <section className="flex max-h-screen flex-col items-center justify-center bg-white py-14 dark:bg-[#141416]">
+    <section className="flex max-h-screen flex-col items-center justify-center bg-white py-14 dark:bg-[#1a1831]">
       <div className="w-full">
         <Reveal>
           <p className="text-center text-sm font-medium uppercase tracking-widest text-foreground/50">
@@ -68,8 +68,8 @@ export function SponsorsSection({ sponsors }: { sponsors: ActiveSponsor[] }) {
         <Reveal delay={150}>
           {useMarquee ? (
             <div className="group relative mt-12 overflow-hidden">
-              <div className="pointer-events-none absolute left-0 z-10 h-full w-3/12 bg-linear-to-r from-white to-transparent dark:from-[#141416]" />
-              <div className="pointer-events-none absolute right-0 z-10 h-full w-3/12 bg-linear-to-l from-white to-transparent dark:from-[#141416]" />
+              <div className="pointer-events-none absolute left-0 z-10 h-full w-3/12 bg-linear-to-r from-white to-transparent dark:from-[#1a1831]" />
+              <div className="pointer-events-none absolute right-0 z-10 h-full w-3/12 bg-linear-to-l from-white to-transparent dark:from-[#1a1831]" />
               <div className="flex w-max animate-scroll items-center gap-16 pr-16 group-hover:[animation-play-state:paused] md:gap-24 md:pr-24">
                 {[...sponsors, ...sponsors].map((sponsor, index) => (
                   <SponsorLogo

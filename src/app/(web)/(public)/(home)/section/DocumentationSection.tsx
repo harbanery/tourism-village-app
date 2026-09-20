@@ -19,7 +19,7 @@ export function DocumentationSection({ videos }: { videos: ActiveVideo[] }) {
   const mainVideo = videos[0];
 
   return (
-    <section className="flex max-h-screen items-center bg-white dark:bg-[#141416] py-14">
+    <section className="flex max-h-screen items-center bg-white dark:bg-[#1a1831] py-14">
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
         <div className="grid items-center gap-8 md:grid-cols-2">
           <Reveal direction="right">

@@ -13,7 +13,7 @@ export default function RootLoading() {
     >
       <div className="flex flex-col items-center">
         <span className="loader-ripple" aria-hidden />
-        <p className="-mt-4 text-lg font-normal tracking-tight text-foreground font-script">
+        <p className="-mt-4 text-lg font-bold tracking-tight text-foreground font-script">
           Desaku<span className="text-primary">Wisataku</span>
         </p>
       </div>

@@ -22,7 +22,7 @@ function BrandText({ text }: { text: string }) {
       {parts.map((part, index) => (
         <span key={index}>
           {index > 0 && (
-            <span className="font-script font-normal tracking-normal">
+            <span className="font-script font-bold tracking-normal">
               Desaku
               <span className="text-primary">Wisataku</span>
             </span>

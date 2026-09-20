@@ -112,7 +112,7 @@ function PaymentCountdown({
       className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-black/5 p-4 text-white dark:border-white/10"
       style={{
         background:
-          "linear-gradient(135deg, #52525b 0%, var(--ant-color-primary, #0d7a5f) 100%)",
+          "linear-gradient(135deg, #52525b 0%, var(--ant-color-primary, #41644a) 100%)",
       }}
     >
       <div className="flex min-w-0 items-center gap-3">

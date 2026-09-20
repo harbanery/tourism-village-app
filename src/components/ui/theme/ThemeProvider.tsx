@@ -145,14 +145,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         theme={{
           algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
           token: {
-            // Primary hijau (DROID) — selaras dengan --color-primary di
-            // assets/global/index.css. Catatan: antd 6 tidak lagi punya token
-            // colorSecondary; warna secondary (hijau hutan #053227) dipakai
-            // via utility Tailwind (--color-secondary: bg-secondary/dst.).
-            colorPrimary: "#0d7a5f",
+            // Primary forest crown (#41644A) — selaras dengan
+            // --color-primary di assets/global/index.css. Catatan: antd 6
+            // tidak lagi punya token colorSecondary; warna secondary
+            // (midnight forest #0D4715) dipakai via utility Tailwind
+            // (--color-secondary: bg-secondary/dst.).
+            colorPrimary: "#41644a",
             borderRadius: 10,
             fontFamily:
-              "var(--font-helvetica), ui-sans-serif, system-ui, sans-serif",
+              "var(--font-switzer), ui-sans-serif, system-ui, sans-serif",
             // Override kontras WCAG (minimal 4.5:1 pada background terang).
             ...(isDark
               ? {}
@@ -167,7 +168,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
               ...(isDark ? {} : { contentFontSize: 24 }),
             },
             Tabs: {
-              ...(isDark ? {} : { itemActiveColor: "#0d7a5f" }),
+              ...(isDark ? {} : { itemActiveColor: "#41644a" }),
             },
           },
         }}
