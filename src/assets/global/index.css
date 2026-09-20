@@ -25,7 +25,7 @@
   --color-secondary: #0d4715;
   /* Body: Switzer (lokal, variable); mono: Martian Mono (Google). */
   --font-sans: var(--font-switzer);
-  --font-mono: var(--font-martian-mono);
+  --font-mono: var(--font-geist-mono);
   /* Paquito Bold — khusus teks merek DesakuWisataku (font-script). */
   --font-script: var(--font-paquito);
   /* Marquee sponsor (pola skills-marquee portfolio). */

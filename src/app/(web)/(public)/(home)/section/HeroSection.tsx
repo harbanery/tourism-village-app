@@ -27,7 +27,7 @@ export function HeroSection() {
     <section className="relative flex min-h-[calc(100dvh-4rem)] items-center">
       <div className="relative mx-auto w-full max-w-6xl px-4 py-24 text-white">
         <Reveal>
-          <h1 className="font-bold max-w-3xl leading-tight drop-shadow-md">
+          <h1 className="font-bold max-w-3xl leading-tight drop-shadow-md space-y-2">
             <span className="text-3xl md:text-6xl block">
               {t("home.hero.title1")}
             </span>

@@ -164,7 +164,7 @@ export function Navbar() {
           >
             Desaku
           </span>
-          <span className="text-secondary transition-colors group-hover:text-primary/60">
+          <span className="text-secondary transition-colors group-hover:text-secondary/60 dark:text-primary dark:group-hover:text-primary/60">
             Wisataku
           </span>
         </button>

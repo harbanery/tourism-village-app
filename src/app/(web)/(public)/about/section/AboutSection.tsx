@@ -24,7 +24,7 @@ function BrandText({ text }: { text: string }) {
           {index > 0 && (
             <span className="font-script font-bold tracking-normal">
               Desaku
-              <span className="text-primary">Wisataku</span>
+              <span className="text-secondary">Wisataku</span>
             </span>
           )}
           {part}
@@ -48,22 +48,22 @@ export function AboutSection() {
 
   const features = [
     {
-      icon: <HomeFilled className="text-3xl! text-primary!" />,
+      icon: <HomeFilled className="text-3xl! text-white!" />,
       title: t("home.why.facility.title"),
       desc: t("about.feature.facility.desc"),
     },
     {
-      icon: <CustomerServiceFilled className="text-3xl! text-primary!" />,
+      icon: <CustomerServiceFilled className="text-3xl! text-white!" />,
       title: t("home.why.service.title"),
       desc: t("about.feature.service.desc"),
     },
     {
-      icon: <WalletFilled className="text-3xl! text-primary!" />,
+      icon: <WalletFilled className="text-3xl! text-white!" />,
       title: t("home.why.cheap.title"),
       desc: t("about.feature.cheap.desc"),
     },
     {
-      icon: <StarFilled className="text-3xl! text-primary!" />,
+      icon: <StarFilled className="text-3xl! text-white!" />,
       title: t("home.why.local.title"),
       desc: t("about.feature.local.desc"),
     },
@@ -119,7 +119,7 @@ export function AboutSection() {
             {features.map((feature, index) => (
               <Reveal key={feature.title} delay={index * 100}>
                 <div className="flex items-start gap-5 py-8">
-                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/75">
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/25">
                     {feature.icon}
                   </span>
                   <div className="text-left">

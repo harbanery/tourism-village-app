@@ -9,7 +9,7 @@ const Footer = () => {
   const { t } = useT();
 
   return (
-    <footer className="border-t border-black/5 bg-background dark:border-white/10 dark:bg-[#1a1831]">
+    <footer className="border-t bg-background/20 border-black/5 dark:border-white/10">
       <div className="mx-auto w-full max-w-7xl px-6 py-6">
         <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
           <p className="text-center text-sm font-light tracking-wider text-foreground/60 dark:text-white/60">

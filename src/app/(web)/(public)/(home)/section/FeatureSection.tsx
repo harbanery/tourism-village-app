@@ -17,22 +17,22 @@ export function FeatureSection() {
 
   const features = [
     {
-      icon: <HomeFilled className="text-4xl! text-primary!" />,
+      icon: <HomeFilled className="text-4xl! text-foreground!" />,
       title: t("home.why.facility.title"),
       desc: t("home.why.facility.desc"),
     },
     {
-      icon: <CustomerServiceFilled className="text-4xl! text-primary!" />,
+      icon: <CustomerServiceFilled className="text-4xl! text-foreground!" />,
       title: t("home.why.service.title"),
       desc: t("home.why.service.desc"),
     },
     {
-      icon: <WalletFilled className="text-4xl! text-primary!" />,
+      icon: <WalletFilled className="text-4xl! text-foreground!" />,
       title: t("home.why.cheap.title"),
       desc: t("home.why.cheap.desc"),
     },
     {
-      icon: <StarFilled className="text-4xl! text-primary!" />,
+      icon: <StarFilled className="text-4xl! text-foreground!" />,
       title: t("home.why.local.title"),
       desc: t("home.why.local.desc"),
     },
@@ -47,7 +47,7 @@ export function FeatureSection() {
             <span className="font-script font-bold tracking-normal text-white">
               Desaku
             </span>
-            <span className="font-script font-bold tracking-normal text-primary">
+            <span className="font-script font-bold tracking-normal text-secondary">
               Wisataku
             </span>
             ?
@@ -71,13 +71,14 @@ export function FeatureSection() {
               className={index % 2 === 0 ? "sm:mt-10" : ""}
             >
               <Card
-                className="h-full! border-white/10! bg-white/60! text-center! backdrop-blur-sm! dark:bg-black/60!"
+                className="h-full! border-white/10! text-center! backdrop-blur-sm! bg-background/50!"
                 styles={{ body: { height: "100%" } }}
               >
                 <div className="flex h-full flex-col items-center gap-3 text-center">
-                  {/* Icon besar di atas dalam wadah rounded: background
-                      secondary, icon primary. */}
-                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-secondary/75">
+                  {/* Icon besar di atas dalam wadah rounded menyesuaikan
+                      warna card: bg sedikit lebih gelap (secondary solid)
+                      + icon sedikit lebih terang (vintage paper). */}
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-primary/25">
                     {feature.icon}
                   </span>
                   <h3 className="font-semibold text-lg text-foreground/95">

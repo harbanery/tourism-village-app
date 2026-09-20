@@ -1,4 +1,4 @@
-import { Martian_Mono } from "next/font/google";
+import { Geist_Mono, Martian_Mono } from "next/font/google";
 
 /**
  * Font GOOGLE — dipakai untuk kebutuhan yang file-nya tidak tersedia
@@ -6,10 +6,9 @@ import { Martian_Mono } from "next/font/google";
  * font Google lewat sini; keduanya baru dipakai di app/layout.tsx).
  */
 
-/** Martian Mono — font mono (menggantikan Geist Mono). */
-export const martianMono = Martian_Mono({
+export const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-martian-mono",
+  variable: "--font-geist-mono",
   display: "swap",
   weight: ["400", "700"],
   adjustFontFallback: true,

@@ -72,7 +72,7 @@ const SiderLayout: React.FC<SiderLayoutProps> = ({
     <div className="flex h-16 shrink-0 items-center gap-2 px-4">
       <span className="truncate text-base font-bold font-script tracking-normal">
         <span className="text-foreground">Desaku</span>
-        <span className="text-primary">Wisataku</span>
+        <span className="text-secondary dark:text-primary">Wisataku</span>
       </span>
     </div>
   );
