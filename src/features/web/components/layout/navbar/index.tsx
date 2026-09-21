@@ -145,7 +145,7 @@ export function Navbar() {
         shouldShow ? "translate-y-0" : "-translate-y-full",
         onHero
           ? "border-transparent bg-transparent text-white"
-          : "border-black/5 bg-white/80 text-foreground backdrop-blur-md dark:border-white/10 dark:bg-[#1a1831]/80",
+          : "border-black/5 bg-white/80 text-foreground backdrop-blur-md dark:border-white/10 dark:bg-black/80",
       ].join(" ")}
     >
       <nav className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between gap-4">
@@ -233,14 +233,32 @@ export function Navbar() {
               />
             </Dropdown>
           ) : (
-            <Button
-              type="primary"
-              icon={<LoginOutlined />}
-              className="hidden! sm:inline-flex! ml-1!"
-              onClick={() => router.push("/login")}
-            >
-              {t("nav.login")}
-            </Button>
+            <>
+              <Button
+                color="primary"
+                variant="outlined"
+                icon={<LoginOutlined />}
+                ghost
+                className={[
+                  "hidden! sm:inline-flex! ml-1!",
+                  // Mode hero (navbar transparan di atas gambar): teks &
+                  // border putih agar tombol outlined tetap terbaca.
+                  onHero
+                    ? "border-white/60! text-white! hover:border-white!"
+                    : "border-foreground/60! text-foreground! hover:border-foreground!",
+                ].join(" ")}
+                onClick={() => router.push("/login")}
+              >
+                {t("nav.login")}
+              </Button>
+              <Button
+                type="primary"
+                className="hidden! sm:inline-flex!"
+                onClick={() => router.push("/register")}
+              >
+                {t("nav.register")}
+              </Button>
+            </>
           )}
           <div className={actionWrap}>
             <Button
@@ -305,13 +323,22 @@ export function Navbar() {
               </Button>
             </>
           ) : (
-            <button
-              type="button"
-              onClick={() => goTo("/login")}
-              className={navLinkClass(pathname === "/login", true)}
-            >
-              {t("nav.login")}
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => goTo("/login")}
+                className={navLinkClass(pathname === "/login", true)}
+              >
+                {t("nav.login")}
+              </button>
+              <button
+                type="button"
+                onClick={() => goTo("/register")}
+                className={navLinkClass(pathname === "/register", true)}
+              >
+                {t("nav.register")}
+              </button>
+            </>
           )}
         </nav>
       </Drawer>

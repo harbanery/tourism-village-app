@@ -246,7 +246,9 @@ export default function PackageClientSection() {
               <section className="mb-8!">
                 <h2 className="mb-3 inline-flex items-center gap-2 text-lg font-semibold">
                   <FireFilled className="text-orange-500!" />
-                  {t("package.frequentlyBought")}
+                  <span className="text-orange-300">
+                    {t("package.frequentlyBought")}
+                  </span>
                 </h2>
                 <Row gutter={[16, 16]}>
                   {popularPackages.map((pkg) => (

@@ -119,7 +119,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.documentation": "Dokumentasi",
     "nav.about": "Tentang Kami",
     "nav.login": "Masuk",
-    "nav.register": "Registrasi",
+    "nav.register": "Daftar",
     "nav.logout": "Keluar",
     "nav.profile": "Profil",
     "nav.adminPanel": "Panel Admin",

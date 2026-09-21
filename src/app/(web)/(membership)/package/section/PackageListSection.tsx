@@ -4,6 +4,7 @@ import { useMounted } from "@/hooks/useMounted";
 import { Badge, Button, Card, Col, Empty, Row } from "antd";
 import {
   CheckCircleFilled,
+  EnvironmentOutlined,
   ShoppingCartOutlined,
   StarFilled,
 } from "@ant-design/icons";
@@ -61,12 +62,14 @@ export function PackageCard({
       }
     >
       {/* Lokasi tepat di bawah judul (ribbon populer di pojok kartu). */}
-      <p
-        className="truncate text-xs text-foreground/50"
+      <div
+        className="flex items-center justify-start gap-2 truncate text-xs text-foreground/50"
         title={pkg.placeName ?? undefined}
       >
-        📍 {pkg.placeName ?? "-"}
-      </p>
+        <EnvironmentOutlined className="text-xs!" />
+
+        <span>{pkg.placeName ?? "-"}</span>
+      </div>
 
       <ul className="mt-3 space-y-2">
         {pkg.facilities.filter(Boolean).map((f) => (
