@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { getActiveBlogBySlug } from "@/services/blog";
 import { displayImage } from "@/utils/helpers";
+import { META_APP, META_TITLE } from "@/utils/config/variables";
 import { ArticleDetailSection } from "./section/ArticleDetailSection";
+
+/** Merek suffix metadata — sama dengan template title root layout. */
+const BRAND = META_TITLE ?? META_APP ?? "DesakuWisataku";
 
 /**
  * ISR: detail artikel diambil di server (service) dan diverifikasi
@@ -9,7 +13,13 @@ import { ArticleDetailSection } from "./section/ArticleDetailSection";
  */
 export const revalidate = 60;
 
-/** Meta per artikel (rekomendasi 1.2): judul, ringkasan, OG image. */
+/**
+ * Meta per artikel (rekomendasi 1.2): judul, ringkasan, OG image.
+ * Judul dokumen otomatis menjadi "judul artikel | DesakuWisataku"
+ * lewat title.template root layout; openGraph.title TIDAK mewarisi
+ * template sehingga suffix merek ditulis eksplisit (permintaan DROID),
+ * dan OG type memakai "article".
+ */
 export async function generateMetadata({
   params,
 }: PageProps<"/article/[slug]">): Promise<Metadata> {
@@ -25,11 +35,14 @@ export async function generateMetadata({
       .trim()
       .slice(0, 155) || post.title;
 
+  // OG title lengkap dengan merek (template tidak berlaku di OG).
+  const ogTitle = `${post.title} | ${BRAND}`;
+
   return {
     title: post.title,
     description: excerpt,
     openGraph: {
-      title: post.title,
+      title: ogTitle,
       description: excerpt,
       type: "article",
       publishedTime: post.datetime,
