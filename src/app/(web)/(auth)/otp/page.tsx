@@ -32,7 +32,7 @@ export default async function OtpPage({ searchParams }: PageProps<"/otp">) {
     if (!user) {
       redirect("/login?redirect=/profile", "replace");
     }
-    redirect("/profile?view=settings&tab=email", "replace");
+    redirect("/profile?view=settings&tab=security", "replace");
   }
 
   if (purpose === "RESET_PASSWORD") {

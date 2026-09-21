@@ -1,6 +1,6 @@
 "use client";
 
-import { Dropdown } from "antd";
+import { Button, Dropdown } from "antd";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 
 /**
@@ -71,15 +71,11 @@ export function LanguageToggle() {
         onClick: ({ key }) => setLocale(key as Locale),
       }}
     >
-      <button
-        type="button"
+      <Button
+        type="text"
         aria-label={t("nav.language.toggle")}
-        className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/10"
-      >
-        {/* Bendera menunjukkan bahasa aktif; kode locale tetap sebagai
-            teks pendamping agar jelas walau bendera kecil. */}
-        {LANGUAGES[locale as Locale].flag}
-      </button>
+        icon={LANGUAGES[locale as Locale].flag}
+      />
     </Dropdown>
   );
 }

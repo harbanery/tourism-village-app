@@ -82,7 +82,7 @@ const HeaderLayout: React.FC<{
         )}
         <Breadcrumb style={{ fontWeight: 600 }} items={breadcrumbItems} />
       </Space>
-      <Space size="middle">
+      <Space size="small">
         <LanguageToggle />
         <ThemeToggle />
         <NotificationBell endpoint="/api/admin/notifications" />

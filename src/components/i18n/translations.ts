@@ -471,12 +471,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.linked.hint":
       "Tautan hanya bisa dibuat bila email akun Google sama dengan email akun ini.",
     "settings.tab.profile": "Profil",
-    "settings.tab.avatar": "Avatar",
-    "settings.tab.email": "Email",
     "settings.tab.notifications": "Notifikasi",
     "settings.avatar.upload": "Unggah Avatar",
     "settings.avatar.hint":
       "Gambar persegi disarankan, format umum (JPG/PNG/WebP), maks 2MB.",
+    "settings.security.email": "Ganti Email",
     "settings.email.current": "Email aktif",
     "settings.email.old": "Email aktif (konfirmasi)",
     "settings.email.oldPlaceholder": "email-aktif@example.com",
@@ -494,7 +493,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.email.hint":
       "Email baru hanya aktif setelah kode OTP diverifikasi.",
     "settings.email.changed": "Email berhasil diganti",
-    "settings.tab.password": "Password",
+    "settings.security.password": "Ganti Password",
     "settings.password.current": "Password saat ini",
     "settings.password.new": "Password baru",
     "settings.password.confirm": "Ulangi password baru",
@@ -1231,12 +1230,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.linked.hint":
       "A link can only be created when the Google email matches this account's email.",
     "settings.tab.profile": "Profile",
-    "settings.tab.avatar": "Avatar",
-    "settings.tab.email": "Email",
     "settings.tab.notifications": "Notifications",
     "settings.avatar.upload": "Upload Avatar",
     "settings.avatar.hint":
       "Square image recommended, common formats (JPG/PNG/WebP), max 2MB.",
+    "settings.security.email": "Change Email",
     "settings.email.current": "Current email",
     "settings.email.old": "Current email (confirm)",
     "settings.email.oldPlaceholder": "current-email@example.com",
@@ -1254,7 +1252,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.email.hint":
       "The new email only becomes active after the OTP code is verified.",
     "settings.email.changed": "Email changed successfully",
-    "settings.tab.password": "Password",
+    "settings.security.password": "Change Password",
     "settings.password.current": "Current password",
     "settings.password.new": "New password",
     "settings.password.confirm": "Repeat new password",

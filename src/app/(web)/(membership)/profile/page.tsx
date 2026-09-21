@@ -18,8 +18,10 @@ export interface ProfileSettings {
 /**
  * Halaman profil (area membership) — selalu mengikuti sesi login;
  * belum login dikembalikan ke halaman login.
- * Param opsional: `?view=settings` buka tab pengaturan, `&tab=email`
- * langsung ke tab ganti email (tujuan kembali dari verifikasi OTP).
+ * Param opsional: `?view=settings` buka tab pengaturan, `&tab=security`
+ * langsung ke tab keamanan (tujuan kembali dari verifikasi OTP ganti
+ * email/password). Nilai legacy (`avatar`, `email`, `password`) dipetakan
+ * otomatis ke tab gabungan barunya.
  */
 export default async function ProfilePage({
   searchParams,
@@ -31,14 +33,16 @@ export default async function ProfilePage({
 
   const params = await searchParams;
   const view = params.view === "settings" ? "settings" : "history";
-  const settingsTab =
+  // Tab settings digabung jadi tiga (permintaan DROID): profil, keamanan,
+  // notifikasi — nilai legacy dipetakan ke tab gabungannya.
+  const settingsTab: "profile" | "security" | "notifications" =
     params.tab === "security" ||
     params.tab === "email" ||
-    params.tab === "avatar" ||
-    params.tab === "password" ||
-    params.tab === "notifications"
-      ? params.tab
-      : "profile";
+    params.tab === "password"
+      ? "security"
+      : params.tab === "notifications"
+        ? "notifications"
+        : "profile";
 
   // Halaman pertama riwayat (3 order teratas: PENDING dulu, lalu PAID,
   // terbaru duluan, tie-break reservasi paling awal) — sisanya dimuat

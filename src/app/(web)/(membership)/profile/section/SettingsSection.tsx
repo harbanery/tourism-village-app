@@ -140,9 +140,11 @@ function formatCountdown(seconds: number): string {
 
 /**
  * Section pengaturan akun (menggantikan section riwayat belanja, bukan
- * modal): ubah profil, ubah avatar, ganti email (via OTP), ganti password
- * (via OTP — semua sesi dicabut setelah berhasil), dan preferensi
- * notifikasi (web notif + email + cron mendatang).
+ * modal). Tiga tab (permintaan DROID):
+ * 1. Profil   — avatar + data profil digabung dalam satu tab.
+ * 2. Keamanan — tautan Google, ganti email, ganti password, dan sesi
+ *               perangkat digabung dalam satu tab.
+ * 3. Notifikasi — preferensi notifikasi (web + email + cron mendatang).
  *
  * Ganti email/password memakai MODAL OTP (bukan pindah halaman): modal
  * tidak bisa ditutup sampai OTP berhasil — mencegah kebingungan alur &
@@ -157,14 +159,8 @@ export function SettingsSection({
 }: {
   user: User | null;
   settings: ProfileSettings;
-  /** Tab awal (mis. "email" saat kembali dari verifikasi OTP ganti email). */
-  initialTab?:
-    | "security"
-    | "profile"
-    | "avatar"
-    | "email"
-    | "password"
-    | "notifications";
+  /** Tab awal (mis. "security" saat kembali dari verifikasi OTP ganti email). */
+  initialTab?: "profile" | "security" | "notifications";
   /** Google SSO aktif (server: GOOGLE_CLIENT_ID + SECRET terisi). */
   googleEnabled?: boolean;
   /** Hasil alur taut Google dari callback (?googleLinked / ?googleError). */
@@ -649,12 +645,131 @@ export function SettingsSection({
     });
   };
 
+  /** Blok unggah avatar — digabung ke tab profil (avatar + data profil). */
+  const avatarBlock = (
+    <div className="flex shrink-0 flex-col items-center gap-3 md:w-44">
+      <Avatar size={112} src={user?.avatar} icon={<UserOutlined />} />
+      <Upload
+        accept="image/*"
+        showUploadList={false}
+        maxCount={1}
+        customRequest={async ({ file, onSuccess, onError }) => {
+          setUploadingAvatar(true);
+          try {
+            const formData = new FormData();
+            formData.append("image", file as File);
+            const res = await fetch("/api/web/profile/avatar", {
+              method: "POST",
+              body: formData,
+            });
+            const result = await res.json();
+            if (!result.success) {
+              message.error(result.error || t("notif.error"));
+              onError?.(new Error(result.error));
+              return;
+            }
+            onSuccess?.(result);
+            message.success(t("common.saved"));
+            router.refresh();
+          } catch (err) {
+            onError?.(err as Error);
+            message.error(t("notif.error"));
+          } finally {
+            setUploadingAvatar(false);
+          }
+        }}
+      >
+        <Button icon={<UploadOutlined />} loading={uploadingAvatar}>
+          {t("settings.avatar.upload")}
+        </Button>
+      </Upload>
+      <p className="text-center text-xs text-foreground/60">
+        {t("settings.avatar.hint")}
+      </p>
+    </div>
+  );
+
   return (
     <Card title={t("settings.title")}>
       <Tabs
         activeKey={tab}
         onChange={setTab}
         items={[
+          {
+            key: "profile",
+            label: t("settings.tab.profile"),
+            children: (
+              <div className="mt-2 flex flex-col gap-6 py-2 md:flex-row md:items-start md:gap-8">
+                {avatarBlock}
+                <Form
+                  form={profileForm}
+                  layout="vertical"
+                  onFinish={handleSaveProfile}
+                  disabled={savingProfile}
+                  className="max-w-md! flex-1!"
+                  initialValues={{
+                    name: user?.name,
+                    phone: user?.phone ?? undefined,
+                    gender: user?.gender ?? undefined,
+                    birthDate: user?.birthDate
+                      ? dayjs(user.birthDate)
+                      : undefined,
+                    address: user?.address ?? undefined,
+                  }}
+                >
+                  <Form.Item
+                    name="name"
+                    label={t("common.name")}
+                    rules={[{ required: true }]}
+                  >
+                    <Input placeholder={t("auth.register.namePlaceholder")} />
+                  </Form.Item>
+                  <Form.Item
+                    name="phone"
+                    label={t("common.phone")}
+                    rules={[
+                      { required: true },
+                      {
+                        pattern: /^[+()\-\s\d]{6,20}$/,
+                        message: t("auth.register.phonePattern"),
+                      },
+                    ]}
+                  >
+                    <Input placeholder="08..." />
+                  </Form.Item>
+                  <Form.Item name="gender" label={t("profile.gender")}>
+                    <Select
+                      allowClear
+                      placeholder={t("profile.genderPlaceholder")}
+                      options={[
+                        { value: "male", label: t("profile.male") },
+                        { value: "female", label: t("profile.female") },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item name="birthDate" label={t("profile.birthDate")}>
+                    <DatePicker
+                      className="w-full!"
+                      placeholder={t("profile.birthDatePlaceholder")}
+                    />
+                  </Form.Item>
+                  <Form.Item name="address" label={t("profile.address")}>
+                    <Input.TextArea
+                      rows={2}
+                      placeholder={t("profile.addressPlaceholder")}
+                    />
+                  </Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={savingProfile}
+                  >
+                    {t("common.save")}
+                  </Button>
+                </Form>
+              </div>
+            ),
+          },
           {
             key: "security",
             label: t("settings.tab.security"),
@@ -707,297 +822,179 @@ export function SettingsSection({
                 <p className="text-xs text-foreground/60">
                   {t("settings.linked.hint")}
                 </p>
-              </div>
-            ),
-          },
-          {
-            key: "profile",
-            label: t("settings.tab.profile"),
-            children: (
-              <Form
-                form={profileForm}
-                layout="vertical"
-                onFinish={handleSaveProfile}
-                disabled={savingProfile}
-                className="mt-2! max-w-md!"
-                initialValues={{
-                  name: user?.name,
-                  phone: user?.phone ?? undefined,
-                  gender: user?.gender ?? undefined,
-                  birthDate: user?.birthDate
-                    ? dayjs(user.birthDate)
-                    : undefined,
-                  address: user?.address ?? undefined,
-                }}
-              >
-                <Form.Item
-                  name="name"
-                  label={t("common.name")}
-                  rules={[{ required: true }]}
-                >
-                  <Input placeholder={t("auth.register.namePlaceholder")} />
-                </Form.Item>
-                <Form.Item
-                  name="phone"
-                  label={t("common.phone")}
-                  rules={[
-                    { required: true },
-                    {
-                      pattern: /^[+()\-\s\d]{6,20}$/,
-                      message: t("auth.register.phonePattern"),
-                    },
-                  ]}
-                >
-                  <Input placeholder="08..." />
-                </Form.Item>
-                <Form.Item name="gender" label={t("profile.gender")}>
-                  <Select
-                    allowClear
-                    placeholder={t("profile.genderPlaceholder")}
-                    options={[
-                      { value: "male", label: t("profile.male") },
-                      { value: "female", label: t("profile.female") },
-                    ]}
-                  />
-                </Form.Item>
-                <Form.Item name="birthDate" label={t("profile.birthDate")}>
-                  <DatePicker
-                    className="w-full!"
-                    placeholder={t("profile.birthDatePlaceholder")}
-                  />
-                </Form.Item>
-                <Form.Item name="address" label={t("profile.address")}>
-                  <Input.TextArea
-                    rows={2}
-                    placeholder={t("profile.addressPlaceholder")}
-                  />
-                </Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={savingProfile}
-                >
-                  {t("common.save")}
-                </Button>
-              </Form>
-            ),
-          },
-          {
-            key: "avatar",
-            label: t("settings.tab.avatar"),
-            children: (
-              <div className="flex flex-col items-center gap-4 py-4">
-                <Avatar size={112} src={user?.avatar} icon={<UserOutlined />} />
-                <Upload
-                  accept="image/*"
-                  showUploadList={false}
-                  maxCount={1}
-                  customRequest={async ({ file, onSuccess, onError }) => {
-                    setUploadingAvatar(true);
-                    try {
-                      const formData = new FormData();
-                      formData.append("image", file as File);
-                      const res = await fetch("/api/web/profile/avatar", {
-                        method: "POST",
-                        body: formData,
-                      });
-                      const result = await res.json();
-                      if (!result.success) {
-                        message.error(result.error || t("notif.error"));
-                        onError?.(new Error(result.error));
-                        return;
-                      }
-                      onSuccess?.(result);
-                      message.success(t("common.saved"));
-                      router.refresh();
-                    } catch (err) {
-                      onError?.(err as Error);
-                      message.error(t("notif.error"));
-                    } finally {
-                      setUploadingAvatar(false);
-                    }
-                  }}
-                >
-                  <Button icon={<UploadOutlined />} loading={uploadingAvatar}>
-                    {t("settings.avatar.upload")}
-                  </Button>
-                </Upload>
-                <p className="text-xs text-foreground/60">
-                  {t("settings.avatar.hint")}
-                </p>
-              </div>
-            ),
-          },
-          {
-            key: "email",
-            label: t("settings.tab.email"),
-            children: (
-              <div className="mt-2 max-w-md">
-                {/* Email aktif sengaja tidak ditampilkan (keamanan) —
-                    kepemilikan dikonfirmasi lewat field email lama. */}
-                {settings.pendingEmail && (
-                  <p className="mb-1 text-xs text-amber-600 dark:text-amber-400">
-                    {t("profile.pendingEmail", {
-                      email: maskEmail(settings.pendingEmail),
-                    })}
+
+                {/* Ganti email (via OTP ke email baru). */}
+                <div className="mt-6 border-t border-black/5 pt-4 dark:border-white/10">
+                  <p className="mb-1 font-medium">
+                    {t("settings.security.email")}
                   </p>
-                )}
-                <Form
-                  form={emailForm}
-                  layout="vertical"
-                  className={settings.pendingEmail ? "mt-2!" : "mt-4!"}
-                  preserve={false}
-                  onFinish={handleRequestEmailChange}
-                  disabled={requestingEmail}
-                >
-                  {/* Email lama: konfirmasi kepemilikan akun. */}
-                  <Form.Item
-                    name="oldEmail"
-                    label={t("settings.email.old")}
-                    rules={[{ required: true }, { type: "email" }]}
+                  {/* Email aktif sengaja tidak ditampilkan (keamanan) —
+                      kepemilikan dikonfirmasi lewat field email lama. */}
+                  {settings.pendingEmail && (
+                    <p className="mb-1 text-xs text-amber-600 dark:text-amber-400">
+                      {t("profile.pendingEmail", {
+                        email: maskEmail(settings.pendingEmail),
+                      })}
+                    </p>
+                  )}
+                  <Form
+                    form={emailForm}
+                    layout="vertical"
+                    className={settings.pendingEmail ? "mt-2!" : "mt-4!"}
+                    preserve={false}
+                    onFinish={handleRequestEmailChange}
+                    disabled={requestingEmail}
                   >
-                    <Input
-                      placeholder={t("settings.email.oldPlaceholder")}
-                      autoComplete="email"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="email"
-                    label={t("settings.email.new")}
-                    rules={[
-                      { required: true },
-                      { type: "email" },
-                      ({ getFieldValue }) => ({
-                        validator(_, value) {
-                          if (!value || value === getFieldValue("oldEmail")) {
-                            return Promise.reject(
-                              new Error(t("settings.email.same")),
-                            );
-                          }
-                          return Promise.resolve();
-                        },
-                      }),
-                    ]}
-                  >
-                    <Input placeholder="email-baru@example.com" />
-                  </Form.Item>
-                  {/* Password aktif: keamanan — pastikan pengajuan datang
-                      dari pemilik akun (bukan orang lain di sesi terbuka). */}
-                  <Form.Item
-                    name="password"
-                    label={t("settings.email.password")}
-                    rules={[{ required: true }]}
-                  >
-                    <Input.Password
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                    />
-                  </Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={requestingEmail}
-                  >
-                    {t("settings.email.sendOtp")}
-                  </Button>
-                </Form>
-                <p className="mt-3 text-xs text-foreground/60">
-                  {t("settings.email.hint")}
-                </p>
-              </div>
-            ),
-          },
-          {
-            key: "password",
-            label: t("settings.tab.password"),
-            children: (
-              <div className="mt-2 max-w-md">
-                <Form
-                  form={passwordForm}
-                  layout="vertical"
-                  preserve={false}
-                  onFinish={handleRequestPasswordChange}
-                  disabled={requestingPassword}
-                >
-                  {/* Password lama: keamanan — pastikan pengajuan datang
-                      dari pemilik akun (bukan orang lain di sesi terbuka). */}
-                  <Form.Item
-                    name="currentPassword"
-                    label={t("settings.password.current")}
-                    rules={[{ required: true }]}
-                  >
-                    <Input.Password
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="newPassword"
-                    label={t("settings.password.new")}
-                    rules={[
-                      { required: true },
-                      { min: 8, message: t("auth.register.passwordMin") },
-                      {
-                        pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
-                        message: t("settings.password.requirement"),
-                      },
-                      ({ getFieldValue }) => ({
-                        validator(_, value) {
-                          if (
-                            !value ||
-                            value === getFieldValue("currentPassword")
-                          ) {
-                            return Promise.reject(
-                              new Error(t("settings.password.same")),
-                            );
-                          }
-                          return Promise.resolve();
-                        },
-                      }),
-                    ]}
-                  >
-                    <Input.Password
-                      placeholder="••••••••"
-                      autoComplete="new-password"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="confirmPassword"
-                    label={t("settings.password.confirm")}
-                    dependencies={["newPassword"]}
-                    rules={[
-                      { required: true },
-                      ({ getFieldValue }) => ({
-                        validator(_, value) {
-                          if (
-                            !value ||
-                            value === getFieldValue("newPassword")
-                          ) {
+                    {/* Email lama: konfirmasi kepemilikan akun. */}
+                    <Form.Item
+                      name="oldEmail"
+                      label={t("settings.email.old")}
+                      rules={[{ required: true }, { type: "email" }]}
+                    >
+                      <Input
+                        placeholder={t("settings.email.oldPlaceholder")}
+                        autoComplete="email"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="email"
+                      label={t("settings.email.new")}
+                      rules={[
+                        { required: true },
+                        { type: "email" },
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            if (!value || value === getFieldValue("oldEmail")) {
+                              return Promise.reject(
+                                new Error(t("settings.email.same")),
+                              );
+                            }
                             return Promise.resolve();
-                          }
-                          return Promise.reject(
-                            new Error(t("auth.register.passwordMismatch")),
-                          );
+                          },
+                        }),
+                      ]}
+                    >
+                      <Input placeholder="email-baru@example.com" />
+                    </Form.Item>
+                    {/* Password aktif: keamanan — pastikan pengajuan datang
+                        dari pemilik akun (bukan orang lain di sesi terbuka). */}
+                    <Form.Item
+                      name="password"
+                      label={t("settings.email.password")}
+                      rules={[{ required: true }]}
+                    >
+                      <Input.Password
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                      />
+                    </Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={requestingEmail}
+                    >
+                      {t("settings.email.sendOtp")}
+                    </Button>
+                  </Form>
+                  <p className="mt-3 text-xs text-foreground/60">
+                    {t("settings.email.hint")}
+                  </p>
+                </div>
+
+                {/* Ganti password (via OTP — semua sesi dicabut setelah
+                    berhasil). */}
+                <div className="mt-6 border-t border-black/5 pt-4 dark:border-white/10">
+                  <p className="mb-1 font-medium">
+                    {t("settings.security.password")}
+                  </p>
+                  <Form
+                    form={passwordForm}
+                    layout="vertical"
+                    className="mt-4!"
+                    preserve={false}
+                    onFinish={handleRequestPasswordChange}
+                    disabled={requestingPassword}
+                  >
+                    {/* Password lama: keamanan — pastikan pengajuan datang
+                        dari pemilik akun (bukan orang lain di sesi terbuka). */}
+                    <Form.Item
+                      name="currentPassword"
+                      label={t("settings.password.current")}
+                      rules={[{ required: true }]}
+                    >
+                      <Input.Password
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="newPassword"
+                      label={t("settings.password.new")}
+                      rules={[
+                        { required: true },
+                        { min: 8, message: t("auth.register.passwordMin") },
+                        {
+                          pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
+                          message: t("settings.password.requirement"),
                         },
-                      }),
-                    ]}
-                  >
-                    <Input.Password
-                      placeholder="••••••••"
-                      autoComplete="new-password"
-                    />
-                  </Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={requestingPassword}
-                  >
-                    {t("settings.password.sendOtp")}
-                  </Button>
-                </Form>
-                <p className="mt-3 text-xs text-foreground/60">
-                  {t("settings.password.hint")}
-                </p>
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            if (
+                              !value ||
+                              value === getFieldValue("currentPassword")
+                            ) {
+                              return Promise.reject(
+                                new Error(t("settings.password.same")),
+                              );
+                            }
+                            return Promise.resolve();
+                          },
+                        }),
+                      ]}
+                    >
+                      <Input.Password
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="confirmPassword"
+                      label={t("settings.password.confirm")}
+                      dependencies={["newPassword"]}
+                      rules={[
+                        { required: true },
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            if (
+                              !value ||
+                              value === getFieldValue("newPassword")
+                            ) {
+                              return Promise.resolve();
+                            }
+                            return Promise.reject(
+                              new Error(t("auth.register.passwordMismatch")),
+                            );
+                          },
+                        }),
+                      ]}
+                    >
+                      <Input.Password
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                      />
+                    </Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={requestingPassword}
+                    >
+                      {t("settings.password.sendOtp")}
+                    </Button>
+                  </Form>
+                  <p className="mt-3 text-xs text-foreground/60">
+                    {t("settings.password.hint")}
+                  </p>
+                </div>
 
                 {/* Keluar dari semua perangkat (rekomendasi 2.1) — satu
                     tombol darurat tanpa perlu OTP karena sesi aktif tetap

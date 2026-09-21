@@ -117,12 +117,27 @@ h6 {
  * - Track diberi warna lembut yang mengikuti light/dark mode.
  * - Tiap opsi diberi margin agar tidak menempel satu sama lain
  *   (jarak antar opsi); thumb item terpilih tetap dihitung antd.
+ * - Dark mode: item terpilih hitam #141414 dengan border senada kartu
+ *   (permintaan DROID). Warna border kartu (token antd colorBorderSecondary)
+ *   disuplai komponen sebagai CSS var --card-border; inset shadow dipakai
+ *   agar border tidak menggeser konten item.
  */
 .profile-segmented.ant-segmented {
   background: transparent;
 }
 .profile-segmented .ant-segmented-item {
   margin: 0 0.5rem 0 0;
+}
+
+.dark .profile-segmented .ant-segmented-item.ant-segmented-item-selected {
+  background: #141414;
+  color: var(--color-white);
+  border: "1px solid #303030";
+}
+
+.dark .profile-segmented .ant-segmented-thumb {
+  background: #141414;
+  box-shadow: inset 0 0 0 1px var(--card-border, #424242);
 }
 
 /*

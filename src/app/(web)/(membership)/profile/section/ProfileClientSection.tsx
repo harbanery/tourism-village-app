@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Segmented } from "antd";
+import { useState, type CSSProperties } from "react";
+import { Segmented, theme } from "antd";
 import { HistoryOutlined, SettingOutlined } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
@@ -18,7 +18,7 @@ export type ProfileView = "history" | "settings";
  * viewport dikurangi navbar) + kolom kanan dengan Segmented (pola period
  * di dashboard admin, icon dipertahankan): Riwayat Belanja dan Pengaturan.
  * `initialView`/`initialSettingsTab` dipakai saat kembali dari verifikasi
- * OTP ganti email agar langsung terbuka di tab ganti email.
+ * OTP ganti email/password agar langsung terbuka di tab keamanan.
  */
 export default function ProfileClientSection({
   user,
@@ -39,13 +39,7 @@ export default function ProfileClientSection({
   /** Total seluruh pesanan user. */
   totalOrders?: number;
   initialView?: ProfileView;
-  initialSettingsTab?:
-    | "security"
-    | "profile"
-    | "avatar"
-    | "email"
-    | "password"
-    | "notifications";
+  initialSettingsTab?: "profile" | "security" | "notifications";
   /** Google SSO aktif (server: GOOGLE_CLIENT_ID + SECRET terisi). */
   googleEnabled?: boolean;
   /** Hasil alur taut Google dari callback (?googleLinked / ?googleError). */
@@ -53,6 +47,7 @@ export default function ProfileClientSection({
 }) {
   const { t } = useT();
   const mounted = useMounted();
+  const { token } = theme.useToken();
   const [view, setView] = useState<ProfileView>(initialView);
   if (!mounted) return null;
 
@@ -66,9 +61,14 @@ export default function ProfileClientSection({
 
       <div className="flex min-w-0 flex-col gap-4">
         {/* Segmented view switcher — layout serupa period di dashboard admin;
-            bg + jarak antar opsi diatur via .profile-segmented (global css). */}
+            bg + jarak antar opsi diatur via .profile-segmented (global css).
+            --card-border: warna border kartu (token antd) untuk selected
+            item di dark mode (hitam #141414 + border senada kartu). */}
         <Segmented
           className="profile-segmented"
+          style={
+            { "--card-border": token.colorBorderSecondary } as CSSProperties
+          }
           value={view}
           onChange={(value) => setView(value as ProfileView)}
           options={[
