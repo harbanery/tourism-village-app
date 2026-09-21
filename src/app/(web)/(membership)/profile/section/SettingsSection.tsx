@@ -648,7 +648,14 @@ export function SettingsSection({
   /** Blok unggah avatar — digabung ke tab profil (avatar + data profil). */
   const avatarBlock = (
     <div className="flex shrink-0 flex-col items-center gap-3 md:w-44">
-      <Avatar size={112} src={user?.avatar} icon={<UserOutlined />} />
+      {/* Placeholder avatar mengikuti warna foreground (permintaan DROID):
+          bg foreground + ikon warna background — kontras di kedua mode. */}
+      <Avatar
+        size={112}
+        className="bg-foreground/20! text-foreground/80!"
+        src={user?.avatar}
+        icon={<UserOutlined />}
+      />
       <Upload
         accept="image/*"
         showUploadList={false}

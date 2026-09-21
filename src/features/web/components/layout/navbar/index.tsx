@@ -230,7 +230,7 @@ export function Navbar() {
               trigger={["click"]}
             >
               <Avatar
-                className="ml-1! cursor-pointer!"
+                className="ml-1! cursor-pointer! bg-foreground/20! text-foreground/80!"
                 src={user?.avatar}
                 icon={<UserOutlined />}
               />

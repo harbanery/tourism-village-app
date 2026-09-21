@@ -47,9 +47,17 @@ export function ProfileInfoSection({
       </Button>
 
       <div className="flex flex-col items-center text-center">
-        {/* Badge dot verifikasi di kanan bawah avatar (ceklis / warning). */}
+        {/* Badge dot verifikasi di kanan bawah avatar (ceklis / warning).
+            Avatar placeholder mengikuti warna foreground (permintaan
+            DROID): bg foreground + ikon warna background — kontras di
+            light maupun dark mode. */}
         <Badge offset={[-15, 84]} count={verificationDot}>
-          <Avatar size={96} src={user?.avatar} icon={<UserOutlined />} />
+          <Avatar
+            size={96}
+            className="bg-foreground/20! text-foreground/80!"
+            src={user?.avatar}
+            icon={<UserOutlined />}
+          />
         </Badge>
         <h1 className="mt-4 text-xl font-bold">{user?.name ?? "-"}</h1>
         <div className="mt-1 flex items-center gap-2">
@@ -70,10 +78,7 @@ export function ProfileInfoSection({
           [
             [t("common.phone"), user?.phone ? maskPhone(user.phone) : "-"],
             user?.gender
-              ? [
-                  t("profile.gender"),
-                  t(`profile.${user.gender}`),
-                ]
+              ? [t("profile.gender"), t(`profile.${user.gender}`)]
               : null,
             [
               t("profile.birthDate"),

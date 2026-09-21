@@ -5,7 +5,6 @@ import { Badge, Button, Card, Col, Empty, Row } from "antd";
 import {
   CheckCircleFilled,
   EnvironmentFilled,
-  EnvironmentOutlined,
   ShoppingCartOutlined,
   StarFilled,
 } from "@ant-design/icons";
