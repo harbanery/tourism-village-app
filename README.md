@@ -42,11 +42,6 @@
 
 My web-based application, **DesakuWisataku**, is a full-stack tourism village platform that connects visitors with a fictional Indonesian village's tourism offerings. Visitors can browse places and travel packages, read articles, watch video documentation, and book packages end-to-end: cart → checkout → **Midtrans QRIS payment** → e-ticket & invoice PDF — all with real-time in-app notifications. A dedicated **admin panel** manages content (places, packages, blog, sponsors, testimonials), orders, and accounts, complete with a Chart.js analytics dashboard. Logging in is frictionless: **Google SSO** (OAuth redirect — not Firebase, no popups) registers the account on first sign-in and only asks for a password afterwards — no manual forms required.
 
-The application runs in two payment modes with **zero code changes**:
-
-- When `MIDTRANS_SERVER_KEY` is **set**, payments are charged through the **Midtrans Core API** (QRIS POS) — sandbox or production depending on `MIDTRANS_ENV`.
-- When `MIDTRANS_SERVER_KEY` is **empty**, the app automatically falls back to a **built-in payment simulator** so the whole booking flow stays demoable without Midtrans credentials.
-
 ### Built With
 
 [![Next][Next.js]][Next-url]
@@ -58,11 +53,11 @@ The application runs in two payment modes with **zero code changes**:
 
 ## The Story
 
-Indonesian villages hold some of the most beautiful tourism experiences in the country, yet most of them are still promoted through word of mouth and scattered social media posts. Travelers cannot see what packages exist, how much they cost, or how to book — and village managers have no simple tool to manage it all.
+In 2021, I built my first tourism village website: **Desa Wisata Tempellemahbang** in Jepon, Blora — a PHP/**CodeIgniter** project for promoting the village and growing its visitors, later published as a paper on [ResearchGate](https://www.researchgate.net/publication/357699450_Implementasi_Web_Desa_Wisata_Tempellemahbang_Jepon_Blora_untuk_Promosi_dan_Peningkatan_Pengunjung). It did what it needed to do, but it was very much a product of its stack: classic MVC, server-rendered PHP, and none of the modern web tooling I work with today.
 
-**DesakuWisataku** is my answer to that gap: a single platform where a village can present its places, packages, articles, and videos professionally, while visitors get a smooth booking experience with modern QRIS payment. The admin panel is designed so a non-technical village operator can manage everything — content, orders, and customers — without touching a line of code.
+**DesakuWisataku** is that idea rebuilt from scratch. I'll be honest — the motivation is simple: I wanted to add another project to my portfolio and to see how my old tourism village website would turn out if I built it again today with **Next.js**, this time under a different (fictional) village name. Same goal — presenting a village's places, packages, articles, and galleries professionally, with a smooth booking flow (cart → checkout → QRIS payment → e-ticket) and an admin panel a non-technical village operator can actually use — but with a completely different engine: Next.js 16 App Router, Prisma, Midtrans, Cloudinary, and cron automation.
 
-This project is as much a showcase of a production-grade architecture (Next.js 16 App Router, Prisma, Midtrans, Cloudinary, cron automation) as it is a usable product for a real-world problem.
+This project is as much a showcase of production-grade architecture as it is a modern remake of my own 2021 work.
 
 ## Getting Started
 
@@ -137,7 +132,7 @@ To get a local copy up and running follow these simple steps.
    # Secret endpoint cron (/api/cron/*)
    CRON_SECRET="your-cron-secret"
 
-   # Google SSO (bukan Firebase) — kosong = SSO nonaktif
+   # Google SSO (Google Cloud Console) — kosong = SSO nonaktif
    GOOGLE_CLIENT_ID=""
    GOOGLE_CLIENT_SECRET=""
    ```
