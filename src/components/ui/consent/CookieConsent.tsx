@@ -64,7 +64,7 @@ export function CookieConsent() {
               </p>
             </div>
             <div className="flex shrink-0 gap-2">
-              <Button size="small" onClick={() => choose("essential")}>
+              <Button size="small" ghost onClick={() => choose("essential")}>
                 {t("consent.essential")}
               </Button>
               <Button
