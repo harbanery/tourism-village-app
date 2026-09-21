@@ -80,108 +80,105 @@ export function RegisterFormSection({
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       <Reveal>
         <Card>
-        <h1 className="text-2xl font-bold text-center">
-          {t("auth.register.title")}
-        </h1>
-        <p className="mt-1 text-center text-foreground/60">
-          {t("auth.register.subtitle")}
-        </p>
-        <Form
-          form={form}
-          layout="vertical"
-          className="mt-6!"
-          onFinish={handleRegister}
-          disabled={loading}
-        >
-          <Form.Item
-            name="name"
-            label={t("auth.register.name")}
-            rules={[
-              { required: true },
-              { min: 2, message: t("auth.register.nameMin") },
-              { max: 60, message: t("auth.register.nameMin") },
-            ]}
+          <h1 className="text-2xl font-bold text-center">
+            {t("auth.register.title")}
+          </h1>
+          <Form
+            form={form}
+            layout="vertical"
+            className="mt-6!"
+            onFinish={handleRegister}
+            disabled={loading}
           >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder={t("auth.register.namePlaceholder")}
-            />
-          </Form.Item>
-          <Form.Item
-            name="email"
-            label={t("common.email")}
-            rules={[{ required: true }, { type: "email" }]}
-          >
-            <Input
-              prefix={<MailOutlined />}
-              placeholder={t("auth.register.emailPlaceholder")}
-              autoComplete="email"
-            />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            label={t("auth.register.password")}
-            rules={[
-              { required: true },
-              { min: 8, message: t("auth.register.passwordMin") },
-              {
-                pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
-                message: t("auth.register.passwordPattern"),
-              },
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder={t("auth.register.passwordPlaceholder")}
-            />
-          </Form.Item>
-          <Form.Item
-            name="retypePassword"
-            label={t("auth.register.retypePassword")}
-            dependencies={["password"]}
-            rules={[
-              { required: true },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error(t("auth.register.passwordMismatch")),
-                  );
+            <Form.Item
+              name="name"
+              label={t("auth.register.name")}
+              rules={[
+                { required: true },
+                { min: 2, message: t("auth.register.nameMin") },
+                { max: 60, message: t("auth.register.nameMin") },
+              ]}
+            >
+              <Input
+                prefix={<UserOutlined />}
+                placeholder={t("auth.register.namePlaceholder")}
+              />
+            </Form.Item>
+            <Form.Item
+              name="email"
+              label={t("common.email")}
+              rules={[{ required: true }, { type: "email" }]}
+            >
+              <Input
+                prefix={<MailOutlined />}
+                placeholder={t("auth.register.emailPlaceholder")}
+                autoComplete="email"
+              />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              label={t("auth.register.password")}
+              rules={[
+                { required: true },
+                { min: 8, message: t("auth.register.passwordMin") },
+                {
+                  pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
+                  message: t("auth.register.passwordPattern"),
                 },
-              }),
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder={t("auth.register.retypePlaceholder")}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              {t("auth.register.button")}
-            </Button>
-          </Form.Item>
-        </Form>
-        <Divider plain className="my-2! text-xs!">
-          <span className="text-xs text-foreground/50">
-            {t("auth.google.divider")}
-          </span>
-        </Divider>
-        <div className="flex justify-center">
-          <GoogleButton enabled={googleEnabled} redirectTo="/profile" />
-        </div>
-        <p className="mt-6 text-center text-sm text-foreground/60">
-          {t("auth.register.haveAccount")}{" "}
-          <button
-            type="button"
-            onClick={() => router.push("/login")}
-            className="cursor-pointer! text-primary! hover:underline!"
-          >
-            {t("nav.login")}
-          </button>
-        </p>
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder={t("auth.register.passwordPlaceholder")}
+              />
+            </Form.Item>
+            <Form.Item
+              name="retypePassword"
+              label={t("auth.register.retypePassword")}
+              dependencies={["password"]}
+              rules={[
+                { required: true },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error(t("auth.register.passwordMismatch")),
+                    );
+                  },
+                }),
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder={t("auth.register.retypePlaceholder")}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" block loading={loading}>
+                {t("auth.register.button")}
+              </Button>
+            </Form.Item>
+          </Form>
+          <Divider plain className="my-2! text-xs!">
+            <span className="text-xs text-foreground/50">
+              {t("auth.google.divider")}
+            </span>
+          </Divider>
+          <div className="flex justify-center">
+            <GoogleButton enabled={googleEnabled} redirectTo="/profile" />
+          </div>
+          <p className="mt-6 text-center text-sm text-foreground/60">
+            {t("auth.register.haveAccount")}{" "}
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="cursor-pointer! text-primary! hover:underline!"
+            >
+              {t("nav.login")}
+            </button>
+          </p>
         </Card>
       </Reveal>
     </div>

@@ -72,12 +72,11 @@ export function AboutSection() {
   return (
     <>
       <section className="flex min-h-screen items-center justify-center">
-        <div className="mx-auto w-full max-w-4xl px-4 text-center">
+        <div className="translate-x-4 -translate-y-4 w-full max-w-4xl px-4 text-center">
           <Reveal>
             <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow">
               {t("about.title")}
             </h1>
-            <p className="mt-1 text-white/60">{t("about.subtitle")}</p>
           </Reveal>
 
           <div className="mt-8 space-y-5 text-white/80">
@@ -110,9 +109,6 @@ export function AboutSection() {
             <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
               {t("about.feature.title")}
             </h2>
-            <p className="mt-1 text-white/80 drop-shadow">
-              {t("about.feature.subtitle")}
-            </p>
           </Reveal>
 
           <div className="mt-6 flex flex-col divide-y divide-white/10">

@@ -87,51 +87,48 @@ export function ForgotPasswordSection() {
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       <Reveal>
         <Card>
-        <h1 className="text-2xl font-bold text-center">
-          {t("auth.forgot.title")}
-        </h1>
-        <p className="mt-1 text-center text-foreground/60">
-          {t("auth.forgot.subtitle")}
-        </p>
-        <Form
-          form={form}
-          layout="vertical"
-          className="mt-6!"
-          onFinish={handleSubmit}
-          disabled={loading}
-        >
-          <Form.Item
-            name="email"
-            label={t("common.email")}
-            rules={[{ required: true }, { type: "email" }]}
+          <h1 className="text-2xl font-bold text-center">
+            {t("auth.forgot.title")}
+          </h1>
+          <Form
+            form={form}
+            layout="vertical"
+            className="mt-6!"
+            onFinish={handleSubmit}
+            disabled={loading}
           >
-            <Input
-              prefix={<MailOutlined />}
-              placeholder={t("auth.forgot.emailPlaceholder")}
-              autoComplete="email"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              {t("auth.forgot.button")}
-            </Button>
-          </Form.Item>
-        </Form>
-        <Alert
-          type="info"
-          showIcon
-          title={t("auth.forgot.info")}
-          className="mt-2!"
-        />
-        <p className="mt-4 text-center text-sm text-foreground/60">
-          <button
-            type="button"
-            onClick={() => router.push("/login")}
-            className="cursor-pointer! text-primary! hover:underline!"
-          >
-            ← {t("auth.forgot.backToLogin")}
-          </button>
-        </p>
+            <Form.Item
+              name="email"
+              label={t("common.email")}
+              rules={[{ required: true }, { type: "email" }]}
+            >
+              <Input
+                prefix={<MailOutlined />}
+                placeholder={t("auth.forgot.emailPlaceholder")}
+                autoComplete="email"
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" block loading={loading}>
+                {t("auth.forgot.button")}
+              </Button>
+            </Form.Item>
+          </Form>
+          <Alert
+            type="info"
+            showIcon
+            title={t("auth.forgot.info")}
+            className="mt-2!"
+          />
+          <p className="mt-4 text-center text-sm text-foreground/60">
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="cursor-pointer! text-primary! hover:underline!"
+            >
+              ← {t("auth.forgot.backToLogin")}
+            </button>
+          </p>
         </Card>
       </Reveal>
     </div>

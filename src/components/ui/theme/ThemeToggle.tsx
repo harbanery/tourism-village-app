@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Tooltip } from "antd";
-import { MoonOutlined, SunOutlined } from "@ant-design/icons";
+import { MoonFilled, SunFilled } from "@ant-design/icons";
 import { useThemeMode } from "./ThemeProvider";
 import { useT } from "@/components/i18n/LocaleProvider";
 
@@ -13,7 +13,7 @@ export function ThemeToggle() {
       <Button
         type="text"
         aria-label={t("nav.theme.toggle")}
-        icon={mode === "light" ? <MoonOutlined /> : <SunOutlined />}
+        icon={mode === "light" ? <SunFilled /> : <MoonFilled />}
         onClick={toggle}
       />
     </Tooltip>

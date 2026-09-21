@@ -5,7 +5,7 @@ import { Badge, Button, Card, Col, Row } from "antd";
 import {
   ArrowRightOutlined,
   CheckCircleFilled,
-  EnvironmentOutlined,
+  EnvironmentFilled,
   StarFilled,
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -88,7 +88,7 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
                     {/* Urutan body: lokasi (kiri + icon) → fasilitas → harga (tengah). */}
                     {pkg.placeName && (
                       <div className="flex items-center justify-start gap-2 text-white/85">
-                        <EnvironmentOutlined className="text-sm!" />
+                        <EnvironmentFilled className="text-sm!" />
                         <span>{pkg.placeName}</span>
                       </div>
                     )}

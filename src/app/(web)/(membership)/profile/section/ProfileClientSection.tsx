@@ -2,7 +2,7 @@
 
 import { useState, type CSSProperties } from "react";
 import { Segmented, theme } from "antd";
-import { HistoryOutlined, SettingOutlined } from "@ant-design/icons";
+import { ClockCircleFilled, SettingFilled } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 import { useMounted } from "@/hooks/useMounted";
 import type { User } from "@/features/web/types";
@@ -74,12 +74,12 @@ export default function ProfileClientSection({
           options={[
             {
               value: "history",
-              icon: <HistoryOutlined />,
+              icon: <ClockCircleFilled />,
               label: t("profile.orderHistory"),
             },
             {
               value: "settings",
-              icon: <SettingOutlined />,
+              icon: <SettingFilled />,
               label: t("settings.title"),
             },
           ]}

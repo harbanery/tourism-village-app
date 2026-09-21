@@ -188,58 +188,55 @@ export function OtpSection({
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       <Reveal>
         <Card>
-        <div className="text-center">
-          <SafetyOutlined className="text-4xl! text-primary!" />
-          <h1 className="mt-3 text-2xl font-bold">{t("auth.otp.title")}</h1>
-          <p className="mt-1 text-foreground/60">
-            {isReset
-              ? t("auth.otp.subtitleReset")
-              : t("auth.otp.subtitleRegister")}
-          </p>
-        </div>
+          <div className="text-center">
+            <SafetyOutlined className="text-4xl! text-primary!" />
+            <h1 className="mt-3 text-2xl font-bold">{t("auth.otp.title")}</h1>
+          </div>
 
-        {dev && (
-          <Alert
-            className="mt-4!"
-            type="info"
-            showIcon
-            title={t("auth.otp.devCode")}
-            description={
-              <span className="font-mono text-lg font-bold tracking-widest">
-                {dev}
-              </span>
-            }
-          />
-        )}
-
-        {/* Tanpa tombol verifikasi — submit otomatis saat 6 digit terisi. */}
-        <div className="mt-6 flex flex-col items-center gap-2">
-          <Input.OTP
-            autoFocus
-            length={6}
-            inputMode="numeric"
-            disabled={loading}
-            value={code}
-            onChange={handleChange}
-          />
-          {loading && (
-            <p className="text-xs text-foreground/50">{t("common.loading")}</p>
+          {dev && (
+            <Alert
+              className="mt-4!"
+              type="info"
+              showIcon
+              title={t("auth.otp.devCode")}
+              description={
+                <span className="font-mono text-lg font-bold tracking-widest">
+                  {dev}
+                </span>
+              }
+            />
           )}
-        </div>
 
-        <div className="mt-6 text-center space-y-2 text-sm">
-          <p className="text-foreground/60">{t("auth.otp.notReceived")}</p>
-          <Button
-            type="link"
-            loading={resending}
-            disabled={resendIn > 0 || rateLimited}
-            onClick={handleResend}
-          >
-            {resendIn > 0
-              ? t("auth.otp.resendIn", { time: formatCountdown(resendIn) })
-              : t("auth.otp.resend")}
-          </Button>
-        </div>
+          {/* Tanpa tombol verifikasi — submit otomatis saat 6 digit terisi. */}
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <Input.OTP
+              autoFocus
+              length={6}
+              inputMode="numeric"
+              disabled={loading}
+              value={code}
+              onChange={handleChange}
+            />
+            {loading && (
+              <p className="text-xs text-foreground/50">
+                {t("common.loading")}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-6 text-center space-y-2 text-sm">
+            <p className="text-foreground/60">{t("auth.otp.notReceived")}</p>
+            <Button
+              type="link"
+              loading={resending}
+              disabled={resendIn > 0 || rateLimited}
+              onClick={handleResend}
+            >
+              {resendIn > 0
+                ? t("auth.otp.resendIn", { time: formatCountdown(resendIn) })
+                : t("auth.otp.resend")}
+            </Button>
+          </div>
         </Card>
       </Reveal>
     </div>

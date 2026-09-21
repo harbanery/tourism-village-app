@@ -4,6 +4,7 @@ import { useMounted } from "@/hooks/useMounted";
 import { Badge, Button, Card, Col, Empty, Row } from "antd";
 import {
   CheckCircleFilled,
+  EnvironmentFilled,
   EnvironmentOutlined,
   ShoppingCartOutlined,
   StarFilled,
@@ -66,7 +67,7 @@ export function PackageCard({
         className="flex items-center justify-start gap-2 truncate text-xs text-foreground/50"
         title={pkg.placeName ?? undefined}
       >
-        <EnvironmentOutlined className="text-xs!" />
+        <EnvironmentFilled className="text-xs!" />
 
         <span>{pkg.placeName ?? "-"}</span>
       </div>

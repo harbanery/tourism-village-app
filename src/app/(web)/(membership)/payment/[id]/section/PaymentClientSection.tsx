@@ -152,7 +152,7 @@ function PaymentCountdown({
 function QrisLogo({ className }: { className?: string }) {
   return (
     <span
-      className={`inline-flex items-center rounded-md bg-white px-1.5 py-0.5 shadow-sm ${className ?? ""}`}
+      className={`inline-flex items-center rounded-md bg-[#ffffff] px-1.5 py-0.5 shadow-sm ${className ?? ""}`}
     >
       {/* SVG lokal → unoptimized (image optimizer Next menolak .svg). */}
       <Image
@@ -468,7 +468,7 @@ export default function PaymentClientSection({
               {t("payment.qrisTitle")}
               <QrisLogo />
             </p>
-            <div className="rounded-xl border border-black/10 bg-white p-3 dark:border-white/10">
+            <div className="rounded-xl border border-black/10 bg-[#ffffff] p-3 dark:border-white/10">
               {qris.qrImageUrl ? (
                 // URL gambar QR resmi dari Midtrans bila tersedia.
                 <Image

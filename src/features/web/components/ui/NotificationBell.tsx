@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge, Button, Empty, Popover, Spin } from "antd";
-import { BellOutlined, CheckOutlined } from "@ant-design/icons";
+import { BellFilled, CheckCircleFilled } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
 
 interface NotificationItem {
@@ -177,7 +177,7 @@ export function NotificationBell({
           <Button
             size="small"
             type="text"
-            icon={<CheckOutlined />}
+            icon={<CheckCircleFilled />}
             onClick={handleMarkAll}
           >
             {t("notifBell.markAllRead")}
@@ -257,7 +257,7 @@ export function NotificationBell({
         <Button
           type="text"
           aria-label={t("notifBell.title")}
-          icon={<BellOutlined />}
+          icon={<BellFilled />}
         />
       </Badge>
     </Popover>

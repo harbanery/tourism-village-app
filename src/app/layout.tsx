@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ThemeProvider } from "@/components/ui/theme/ThemeProvider";
-import { CookieConsent } from "@/components/ui/consent/CookieConsent";
 import { switzerSans, advercase, paquito } from "@/utils/fonts/next-local";
 import { geistMono } from "@/utils/fonts/next-google";
 import {
@@ -122,9 +121,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <LocaleProvider>
             <ThemeProvider>
               {children}
-              {/* Banner persetujuan cookie + analytics ter-gate (rekom 2.5).
-                  Harus DI DALAM LocaleProvider agar translate jalan. */}
-              <CookieConsent />
+              {/*
+                Banner cookie + analytics TIDAK lagi di root: hanya dipasang
+                di layout (web) dan admin ((auth)/(panel)) sehingga halaman
+                loading/not-found/error — yang dirender langsung di bawah
+                root layout — tidak menampilkan banner (permintaan DROID).
+              */}
             </ThemeProvider>
           </LocaleProvider>
         </AntdRegistry>

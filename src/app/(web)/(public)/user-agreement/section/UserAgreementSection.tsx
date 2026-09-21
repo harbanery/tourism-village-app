@@ -24,21 +24,11 @@ export function UserAgreementSection() {
       key: "terms",
       href: "#terms",
       title: t("terms.title"),
-      children: TERMS_BLOCKS.map((key) => ({
-        key: `terms-${key}`,
-        href: `#terms-${key}`,
-        title: t(`terms.${key}.title`),
-      })),
     },
     {
       key: "privacy-policy",
       href: "#privacy-policy",
       title: t("privacy.title"),
-      children: PRIVACY_BLOCKS.map((key) => ({
-        key: `privacy-${key}`,
-        href: `#privacy-${key}`,
-        title: t(`privacy.${key}.title`),
-      })),
     },
   ];
 
@@ -60,60 +50,60 @@ export function UserAgreementSection() {
           {/* Syarat & Ketentuan — anchor utama #terms. */}
           <Reveal>
             <section id="terms" className="scroll-mt-20">
-            <h2 className="text-xl md:text-2xl font-bold">
-              {t("terms.title")}
-            </h2>
-            <p className="mt-3 text-justify leading-relaxed text-foreground/80">
-              {t("terms.intro")}
-            </p>
+              <h2 className="text-xl md:text-2xl font-bold">
+                {t("terms.title")}
+              </h2>
+              <p className="mt-3 text-justify leading-relaxed text-foreground/80">
+                {t("terms.intro")}
+              </p>
 
-            <div className="mt-6 space-y-8">
-              {TERMS_BLOCKS.map((key, index) => (
-                <section
-                  key={`terms-${key}`}
-                  id={`terms-${key}`}
-                  className="scroll-mt-20"
-                >
-                  <h3 className="text-lg font-semibold">
-                    <span className="mr-2 text-primary">{index + 1}.</span>
-                    {t(`terms.${key}.title`)}
-                  </h3>
-                  <p className="mt-2 text-justify leading-relaxed text-foreground/80">
-                    {t(`terms.${key}.body`)}
-                  </p>
-                </section>
-              ))}
-            </div>
+              <div className="mt-6 space-y-8">
+                {TERMS_BLOCKS.map((key, index) => (
+                  <section
+                    key={`terms-${key}`}
+                    id={`terms-${key}`}
+                    className="scroll-mt-20"
+                  >
+                    <h3 className="text-lg font-semibold">
+                      <span className="mr-2 text-primary">{index + 1}.</span>
+                      {t(`terms.${key}.title`)}
+                    </h3>
+                    <p className="mt-2 text-justify leading-relaxed text-foreground/80">
+                      {t(`terms.${key}.body`)}
+                    </p>
+                  </section>
+                ))}
+              </div>
             </section>
           </Reveal>
 
           {/* Kebijakan Privasi — anchor utama #privacy-policy. */}
           <Reveal>
             <section id="privacy-policy" className="scroll-mt-20">
-            <h2 className="text-xl md:text-2xl font-bold">
-              {t("privacy.title")}
-            </h2>
-            <p className="mt-1 text-sm text-foreground/50">
-              {t("privacy.updated")}
-            </p>
+              <h2 className="text-xl md:text-2xl font-bold">
+                {t("privacy.title")}
+              </h2>
+              <p className="mt-1 text-sm text-foreground/50">
+                {t("privacy.updated")}
+              </p>
 
-            <div className="mt-6 space-y-8">
-              {PRIVACY_BLOCKS.map((key, index) => (
-                <section
-                  key={`privacy-${key}`}
-                  id={`privacy-${key}`}
-                  className="scroll-mt-20"
-                >
-                  <h3 className="text-lg font-semibold">
-                    <span className="mr-2 text-primary">{index + 1}.</span>
-                    {t(`privacy.${key}.title`)}
-                  </h3>
-                  <p className="mt-2 text-justify leading-relaxed text-foreground/80">
-                    {t(`privacy.${key}.body`)}
-                  </p>
-                </section>
-              ))}
-            </div>
+              <div className="mt-6 space-y-8">
+                {PRIVACY_BLOCKS.map((key, index) => (
+                  <section
+                    key={`privacy-${key}`}
+                    id={`privacy-${key}`}
+                    className="scroll-mt-20"
+                  >
+                    <h3 className="text-lg font-semibold">
+                      <span className="mr-2 text-primary">{index + 1}.</span>
+                      {t(`privacy.${key}.title`)}
+                    </h3>
+                    <p className="mt-2 text-justify leading-relaxed text-foreground/80">
+                      {t(`privacy.${key}.body`)}
+                    </p>
+                  </section>
+                ))}
+              </div>
             </section>
           </Reveal>
         </div>

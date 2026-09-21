@@ -690,7 +690,7 @@ export function SettingsSection({
   );
 
   return (
-    <Card title={t("settings.title")}>
+    <Card>
       <Tabs
         activeKey={tab}
         onChange={setTab}

@@ -21,6 +21,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "error.retry": "Coba Lagi",
     "notFound.subtitle": "Halaman yang Anda cari tidak ditemukan.",
     "notFound.back": "Kembali ke Beranda",
+    "notFound.backAdmin": "Kembali ke Dashboard",
 
     "menu.dashboard": "Dashboard",
     "menu.account": "Akun",
@@ -781,6 +782,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "error.retry": "Try Again",
     "notFound.subtitle": "The page you are looking for does not exist.",
     "notFound.back": "Back Home",
+    "notFound.backAdmin": "Back to Dashboard",
 
     "menu.dashboard": "Dashboard",
     "menu.account": "Accounts",

@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar, Button, Drawer, Dropdown } from "antd";
 import {
-  HistoryOutlined,
+  ClockCircleFilled,
   LoginOutlined,
   LogoutOutlined,
   MenuOutlined,
-  SettingOutlined,
+  SettingFilled,
   UserOutlined,
 } from "@ant-design/icons";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -45,7 +45,7 @@ function navLinkClass(active: boolean, stacked = false, onHero = false) {
   const color = onHero
     ? "text-white/85! hover:text-white!"
     : "text-foreground/80! hover:text-foreground!";
-  const underline = onHero ? "after:bg-white!" : "after:bg-primary!";
+  const underline = onHero ? "after:bg-white!" : "after:bg-foreground!";
   return [
     "group relative! cursor-pointer! text-sm! font-medium! transition-colors!",
     "after:absolute! after:left-0! after:bottom-0! after:h-0.5! after:w-0! after:rounded-full!",
@@ -56,7 +56,7 @@ function navLinkClass(active: boolean, stacked = false, onHero = false) {
     active
       ? onHero
         ? "text-white! after:w-full!"
-        : "text-primary! after:w-full!"
+        : "text-primary! after:bg-primary! after:w-full!"
       : color,
   ].join(" ");
 }
@@ -76,8 +76,9 @@ export function Navbar() {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const isHome = pathname === "/";
+  const isAbout = pathname === "/about";
   /** Mode hero: hanya di paling atas home — transparan, tanpa blur, teks putih. */
-  const onHero = isHome && !scrolled;
+  const onHero = (isHome || isAbout) && !scrolled;
 
   /**
    * Perilaku scroll (pola navbar portfolio + tampil saat berhenti):
@@ -136,7 +137,9 @@ export function Navbar() {
   };
 
   /** Wrapper tombol aksi kanan: saat mode hero, paksa ikon antd putih. */
-  const actionWrap = onHero ? "[&_.ant-btn]:text-white!" : undefined;
+  const actionWrap = onHero
+    ? "[&_.ant-btn]:text-white/85! hover:[&_.ant-btn]:text-white!"
+    : "[&_.ant-btn]:text-foreground/80! hover:[&_.ant-btn]:text-foreground!";
 
   return (
     <header
@@ -190,7 +193,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-1">
-          <div className={[actionWrap, "flex items-center"].join(" ")}>
+          <div className={[actionWrap, "flex items-center gap-1"].join(" ")}>
             <LanguageToggle />
             <ThemeToggle />
             {/* SSE realtime (rekomendasi 1.2) — fallback polling otomatis. */}
@@ -204,13 +207,13 @@ export function Navbar() {
                 items: [
                   {
                     key: "history",
-                    icon: <HistoryOutlined />,
+                    icon: <ClockCircleFilled />,
                     label: t("profile.orderHistory"),
                     onClick: () => router.push("/profile?view=history"),
                   },
                   {
                     key: "settings",
-                    icon: <SettingOutlined />,
+                    icon: <SettingFilled />,
                     label: t("settings.title"),
                     onClick: () => router.push("/profile?view=settings"),
                   },
@@ -233,7 +236,7 @@ export function Navbar() {
               />
             </Dropdown>
           ) : (
-            <>
+            <div className="flex items-center gap-2">
               <Button
                 color="primary"
                 variant="outlined"
@@ -258,7 +261,7 @@ export function Navbar() {
               >
                 {t("nav.register")}
               </Button>
-            </>
+            </div>
           )}
           <div className={actionWrap}>
             <Button

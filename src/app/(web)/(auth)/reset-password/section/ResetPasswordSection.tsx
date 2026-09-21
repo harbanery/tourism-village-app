@@ -97,68 +97,67 @@ export function ResetPasswordSection({ token }: { token: string }) {
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       <Reveal>
         <Card>
-        <div className="text-center">
-          <SafetyOutlined className="text-4xl! text-primary!" />
-          <h1 className="mt-3 text-2xl font-bold">{t("auth.reset.title")}</h1>
-          <p className="mt-1 text-foreground/60">{t("auth.reset.subtitle")}</p>
-        </div>
+          <div className="text-center">
+            <SafetyOutlined className="text-4xl! text-primary!" />
+            <h1 className="mt-3 text-2xl font-bold">{t("auth.reset.title")}</h1>
+          </div>
 
-        <Form
-          form={form}
-          layout="vertical"
-          className="mt-6!"
-          onFinish={handleReset}
-          disabled={loading}
-        >
-          <Form.Item
-            name="password"
-            label={t("auth.register.password")}
-            rules={[
-              { required: true },
-              { min: 8, message: t("auth.register.passwordMin") },
-              {
-                pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
-                message: t("auth.register.passwordPattern"),
-              },
-            ]}
+          <Form
+            form={form}
+            layout="vertical"
+            className="mt-6!"
+            onFinish={handleReset}
+            disabled={loading}
           >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder={t("auth.reset.passwordPlaceholder")}
-              autoComplete="new-password"
-            />
-          </Form.Item>
-          <Form.Item
-            name="retypePassword"
-            label={t("auth.register.retypePassword")}
-            dependencies={["password"]}
-            rules={[
-              { required: true },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error(t("auth.register.passwordMismatch")),
-                  );
+            <Form.Item
+              name="password"
+              label={t("auth.register.password")}
+              rules={[
+                { required: true },
+                { min: 8, message: t("auth.register.passwordMin") },
+                {
+                  pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
+                  message: t("auth.register.passwordPattern"),
                 },
-              }),
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder={t("auth.reset.retypePlaceholder")}
-              autoComplete="new-password"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              {t("auth.reset.button")}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder={t("auth.reset.passwordPlaceholder")}
+                autoComplete="new-password"
+              />
+            </Form.Item>
+            <Form.Item
+              name="retypePassword"
+              label={t("auth.register.retypePassword")}
+              dependencies={["password"]}
+              rules={[
+                { required: true },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error(t("auth.register.passwordMismatch")),
+                    );
+                  },
+                }),
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder={t("auth.reset.retypePlaceholder")}
+                autoComplete="new-password"
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" block loading={loading}>
+                {t("auth.reset.button")}
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
       </Reveal>
     </div>
   );

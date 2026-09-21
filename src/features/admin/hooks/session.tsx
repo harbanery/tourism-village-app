@@ -7,6 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { usePathname } from "next/navigation";
 import type { AdminRole } from "@prisma/client";
 
 export interface AdminSessionInfo {
@@ -49,6 +50,7 @@ export function AdminSessionProvider({
 }) {
   const [session, setSession] = useState<AdminSessionInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
 
   const fetchSession = useCallback(async () => {
     try {
@@ -64,9 +66,13 @@ export function AdminSessionProvider({
     }
   }, []);
 
+  // Ambil sesi saat mount DAN setiap kali rute admin berubah: provider
+  // hidup di admin/layout (tetap ter-mount saat pindah login → panel),
+  // sehingga tanpa refetch per-pathname data user & menu role di navbar
+  // baru muncul setelah refresh manual (bug DROID).
   useEffect(() => {
     void Promise.resolve().then(fetchSession);
-  }, [fetchSession]);
+  }, [fetchSession, pathname]);
 
   return (
     <AdminSessionContext.Provider value={{ session, loading, refresh: fetchSession }}>

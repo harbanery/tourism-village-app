@@ -101,76 +101,73 @@ export function LoginFormSection({
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       <Reveal>
         <Card>
-        <h1 className="text-2xl font-bold text-center">
-          {t("auth.login.title")}
-        </h1>
-        <p className="mt-1 text-center text-foreground/60">
-          {t("auth.login.subtitle")}
-        </p>
-        <Form
-          form={form}
-          layout="vertical"
-          className="mt-6!"
-          onFinish={handleLogin}
-          disabled={loading}
-        >
-          <Form.Item
-            name="email"
-            label={t("common.email")}
-            rules={[{ required: true }, { type: "email" }]}
+          <h1 className="text-2xl font-bold text-center">
+            {t("auth.login.title")}
+          </h1>
+          <Form
+            form={form}
+            layout="vertical"
+            className="mt-6!"
+            onFinish={handleLogin}
+            disabled={loading}
           >
-            <Input
-              prefix={<MailOutlined />}
-              placeholder={t("auth.login.emailPlaceholder")}
-              autoComplete="email"
-            />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            label={t("auth.register.password")}
-            rules={[{ required: true }]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder={t("auth.login.passwordPlaceholder")}
-              autoComplete="current-password"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              {t("auth.login.button")}
-            </Button>
-          </Form.Item>
-        </Form>
-        <Divider plain className="my-2! text-xs!">
-          <span className="text-xs text-foreground/50">
-            {t("auth.google.divider")}
-          </span>
-        </Divider>
-        <div className="w-full flex justify-center">
-          <GoogleButton enabled={googleEnabled} redirectTo={redirectTo} />
-        </div>
-        <div className="mt-6 text-center space-y-2 text-sm">
-          <p>
-            <button
-              type="button"
-              onClick={() => router.push("/forgot-password")}
-              className="cursor-pointer! text-primary! hover:underline!"
+            <Form.Item
+              name="email"
+              label={t("common.email")}
+              rules={[{ required: true }, { type: "email" }]}
             >
-              {t("auth.login.forgot")}
-            </button>
-          </p>
-          <p className="text-foreground/60">
-            {t("auth.login.noAccount")}{" "}
-            <button
-              type="button"
-              onClick={() => router.push("/register")}
-              className="cursor-pointer! text-primary! hover:underline!"
+              <Input
+                prefix={<MailOutlined />}
+                placeholder={t("auth.login.emailPlaceholder")}
+                autoComplete="email"
+              />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              label={t("auth.register.password")}
+              rules={[{ required: true }]}
             >
-              {t("nav.register")}
-            </button>
-          </p>
-        </div>
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder={t("auth.login.passwordPlaceholder")}
+                autoComplete="current-password"
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" block loading={loading}>
+                {t("auth.login.button")}
+              </Button>
+            </Form.Item>
+          </Form>
+          <Divider plain className="my-2! text-xs!">
+            <span className="text-xs text-foreground/50">
+              {t("auth.google.divider")}
+            </span>
+          </Divider>
+          <div className="w-full flex justify-center">
+            <GoogleButton enabled={googleEnabled} redirectTo={redirectTo} />
+          </div>
+          <div className="mt-6 text-center space-y-2 text-sm">
+            <p>
+              <button
+                type="button"
+                onClick={() => router.push("/forgot-password")}
+                className="cursor-pointer! text-primary! hover:underline!"
+              >
+                {t("auth.login.forgot")}
+              </button>
+            </p>
+            <p className="text-foreground/60">
+              {t("auth.login.noAccount")}{" "}
+              <button
+                type="button"
+                onClick={() => router.push("/register")}
+                className="cursor-pointer! text-primary! hover:underline!"
+              >
+                {t("nav.register")}
+              </button>
+            </p>
+          </div>
         </Card>
       </Reveal>
     </div>

@@ -52,9 +52,6 @@ export function FeatureSection() {
             </span>
             ?
           </h2>
-          <p className="mt-1 text-white/80 drop-shadow">
-            {t("home.why.subtitle")}
-          </p>
         </Reveal>
 
         {/* Grid 4 kartu berposisi "gunung" (zigzag): kartu pertama di
