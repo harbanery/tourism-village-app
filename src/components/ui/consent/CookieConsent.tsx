@@ -64,7 +64,12 @@ export function CookieConsent() {
               </p>
             </div>
             <div className="flex shrink-0 gap-2">
-              <Button size="small" ghost onClick={() => choose("essential")}>
+              <Button
+                size="small"
+                ghost
+                onClick={() => choose("essential")}
+                className="border-foreground/60! text-foreground! hover:border-foreground!"
+              >
                 {t("consent.essential")}
               </Button>
               <Button
