@@ -16,7 +16,7 @@ const AdminShell = ({ children }: { children: React.ReactNode }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <Layout className="hide-scrollbar" style={{ minHeight: "100vh" }} hasSider>
+    <Layout className="hide-scrollbar!" style={{ minHeight: "100vh" }} hasSider>
       <SiderLayout
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}

@@ -78,7 +78,7 @@ export function PackageCard({
             className="flex min-h-6 items-start gap-2 truncate text-sm text-foreground/80"
             title={f}
           >
-            <CheckCircleFilled className="mt-0.5 shrink-0 text-primary" />
+            <CheckCircleFilled className="mt-0.5! shrink-0! text-primary!" />
             <span className="min-w-0 truncate">{f}</span>
           </li>
         ))}

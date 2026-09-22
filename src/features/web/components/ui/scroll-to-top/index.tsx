@@ -59,7 +59,7 @@ export function ScrollToTop() {
           : "pointer-events-none translate-y-4 opacity-0",
       ].join(" ")}
     >
-      <ArrowUpOutlined className="text-xs! transition-transform duration-500 group-hover:-translate-y-0.5" />
+      <ArrowUpOutlined className="text-xs! transition-transform! duration-500! group-hover:-translate-y-0.5!" />
       <span className="hidden text-[10px] font-medium uppercase tracking-widest sm:inline">
         {t("common.backToTop")}
       </span>

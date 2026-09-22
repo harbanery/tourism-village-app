@@ -103,7 +103,7 @@ export function PackagesSection({ packages }: { packages: ActivePackage[] }) {
                             key={f}
                             className="flex min-h-6 items-start gap-2 text-sm text-white/85"
                           >
-                            <CheckCircleFilled className="mt-0.5 text-white" />
+                            <CheckCircleFilled className="mt-0.5! text-white!" />
                             {f}
                           </li>
                         ))}

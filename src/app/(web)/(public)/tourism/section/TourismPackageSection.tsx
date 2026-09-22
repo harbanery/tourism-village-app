@@ -151,7 +151,7 @@ export function TourismPackageSection({
                                           key={facility}
                                           className="flex items-start gap-2 text-sm text-foreground/80"
                                         >
-                                          <CheckCircleFilled className="mt-0.5 text-primary" />
+                                          <CheckCircleFilled className="mt-0.5! text-primary!" />
                                           {facility}
                                         </li>
                                       ))}

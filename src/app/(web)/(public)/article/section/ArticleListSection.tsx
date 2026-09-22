@@ -118,8 +118,8 @@ export function ArticleListSection({ posts }: { posts: WebBlog[] }) {
               icon={
                 <ArrowUpOutlined
                   className={[
-                    "transition-transform duration-300",
-                    sortKey === "oldest" ? "rotate-180" : "",
+                    "transition-transform! duration-300!",
+                    sortKey === "oldest" ? "rotate-180!" : "",
                   ].join(" ")}
                 />
               }

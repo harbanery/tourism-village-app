@@ -881,7 +881,7 @@ export function SettingsSection({
                         }),
                       ]}
                     >
-                      <Input placeholder="email-baru@example.com" />
+                      <Input placeholder={t("settings.email.newPlaceholder")} />
                     </Form.Item>
                     {/* Password aktif: keamanan — pastikan pengajuan datang
                         dari pemilik akun (bukan orang lain di sesi terbuka). */}

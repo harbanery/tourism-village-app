@@ -480,6 +480,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.email.current": "Email aktif",
     "settings.email.old": "Email aktif (konfirmasi)",
     "settings.email.oldPlaceholder": "email-aktif@example.com",
+    "settings.email.newPlaceholder": "email-baru@example.com",
     "settings.email.oldMismatch":
       "Email aktif tidak cocok — periksa kembali email akun Anda",
     "settings.email.new": "Email baru",
@@ -1240,6 +1241,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "settings.email.current": "Current email",
     "settings.email.old": "Current email (confirm)",
     "settings.email.oldPlaceholder": "current-email@example.com",
+    "settings.email.newPlaceholder": "new-email@example.com",
     "settings.email.oldMismatch":
       "Current email does not match — please double-check your account email",
     "settings.email.new": "New email",

@@ -311,7 +311,7 @@ const BlogDecorator = () => {
           <span className="truncate font-medium">{title}</span>
           {/* Slug URL (/blog/[slug]) sebagai tooltip icon di kanan judul. */}
           <Tooltip title={<span className="font-mono">{record.slug}</span>}>
-            <LinkOutlined className="shrink-0 cursor-help text-xs! text-foreground/40!" />
+            <LinkOutlined className="shrink-0! cursor-help! text-xs! text-foreground/40!" />
           </Tooltip>
         </span>
       ),
