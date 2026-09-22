@@ -56,7 +56,7 @@ export function CookieConsent() {
 
       {consent === null && (
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center p-4">
-          <div className="flex w-full max-w-xl flex-col gap-3 rounded-xl border border-black/10 bg-white/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center dark:border-white/10 dark:bg-neutral-900/95">
+          <div className="flex w-full max-w-xl flex-col gap-3 rounded-xl border border-foreground/10 bg-background/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center ">
             <div className="min-w-0 flex-1">
               <p className="font-medium">{t("consent.title")}</p>
               <p className="mt-1 text-xs text-foreground/60">
@@ -66,9 +66,13 @@ export function CookieConsent() {
             <div className="flex shrink-0 gap-2">
               <Button
                 size="small"
+                color="primary"
+                variant="outlined"
                 ghost
+                className={
+                  "border-foreground/60! text-foreground! hover:border-foreground!"
+                }
                 onClick={() => choose("essential")}
-                className="border-foreground/60! text-foreground! hover:border-foreground!"
               >
                 {t("consent.essential")}
               </Button>
