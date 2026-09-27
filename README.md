@@ -197,11 +197,11 @@ This application is a complete tourism village platform: public website, member 
 - **Profile**: avatar upload (Cloudinary signed upload), email change with OTP to the old address, password change with OTP verification, order history, and notification preferences.
 - **Realtime notifications**: **SSE stream** (`/api/web/notifications/stream`) with automatic polling fallback; bell component with unread badges in the navbar.
 - **Admin panel**: dashboard (revenue trend, order status chart, ratio & status doughnuts, top packages — Chart.js), order management (detail drawer, cancel, Midtrans sync, resend email, invoice), tourism (places & packages), blog (rich-text editor + unique slug generation), sponsors, testimonial moderation (approval + featured), and account/role management (Master/Viewer/Author).
-- **Automated emails**: OTP, admin credentials, order events, trip reminders, and a daily summary for admins (email + in-app).
+- **Automated emails**: OTP, a welcome email after registration verification (onboarding + packages link), admin credentials, order events, trip reminders, a daily summary, and a weekly **trend** summary for admins (deltas vs last week, daily revenue, top packages — email + in-app).
 - **Multi-language support** (Indonesian & English) with instant switching, integrated with Ant Design and dayjs locales.
 - **Dark/Light mode** with localStorage persistence and system preference detection.
 - **PWA-ready**: web manifest, apple-touch icons, and Android icons.
-- **Security hardening**: same-origin checks for all mutating API requests, file-upload validation, rich-text sanitization (DOMPurify), masked personal data in logs, and constant-time cron secret comparison.
+- **Security hardening**: same-origin checks for all mutating API requests, **shared DB-backed rate limiting** (sliding window persisted in the `rate_limit_hit` table, effective across serverless instances, with an in-memory fallback) on top of per-IP login/register limits, file-upload validation, rich-text sanitization (DOMPurify), masked personal data in logs, and constant-time cron secret comparison.
 - **PostgreSQL database** managed via **Prisma ORM** with automatic retry on connection errors.
 - **UI components** with **Ant Design** and **Tailwind CSS** styling — Tailwind classes on antd components use the `!` important suffix (or a wrapper `div`) so they reliably win over antd's built-in styles.
 - **Navigation** uses `useRouter` from `next/navigation` instead of `<Link>` for consistent client-side behavior.
@@ -267,6 +267,8 @@ This app supports automated notifications via **Email** (Nodemailer) and **in-ap
 | **Expire Orders** | Every minute (as needed) | Database       | Sweeps `PENDING` orders past the payment deadline to `CANCELED` |
 | **Trip Reminder** | Daily, 07:00 WIB         | Email + In-app | H-1 departure reminder for `PAID` orders                        |
 | **Daily Summary** | Daily, 21:00 WIB         | Email + In-app | Order & revenue recap for Master admins                         |
+| **Weekly Summary** | Mondays, 21:00 WIB (piggybacks on Daily Summary — Hobby plan allows only 2 daily crons; `/api/cron/weekly-summary` is ready for a standalone schedule on Pro) | Email + In-app | Weekly **trend** report for Master admins: deltas vs last week, daily revenue breakdown, top packages |
+| **Welcome Email** | On registration verification | Email       | One-time onboarding email with a link to the packages page, sent right after the OTP is verified |
 
 To enable notifications:
 

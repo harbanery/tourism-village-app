@@ -4,7 +4,7 @@ import { getClientIp, getCurrentUser } from "@/lib/auth";
 import { createPageTicket } from "@/lib/otp";
 import { isPaymentExpired } from "@/utils/server/orderExpiry";
 import { applyPaymentTransition } from "@/utils/server/orderStatus";
-import { rateLimit, tooManyRequests } from "@/utils/server/rateLimit";
+import { rateLimitShared, tooManyRequests } from "@/utils/server/rateLimit";
 
 /** Kuota hit endpoint ini per user per IP (rekomendasi 2.1). */
 const TICKET_RATE_LIMIT = 6;
@@ -27,7 +27,8 @@ export async function GET(
     );
   }
 
-  const { allowed, retryAfterMs } = rateLimit(
+  // Window persisten di DB: berlaku lintas instance serverless.
+  const { allowed, retryAfterMs } = await rateLimitShared(
     `order-ticket:${user.id}:${getClientIp(request)}`,
     TICKET_RATE_LIMIT,
   );

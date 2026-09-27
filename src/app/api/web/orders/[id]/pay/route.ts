@@ -5,7 +5,7 @@ import { verifyPageTicket } from "@/lib/otp";
 import { isPaymentExpired, paymentDeadline } from "@/utils/server/orderExpiry";
 import { applyPaymentTransition } from "@/utils/server/orderStatus";
 import { customerFromUser, ensureOrderQris } from "@/lib/qris";
-import { rateLimit, tooManyRequests } from "@/utils/server/rateLimit";
+import { rateLimitShared, tooManyRequests } from "@/utils/server/rateLimit";
 
 /** Kuota hit endpoint ini per user per IP (rekomendasi 2.1). */
 const PAY_RATE_LIMIT = 6;
@@ -34,8 +34,9 @@ export async function GET(
   }
 
   // Rate limit per user per IP — endpoint memanggil Core API Midtrans
-  // (buat QR), jadi perlu dijaga dari abuse (rekomendasi 2.1).
-  const { allowed, retryAfterMs } = rateLimit(
+  // (buat QR), jadi perlu dijaga dari abuse (rekomendasi 2.1). Window
+  // persisten di DB: berlaku lintas instance serverless.
+  const { allowed, retryAfterMs } = await rateLimitShared(
     `order-pay:${user.id}:${getClientIp(request)}`,
     PAY_RATE_LIMIT,
   );

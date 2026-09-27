@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
 import { NODE_ENV } from "@/utils/config/variables";
-import { buildDailySummary, sendDailySummary } from "@/utils/server/orderEvents";
+import {
+  buildDailySummary,
+  sendDailySummary,
+  sendWeeklySummary,
+} from "@/utils/server/orderEvents";
 import { isCronAuthorized } from "@/utils/server/cronAuth";
 
 /**
  * GET /api/cron/daily-summary — ringkasan harian order & pendapatan untuk
  * admin (email ke MASTER + notifikasi in-app). Dijadwalkan Vercel Cron
  * setiap hari 21:00 WIB (14:00 UTC).
+ *
+ * Setiap Senin juga mengirim ringkasan MINGGUAN (tren) — menumpang di sini
+ * karena plan Vercel Hobby dibatasi 2 cron harian (trip-reminder + ini);
+ * endpoint /api/cron/weekly-summary tersedia untuk jadwal terpisah.
  */
 export async function GET(request: Request) {
   if (!isCronAuthorized(request)) {
@@ -15,6 +23,9 @@ export async function GET(request: Request) {
 
   try {
     await sendDailySummary();
+    if (new Date().getDay() === 1) {
+      await sendWeeklySummary();
+    }
     const preview = await buildDailySummary();
     return NextResponse.json({ success: true, preview });
   } catch (err) {
@@ -35,6 +46,9 @@ export async function POST() {
     );
   }
   await sendDailySummary();
+  if (new Date().getDay() === 1) {
+    await sendWeeklySummary();
+  }
   const preview = await buildDailySummary();
   return NextResponse.json({ success: true, preview });
 }

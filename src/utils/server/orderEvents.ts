@@ -6,6 +6,7 @@ import {
   orderConfirmationEmail,
   orderPaidEmail,
   tripReminderEmail,
+  weeklySummaryEmail,
   type OrderEmailData,
 } from "@/utils/email/emailTemplates";
 import { NOTIFICATION_LOCALE } from "@/utils/config/variables";
@@ -366,5 +367,164 @@ export async function sendDailySummary(): Promise<void> {
     await sendMasterAdminsEmail(dailySummaryEmail(summary));
   } catch (error) {
     console.error("[orderEvents] sendDailySummary:", error);
+  }
+}
+
+/** Awal minggu (Senin 00:00) dari tanggal mana pun (kalender lokal). */
+function weekStart(date = new Date()): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const day = (d.getDay() + 6) % 7; // Senin=0 … Minggu=6
+  d.setDate(d.getDate() - day);
+  return d;
+}
+
+/** Agregat satu periode [start, end) — dipakai ringkasan mingguan. */
+async function aggregatePeriod(start: Date, end: Date) {
+  const [totalOrders, paidOrders, pendingOrders, canceledOrders, revenueAgg, buyers, paidRows, items] =
+    await Promise.all([
+      prisma.order.count({ where: { dateOrder: { gte: start, lt: end } } }),
+      prisma.order.count({
+        where: { paymentStatus: "PAID", paidAt: { gte: start, lt: end } },
+      }),
+      prisma.order.count({
+        where: { paymentStatus: "PENDING", dateOrder: { gte: start, lt: end } },
+      }),
+      prisma.order.count({
+        where: { paymentStatus: "CANCELED", dateOrder: { gte: start, lt: end } },
+      }),
+      prisma.order.aggregate({
+        _sum: { totalPrice: true },
+        where: { paymentStatus: "PAID", paidAt: { gte: start, lt: end } },
+      }),
+      prisma.order.groupBy({
+        by: ["userId"],
+        where: { dateOrder: { gte: start, lt: end } },
+      }),
+      prisma.order.findMany({
+        where: { paymentStatus: "PAID", paidAt: { gte: start, lt: end } },
+        select: { paidAt: true, totalPrice: true },
+      }),
+      prisma.orderItem.findMany({
+        where: {
+          order: { paymentStatus: "PAID", paidAt: { gte: start, lt: end } },
+        },
+        select: {
+          quantity: true,
+          price: true,
+          package: { select: { name: true } },
+        },
+      }),
+    ]);
+
+  // Pendapatan per hari (bucket lokal Senin→Minggu).
+  const revenuePerDay: { date: Date; revenue: number; paidOrders: number }[] =
+    [];
+  for (let i = 0; i < 7; i++) {
+    const dayStart = new Date(start);
+    dayStart.setDate(dayStart.getDate() + i);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+    const dayPaid = paidRows.filter(
+      (o) => o.paidAt! >= dayStart && o.paidAt! < dayEnd,
+    );
+    revenuePerDay.push({
+      date: dayStart,
+      revenue: dayPaid.reduce((sum, o) => sum + o.totalPrice, 0),
+      paidOrders: dayPaid.length,
+    });
+  }
+
+  // Paket terlaris (PAID) — qty & pendapatan per nama paket.
+  const byPackage = new Map<string, { quantity: number; revenue: number }>();
+  for (const item of items) {
+    const agg = byPackage.get(item.package.name) ?? {
+      quantity: 0,
+      revenue: 0,
+    };
+    agg.quantity += item.quantity;
+    agg.revenue += item.price;
+    byPackage.set(item.package.name, agg);
+  }
+  const topPackages = [...byPackage.entries()]
+    .map(([name, agg]) => ({ name, ...agg }))
+    .sort((a, b) => b.revenue - a.revenue || b.quantity - a.quantity)
+    .slice(0, 5);
+
+  return {
+    totalOrders,
+    paidOrders,
+    pendingOrders,
+    canceledOrders,
+    revenue: revenueAgg._sum.totalPrice ?? 0,
+    newBuyers: buyers.length,
+    revenuePerDay,
+    topPackages,
+  };
+}
+
+/**
+ * Ringkasan tren minggu lalu (Senin–Minggu lengkap) + pembanding minggu
+ * sebelumnya — bahan email/notifikasi `sendWeeklySummary`.
+ */
+export async function buildWeeklySummary() {
+  const thisWeekStart = weekStart();
+  const end = thisWeekStart; // akhir Minggu lalu
+  const start = new Date(end);
+  start.setDate(start.getDate() - 7);
+  const prevEnd = start;
+  const prevStart = new Date(start);
+  prevStart.setDate(prevStart.getDate() - 7);
+
+  const [current, prev] = await Promise.all([
+    aggregatePeriod(start, end),
+    aggregatePeriod(prevStart, prevEnd),
+  ]);
+
+  return {
+    startDate: start,
+    endDate: end,
+    ...current,
+    prev: {
+      totalOrders: prev.totalOrders,
+      paidOrders: prev.paidOrders,
+      revenue: prev.revenue,
+    },
+  };
+}
+
+/**
+ * Cron mingguan (menumpang daily-summary tiap Senin, atau endpoint
+ * /api/cron/weekly-summary bila dijadwalkan terpisah): ringkasan TREN ke
+ * admin — delta vs minggu lalu, pendapatan harian, paket terlaris.
+ */
+export async function sendWeeklySummary(): Promise<void> {
+  try {
+    const summary = await buildWeeklySummary();
+    const revenueDelta =
+      summary.prev.revenue === 0
+        ? summary.revenue > 0
+          ? isId
+            ? "baru"
+            : "new"
+          : "—"
+        : `${summary.revenue >= summary.prev.revenue ? "▲" : "▼"} ${Math.abs(
+            Math.round(
+              ((summary.revenue - summary.prev.revenue) / summary.prev.revenue) *
+                100,
+            ),
+          )}%`;
+
+    await notifyAdmins({
+      type: "WEEKLY_SUMMARY",
+      title: isId ? "Ringkasan mingguan" : "Weekly summary",
+      body: isId
+        ? `${summary.paidOrders} order dibayar, pendapatan ${rupiah(summary.revenue)} (${revenueDelta} vs minggu lalu).`
+        : `${summary.paidOrders} paid orders, revenue ${rupiah(summary.revenue)} (${revenueDelta} vs last week).`,
+      link: "/",
+    });
+    await sendMasterAdminsEmail(weeklySummaryEmail(summary));
+  } catch (error) {
+    console.error("[orderEvents] sendWeeklySummary:", error);
   }
 }

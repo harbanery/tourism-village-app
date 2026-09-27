@@ -128,6 +128,20 @@ model LoginAttempt {
   @@map("login_attempt")
 }
 
+/**
+ * Hit rate-limit sliding window bersama lintas instance serverless
+ * (pay/status/ticket order) — lanjutan LoginAttempt: limiter in-memory
+ * hanya berlaku per-instance, tabel ini membuat window-nya persisten.
+ */
+model RateLimitHit {
+  id        String   @id @default(uuid())
+  key       String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([key, createdAt])
+  @@map("rate_limit_hit")
+}
+
 /** Kode OTP sekali pakai (verifikasi register, reset password, ganti email). */
 model OtpCode {
   id         String    @id @default(uuid())

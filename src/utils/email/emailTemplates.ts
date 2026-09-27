@@ -180,6 +180,64 @@ ${BASE_URL}/login`;
   };
 }
 
+/** Data welcome email (onboarding pasca verifikasi registrasi). */
+export interface WelcomeEmailData {
+  userName: string;
+}
+
+/**
+ * Email selamat datang — dikirim SEKALI setelah OTP registrasi terverifikasi
+ * (bukan saat akun dibuat): onboarding singkat + tautan ke halaman paket
+ * (rekomendasi email: registrasi saat ini hanya mengirim OTP).
+ */
+export function welcomeEmail(data: WelcomeEmailData): EmailContent {
+  const isId = NOTIFICATION_LOCALE === "id";
+  const title = isId ? "Selamat Datang" : "Welcome";
+  const greeting = isId
+    ? `Halo ${data.userName}, email Anda berhasil diverifikasi — selamat datang di ${BRAND}!`
+    : `Hello ${data.userName}, your email is verified — welcome to ${BRAND}!`;
+
+  const steps = isId
+    ? [
+        "Jelajahi tempat wisata dan paket wisata desa kami.",
+        "Pesan paket favorit Anda dan bayar dengan QRIS.",
+        "Terima e-tiket, invoice, dan pengingat jadwal otomatis.",
+      ]
+    : [
+        "Explore our village places and travel packages.",
+        "Book your favorite package and pay with QRIS.",
+        "Receive your e-ticket, invoice, and trip reminders automatically.",
+      ];
+  const stepsHtml = steps
+    .map(
+      (step, i) =>
+        `<li style="margin:4px 0;"><b>${i + 1}.</b> ${step}</li>`,
+    )
+    .join("");
+  const cta = isId
+    ? "Mulai petualangan Anda — lihat paket wisata kami:"
+    : "Start your journey — check out our travel packages:";
+
+  const bodyHtml = `
+    <p style="margin:0 0 12px;">${greeting}</p>
+    <ul style="margin:0 0 12px;padding-left:20px;">${stepsHtml}</ul>
+    <p style="margin:0 0 4px;">${cta}</p>
+    ${button(`${BASE_URL}/package`, isId ? "Lihat Paket Wisata" : "Browse Packages")}`;
+
+  const text = `${greeting}
+${steps.map((step, i) => `${i + 1}. ${step}`).join("\n")}
+${cta}
+${BASE_URL}/package`;
+
+  return {
+    subject: isId
+      ? `[${BRAND}] Selamat datang di ${BRAND}, ${data.userName}!`
+      : `[${BRAND}] Welcome to ${BRAND}, ${data.userName}!`,
+    text,
+    html: emailLayout(title, bodyHtml),
+  };
+}
+
 /** Email konfirmasi pesanan baru (checkout sukses, status PENDING). */
 export function orderConfirmationEmail(order: OrderEmailData): EmailContent {
   const isId = NOTIFICATION_LOCALE === "id";
@@ -349,6 +407,148 @@ export interface DailySummaryData {
   newUsers?: number;
 }
 
+/** Data ringkasan mingguan untuk admin (tren vs minggu sebelumnya). */
+export interface WeeklySummaryData {
+  /** Awal periode (Senin, eksklusif-akhir Minggu). */
+  startDate: Date;
+  endDate: Date;
+  totalOrders: number;
+  paidOrders: number;
+  pendingOrders: number;
+  canceledOrders: number;
+  revenue: number;
+  /** Pembeli unik yang membuat order di periode ini. */
+  newBuyers: number;
+  /** Angka minggu SEBELUMNYA — pembanding tren. */
+  prev: {
+    totalOrders: number;
+    paidOrders: number;
+    revenue: number;
+  };
+  /** Pendapatan per hari (7 baris, urut Senin→Minggu). */
+  revenuePerDay: { date: Date; revenue: number; paidOrders: number }[];
+  /** Paket terlaris periode ini (basis PAID, maks 5). */
+  topPackages: { name: string; quantity: number; revenue: number }[];
+}
+
+/** Delta tren vs periode sebelumnya: teks + warna (hijau naik, merah turun). */
+function trend(current: number, previous: number): { text: string; color: string } {
+  const isId = NOTIFICATION_LOCALE === "id";
+  if (previous === 0) {
+    return current > 0
+      ? { text: isId ? "baru" : "new", color: "#059669" }
+      : { text: "—", color: "#6b7280" };
+  }
+  const pct = Math.round(((current - previous) / previous) * 100);
+  const up = pct >= 0;
+  return {
+    text: `${up ? "▲" : "▼"} ${Math.abs(pct)}%`,
+    color: up ? "#059669" : "#dc2626",
+  };
+}
+
+/**
+ * Email ringkasan MINGGUAN admin — lanjutan `dailySummaryEmail`, fokus TREN:
+ * perbandingan vs minggu sebelumnya, pendapatan harian sepanjang minggu,
+ * dan paket terlaris (rekomendasi email: tren, bukan hanya angka harian).
+ */
+export function weeklySummaryEmail(data: WeeklySummaryData): EmailContent {
+  const isId = NOTIFICATION_LOCALE === "id";
+  const title = isId ? "Ringkasan Mingguan" : "Weekly Summary";
+  const period = isId
+    ? `Minggu ${formatDate(data.startDate)} – ${formatDate(new Date(data.endDate.getTime() - 1))} (vs minggu sebelumnya)`
+    : `Week of ${formatDate(data.startDate)} – ${formatDate(new Date(data.endDate.getTime() - 1))} (vs previous week)`;
+
+  const ordersTrend = trend(data.totalOrders, data.prev.totalOrders);
+  const paidTrend = trend(data.paidOrders, data.prev.paidOrders);
+  const revenueTrend = trend(data.revenue, data.prev.revenue);
+
+  const kpi = isId
+    ? [
+        ["Order baru", String(data.totalOrders), ordersTrend],
+        ["Dibayar (PAID)", String(data.paidOrders), paidTrend],
+        ["Menunggu (PENDING)", String(data.pendingOrders), { text: "—", color: "#6b7280" }],
+        ["Dibatalkan", String(data.canceledOrders), { text: "—", color: "#6b7280" }],
+        ["Pendapatan", formatRupiah(data.revenue), revenueTrend],
+        ["Pembeli unik", String(data.newBuyers), { text: "—", color: "#6b7280" }],
+      ] as [string, string, { text: string; color: string }][]
+    : [
+        ["New orders", String(data.totalOrders), ordersTrend],
+        ["Paid", String(data.paidOrders), paidTrend],
+        ["Pending", String(data.pendingOrders), { text: "—", color: "#6b7280" }],
+        ["Canceled", String(data.canceledOrders), { text: "—", color: "#6b7280" }],
+        ["Revenue", formatRupiah(data.revenue), revenueTrend],
+        ["Unique buyers", String(data.newBuyers), { text: "—", color: "#6b7280" }],
+      ] as [string, string, { text: string; color: string }][];
+
+  const kpiRows = kpi
+    .map(
+      ([label, value, t]) => `<tr>
+        <td style="padding:6px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">${label}</td>
+        <td style="padding:6px 0;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:bold;">${value}</td>
+        <td style="padding:6px 0 6px 12px;border-bottom:1px solid #e5e7eb;text-align:right;color:${t.color};font-size:12px;white-space:nowrap;">${t.text}</td>
+      </tr>`,
+    )
+    .join("");
+
+  const dayLabels = isId
+    ? ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
+    : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const barMax = Math.max(1, ...data.revenuePerDay.map((d) => d.revenue));
+  const dailyRows = data.revenuePerDay
+    .map((d) => {
+      const dayIdx = (new Date(d.date).getDay() + 6) % 7;
+      const width = Math.round((d.revenue / barMax) * 100);
+      return `<tr>
+        <td style="padding:3px 8px 3px 0;color:#6b7280;font-size:13px;">${dayLabels[dayIdx]}</td>
+        <td style="padding:3px 0;">
+          <div style="background:${BRAND_PRIMARY};border-radius:4px;height:12px;width:${Math.max(width, d.revenue > 0 ? 4 : 0)}%;"></div>
+        </td>
+        <td style="padding:3px 0 3px 12px;text-align:right;font-size:13px;white-space:nowrap;">${formatRupiah(d.revenue)} · ${d.paidOrders}</td>
+      </tr>`;
+    })
+    .join("");
+
+  const topPkgs = data.topPackages.length
+    ? data.topPackages
+        .map(
+          (p, i) => `<li style="margin:4px 0;"><b>${i + 1}. ${p.name}</b> — ${isId ? "terjual" : "sold"} ${p.quantity}× · ${formatRupiah(p.revenue)}</li>`,
+        )
+        .join("")
+    : `<li style="margin:4px 0;color:#6b7280;">${isId ? "Belum ada paket terjual minggu ini." : "No packages sold this week."}</li>`;
+
+  const dailyTitle = isId ? "Pendapatan harian (PAID)" : "Daily revenue (PAID)";
+  const topTitle = isId ? "Paket terlaris" : "Top packages";
+
+  const bodyHtml = `
+    <p style="margin:0 0 12px;">${period}</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">${kpiRows}</table>
+    <h3 style="margin:20px 0 8px;font-size:15px;color:${BRAND_PRIMARY};">${dailyTitle}</h3>
+    <table style="width:100%;border-collapse:collapse;">${dailyRows}</table>
+    <h3 style="margin:20px 0 8px;font-size:15px;color:${BRAND_PRIMARY};">${topTitle}</h3>
+    <ul style="margin:0 0 8px;padding-left:20px;font-size:14px;">${topPkgs}</ul>
+    ${button(`${BASE_URL}/admin`, isId ? "Buka Dashboard" : "Open Dashboard")}`;
+
+  const text = `${period}
+${kpi.map(([label, value, t]) => `${label}: ${value} (${t.text})`).join("\n")}
+${dailyTitle}:
+${data.revenuePerDay
+  .map(
+    (d) =>
+      `- ${formatDate(d.date)}: ${formatRupiah(d.revenue)} · ${d.paidOrders}`,
+  )
+  .join("\n")}
+${topTitle}:
+${data.topPackages.map((p) => `- ${p.name}: ${p.quantity}× · ${formatRupiah(p.revenue)}`).join("\n")}`;
+
+  return {
+    subject: isId
+      ? `[${BRAND}] Ringkasan mingguan — ${data.paidOrders} order dibayar, ${formatRupiah(data.revenue)} (${revenueTrend.text} vs minggu lalu)`
+      : `[${BRAND}] Weekly summary — ${data.paidOrders} paid orders, ${formatRupiah(data.revenue)} (${revenueTrend.text} vs last week)`,
+    text,
+    html: emailLayout(title, bodyHtml),
+  };
+}
 /** Email ringkasan harian untuk admin (dikirim cron malam hari). */
 export function dailySummaryEmail(data: DailySummaryData): EmailContent {
   const isId = NOTIFICATION_LOCALE === "id";

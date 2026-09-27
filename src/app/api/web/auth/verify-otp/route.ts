@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { isSameOrigin } from "@/lib/auth";
 import { verifyOtp, createResetToken } from "@/lib/otp";
+import { sendEmail } from "@/lib/email";
+import { welcomeEmail } from "@/utils/email/emailTemplates";
 
 /**
  * POST /api/web/auth/verify-otp — verifikasi kode OTP di halaman /otp.
@@ -82,6 +84,15 @@ export async function POST(request: NextRequest) {
         where: { id: user.id },
         data: { emailVerified: true },
       });
+
+      // Welcome email sekali saja (verifikasi pertama): onboarding singkat
+      // + link halaman paket — best-effort, menghormati preferensi email.
+      if (user.notifEmail) {
+        void sendEmail({
+          to: user.email,
+          ...welcomeEmail({ userName: user.name }),
+        });
+      }
     }
 
     // Registrasi selesai → user login sendiri di /login (tanpa auto-login).

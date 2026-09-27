@@ -16,7 +16,8 @@ export type AdminNotificationType =
   | "NEW_ORDER"
   | "PAYMENT_RECEIVED"
   | "NEW_REVIEW"
-  | "DAILY_SUMMARY";
+  | "DAILY_SUMMARY"
+  | "WEEKLY_SUMMARY";
 
 export interface NotificationPayload {
   type: UserNotificationType | AdminNotificationType;

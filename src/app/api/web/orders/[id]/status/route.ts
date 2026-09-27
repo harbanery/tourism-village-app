@@ -5,7 +5,7 @@ import { createPageTicket } from "@/lib/otp";
 import { fetchMidtransStatus, mapMidtransStatus } from "@/lib/midtrans";
 import { isPaymentExpired } from "@/utils/server/orderExpiry";
 import { applyPaymentTransition } from "@/utils/server/orderStatus";
-import { rateLimit, tooManyRequests } from "@/utils/server/rateLimit";
+import { rateLimitShared, tooManyRequests } from "@/utils/server/rateLimit";
 
 /**
  * Kuota hit per user per IP (rekomendasi 2.1). 12/menit menampung
@@ -35,7 +35,8 @@ export async function GET(
 
   // Rate limit per user per IP — endpoint memanggil status API Midtrans
   // (server-to-server), jadi perlu dijaga dari abuse (rekomendasi 2.1).
-  const { allowed, retryAfterMs } = rateLimit(
+  // Window persisten di DB: berlaku lintas instance serverless.
+  const { allowed, retryAfterMs } = await rateLimitShared(
     `order-status:${user.id}:${getClientIp(request)}`,
     STATUS_RATE_LIMIT,
   );
